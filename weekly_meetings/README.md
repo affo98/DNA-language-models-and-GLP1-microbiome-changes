@@ -4,7 +4,7 @@
 #### Meeting Outline
 * [30 January 2025](#date-30-january-2025)
 
-#### Date: 30 January 2024
+#### Date: 30 January 2025
 
 ##### Who did you help this week?
 
