@@ -1,4 +1,4 @@
-# Shinkansen's Thesis Weekly Meeting Notes
+# Weekly Meeting Notes Outline
 
 [Overleaf report](url overleaf)
 #### Meeting Outline
