@@ -93,7 +93,7 @@ Getting more concrete ideas about scope of thesis, and what contributions we can
 We need feedback on our Thesis scope ideas.
 
 We generally have 3 areas of interest.
-![Overview of Ideas](/images/representation_learning_framework.jpeg)
+![Overview of Ideas](./images/representation_learning_framework.jpeg)
 
 1. **MLM Pretraining**
    1. A recent paper found that randomly initialized DNA language models perform very similar to ones pretrained with MLM ([Paper](https://www.biorxiv.org/content/10.1101/2024.12.18.628606v1.full.pdf)): *"While pretraining provides double-digit improvements in computer vision and NLP, the gains in genomics are typically within 2-3% and often negative, challenging the effectiveness of current genomic pretraining approaches"*. Simply applying methods from NLP to DNA may not be suitable.
