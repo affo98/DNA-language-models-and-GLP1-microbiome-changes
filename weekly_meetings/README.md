@@ -4,6 +4,71 @@
 
 #### Meeting Outline
 * [06 February 2025](#date-30-january-2025)
+* [20 February 2025](#date-30-january-2025)
+
+
+#### Date: 20 February 2025
+
+##### Who did you help this week?
+
+##### Who helped you this week?
+
+  - Simon Rasmussen
+  - Damian 
+
+##### What did you achieve?
+
+
+**Hiearchical Contrastive Learning**
+Found a hiearchical contrastive learning framework using labels: https://arxiv.org/pdf/2204.13207. 
+
+**Mixing**
+In DNABERT-S they use MI-MIX as a domain agnostic data augmentation technique, to mix up hidden representations, which should regularize the model. We thought about a) just copying the MI-MIX, to make our model comparable to DNABERT-S, b) ignoring the MI-MIX, or c) try another mixing strategy. But we also want to focus more of our time on contrastive learning and MIL.   
+
+**MIL**
+Defining our MIL and prediction setup. A bag is condidered a patient. Here is a possible outline.
+
+1. Obtain contigs from a patient and do binning, like in our research project. This results in a dictionary that maps every contig to a cluster.
+   
+2. **Create cluster catalogue (CC)**: We consider every cluster an instance, and there are *k* clusters. A cluster could be represented in 4 different ways:
+   1. Cluster centroid matrix $ \in R\ ^{|k|\times d}$, where every instance is the average of contig-embeddings. We can either calculate the centroid using all contigs, or only use contigs from a specific patient.
+   2. Distance matrix $ \in R\ ^{|k|\times |k|}$ where each entry denotes the hausdorff distance between two clusters (like the genus-analysis in our research project). We can either calculate distances using all contigs, or only using contigs from a specific patient.
+3. **Add abundance vector (AV)**: Consider that every patient has a $1 \times |k|$ vector indicating the abundance of every species for that patient. This abundance vector can be included in 3 ways; a)  multiplied by the cluster catalogue, such that each cluster is weighted by its abundance, b) used directly as input to the network with separate learned attention scores $A_a$, or c) a combination of both. There are 2 ways to compute the abundance:
+   1. Frequency-based, where we count the number of contigs in a cluster, divided by the total contigs for that patient. 
+   2. Weighted by contig abundance: The abundance of each contig within each patient is an important signal for phenotype prediction. Instead of simply counting contigs like in i), we can do a weighted sum using the contig abundances. 
+4. **MIL framework** We can have a model with 2 inputs and 2 learned attention score-vectors. The first input to the model can be the following: A cluster catalogue (CC) weighted by the Abundance Vector $AV$ with learned attention scores $A_{cc}$
+
+$$g[CC \times AV \times A_{cc}]$$
+
+The second input can be the Abundance vector only, with a learned attention score $A_{av}$:
+
+$$h[AV \times A_{av}]$$
+
+A final transformation $l$ combines the two transformations $g$ and $h$ into the output prediction.
+
+$$ output = l(g, h) $$
+
+5. **Model architecture**: We are keen on trying out GNNs with MIL, based on this paper, where they cite you! https://arxiv.org/pdf/1906.04881. This incorporates relationships between species which is a nice property, and we avoid using a cnn on some matrix. 
+
+
+##### What did you struggle with?
+
+##### What would you like to work on next week?
+
+-Acquiring data, contrastive learning, bioinformatics pipeline. 
+
+##### Where do you need help from Veronika?
+
+Discussion of the MIL setup.
+  
+
+
+
+
+
+
+
+
 
 #### Date: 06 February 2025
 
