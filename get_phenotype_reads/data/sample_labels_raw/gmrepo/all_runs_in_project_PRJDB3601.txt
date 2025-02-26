@@ -1,0 +1,113 @@
+project ID	run ID	experiment type	instrument model	nr. reads sequenced	host age	sex	BMI	country	longitude	lattitude	associated phenotype	QC status
+PRJDB3601	DRR042264	Metagenomics	Illumina MiSeq	12673605	21	Female	18.8	Japanese			D006262		
+PRJDB3601	DRR042265	Metagenomics	Illumina MiSeq	12673605	21	Female	18.8	Japanese			D006262		
+PRJDB3601	DRR042266	Metagenomics	454 GS FLX Titanium	12673605	21	Female	18.8	Japanese			D006262		
+PRJDB3601	DRR042267	Metagenomics	Ion Torrent PGM	12673605	21	Female	18.8	Japanese			D006262		
+PRJDB3601	DRR042272	Metagenomics	Illumina MiSeq	15080162	23	Female	18.6	Japanese			D006262		
+PRJDB3601	DRR042273	Metagenomics	Illumina MiSeq	15080162	23	Female	18.6	Japanese			D006262		
+PRJDB3601	DRR042274	Metagenomics	454 GS FLX Titanium	15080162	23	Female	18.6	Japanese			D006262		
+PRJDB3601	DRR042275	Metagenomics	Ion Torrent PGM	15080162	23	Female	18.6	Japanese			D006262		
+PRJDB3601	DRR042280	Metagenomics	Illumina MiSeq	14322565	21	Female	19.9	Japanese			D006262		
+PRJDB3601	DRR042281	Metagenomics	Illumina MiSeq	14322565	21	Female	19.9	Japanese			D006262		
+PRJDB3601	DRR042282	Metagenomics	454 GS FLX Titanium	14322565	21	Female	19.9	Japanese			D006262		
+PRJDB3601	DRR042283	Metagenomics	Ion Torrent PGM	14322565	21	Female	19.9	Japanese			D006262		
+PRJDB3601	DRR042288	Metagenomics	Illumina MiSeq	12573361	20	Female	23.2	Japanese			D006262		
+PRJDB3601	DRR042289	Metagenomics	Illumina MiSeq	12573361	20	Female	23.2	Japanese			D006262		
+PRJDB3601	DRR042290	Metagenomics	454 GS FLX Titanium	12573361	20	Female	23.2	Japanese			D006262		
+PRJDB3601	DRR042304	Metagenomics	Illumina MiSeq	13734810	20	Female	18.5	Japanese			D006262		
+PRJDB3601	DRR042305	Metagenomics	Illumina MiSeq	13734810	20	Female	18.5	Japanese			D006262		
+PRJDB3601	DRR042306	Metagenomics	454 GS FLX Titanium	13734810	20	Female	18.5	Japanese			D006262		
+PRJDB3601	DRR042307	Metagenomics	Ion Torrent PGM	13734810	20	Female	18.5	Japanese			D006262		
+PRJDB3601	DRR042312	Metagenomics	Illumina MiSeq	12726273	21	Female	18	Japanese			D013851		
+PRJDB3601	DRR042313	Metagenomics	Illumina MiSeq	12726273	21	Female	18	Japanese			D013851		
+PRJDB3601	DRR042314	Metagenomics	454 GS FLX Titanium	12726273	21	Female	18	Japanese			D013851		
+PRJDB3601	DRR042316	Metagenomics	Illumina MiSeq	12320372	23	Female	19.1	Japanese			D006262		
+PRJDB3601	DRR042317	Metagenomics	Illumina MiSeq	12320372	23	Female	19.1	Japanese			D006262		
+PRJDB3601	DRR042318	Metagenomics	454 GS FLX Titanium	12320372	23	Female	19.1	Japanese			D006262		
+PRJDB3601	DRR042320	Metagenomics	Illumina MiSeq	15037413	25	Male	23.7	Japanese			D006262		
+PRJDB3601	DRR042321	Metagenomics	Illumina MiSeq	15037413	25	Male	23.7	Japanese			D006262		
+PRJDB3601	DRR042322	Metagenomics	454 GS FLX Titanium	15037413	25	Male	23.7	Japanese			D006262		
+PRJDB3601	DRR042323	Metagenomics	Ion Torrent PGM	15037413	25	Male	23.7	Japanese			D006262		
+PRJDB3601	DRR042328	Metagenomics	Illumina MiSeq	12272505	22	Female	24.4	Japanese			D006262		
+PRJDB3601	DRR042329	Metagenomics	Illumina MiSeq	12272505	22	Female	24.4	Japanese			D006262		
+PRJDB3601	DRR042330	Metagenomics	454 GS FLX Titanium	12272505	22	Female	24.4	Japanese			D006262		
+PRJDB3601	DRR042332	Metagenomics	Illumina MiSeq	13637374	20	Female	18	Japanese			D013851		
+PRJDB3601	DRR042333	Metagenomics	Illumina MiSeq	13637374	20	Female	18	Japanese			D013851		
+PRJDB3601	DRR042334	Metagenomics	454 GS FLX Titanium	13637374	20	Female	18	Japanese			D013851		
+PRJDB3601	DRR042335	Metagenomics	Ion Torrent PGM	13637374	20	Female	18	Japanese			D013851		
+PRJDB3601	DRR042340	Metagenomics	Illumina MiSeq	15316949	20	Male	19.4	Japanese			D006262		
+PRJDB3601	DRR042341	Metagenomics	Illumina MiSeq	15316949	20	Male	19.4	Japanese			D006262		
+PRJDB3601	DRR042342	Metagenomics	454 GS FLX Titanium	15316949	20	Male	19.4	Japanese			D006262		
+PRJDB3601	DRR042343	Metagenomics	Ion Torrent PGM	15316949	20	Male	19.4	Japanese			D006262		
+PRJDB3601	DRR042348	Metagenomics	Illumina MiSeq	11767511	21	Male	21.5	Japanese			D006262		
+PRJDB3601	DRR042349	Metagenomics	Illumina MiSeq	11767511	21	Male	21.5	Japanese			D006262		
+PRJDB3601	DRR042350	Metagenomics	454 GS FLX Titanium	11767511	21	Male	21.5	Japanese			D006262		
+PRJDB3601	DRR042352	Metagenomics	Illumina MiSeq	13588046	20	Male	19.4	Japanese			D006262		
+PRJDB3601	DRR042353	Metagenomics	Illumina MiSeq	13588046	20	Male	19.4	Japanese			D006262		
+PRJDB3601	DRR042354	Metagenomics	454 GS FLX Titanium	13588046	20	Male	19.4	Japanese			D006262		
+PRJDB3601	DRR042356	Metagenomics	Illumina MiSeq	13311441	21	Female	19.4	Japanese			D006262		
+PRJDB3601	DRR042357	Metagenomics	Illumina MiSeq	13311441	21	Female	19.4	Japanese			D006262		
+PRJDB3601	DRR042358	Metagenomics	454 GS FLX Titanium	13311441	21	Female	19.4	Japanese			D006262		
+PRJDB3601	DRR042360	Metagenomics	Illumina MiSeq	13823607	22	Female	19.5	Japanese			D006262		
+PRJDB3601	DRR042361	Metagenomics	Illumina MiSeq	13823607	22	Female	19.5	Japanese			D006262		
+PRJDB3601	DRR042362	Metagenomics	454 GS FLX Titanium	13823607	22	Female	19.5	Japanese			D006262		
+PRJDB3601	DRR042364	Metagenomics	Illumina MiSeq	11810753	21	Female	20.5	Japanese			D006262		
+PRJDB3601	DRR042365	Metagenomics	Illumina MiSeq	11810753	21	Female	20.5	Japanese			D006262		
+PRJDB3601	DRR042366	Metagenomics	454 GS FLX Titanium	11810753	21	Female	20.5	Japanese			D006262		
+PRJDB3601	DRR042390	Metagenomics	Illumina MiSeq	14215773	19	Female	19.6	Japanese			D006262		
+PRJDB3601	DRR042391	Metagenomics	Illumina MiSeq	14215773	19	Female	19.6	Japanese			D006262		
+PRJDB3601	DRR042392	Metagenomics	454 GS FLX Titanium	14215773	19	Female	19.6	Japanese			D006262		
+PRJDB3601	DRR042394	Metagenomics	Illumina MiSeq	13507944	21	Female	21.2	Japanese			D006262		
+PRJDB3601	DRR042395	Metagenomics	Illumina MiSeq	13507944	21	Female	21.2	Japanese			D006262		
+PRJDB3601	DRR042396	Metagenomics	454 GS FLX Titanium	13507944	21	Female	21.2	Japanese			D006262		
+PRJDB3601	DRR042398	Metagenomics	Illumina MiSeq	14415748	19	Male	22.6	Japanese			D006262		
+PRJDB3601	DRR042399	Metagenomics	Illumina MiSeq	14415748	19	Male	22.6	Japanese			D006262		
+PRJDB3601	DRR042400	Metagenomics	454 GS FLX Titanium	14415748	19	Male	22.6	Japanese			D006262		
+PRJDB3601	DRR042410	Metagenomics	Illumina MiSeq	11809417	19	Male	20.1	Japanese			D006262		
+PRJDB3601	DRR042411	Metagenomics	Illumina MiSeq	11809417	19	Male	20.1	Japanese			D006262		
+PRJDB3601	DRR042412	Metagenomics	454 GS FLX Titanium	11809417	19	Male	20.1	Japanese			D006262		
+PRJDB3601	DRR042413	Metagenomics	Ion Torrent PGM	11809417	19	Male	20.1	Japanese			D006262		
+PRJDB3601	DRR042420	Metagenomics	Illumina MiSeq	14160496	47	Male	20.5	Japanese			D006262		
+PRJDB3601	DRR042421	Metagenomics	Illumina MiSeq	14160496	47	Male	20.5	Japanese			D006262		
+PRJDB3601	DRR042422	Metagenomics	454 GS FLX+	14160496	47	Male	20.5	Japanese			D006262		
+PRJDB3601	DRR042423	Metagenomics	Ion Torrent PGM	14160496	47	Male	20.5	Japanese			D006262		
+PRJDB3601	DRR042424	Metagenomics	Illumina MiSeq	15310216	50	Male	21.3	Japanese			D006262		
+PRJDB3601	DRR042425	Metagenomics	Illumina MiSeq	15310216	50	Male	21.3	Japanese			D006262		
+PRJDB3601	DRR042426	Metagenomics	454 GS FLX+	15310216	50	Male	21.3	Japanese			D006262		
+PRJDB3601	DRR042427	Metagenomics	Ion Torrent PGM	15310216	50	Male	21.3	Japanese			D006262		
+PRJDB3601	DRR042428	Metagenomics	Illumina MiSeq	12632975	50	Male	25.2	Japanese			D050177		
+PRJDB3601	DRR042429	Metagenomics	Illumina MiSeq	12632975	50	Male	25.2	Japanese			D050177		
+PRJDB3601	DRR042430	Metagenomics	454 GS FLX+	12632975	50	Male	25.2	Japanese			D050177		
+PRJDB3601	DRR042431	Metagenomics	Ion Torrent PGM	12632975	50	Male	25.2	Japanese			D050177		
+PRJDB3601	DRR042436	Metagenomics	Illumina MiSeq	15296935	42	Female	21.2	Japanese			D006262		
+PRJDB3601	DRR042437	Metagenomics	Illumina MiSeq	15296935	42	Female	21.2	Japanese			D006262		
+PRJDB3601	DRR042438	Metagenomics	454 GS FLX+	15296935	42	Female	21.2	Japanese			D006262		
+PRJDB3601	DRR042439	Metagenomics	Ion Torrent PGM	15296935	42	Female	21.2	Japanese			D006262		
+PRJDB3601	DRR042452	Metagenomics	Illumina MiSeq	14143030	48	Female	19.5	Japanese			D006262		
+PRJDB3601	DRR042453	Metagenomics	Illumina MiSeq	14143030	48	Female	19.5	Japanese			D006262		
+PRJDB3601	DRR042454	Metagenomics	454 GS FLX+	14143030	48	Female	19.5	Japanese			D006262		
+PRJDB3601	DRR042455	Metagenomics	Ion Torrent PGM	14143030	48	Female	19.5	Japanese			D006262		
+PRJDB3601	DRR042462	Metagenomics	Illumina MiSeq	13361243	48	Female	21.4	Japanese			D006262		
+PRJDB3601	DRR042463	Metagenomics	Illumina MiSeq	13361243	48	Female	21.4	Japanese			D006262		
+PRJDB3601	DRR042464	Metagenomics	454 GS FLX+	13361243	48	Female	21.4	Japanese			D006262		
+PRJDB3601	DRR042465	Metagenomics	Ion Torrent PGM	13361243	48	Female	21.4	Japanese			D006262		
+PRJDB3601	DRR042468	Metagenomics	Illumina MiSeq	11027178	50	Male	25.5	Japanese			D050177		
+PRJDB3601	DRR042469	Metagenomics	Illumina MiSeq	11027178	50	Male	25.5	Japanese			D050177		
+PRJDB3601	DRR042470	Metagenomics	454 GS FLX+	11027178	50	Male	25.5	Japanese			D050177		
+PRJDB3601	DRR042471	Metagenomics	Ion Torrent PGM	11027178	50	Male	25.5	Japanese			D050177		
+PRJDB3601	DRR042472	Metagenomics	Illumina MiSeq	12340922	45	Male	21.9	Japanese			D006262		
+PRJDB3601	DRR042473	Metagenomics	Illumina MiSeq	12340922	45	Male	21.9	Japanese			D006262		
+PRJDB3601	DRR042474	Metagenomics	454 GS FLX+	12340922	45	Male	21.9	Japanese			D006262		
+PRJDB3601	DRR042475	Metagenomics	Ion Torrent PGM	12340922	45	Male	21.9	Japanese			D006262		
+PRJDB3601	DRR042482	Metagenomics	Illumina MiSeq	17592940	50	Male	20.9	Japanese			D006262		
+PRJDB3601	DRR042483	Metagenomics	Illumina MiSeq	17592940	50	Male	20.9	Japanese			D006262		
+PRJDB3601	DRR042484	Metagenomics	454 GS FLX+	17592940	50	Male	20.9	Japanese			D006262		
+PRJDB3601	DRR042485	Metagenomics	Ion Torrent PGM	17592940	50	Male	20.9	Japanese			D006262		
+PRJDB3601	DRR042488	Metagenomics	Illumina MiSeq	16196679	46	Male	30.1	Japanese			D009765		
+PRJDB3601	DRR042489	Metagenomics	Illumina MiSeq	16196679	46	Male	30.1	Japanese			D009765		
+PRJDB3601	DRR042490	Metagenomics	454 GS FLX+	16196679	46	Male	30.1	Japanese			D009765		
+PRJDB3601	DRR042491	Metagenomics	Ion Torrent PGM	16196679	46	Male	30.1	Japanese			D009765		
+PRJDB3601	DRR042591	Metagenomics	Illumina MiSeq	16001455	54	Male	22.4	Japanese			D006262		
+PRJDB3601	DRR042592	Metagenomics	Illumina MiSeq	16001455	54	Male	22.4	Japanese			D006262		
+PRJDB3601	DRR042593	Metagenomics	454 GS FLX+	16001455	54	Male	22.4	Japanese			D006262		
+PRJDB3601	DRR042594	Metagenomics	Ion Torrent PGM	16001455	54	Male	22.4	Japanese			D006262		
