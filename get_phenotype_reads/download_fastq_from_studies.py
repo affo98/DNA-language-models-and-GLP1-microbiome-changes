@@ -56,6 +56,7 @@ def setup_logfile(path_to_logfile: str):
     logging.info(
         f"Run started at: {logging.Formatter('%(asctime)s').formatTime(logging.LogRecord('', '', '', '', '', '', ''))}"
     )
+    return
 
 
 def preprocess_abundance_metaml(path_to_abundance: str) -> None:
@@ -391,4 +392,6 @@ if __name__ == "__main__":
     )
     all_studies_fastq = map_sampleid_to_alias(all_studies_fastq)
 
-    download_all_fastq_files(all_studies_fastq)
+    # 3400 fastq files, every fastq-file is 1.5 GB approx, every run has two fastq files
+
+    # download_all_fastq_files(all_studies_fastq)

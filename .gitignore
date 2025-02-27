@@ -1,0 +1,13 @@
+
+#get phenotype reads
+/get_phenotype_reads/data/studies_fastq_list/*
+/get_phenotype_reads/data/sample_labels_raw/metaml/PRJEB1786_sample_labels.txt
+/get_phenotype_reads/data/sample_labels_raw/metaml/PRJEB4336_sample_labels.txt
+
+#get cami2 data
+/get_cami2_data/data/*
+
+
+#data
+/data/phenotype/reads/*
+/data/cami2/*
