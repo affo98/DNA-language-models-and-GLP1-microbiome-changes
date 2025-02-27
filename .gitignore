@@ -6,10 +6,10 @@
 
 
 #get cami2 data
-/get_cami2_data/data/*
+/get_cami2_data/data/*/
 
 #data
-/data/phenotype/reads/*
+/data/phenotype/reads/*.csv
 /data/phenotype/sample_labels/*
 /data/cami2/*
 

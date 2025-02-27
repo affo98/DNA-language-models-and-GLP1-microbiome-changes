@@ -4,6 +4,7 @@ import argparse
 import yaml
 import gzip
 import tarfile
+import shutil
 
 import requests
 
@@ -96,7 +97,7 @@ def download_cami_contigs(dataset_name: str) -> None:
 
         with tarfile.open(dataset_to_tarfile[dataset], "r:gz") as tar:
             tar.extractall(path=os.environ["raw_data_path"])
-        print(f"{dataset}_{reads} Extracted successfully!")
+        print(f"{dataset}_{reads} extracted successfully.")
         os.remove(dataset_to_tarfile[dataset])
 
     else:
@@ -253,6 +254,7 @@ def save_output(output: pd.DataFrame, dataset: str) -> None:
         os.path.join(os.environ["CAMI2_OUTPUT_PATH"], f"{dataset}_contigs.csv"),
         index=False,
     )
+    print(f"{dataset} saved successfully.")
     return
 
 
@@ -281,3 +283,5 @@ if __name__ == "__main__":
 
         get_summary_stats(output)
         save_output(output, dataset)
+
+        shutil.rmtree(os.environ["raw_data_path"])
