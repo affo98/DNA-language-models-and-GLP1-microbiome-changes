@@ -1,0 +1,23 @@
+Run started at: 2025-02-27 15:50:05,545
+---------- plant_long ----------
+Number of contigs originally: 367404
+Number of contigs above 2500 bps: 214641
+Removed 152763 contigs below 2500 bps
+Number of genomes originally: 561
+Number of genomes w. more than 10 contigs 526
+Removed 35 genomes with fewer than 10 contigs
+cami_genome_id: 526
+superkingdom: 5
+phylum: 21
+class: 37
+order: 76
+family: 123
+genus: 186
+species: 302
+strain: 344
+Sequence length of all genomes -> Min: 2500, Max: 7026503, Avg: 10842.34
+Genome with Min Rows: RNODE_525_length_3666_cov_9.03954 (10 rows)
+Genome with Max Rows: Phomopsis_columnaris_MPI-SW4-AT-0540 (7288 rows)
+Average Rows per Genome: 407.79
+
+
