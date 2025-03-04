@@ -365,7 +365,8 @@ def download_all_fastq_files(all_studies_fastq: dict) -> None:
                     fastq_filename = os.path.basename(fastq_file)
                     destination_path = os.path.join(run_dir, fastq_filename)
                     download_fastq(fastq_file, destination_path)
-                    return
+
+    return
 
 
 if __name__ == "__main__":
@@ -394,4 +395,4 @@ if __name__ == "__main__":
 
     # 3400 fastq files, every fastq-file is 1.5 GB approx, every run has two fastq files
 
-    # download_all_fastq_files(all_studies_fastq)
+    download_all_fastq_files(all_studies_fastq)
