@@ -5,12 +5,17 @@ This folder contains a script to obtain contigs from specific datasets in the CA
 The datasets in CAMI2 are designed to mimic realistic microbiome environments and include a vast array of both new and known genomes. CAMI2 datasets are often used to benchmark metagenomic binners.
 https://cami-challenge.org/
 
-We include the following datasets:
+The list of included studies (id, name) are specified in the file `config/cami2_processing.yml`. They include:
 
-* [**marine**](https://cami-challenge.org/datasets/Marine/) **short** (Gold standard assembly from Illumina HiSeq simulation)
-* [**marine**](https://cami-challenge.org/datasets/Marine/) **long** (Gold standard assembly from Pacific Bioscience simulation)
-* [**plant**](https://cami-challenge.org/datasets/Plant-associated/) **short** (From Illumina HiSeq data simulation)
-* [**plant**](https://cami-challenge.org/datasets/Plant-associated/) **long** (From Pacific Bioscience data simulation)
+* [**marine**](https://cami-challenge.org/datasets/Marine/) `short` (Gold standard assembly from Illumina HiSeq simulation)
+* [**marine**](https://cami-challenge.org/datasets/Marine/) `long` (Gold standard assembly from Pacific Bioscience simulation)
+* [**plant**](https://cami-challenge.org/datasets/Plant-associated/) `short` (From Illumina HiSeq data simulation)
+* [**plant**](https://cami-challenge.org/datasets/Plant-associated/) `long` (From Pacific Bioscience data simulation)
+* [**human**](https://cami-challenge.org/datasets/Toy%20Human%20Microbiome%20Project/) **airways** `short`
+* [**human**](https://cami-challenge.org/datasets/Toy%20Human%20Microbiome%20Project/) **gastro** `short`
+* [**human**](https://cami-challenge.org/datasets/Toy%20Human%20Microbiome%20Project/) **oral** `short`
+* [**human**](https://cami-challenge.org/datasets/Toy%20Human%20Microbiome%20Project/) **skin** `short`
+* [**human**](https://cami-challenge.org/datasets/Toy%20Human%20Microbiome%20Project/) **urogenital** `short`
 
 The output path of processed contigs are `data/cami2`.
 

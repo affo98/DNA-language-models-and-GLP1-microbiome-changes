@@ -15,11 +15,6 @@ from Bio import SeqIO
 from tqdm import tqdm
 
 
-CONTIG_FILE = "anonymous_gsa_pooled.fasta.gz"
-MAPPING_FILE = "gsa_pooled_mapping.tsv.gz"
-TAXONOMIC_FILE = "taxonomic_profile_0.txt"
-
-
 def setup_data_paths() -> None:
     """Check if the required folders exist, create them if they don't, and set environment variables."""
     paths = {
@@ -67,77 +62,162 @@ def read_dataset_names(file_path: str) -> list[list[str]]:
     return datasets
 
 
-def download_cami_contigs(dataset_name: str) -> None:
+def download_cami_contigs(dataset: str, reads: str) -> None:
 
-    logging.info(f"---------- {dataset_name} ----------")
-    base_url = "https://frl.publisso.de/data/frl:6425521"
-    dataset_to_tarfile = {
-        "marine": "marmgCAMI2_setup.tar.gz",
-        "plant": "rhimgCAMI2_setup.tar.gz",
-    }
-    dataset, reads = dataset_name.split("_")
+    logging.info(f"---------- {dataset}_{reads} ----------")
 
-    if dataset == "marine":
-        url = f"{base_url}/{dataset}/{reads}_read/{dataset_to_tarfile[dataset]}"
-    elif dataset == "plant":
-        if reads == "short":
-            url = f"{base_url}/{dataset}_associated/{reads}_read/{dataset_to_tarfile[dataset]}"
-        elif reads == "long":
-            url = f"{base_url}/{dataset}_associated/{reads}_read_pacbio/{dataset_to_tarfile[dataset]}"
+    human_datasets = ["airways", "gastro", "oral", "skin", "urogenital"]
 
-    response = requests.get(url)
+    if dataset in ["marine", "plant"]:
+        base_url = "https://frl.publisso.de/data/frl:6425521"
+        dataset_to_tarfile = {
+            "marine": "marmgCAMI2_setup.tar.gz",
+            "plant": "rhimgCAMI2_setup.tar.gz",
+        }
 
-    os.environ["raw_data_path"] = os.path.join(
-        os.environ["CAMI2_DATA_PATH"], f"{dataset}_{reads}"
-    )
+        if dataset == "marine":
+            url = f"{base_url}/{dataset}/{reads}_read/{dataset_to_tarfile[dataset]}"
+        elif dataset == "plant":
+            if reads == "short":
+                url = f"{base_url}/{dataset}_associated/{reads}_read/{dataset_to_tarfile[dataset]}"
+            elif reads == "long":
+                url = f"{base_url}/{dataset}_associated/{reads}_read_pacbio/{dataset_to_tarfile[dataset]}"
 
-    if response.status_code == 200:
-        with open(dataset_to_tarfile[dataset], "wb") as f:
-            f.write(response.content)
+        response = requests.get(url)
+        if response.status_code == 200:
+            with open(dataset_to_tarfile[dataset], "wb") as f:
+                f.write(response.content)
 
-        with tarfile.open(dataset_to_tarfile[dataset], "r:gz") as tar:
-            tar.extractall(path=os.environ["raw_data_path"])
-        print(f"{dataset}_{reads} extracted successfully.")
-        os.remove(dataset_to_tarfile[dataset])
+            with tarfile.open(dataset_to_tarfile[dataset], "r:gz") as tar:
+                tar.extractall(path=os.environ["raw_data_path"])
+            os.remove(dataset_to_tarfile[dataset])
 
-    else:
-        print(
-            f"Failed to download {dataset}_{reads}. Status code:", response.status_code
-        )
+        else:
+            print(
+                f"Failed to download {dataset}_{reads}. Status code:",
+                response.status_code,
+            )
+
+    elif dataset in human_datasets:
+        os.makedirs(os.environ["raw_data_path"])
+        base_url = "https://openstack.cebitec.uni-bielefeld.de:8080/swift/v1/CAMI_"
+        dataset_to_urlsuffix_taxid = {
+            "airways": ["Airways", "10"],
+            "gastro": ["Gastrointestinal_tract", "0"],
+            "oral": ["Oral", "6"],
+            "skin": ["Skin", "1"],
+            "urogenital": ["Urogenital_tract", "0"],
+        }
+        url = f"{base_url}{dataset_to_urlsuffix_taxid[dataset][0]}/short_read/"
+        human_files = [
+            "gsa.fasta.gz",
+            "gsa_pooled_mapping.tsv.gz",
+            "taxonomic_profile_",
+        ]
+
+        for file in human_files:
+            if file == "taxonomic_profile_":
+                file = f"{file}{dataset_to_urlsuffix_taxid[dataset][1]}.txt"
+            url_file = f"{url}{file}"
+
+            print(url_file)
+
+            response = requests.get(url_file)
+
+            if response.status_code == 200:
+                with open(os.path.join(os.environ["raw_data_path"], file), "wb") as f:
+                    f.write(response.content)
+
+            else:
+                print(
+                    f"Failed to download {dataset}_{reads}. Status code:",
+                    response.status_code,
+                )
 
 
 def load_raw_cami_files(
-    contig_file: str, mapping_file: str, taxanomic_file: str
+    dataset: str,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
 
-    raw_data_path_unpacked = os.path.join(
-        os.environ["raw_data_path"], os.listdir(os.environ["raw_data_path"])[0]
-    )
+    if dataset in ["marine", "plant"]:
+        raw_data_path = os.path.join(
+            os.environ["raw_data_path"], os.listdir(os.environ["raw_data_path"])[0]
+        )
+        contig_file = "anonymous_gsa_pooled.fasta.gz"
+        mapping_file = "gsa_pooled_mapping.tsv.gz"
+        taxonomic_file = "taxonomic_profile_0.txt"
 
-    contig_file = os.path.join(raw_data_path_unpacked, contig_file)
-    mapping_file = os.path.join(raw_data_path_unpacked, mapping_file)
-    taxanomic_file = os.path.join(raw_data_path_unpacked, taxanomic_file)
+    elif dataset in ["airways", "gastro", "oral", "skin", "urogenital"]:
+        raw_data_path = os.environ["raw_data_path"]
 
-    with gzip.open(contig_file, "rt") as handle:
+        dataset_to_urlsuffix_taxid = {
+            "airways": "10",
+            "gastro": "0",
+            "oral": "6",
+            "skin": "1",
+            "urogenital": "0",
+        }
+        contig_file = "gsa.fasta.gz"
+        mapping_file = "gsa_pooled_mapping.tsv.gz"
+        taxonomic_file = f"taxonomic_profile_{dataset_to_urlsuffix_taxid[dataset]}.txt"
+
+    contig_file_path = os.path.join(raw_data_path, contig_file)
+    mapping_file_path = os.path.join(raw_data_path, mapping_file)
+    taxanomic_file_path = os.path.join(raw_data_path, taxonomic_file)
+
+    with gzip.open(contig_file_path, "rt") as handle:
         records = [
             {"contig_id": record.id, "seq": str(record.seq)}
             for record in SeqIO.parse(handle, "fasta")
         ]
     con = pd.DataFrame(records)
+
+    map = pd.read_csv(mapping_file_path, compression="gzip", sep="\t")
+
+    if dataset in ["marine", "plant"]:
+        tax = pd.read_csv(taxanomic_file_path, sep="\t", skiprows=4)
+
+    elif dataset in ["airways", "gastro", "oral", "skin", "urogenital"]:
+        with open(taxanomic_file_path, "r") as f:
+            lines = f.readlines()
+            del lines[4]
+        with open(taxanomic_file_path, "w") as f:
+            f.writelines(lines)
+
+        tax = pd.read_csv(taxanomic_file_path, sep="\t", skiprows=3)
+
+    return con, map, tax
+
+
+def preprocess_cami_files(
+    dataset: str, con: pd.DataFrame, map: pd.DataFrame, tax: pd.DataFrame
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+
+    logging.info(f"\n** Preprocessing/Cleaning **")
     n_contigs_original = con.shape[0]
     logging.info(f"Number of contigs originally: {n_contigs_original}")
     con = con[con["seq"].str.len() >= 2500]
     logging.info(f"Number of contigs above 2500 bps: {con.shape[0]}")
     logging.info(f"Removed {n_contigs_original - con.shape[0]} contigs below 2500 bps")
 
-    map = pd.read_csv(mapping_file, compression="gzip", sep="\t")
+    invalid_contigs = map.groupby("#anonymous_contig_id").filter(
+        lambda x: x["genome_id"].nunique() > 1
+    )
+    if not invalid_contigs.empty:
+        logging.info(
+            f"Removed {invalid_contigs.shape[0]} contigs where #anonymous_contig_id were mapped to multiple contig_ids in the mapping file"
+        )
+        con = con[~con["contig_id"].isin(invalid_contigs["#anonymous_contig_id"])]
 
-    tax = pd.read_csv(taxanomic_file, sep="\t", skiprows=4)
+    map = map.drop_duplicates("#anonymous_contig_id", keep="first")
+
+    if dataset in ["airways", "gastro", "oral", "skin", "urogenital"]:
+        tax = tax.rename(columns={"_CAMI_GENOMEID": "_CAMI_genomeID"})
 
     return con, map, tax
 
 
-def preprocess_cami_files(
+def merge_cami_files(
     con: pd.DataFrame, map: pd.DataFrame, tax: pd.DataFrame
 ) -> pd.DataFrame:
 
@@ -210,11 +290,13 @@ def preprocess_cami_files(
     logging.info(
         f"Removed {genomes_fewer_than_10.shape[0]} genomes with fewer than 10 contigs"
     )
+    logging.info(f"Number of contigs after cleaning: {out.shape[0]}")
 
     return out
 
 
 def get_summary_stats(output: pd.DataFrame) -> None:
+    logging.info(f"\n** Summary Stats **")
 
     for col in [
         "cami_genome_id",
@@ -249,12 +331,12 @@ def get_summary_stats(output: pd.DataFrame) -> None:
     return
 
 
-def save_output(output: pd.DataFrame, dataset: str) -> None:
+def save_output(output: pd.DataFrame, dataset: str, reads: str) -> None:
     output.to_csv(
-        os.path.join(os.environ["CAMI2_OUTPUT_PATH"], f"{dataset}_contigs.csv"),
+        os.path.join(os.environ["CAMI2_OUTPUT_PATH"], f"{dataset}_{reads}_contigs.csv"),
         index=False,
     )
-    print(f"{dataset} saved successfully.")
+    print(f"{dataset} {reads} saved successfully.")
     return
 
 
@@ -274,14 +356,21 @@ if __name__ == "__main__":
     all_datasets = read_dataset_names(os.environ["CONFIG_PATH"])
     all_datasets = args.datasets if args.datasets else all_datasets
 
-    for dataset in tqdm(all_datasets, desc="Processing Cami2-datasets"):
-        download_cami_contigs(dataset)
+    for dataset_id in tqdm(all_datasets, desc="Processing Cami2-datasets"):
+        dataset, reads = dataset_id.split("_")
+        os.environ["raw_data_path"] = os.path.join(
+            os.environ["CAMI2_DATA_PATH"], f"{dataset}_{reads}"
+        )
+        download_cami_contigs(dataset, reads)
 
-        con, map, tax = load_raw_cami_files(CONTIG_FILE, MAPPING_FILE, TAXONOMIC_FILE)
+        con, map, tax = load_raw_cami_files(dataset)
 
-        output = preprocess_cami_files(con, map, tax)
+        con, map, tax = preprocess_cami_files(dataset, con, map, tax)
+
+        output = merge_cami_files(con, map, tax)
 
         get_summary_stats(output)
-        save_output(output, dataset)
+        save_output(output, dataset, reads)
 
+        del con, map, tax, output
         shutil.rmtree(os.environ["raw_data_path"])

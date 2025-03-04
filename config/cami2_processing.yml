@@ -3,3 +3,8 @@ datasets:
   - name: marine_long
   - name: plant_short
   - name: plant_long
+  - name: airways_short
+  - name: gastro_short
+  - name: oral_short
+  - name: skin_short
+  - name: urogenital_short
