@@ -139,6 +139,7 @@ class KMediod:
                 continue
             predictions[predictions == label] = -1
 
+        labels, counts = torch.unique(predictions, return_counts=True)
         for label, count in zip(labels.cpu(), counts.cpu()):
             print(f"Cluster {label}: {count} points")
 
