@@ -23,6 +23,7 @@ class KMediod:
             print("Embeddings chenged to dtype float32")
         if not normalized:
             embeddings = normalize(embeddings)
+            print("Normalizing embeddings")
         if not 0 < min_similarity < 1:
             raise (ValueError("Minimum similarity must be between 0 and 1"))
         if min_bin_size < 1:
