@@ -1,11 +1,97 @@
-Run started at: 2025-02-27 16:20:42,435
+Run started at: 2025-03-05 09:47:59,826
+---------- marine_short ----------
+
+** Preprocessing/Cleaning **
+Number of contigs originally: 1583781
+Number of contigs above 2500 bps: 122715
+Removed 1461066 contigs below 2500 bps
+Number of genomes originally: 772
+Number of genomes w. more than 10 contigs 550
+Removed 222 genomes with fewer than 10 contigs
+Number of contigs after cleaning: 122100
+
+** Summary Stats **
+cami_genome_id: 550
+superkingdom: 4
+phylum: 19
+class: 25
+order: 63
+family: 98
+genus: 183
+species: 276
+strain: 308
+Sequence length of all genomes -> Min: 2500, Max: 3813201, Avg: 9217.87
+Genome with Min Rows: RNODE_235_length_2608_cov_55.03480 (10 rows)
+Genome with Max Rows: Otu1358 (1010 rows)
+Average Rows per Genome: 222.00
+
+
+---------- marine_long ----------
+
+** Preprocessing/Cleaning **
+Number of contigs originally: 149860
+Number of contigs above 2500 bps: 117556
+Removed 32304 contigs below 2500 bps
+Number of genomes originally: 869
+Number of genomes w. more than 10 contigs 646
+Removed 223 genomes with fewer than 10 contigs
+Number of contigs after cleaning: 117024
+
+** Summary Stats **
+cami_genome_id: 646
+superkingdom: 4
+phylum: 19
+class: 27
+order: 63
+family: 101
+genus: 194
+species: 328
+strain: 359
+Sequence length of all genomes -> Min: 2500, Max: 2697507, Avg: 14705.69
+Genome with Min Rows: RNODE_65_length_5443_cov_3.51540 (10 rows)
+Genome with Max Rows: Otu2439 (841 rows)
+Average Rows per Genome: 181.15
+
+
+---------- plant_short ----------
+
+** Preprocessing/Cleaning **
+Number of contigs originally: 3439911
+Number of contigs above 2500 bps: 75353
+Removed 3364558 contigs below 2500 bps
+Number of genomes originally: 207
+Number of genomes w. more than 10 contigs 178
+Removed 29 genomes with fewer than 10 contigs
+Number of contigs after cleaning: 75266
+
+** Summary Stats **
+cami_genome_id: 178
+superkingdom: 4
+phylum: 8
+class: 17
+order: 32
+family: 44
+genus: 64
+species: 76
+strain: 98
+Sequence length of all genomes -> Min: 2500, Max: 6291273, Avg: 14439.53
+Genome with Min Rows: RNODE_34_length_5214_cov_5.85112 (10 rows)
+Genome with Max Rows: GCF_000001735.4_TAIR10.1_genomic (11722 rows)
+Average Rows per Genome: 422.84
+
+
 ---------- plant_long ----------
+
+** Preprocessing/Cleaning **
 Number of contigs originally: 367404
 Number of contigs above 2500 bps: 214641
 Removed 152763 contigs below 2500 bps
 Number of genomes originally: 561
 Number of genomes w. more than 10 contigs 526
 Removed 35 genomes with fewer than 10 contigs
+Number of contigs after cleaning: 214496
+
+** Summary Stats **
 cami_genome_id: 526
 superkingdom: 5
 phylum: 21
@@ -19,5 +105,145 @@ Sequence length of all genomes -> Min: 2500, Max: 7026503, Avg: 10842.34
 Genome with Min Rows: RNODE_525_length_3666_cov_9.03954 (10 rows)
 Genome with Max Rows: Phomopsis_columnaris_MPI-SW4-AT-0540 (7288 rows)
 Average Rows per Genome: 407.79
+
+
+---------- airways_short ----------
+
+** Preprocessing/Cleaning **
+Number of contigs originally: 1971278
+Number of contigs above 2500 bps: 80167
+Removed 1891111 contigs below 2500 bps
+Removed 1654 contigs where #anonymous_contig_id were mapped to multiple contig_ids in the mapping file
+Number of genomes originally: 533
+Number of genomes w. more than 10 contigs 348
+Removed 185 genomes with fewer than 10 contigs
+Number of contigs after cleaning: 79281
+
+** Summary Stats **
+cami_genome_id: 348
+superkingdom: 1
+phylum: 8
+class: 16
+order: 29
+family: 55
+genus: 90
+species: 176
+strain: 115
+Sequence length of all genomes -> Min: 2500, Max: 1927209, Avg: 7644.44
+Genome with Min Rows: OTU_97.270.0 (10 rows)
+Genome with Max Rows: OTU_97.38219.0 (999 rows)
+Average Rows per Genome: 227.82
+
+
+---------- gastro_short ----------
+
+** Preprocessing/Cleaning **
+Number of contigs originally: 210632
+Number of contigs above 2500 bps: 22614
+Removed 188018 contigs below 2500 bps
+Removed 504 contigs where #anonymous_contig_id were mapped to multiple contig_ids in the mapping file
+Number of genomes originally: 161
+Number of genomes w. more than 10 contigs 99
+Removed 62 genomes with fewer than 10 contigs
+Number of contigs after cleaning: 31217
+
+** Summary Stats **
+cami_genome_id: 99
+superkingdom: 1
+phylum: 10
+class: 21
+order: 33
+family: 55
+genus: 150
+species: 370
+strain: 41
+Sequence length of all genomes -> Min: 2500, Max: 6645476, Avg: 95245.18
+Genome with Min Rows: OTU_97.13971.0 (10 rows)
+Genome with Max Rows: OTU_97.29.0 (942 rows)
+Average Rows per Genome: 224.82
+
+
+---------- oral_short ----------
+
+** Preprocessing/Cleaning **
+Number of contigs originally: 1286547
+Number of contigs above 2500 bps: 60211
+Removed 1226336 contigs below 2500 bps
+Removed 1592 contigs where #anonymous_contig_id were mapped to multiple contig_ids in the mapping file
+Number of genomes originally: 497
+Number of genomes w. more than 10 contigs 367
+Removed 130 genomes with fewer than 10 contigs
+Number of contigs after cleaning: 59442
+
+** Summary Stats **
+cami_genome_id: 367
+superkingdom: 1
+phylum: 7
+class: 14
+order: 21
+family: 33
+genus: 67
+species: 141
+strain: 95
+Sequence length of all genomes -> Min: 2500, Max: 2941930, Avg: 8601.28
+Genome with Min Rows: OTU_97.26911.0 (10 rows)
+Genome with Max Rows: OTU_97.40084.0 (903 rows)
+Average Rows per Genome: 161.97
+
+
+---------- skin_short ----------
+
+** Preprocessing/Cleaning **
+Number of contigs originally: 753143
+Number of contigs above 2500 bps: 90398
+Removed 662745 contigs below 2500 bps
+Removed 1216 contigs where #anonymous_contig_id were mapped to multiple contig_ids in the mapping file
+Number of genomes originally: 443
+Number of genomes w. more than 10 contigs 344
+Removed 99 genomes with fewer than 10 contigs
+Number of contigs after cleaning: 89804
+
+** Summary Stats **
+cami_genome_id: 344
+superkingdom: 1
+phylum: 7
+class: 14
+order: 28
+family: 48
+genus: 75
+species: 174
+strain: 112
+Sequence length of all genomes -> Min: 2500, Max: 1470448, Avg: 7256.36
+Genome with Min Rows: OTU_97.39762.0 (10 rows)
+Genome with Max Rows: OTU_97.2092.0 (1097 rows)
+Average Rows per Genome: 261.06
+
+
+---------- urogenital_short ----------
+
+** Preprocessing/Cleaning **
+Number of contigs originally: 206830
+Number of contigs above 2500 bps: 19733
+Removed 187097 contigs below 2500 bps
+Removed 486 contigs where #anonymous_contig_id were mapped to multiple contig_ids in the mapping file
+Number of genomes originally: 174
+Number of genomes w. more than 10 contigs 107
+Removed 67 genomes with fewer than 10 contigs
+Number of contigs after cleaning: 19373
+
+** Summary Stats **
+cami_genome_id: 107
+superkingdom: 1
+phylum: 6
+class: 12
+order: 17
+family: 24
+genus: 28
+species: 60
+strain: 41
+Sequence length of all genomes -> Min: 2500, Max: 5287947, Avg: 10905.15
+Genome with Min Rows: OTU_97.8468.0 (10 rows)
+Genome with Max Rows: OTU_97.8170.0 (1008 rows)
+Average Rows per Genome: 181.06
 
 
