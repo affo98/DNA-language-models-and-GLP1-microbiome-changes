@@ -64,7 +64,7 @@ def main():
 
     kmediod = KMediod(
         embeddings,
-        min_similarity=0.01,
+        min_similarity=0.008,
         min_bin_size=10,
         num_steps=3,
         max_iter=1000,
