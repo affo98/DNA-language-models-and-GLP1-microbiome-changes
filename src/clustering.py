@@ -114,7 +114,6 @@ class KMediod:
                 candidates = torch.where(candidate_mask)[0]
 
                 if len(candidates) == 0:
-                    print(f"No Candidates found!")
                     break
 
                 seed = torch.mean(self.embeddings[candidates], dim=0)  # update seed
@@ -126,7 +125,6 @@ class KMediod:
             predictions[candidates] = cluster_id
 
             # Update density vector
-            print(f"Update Density")
             cluster_embs = self.embeddings[candidates]
             print(cluster_embs.shape)
             cluster_sims = torch.mm(self.embeddings, cluster_embs.T)
