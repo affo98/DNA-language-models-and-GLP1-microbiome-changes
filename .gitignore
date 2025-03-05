@@ -14,3 +14,6 @@
 /data/cami2/*
 
 play.ipynb
+
+#Pycache
+src/__pycache__
