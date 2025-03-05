@@ -116,10 +116,6 @@ class KMediod:
 
                 seed = torch.mean(self.embeddings[candidates], dim=0)  # update seed
 
-            # if len(candidates) == 0:
-            #     cluster_id -= 1  # Rollback unused cluster ID
-            #     continue
-
             predictions[candidates] = cluster_id
 
             # Update density vector
@@ -137,9 +133,9 @@ class KMediod:
                 print(f"KMediod Step {cluster_id} completed.")
 
         # Filter small clusters
-        print(f"filter small clusters")
         labels, counts = torch.unique(predictions, return_counts=True)
         for label, count in zip(labels.cpu(), counts.cpu()):
+            print(f"Cluster {label}: {count} points")
             if label == -1 or count >= self.min_bin_size:
                 continue
             predictions[predictions == label] = -1
