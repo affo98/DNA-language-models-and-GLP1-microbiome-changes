@@ -116,9 +116,9 @@ class KMediod:
 
                 seed = torch.mean(self.embeddings[candidates], dim=0)  # update seed
 
-            if len(candidates) == 0:
-                cluster_id -= 1  # Rollback unused cluster ID
-                continue
+            # if len(candidates) == 0:
+            #     cluster_id -= 1  # Rollback unused cluster ID
+            #     continue
 
             predictions[candidates] = cluster_id
 
