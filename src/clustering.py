@@ -114,6 +114,7 @@ class KMediod:
                 candidates = torch.where(candidate_mask)[0]
 
                 if len(candidates) == 0:
+                    print(f"No Candidates found!")
                     break
 
                 seed = torch.mean(self.embeddings[candidates], dim=0)  # update seed
