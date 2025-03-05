@@ -47,8 +47,10 @@ def calculate_tnf(dna_sequences: list[str]) -> np.ndarray:
             no_missing_tns += count_N / len(seq)
 
     print(f"Average Number of Missing Nucleotide (N): {count_N/len(dna_sequences)}")
-    # Convert counts to frequencies
+
+    # convert counts to frequencies
     total_counts = np.sum(embeddings, axis=1)
+    total_counts[total_counts == 0] = 1e-10  # avoid division by 0
     embeddings = embeddings / total_counts[:, None]
 
     return embeddings
