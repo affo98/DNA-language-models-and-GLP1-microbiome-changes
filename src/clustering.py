@@ -60,7 +60,6 @@ class KMediod:
 
     def fit(
         self,
-        device: torch.device,
         embeddings: np.ndarray,
         min_similarity=0.8,
         min_bin_size=10,
@@ -76,7 +75,7 @@ class KMediod:
             torch.where(sim_matrix >= min_similarity, sim_matrix, 0.0), dim=1
         )
 
-        predictions = torch.full((n_samples,), -1, dtype=torch.long, device=device)
+        predictions = torch.full((n_samples,), -1, dtype=torch.long, device=self.device)
         cluster_id = 0
 
         print("=========================================\n")
