@@ -65,17 +65,11 @@ class KMediod:
         block_size = 30000
         n_samples = self.embeddings.shape[0]
 
-        sim_matrix = torch.mm(self.embeddings, self.embeddings.T)
-
-        density_vector = torch.sum(
-            torch.where(sim_matrix >= self.min_similarity, sim_matrix, 0.0), dim=1
-        )
-
         density_vector = torch.zeros(n_samples, device=self.device)
 
         for i in range(0, n_samples, block_size):
             block_start = i
-            block_end = min(i + block_size, n)
+            block_end = min(i + block_size, n_samples)
             block_embeddings = self.embeddings[block_start:block_end]
 
             block_sim_matrix = torch.mm(
