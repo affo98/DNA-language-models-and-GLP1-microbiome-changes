@@ -49,7 +49,7 @@ class KMediod:
 
         device, gpu_count = get_available_device()
         embeddings = torch.from_numpy(embeddings).to(device)
-        print(f"Using {device} to for k-mediod clustering")
+        print(f"Using {device} for k-mediod clustering")
 
         self.embeddings = embeddings
         self.min_similarity = min_similarity
@@ -105,8 +105,10 @@ class KMediod:
 
             seed = self.embeddings[medoid_idx]
             available_mask = predictions == -1  # points that are still available
+            print(f"Selected Seed")
 
             for _ in range(self.num_steps):
+                print(f"{_}")
                 similarities = torch.mv(self.embeddings, seed)
                 candidate_mask = (similarities >= self.min_similarity) & available_mask
                 candidates = torch.where(candidate_mask)[0]
@@ -123,6 +125,7 @@ class KMediod:
             predictions[candidates] = cluster_id
 
             # Update density vector
+            print(f"Update Density")
             cluster_embs = self.embeddings[candidates]
             cluster_sims = torch.mm(self.embeddings, cluster_embs.T)
             cluster_sims = torch.where(
@@ -136,6 +139,7 @@ class KMediod:
                 print(f"KMediod Step {cluster_id} completed.")
 
         # Filter small clusters
+        print(f"filter small clusters")
         labels, counts = torch.unique(predictions, return_counts=True)
         for label, count in zip(labels.cpu(), counts.cpu()):
             if label == -1 or count >= self.min_bin_size:
