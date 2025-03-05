@@ -37,12 +37,17 @@ def main():
         action="store_true",
         help="Set this flag if TNFs are already computed and saved in a .npz file.",
     )
+    parser.add_argument(
+        "--dataset_name",
+        "-d",
+        help="dataset cami2 to include",
+    )
     args = parser.parse_args()
 
     setup_paths()
 
     contigs_file = os.path.join(
-        os.environ["CAMI2_OUTPUT_PATH"], "marine_short_contigs.csv"
+        os.environ["CAMI2_OUTPUT_PATH"], f"{args.dataset_name}.csv"
     )
 
     with open(contigs_file) as csvfile:
