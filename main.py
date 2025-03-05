@@ -42,6 +42,11 @@ def main():
         "-d",
         help="dataset cami2 to include",
     )
+    parser.add_argument(
+        "--min_similarity",
+        "-s",
+        help="dataset cami2 to include",
+    )
     args = parser.parse_args()
 
     setup_paths()
@@ -64,7 +69,7 @@ def main():
 
     kmediod = KMediod(
         embeddings,
-        min_similarity=0.0065,
+        min_similarity=args.min_similarity,  # 0.0075
         min_bin_size=10,
         num_steps=3,
         max_iter=1000,
