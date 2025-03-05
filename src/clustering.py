@@ -110,7 +110,6 @@ class KMediod:
             for _ in range(self.num_steps):
                 print(f"{_}")
                 similarities = torch.mv(self.embeddings, seed)
-                print(similarities)
                 candidate_mask = (similarities >= self.min_similarity) & available_mask
                 candidates = torch.where(candidate_mask)[0]
 
