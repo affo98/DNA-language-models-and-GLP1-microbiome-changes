@@ -135,9 +135,11 @@ class KMediod:
         # Filter small clusters
         labels, counts = torch.unique(predictions, return_counts=True)
         for label, count in zip(labels.cpu(), counts.cpu()):
-            print(f"Cluster {label}: {count} points")
             if label == -1 or count >= self.min_bin_size:
                 continue
             predictions[predictions == label] = -1
+
+        for label, count in zip(labels.cpu(), counts.cpu()):
+            print(f"Cluster {label}: {count} points")
 
         return predictions.cpu().numpy()
