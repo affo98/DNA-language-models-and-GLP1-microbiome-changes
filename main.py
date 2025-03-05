@@ -70,7 +70,7 @@ def main():
         max_iter=1000,
         normalized=False,
     )
-    predictions = kmediod.fit(embeddings)
+    predictions = kmediod.fit()
 
 
 if __name__ == "__main__":

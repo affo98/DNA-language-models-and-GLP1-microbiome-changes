@@ -60,19 +60,14 @@ class KMediod:
 
     def fit(
         self,
-        embeddings: np.ndarray,
-        min_similarity=0.8,
-        min_bin_size=10,
-        num_steps=3,
-        max_iter=1000,
     ) -> np.array:
 
-        n_samples = embeddings.shape[0]
+        n_samples = self.embeddings.shape[0]
 
-        sim_matrix = torch.mm(embeddings, embeddings.T)
+        sim_matrix = torch.mm(self.embeddings, self.embeddings.T)
 
         density_vector = torch.sum(
-            torch.where(sim_matrix >= min_similarity, sim_matrix, 0.0), dim=1
+            torch.where(sim_matrix >= self.min_similarity, sim_matrix, 0.0), dim=1
         )
 
         predictions = torch.full((n_samples,), -1, dtype=torch.long, device=self.device)
@@ -82,29 +77,29 @@ class KMediod:
         print(f"Running KMedoid on {n_samples} contigs\n")
         print("=========================================\n")
 
-        progress_bar = tqdm(total=max_iter, desc="Clusters created K-mediod")
+        progress_bar = tqdm(total=self.max_iter, desc="Clusters created K-mediod")
 
         while torch.any(predictions == -1):
             cluster_id += 1
-            if cluster_id > max_iter:
+            if cluster_id > self.max_iter:
                 break
 
             # Select highest density point index
             medoid_idx = torch.argmax(density_vector).item()
             density_vector[medoid_idx] = -100  # exclude seed from density vector
 
-            seed = embeddings[medoid_idx]
+            seed = self.embeddings[medoid_idx]
             available_mask = predictions == -1  # points that are still available
 
-            for _ in range(num_steps):
-                similarities = torch.mv(embeddings, seed)
-                candidate_mask = (similarities >= min_similarity) & available_mask
+            for _ in range(self.num_steps):
+                similarities = torch.mv(self.embeddings, seed)
+                candidate_mask = (similarities >= self.min_similarity) & available_mask
                 candidates = torch.where(candidate_mask)[0]
 
                 if len(candidates) == 0:
                     break
 
-                seed = torch.mean(embeddings[candidates], dim=0)  # update seed
+                seed = torch.mean(self.embeddings[candidates], dim=0)  # update seed
 
             if len(candidates) == 0:
                 cluster_id -= 1  # Rollback unused cluster ID
@@ -113,10 +108,10 @@ class KMediod:
             predictions[candidates] = cluster_id
 
             # Update density vector
-            cluster_embs = embeddings[candidates]
-            cluster_sims = torch.mm(embeddings, cluster_embs.T)
+            cluster_embs = self.embeddings[candidates]
+            cluster_sims = torch.mm(self.embeddings, cluster_embs.T)
             cluster_sims = torch.where(
-                cluster_sims >= min_similarity, cluster_sims, 0.0
+                cluster_sims >= self.min_similarity, cluster_sims, 0.0
             )
             density_vector -= torch.sum(cluster_sims, dim=1)
             density_vector[candidates] = -100  # exclude seed from density vector
@@ -128,7 +123,7 @@ class KMediod:
         # Filter small clusters
         labels, counts = torch.unique(predictions, return_counts=True)
         for label, count in zip(labels.cpu(), counts.cpu()):
-            if label == -1 or count >= min_bin_size:
+            if label == -1 or count >= self.min_bin_size:
                 continue
             predictions[predictions == label] = -1
 
