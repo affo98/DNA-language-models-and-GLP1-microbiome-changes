@@ -76,6 +76,7 @@ def main():
         normalized=False,
     )
     predictions = kmediod.fit()
+    print(predictions)
 
 
 if __name__ == "__main__":
