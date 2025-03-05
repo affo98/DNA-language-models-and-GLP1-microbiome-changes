@@ -57,15 +57,15 @@ def main():
         d = np.load("tnf_embeddings.npz")
         embeddings = d["embeddings"]
 
-    # kmediod = KMediod(
-    #     embeddings,
-    #     min_similarity=0.8,
-    #     min_bin_size=10,
-    #     num_steps=3,
-    #     max_iter=1000,
-    #     normalized=False,
-    # )
-    # predictions = kmediod.fit()
+    kmediod = KMediod(
+        embeddings,
+        min_similarity=0.8,
+        min_bin_size=10,
+        num_steps=3,
+        max_iter=1000,
+        normalized=False,
+    )
+    predictions = kmediod.fit()
 
 
 if __name__ == "__main__":
