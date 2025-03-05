@@ -62,6 +62,7 @@ class KMediod:
         self,
     ) -> np.array:
 
+        block_size = 30000
         n_samples = self.embeddings.shape[0]
 
         sim_matrix = torch.mm(self.embeddings, self.embeddings.T)
@@ -69,6 +70,26 @@ class KMediod:
         density_vector = torch.sum(
             torch.where(sim_matrix >= self.min_similarity, sim_matrix, 0.0), dim=1
         )
+
+        density_vector = torch.zeros(n_samples, device=self.device)
+
+        for i in range(0, n_samples, block_size):
+            block_start = i
+            block_end = min(i + block_size, n)
+            block_embeddings = self.embeddings[block_start:block_end]
+
+            block_sim_matrix = torch.mm(
+                block_embeddings, self.embeddings.T
+            )  # Shape: (block_size, n) - sim of block to all other data points
+
+            block_density = torch.sum(
+                torch.where(
+                    block_sim_matrix >= self.min_similarity, block_sim_matrix, 0.0
+                ),
+                dim=1,
+            )
+
+            density_vector[block_start:block_end] = block_density
 
         predictions = torch.full((n_samples,), -1, dtype=torch.long, device=self.device)
         cluster_id = 0
