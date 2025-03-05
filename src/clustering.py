@@ -128,6 +128,7 @@ class KMediod:
             # Update density vector
             print(f"Update Density")
             cluster_embs = self.embeddings[candidates]
+            print(cluster_embs.shape)
             cluster_sims = torch.mm(self.embeddings, cluster_embs.T)
             cluster_sims = torch.where(
                 cluster_sims >= self.min_similarity, cluster_sims, 0.0
