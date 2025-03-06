@@ -341,20 +341,6 @@ def create_vamb_files(
     dataset: str, reads: str, map: pd.DataFrame, output: pd.DataFrame
 ) -> None:
 
-    valid_contigs = set(output["contig_id"].to_list())
-    fasta_output_path = os.path.join(
-        os.environ["CAMI2_VAMB_OUTPUT_PATH"], f"{dataset}_{reads}_.gsa.fasta.gz"
-    )
-    with gzip.open(
-        os.path.join(os.environ["raw_data_path"], "gsa.fasta.gz"), "rt"
-    ) as handle, gzip.open(fasta_output_path, "wt") as out_handle:
-        filtered_records = (
-            record
-            for record in SeqIO.parse(handle, "fasta")
-            if record.id in valid_contigs
-        )
-        SeqIO.write(filtered_records, out_handle, "fasta")
-
     abundance_dir = os.path.join(os.environ["raw_data_path"], "abundance")
     abundance_files = [
         os.path.join(abundance_dir, f)
@@ -396,6 +382,21 @@ def create_vamb_files(
             sep="\t",
         )
     del map
+
+    valid_contigs = set(output["contig_id"].to_list())
+    fasta_output_path = os.path.join(
+        os.environ["CAMI2_VAMB_OUTPUT_PATH"], f"{dataset}_{reads}_.gsa.fasta.gz"
+    )
+    with gzip.open(
+        os.path.join(os.environ["raw_data_path"], "gsa.fasta.gz"), "rt"
+    ) as handle, gzip.open(fasta_output_path, "wt") as out_handle:
+        filtered_records = (
+            record
+            for record in SeqIO.parse(handle, "fasta")
+            if record.id in valid_contigs
+        )
+        SeqIO.write(filtered_records, out_handle, "fasta")
+
     return
 
 
