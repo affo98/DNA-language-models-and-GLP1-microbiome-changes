@@ -358,6 +358,7 @@ def create_vamb_files(
         sample_abundance["anonymous_contig_id"] = sample_abundance[
             "#anonymous_contig_id"
         ].apply(lambda x: "C" + x.split("C", 1)[-1])
+        print(sample_abundance.head(5))
         sample_abundance = sample_abundance.rename(
             columns={"number_reads": sample_name}
         )
