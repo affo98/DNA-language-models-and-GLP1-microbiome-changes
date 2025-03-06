@@ -1,6 +1,6 @@
 import os
 import logging
-import argparse
+from argparse import ArgumentParser
 import yaml
 import gzip
 import tarfile
@@ -231,24 +231,23 @@ def preprocess_cami_files(
     logging.info(f"Number of contigs above 2500 bps: {con.shape[0]}")
     logging.info(f"Removed {n_contigs_original - con.shape[0]} contigs below 2500 bps")
 
-    # invalied_contigs_byseq = con.loc[
-    #     ~con["seq"].apply(lambda seq: any(c in {"A", "G", "T", "C"} for c in seq)),
-    #     "contig_id",
-    # ]
-    # invalid_contigs_byid = map.groupby("#anonymous_contig_id").filter(
-    #     lambda x: x["genome_id"].nunique() > 1
-    # )
-
-    # if not invalied_contigs_byseq.empty:
-    #     logging.info(
-    #         f"Removed {invalied_contigs_byseq.shape[0]} that did not have any A,G,T,C Nucleotides"
-    #     )
-    #     con = con[~con["contig_id"].isin(invalied_contigs_byseq)]
-    # if not invalid_contigs_byid.empty:
-    #     logging.info(
-    #         f"Removed {invalid_contigs_byid.shape[0]} contigs where #anonymous_contig_id were mapped to multiple contig_ids in the mapping file"
-    #     )
-    #     con = con[~con["contig_id"].isin(invalid_contigs_byid["#anonymous_contig_id"])]
+    invalied_contigs_byseq = con.loc[
+        ~con["seq"].apply(lambda seq: any(c in {"A", "G", "T", "C"} for c in seq)),
+        "contig_id",
+    ]
+    invalid_contigs_byid = map.groupby("#anonymous_contig_id").filter(
+        lambda x: x["genome_id"].nunique() > 1
+    )
+    if not invalied_contigs_byseq.empty:
+        logging.info(
+            f"Removed {invalied_contigs_byseq.shape[0]} that did not have any A,G,T,C Nucleotides"
+        )
+        con = con[~con["contig_id"].isin(invalied_contigs_byseq)]
+    if not invalid_contigs_byid.empty:
+        logging.info(
+            f"Removed {invalid_contigs_byid.shape[0]} contigs where #anonymous_contig_id were mapped to multiple contig_ids in the mapping file"
+        )
+        con = con[~con["contig_id"].isin(invalid_contigs_byid["#anonymous_contig_id"])]
 
     map = map.drop_duplicates("#anonymous_contig_id", keep="first")
 
@@ -357,13 +356,10 @@ def create_vamb_files(
         for f in os.listdir(abundance_dir)
         if f.endswith(".tsv.gz")
     ]
-
-    # Initialize the main DataFrame with unique contig IDs from g
     abundances_output = pd.DataFrame(
         {"contigname": map["#anonymous_contig_id"].unique()}
     )
 
-    # Process each sample abundance file
     for file in abundance_files:
         sample_name = file.split("\\")[-1].split("_")[0]
         sample_abundance = pd.read_csv(file, compression="gzip", sep="\t")
@@ -442,17 +438,29 @@ def save_output(output: pd.DataFrame, dataset: str, reads: str) -> None:
     print(f"{dataset} {reads} saved successfully.")
     return
 
+def add_arguments() -> ArgumentParser:
+    parser = ArgumentParser()
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="List Cami2 datasets to include.")
     parser.add_argument(
         "-d",
         "--datasets",
         nargs="*",
         help="Choose Cami2 datasets (optional). E.g. marine_long, plant_short.",
     )
+
+    parser.add_argument(
+        "--min_similarity",
+        "-s",
+        help="dataset cami2 to include",
+    )
+
     args = parser.parse_args()
 
+    return args
+
+
+
+def main(args):
     setup_data_paths()
     setup_logfile(os.environ["LOG_PATH"])
 
@@ -479,3 +487,15 @@ if __name__ == "__main__":
 
         # del output
         # shutil.rmtree(os.environ["raw_data_path"])
+    
+
+if __name__ == "__main__":
+    if __name__ == "__main__":
+
+    args = add_arguments()
+
+    print("Arguments passed:")
+    for arg, value in vars(args).items():
+        print(f"{arg}: {value}")
+
+    main(args)
