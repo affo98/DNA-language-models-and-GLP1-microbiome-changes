@@ -23,6 +23,8 @@ def setup_data_paths() -> None:
         "CONFIG_PATH": os.path.join(os.getcwd(), "config"),
         "CAMI2_DATA_PATH": os.path.join(os.getcwd(), "get_cami2_data", "data"),
         "CAMI2_OUTPUT_PATH": os.path.join(os.getcwd(), "data", "cami2"),
+        "CAMI2_GFM_OUTPUT_PATH": os.path.join(os.getcwd(), "data", "cami2", "gfm"),
+        "CAMI2_VAMB_OUTPUT_PATH": os.path.join(os.getcwd(), "data", "cami2", "vamb"),
     }
 
     for var_name, path in paths.items():
@@ -108,13 +110,13 @@ def download_cami_contigs(dataset: str, reads: str) -> None:
             "skin": ["Skin", "1"],
             "urogenital": ["Urogenital_tract", "0"],
         }
+
         url = f"{base_url}{dataset_to_urlsuffix_taxid[dataset][0]}/short_read/"
         human_files = [
             "gsa.fasta.gz",
             "gsa_pooled_mapping.tsv.gz",
             "taxonomic_profile_",
         ]
-
         for file in human_files:
             if file == "taxonomic_profile_":
                 file = f"{file}{dataset_to_urlsuffix_taxid[dataset][1]}.txt"
@@ -132,6 +134,35 @@ def download_cami_contigs(dataset: str, reads: str) -> None:
                 print(
                     f"Failed to download {dataset}_{reads}. Status code:",
                     response.status_code,
+                )
+
+        # contig abundances per sample
+        url_file_list = f"{base_url}{dataset_to_urlsuffix_taxid[dataset][0]}/"
+        response_file_list = requests.get(url_file_list)
+        file_list = response_file_list.text.strip().split("\n")
+        sample_gsa_mapping = [
+            file for file in file_list if "short_read" in file and "gsa_mapping" in file
+        ]
+        os.makedirs(os.path.join(os.environ["raw_data_path"], "abundance"))
+        for sample in sample_gsa_mapping:
+            sample_name = sample.split("sample_")[1].split("/")[0]
+            sample_response = requests.get(
+                f"{base_url}{dataset_to_urlsuffix_taxid[dataset][0]}/{sample}"
+            )
+            if sample_response.status_code == 200:
+                with open(
+                    os.path.join(
+                        os.environ["raw_data_path"],
+                        "abundance",
+                        f"{sample_name}_{sample.split('/')[-1]}",
+                    ),
+                    "wb",
+                ) as f:
+                    f.write(sample_response.content)
+            else:
+                print(
+                    f"Failed to download {base_url}{dataset_to_urlsuffix_taxid[dataset][0]}/{sample} Status code:",
+                    sample_response.status_code,
                 )
 
 
@@ -200,14 +231,24 @@ def preprocess_cami_files(
     logging.info(f"Number of contigs above 2500 bps: {con.shape[0]}")
     logging.info(f"Removed {n_contigs_original - con.shape[0]} contigs below 2500 bps")
 
-    invalid_contigs = map.groupby("#anonymous_contig_id").filter(
-        lambda x: x["genome_id"].nunique() > 1
-    )
-    if not invalid_contigs.empty:
-        logging.info(
-            f"Removed {invalid_contigs.shape[0]} contigs where #anonymous_contig_id were mapped to multiple contig_ids in the mapping file"
-        )
-        con = con[~con["contig_id"].isin(invalid_contigs["#anonymous_contig_id"])]
+    # invalied_contigs_byseq = con.loc[
+    #     ~con["seq"].apply(lambda seq: any(c in {"A", "G", "T", "C"} for c in seq)),
+    #     "contig_id",
+    # ]
+    # invalid_contigs_byid = map.groupby("#anonymous_contig_id").filter(
+    #     lambda x: x["genome_id"].nunique() > 1
+    # )
+
+    # if not invalied_contigs_byseq.empty:
+    #     logging.info(
+    #         f"Removed {invalied_contigs_byseq.shape[0]} that did not have any A,G,T,C Nucleotides"
+    #     )
+    #     con = con[~con["contig_id"].isin(invalied_contigs_byseq)]
+    # if not invalid_contigs_byid.empty:
+    #     logging.info(
+    #         f"Removed {invalid_contigs_byid.shape[0]} contigs where #anonymous_contig_id were mapped to multiple contig_ids in the mapping file"
+    #     )
+    #     con = con[~con["contig_id"].isin(invalid_contigs_byid["#anonymous_contig_id"])]
 
     map = map.drop_duplicates("#anonymous_contig_id", keep="first")
 
@@ -292,7 +333,67 @@ def merge_cami_files(
     )
     logging.info(f"Number of contigs after cleaning: {out.shape[0]}")
 
+    del con, tax
     return out
+
+
+def create_vamb_files(
+    dataset: str, reads: str, map: pd.DataFrame, output: pd.DataFrame
+) -> None:
+
+    shutil.copy(
+        os.path.join(os.environ["raw_data_path"], "gsa.fasta.gz"),
+        os.path.join(
+            os.environ["CAMI2_VAMB_OUTPUT_PATH"], f"{dataset}_{reads}_.gsa.fasta.gz"
+        ),
+    )
+
+    map = map[map["#anonymous_contig_id"].isin(output["contig_id"])]
+    print("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh", map.shape)
+
+    abundance_dir = os.path.join(os.environ["raw_data_path"], "abundance")
+    abundance_files = [
+        os.path.join(abundance_dir, f)
+        for f in os.listdir(abundance_dir)
+        if f.endswith(".tsv.gz")
+    ]
+
+    # Initialize the main DataFrame with unique contig IDs from g
+    abundances_output = pd.DataFrame(
+        {"contigname": map["#anonymous_contig_id"].unique()}
+    )
+
+    # Process each sample abundance file
+    for file in abundance_files:
+        sample_name = file.split("\\")[-1].split("_")[0]
+        sample_abundance = pd.read_csv(file, compression="gzip", sep="\t")
+        sample_abundance["#anonymous_contig_id"] = (
+            "P" + sample_abundance["#anonymous_contig_id"].str[2:]
+        )
+        sample_abundance = sample_abundance.rename(
+            columns={"number_reads": f"S{sample_name}"}
+        )
+
+        abundances_output = pd.merge(
+            abundances_output,
+            sample_abundance[["#anonymous_contig_id", f"S{sample_name}"]],
+            how="left",
+            left_on="contigname",
+            right_on="#anonymous_contig_id",
+        )
+        abundances_output = abundances_output.drop(
+            columns=["#anonymous_contig_id"]
+        ).fillna(0)
+        abundances_output.to_csv(
+            os.path.join(
+                os.environ["CAMI2_VAMB_OUTPUT_PATH"],
+                f"{dataset}_{reads}_abundance.tsv",
+            ),
+            index=False,
+            sep="\t",
+        )
+    del map
+    return
 
 
 def get_summary_stats(output: pd.DataFrame) -> None:
@@ -333,7 +434,9 @@ def get_summary_stats(output: pd.DataFrame) -> None:
 
 def save_output(output: pd.DataFrame, dataset: str, reads: str) -> None:
     output.to_csv(
-        os.path.join(os.environ["CAMI2_OUTPUT_PATH"], f"{dataset}_{reads}_contigs.csv"),
+        os.path.join(
+            os.environ["CAMI2_GFM_OUTPUT_PATH"], f"{dataset}_{reads}_contigs.csv"
+        ),
         index=False,
     )
     print(f"{dataset} {reads} saved successfully.")
@@ -369,8 +472,10 @@ if __name__ == "__main__":
 
         output = merge_cami_files(con, map, tax)
 
-        get_summary_stats(output)
-        save_output(output, dataset, reads)
+        create_vamb_files(dataset, reads, map, output)
 
-        del con, map, tax, output
-        shutil.rmtree(os.environ["raw_data_path"])
+        # get_summary_stats(output)
+        # save_output(output, dataset, reads)
+
+        # del output
+        # shutil.rmtree(os.environ["raw_data_path"])

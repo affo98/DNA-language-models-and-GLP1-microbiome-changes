@@ -17,3 +17,8 @@ play.ipynb
 
 #Pycache
 src/__pycache__
+
+
+#/npz files
+*.npz
+!helper/*.npz
