@@ -5,6 +5,7 @@ import yaml
 import gzip
 import tarfile
 import shutil
+from pathlib import Path
 
 import requests
 
@@ -366,7 +367,7 @@ def create_vamb_files(
     )
 
     for file in abundance_files:
-        sample_name = "S" + file.split("\\")[-1].split("_")[0]
+        sample_name = "S" + Path(file).stem.split("_")[0]
         print(sample_name)
         sample_abundance = pd.read_csv(file, compression="gzip", sep="\t")
         sample_abundance["#anonymous_contig_id"] = (
