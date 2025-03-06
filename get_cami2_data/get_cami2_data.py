@@ -438,6 +438,7 @@ def save_output(output: pd.DataFrame, dataset: str, reads: str) -> None:
     print(f"{dataset} {reads} saved successfully.")
     return
 
+
 def add_arguments() -> ArgumentParser:
     parser = ArgumentParser()
 
@@ -448,16 +449,9 @@ def add_arguments() -> ArgumentParser:
         help="Choose Cami2 datasets (optional). E.g. marine_long, plant_short.",
     )
 
-    parser.add_argument(
-        "--min_similarity",
-        "-s",
-        help="dataset cami2 to include",
-    )
-
     args = parser.parse_args()
 
     return args
-
 
 
 def main(args):
@@ -487,10 +481,9 @@ def main(args):
 
         # del output
         # shutil.rmtree(os.environ["raw_data_path"])
-    
+
 
 if __name__ == "__main__":
-    if __name__ == "__main__":
 
     args = add_arguments()
 
