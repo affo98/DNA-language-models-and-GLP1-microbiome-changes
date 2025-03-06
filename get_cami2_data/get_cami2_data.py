@@ -352,7 +352,7 @@ def create_vamb_files(
             for record in SeqIO.parse(handle, "fasta")
             if record.id in valid_contigs
         )
-    SeqIO.write(filtered_records, out_handle, "fasta")
+        SeqIO.write(filtered_records, out_handle, "fasta")
 
     abundance_dir = os.path.join(os.environ["raw_data_path"], "abundance")
     abundance_files = [
