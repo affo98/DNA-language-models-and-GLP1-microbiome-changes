@@ -466,7 +466,7 @@ def main(args):
         os.environ["raw_data_path"] = os.path.join(
             os.environ["CAMI2_DATA_PATH"], f"{dataset}_{reads}"
         )
-        download_cami_contigs(dataset, reads)
+        # download_cami_contigs(dataset, reads)
 
         con, map, tax = load_raw_cami_files(dataset)
 
