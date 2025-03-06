@@ -231,23 +231,23 @@ def preprocess_cami_files(
     logging.info(f"Number of contigs above 2500 bps: {con.shape[0]}")
     logging.info(f"Removed {n_contigs_original - con.shape[0]} contigs below 2500 bps")
 
-    invalied_contigs_byseq = con.loc[
-        ~con["seq"].apply(lambda seq: any(c in {"A", "G", "T", "C"} for c in seq)),
-        "contig_id",
-    ]
-    invalid_contigs_byid = map.groupby("#anonymous_contig_id").filter(
-        lambda x: x["genome_id"].nunique() > 1
-    )
-    if not invalied_contigs_byseq.empty:
-        logging.info(
-            f"Removed {invalied_contigs_byseq.shape[0]} that did not have any A,G,T,C Nucleotides"
-        )
-        con = con[~con["contig_id"].isin(invalied_contigs_byseq)]
-    if not invalid_contigs_byid.empty:
-        logging.info(
-            f"Removed {invalid_contigs_byid.shape[0]} contigs where #anonymous_contig_id were mapped to multiple contig_ids in the mapping file"
-        )
-        con = con[~con["contig_id"].isin(invalid_contigs_byid["#anonymous_contig_id"])]
+    # invalied_contigs_byseq = con.loc[
+    #     ~con["seq"].apply(lambda seq: any(c in {"A", "G", "T", "C"} for c in seq)),
+    #     "contig_id",
+    # ]
+    # invalid_contigs_byid = map.groupby("#anonymous_contig_id").filter(
+    #     lambda x: x["genome_id"].nunique() > 1
+    # )
+    # if not invalied_contigs_byseq.empty:
+    #     logging.info(
+    #         f"Removed {invalied_contigs_byseq.shape[0]} that did not have any A,G,T,C Nucleotides"
+    #     )
+    #     con = con[~con["contig_id"].isin(invalied_contigs_byseq)]
+    # if not invalid_contigs_byid.empty:
+    #     logging.info(
+    #         f"Removed {invalid_contigs_byid.shape[0]} contigs where #anonymous_contig_id were mapped to multiple contig_ids in the mapping file"
+    #     )
+    #     con = con[~con["contig_id"].isin(invalid_contigs_byid["#anonymous_contig_id"])]
 
     map = map.drop_duplicates("#anonymous_contig_id", keep="first")
 
