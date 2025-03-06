@@ -340,15 +340,19 @@ def create_vamb_files(
     dataset: str, reads: str, map: pd.DataFrame, output: pd.DataFrame
 ) -> None:
 
-    shutil.copy(
-        os.path.join(os.environ["raw_data_path"], "gsa.fasta.gz"),
-        os.path.join(
-            os.environ["CAMI2_VAMB_OUTPUT_PATH"], f"{dataset}_{reads}_.gsa.fasta.gz"
-        ),
+    valid_contigs = set(output["contig_id"].to_list())
+    fasta_output_path = os.path.join(
+        os.environ["CAMI2_VAMB_OUTPUT_PATH"], f"{dataset}_{reads}_.gsa.fasta.gz"
     )
-
-    map = map[map["#anonymous_contig_id"].isin(output["contig_id"])]
-    print("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh", map.shape)
+    with gzip.open(
+        os.path.join(os.environ["raw_data_path"], "gsa.fasta.gz"), "rt"
+    ) as handle, gzip.open(fasta_output_path, "wt") as out_handle:
+        filtered_records = (
+            record
+            for record in SeqIO.parse(handle, "fasta")
+            if record.id in valid_contigs
+        )
+    SeqIO.write(filtered_records, out_handle, "fasta")
 
     abundance_dir = os.path.join(os.environ["raw_data_path"], "abundance")
     abundance_files = [
@@ -356,23 +360,24 @@ def create_vamb_files(
         for f in os.listdir(abundance_dir)
         if f.endswith(".tsv.gz")
     ]
+    map = map[map["#anonymous_contig_id"].isin(output["contig_id"])]
     abundances_output = pd.DataFrame(
         {"contigname": map["#anonymous_contig_id"].unique()}
     )
 
     for file in abundance_files:
-        sample_name = file.split("\\")[-1].split("_")[0]
+        sample_name = "S" + file.split("\\")[-1].split("_")[0]
         sample_abundance = pd.read_csv(file, compression="gzip", sep="\t")
         sample_abundance["#anonymous_contig_id"] = (
             "P" + sample_abundance["#anonymous_contig_id"].str[2:]
         )
         sample_abundance = sample_abundance.rename(
-            columns={"number_reads": f"S{sample_name}"}
+            columns={"number_reads": sample_name}
         )
 
         abundances_output = pd.merge(
             abundances_output,
-            sample_abundance[["#anonymous_contig_id", f"S{sample_name}"]],
+            sample_abundance[["#anonymous_contig_id", sample_name]],
             how="left",
             left_on="contigname",
             right_on="#anonymous_contig_id",
@@ -470,10 +475,11 @@ def main(args):
 
         con, map, tax = load_raw_cami_files(dataset)
 
+        print("done load")
         con, map, tax = preprocess_cami_files(dataset, con, map, tax)
-
+        print("done preprocess")
         output = merge_cami_files(con, map, tax)
-
+        print("done merge")
         create_vamb_files(dataset, reads, map, output)
 
         # get_summary_stats(output)
