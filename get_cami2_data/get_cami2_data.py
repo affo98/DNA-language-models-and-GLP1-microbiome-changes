@@ -354,11 +354,10 @@ def create_vamb_files(
 
     for file in abundance_files:
         sample_name = "S" + Path(file).stem.split("_")[0]
-        print(sample_name)
         sample_abundance = pd.read_csv(file, compression="gzip", sep="\t")
-        sample_abundance["#anonymous_contig_id"] = (
-            "P" + sample_abundance["#anonymous_contig_id"].str[2:]
-        )
+        sample_abundance["anonymous_contig_id"] = sample_abundance[
+            "#anonymous_contig_id"
+        ].apply(lambda x: "C" + x.split("C", 1)[-1])
         sample_abundance = sample_abundance.rename(
             columns={"number_reads": sample_name}
         )
