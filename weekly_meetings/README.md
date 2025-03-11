@@ -3,9 +3,45 @@
 [Overleaf report](https://www.overleaf.com/project/679796b5a02b660e4f96beff)
 
 #### Meeting Outline
+* [11 March 2025](#date-30-january-2025)
 * [27 February 2025](#date-30-january-2025)
 * [20 February 2025](#date-30-january-2025)
 * [06 February 2025](#date-30-january-2025)
+
+#### Date: 11 March 2025
+
+##### Who did you help this week?
+
+
+##### Who helped you this week?
+
+* The new HPC Admin at ITU. 
+
+##### What did you achieve?
+
+* Implemented binning on GPU
+* Gathered Phenotype datasets
+* Got further in collecting and proessing CAMI2 data.
+* Got further in pre-training code, and collected pre-training data for bacteria.
+* Running pipeline for processing raw reads from multiple samples into contigs and abundances.
+
+
+##### What did you struggle with?
+
+
+
+
+##### What would you like to work on next week?
+
+
+
+##### Where do you need help from Veronika?
+
+* In pre-training, we wonder whether we should use varying length DNA sequences, or fixed length 10.000 bps. 
+
+
+
+
 
 #### Date: 27 February 2025
 
