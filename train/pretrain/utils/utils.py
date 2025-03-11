@@ -16,7 +16,7 @@ def setup_path(args):
     resPath += f'.{args.train_dataname}'
     resPath += f'.lr{args.lr}'
     resPath += f'.lrscale{args.lr_scale}'
-    resPath += f'.bs{args.train_batch_size}'
+    resPath += f'.bs{args.batch_size}'
     resPath += f'.maxlength{args.max_length}'
     resPath += f'.tmp{args.temp}'
     resPath += f'.seed{args.seed}'

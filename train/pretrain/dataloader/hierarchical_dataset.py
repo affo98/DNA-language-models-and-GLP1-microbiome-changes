@@ -28,17 +28,17 @@ class GenomeHierarchihcalDataset(Dataset):
                 data = list(csv.reader(tsvfile, delimiter="\t"))
 
         self.tokenizer = AutoTokenizer.from_pretrained("zhihan1996/DNABERT-2-117M", trust_remote_code=True)
-        self.id = [d[0] for d in data]
-        self.seq1 = [d[11] for d in data]
-        self.seq2 = [d[12] for d in data]
-        self.species = [d[3] for d in data]
-        self.genus = [d[4] for d in data]
-        self.family = [d[5] for d in data]
-        self.order = [d[6] for d in data]
-        self.class_ = [d[7] for d in data]
-        self.phylum = [d[8] for d in data]
-        self.kingdom = [d[9] for d in data]
-        self.superkingdom = [d[10] for d in data]
+        self.id = [d[0] for d in data[1:]]
+        self.seq1 = [d[11] for d in data[1:]]
+        self.seq2 = [d[12] for d in data[1:]]
+        self.species = [int(d[3]) for d in data[1:]]
+        self.genus = [int(d[4]) for d in data[1:]]
+        self.family = [int(d[5]) for d in data[1:]]
+        self.order = [int(d[6]) for d in data[1:]]
+        self.class_ = [int(d[7]) for d in data[1:]]
+        self.phylum = [int(d[8]) for d in data[1:]]
+        self.kingdom = [int(d[9]) for d in data[1:]]
+        self.superkingdom = [int(d[10]) for d in data[1:]]
         self.labels = {}
 
         for i in range(len(self.id)):
@@ -85,7 +85,7 @@ class GenomeHierarchihcalDataset(Dataset):
             sequences1.append(self.seq1[i])
             sequences2.append(self.seq2[i])
             labels.append(label)
-
+        
         return [sequences1, sequences2], torch.tensor(labels)
 
     def random_sample(self, label, label_dict):
@@ -97,15 +97,13 @@ class GenomeHierarchihcalDataset(Dataset):
                 random_label = label
                 if len(curr_dict.keys()) != 1:
                     while (random_label == label):
-                        random_label = random.sample(curr_dict.keys(), 1)[0]
+                        random_label = random.sample(list(curr_dict.keys()), 1)[0]
             else:
-                random_label = random.sample(curr_dict.keys(), 1)[0]
+                random_label = random.sample(list(curr_dict.keys()), 1)[0]
             curr_dict = curr_dict[random_label]
             top_level = False
         return curr_dict
 
-    def __len__(self):
-        return len(self.filenames)
 
 class HierarchicalBatchSampler(Sampler):
     def __init__(self, batch_size: int,

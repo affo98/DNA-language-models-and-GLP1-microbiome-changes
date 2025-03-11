@@ -32,6 +32,8 @@ class Trainer(nn.Module):
         
     def prepare_pairwise_input(self, sequences):
         sequences1, sequences2 = sequences[0], sequences[1]
+        sequences1 = [s[0] for s in sequences1]
+        sequences2 = [s[0] for s in sequences2]
         feat1 = self.get_batch_token(sequences1)
         feat2 = self.get_batch_token(sequences2)
 
@@ -61,9 +63,9 @@ class Trainer(nn.Module):
         if self.args.gpu is not None:
             input_ids = input_ids.cuda(self.args.gpu, non_blocking=True)
             attention_mask = attention_mask.cuda(self.args.gpu, non_blocking=True)
-            labels = labels.cuda(self.args.gpu, non_blocking=True)
+            labels = labels.squeeze().cuda(self.args.gpu, non_blocking=True)
         with torch.autocast(device_type="cuda"):
-            feat1, feat2, _, _ = self.model(input_ids, attention_mask, mix=False)
+            feat1, feat2, _, _ = self.model(input_ids, attention_mask)
             features = torch.cat([feat1.unsqueeze(1), feat2.unsqueeze(1)], dim=1)
             losses = self.criterion(features, labels)
             loss = losses["instdisc_loss"]
@@ -83,6 +85,7 @@ class Trainer(nn.Module):
         for epoch in range(self.args.epochs):
             self.train_sampler.set_epoch(epoch)
             for _, (sequences, labels) in enumerate(epoch_iterator):
+                labels = labels.squeeze()
                 input_ids, attention_mask = self.prepare_pairwise_input(sequences)
                 losses = self.train_step(input_ids, attention_mask, labels)
                 if self.gstep%self.args.logging_step==0:
@@ -106,9 +109,14 @@ class Trainer(nn.Module):
             val_loss = 0.
             for idx, (sequences, labels) in enumerate(self.val_loader):
                 with torch.no_grad():
+                    labels = labels.squeeze()
+                    labels = labels.squeeze().cuda(self.args.gpu, non_blocking=True)
                     input_ids, attention_mask = self.prepare_pairwise_input(sequences)
+                    input_ids = input_ids.cuda(self.args.gpu, non_blocking=True)
+                    attention_mask = attention_mask.cuda(self.args.gpu, non_blocking=True)
+                    
                     with torch.autocast(device_type="cuda"):
-                        feat1, feat2, _, _ = self.model(input_ids, attention_mask, mix=False)
+                        feat1, feat2, _, _ = self.model(input_ids, attention_mask)
                         features = torch.cat([feat1.unsqueeze(1), feat2.unsqueeze(1)], dim=1)
                         losses = self.criterion(features, labels)
                         val_loss += losses["instdisc_loss"]

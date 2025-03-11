@@ -62,7 +62,7 @@ def set_model(ngpus_per_node, args):
     model.cuda(args.gpu)
     args.batch_size = int(args.batch_size / ngpus_per_node)
     print("Updated batch size is {}".format(args.batch_size))
-    args.workers = int((args.workers + ngpus_per_node - 1) / ngpus_per_node)
+    #args.workers = int((args.workers + ngpus_per_node - 1) / ngpus_per_node)
     model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=True)
 
     criterion = criterion.cuda(args.gpu)
@@ -82,11 +82,13 @@ def get_args(argv):
     parser.add_argument('--val_dataname', type=str, default='val_48k.csv', help="Name of the data used for validating")
     # Training parameters
     parser.add_argument('--max_length', type=int, default=512, help="Max length of tokens")
-    parser.add_argument('--train_batch_size', type=int, default=48, help="Batch size used for training dataset")
-    parser.add_argument('--val_batch_size', type=int, default=360, help="Batch size used for validating dataset")
+    parser.add_argument('--batch_size', type=int, default=48, help="Batch size used for training/validating dataset")
     parser.add_argument('--lr', type=float, default=3e-06, help="Learning rate")
     parser.add_argument('--lr_scale', type=int, default=100, help="")
     parser.add_argument('--epochs', type=int, default=3)
+    #parser.add_argument('--train_batch_size', type=int, default=48, help="Batch size used for training dataset")
+    #parser.add_argument('--val_batch_size', type=int, default=360, help="Batch size used for validating dataset")
+     
     # Contrastive learning
     parser.add_argument('--feat_dim', type=int, default=128, help="Dimension of the projected features for instance discrimination loss")
     parser.add_argument('--temp', type=float, default=0.07, help="Temperature required by contrastive loss")
