@@ -25,6 +25,7 @@ SAMPLES = {
 rule all:
     input:
         expand(os.path.join(OUTDIR, "{dataset}", "catalogue.fna.gz"), dataset=DATASETS)
+        expand(os.path.join(OUTDIR, "{dataset}", "bam_files/{sample}_sorted.bam"), dataset=DATASETS)
 
 
 for dataset in DATASETS:
