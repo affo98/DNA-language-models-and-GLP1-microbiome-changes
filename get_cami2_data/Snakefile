@@ -34,6 +34,12 @@ rule all:
 
 for dataset in DATASETS:
 
+    # rule download:
+    #     output:
+
+            
+
+
     rule concatenate:
         input:
             expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_gsa.fasta"), sample=SAMPLES.get(dataset, []))
@@ -49,10 +55,10 @@ for dataset in DATASETS:
 
     rule alignment:
         input:
-            read=expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_reads.fq.gz"),sample=SAMPLES.get(dataset, [])),
+            read=os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_reads.fq.gz"),
             catalogue=os.path.join(OUTDIR, dataset, "catalogue.fna.gz")
         output:
-            expand(os.path.join(OUTDIR, dataset, "bam_files/{sample}_sorted.bam"), sample=SAMPLES.get(dataset, []))
+            os.path.join(OUTDIR, dataset, "bam_files/{sample}_sorted.bam")
         threads:
             8
         conda:
