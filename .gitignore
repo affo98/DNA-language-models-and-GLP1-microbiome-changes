@@ -12,6 +12,7 @@
 /data/phenotype/reads/*.csv
 /data/phenotype/sample_labels/*
 /data/cami2/*
+!data/cami2/.gitkeep
 
 play.ipynb
 
