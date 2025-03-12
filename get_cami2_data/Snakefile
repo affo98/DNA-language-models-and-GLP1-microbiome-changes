@@ -19,18 +19,22 @@ DATASETS = ALL_DATASETS if DATASET == "all" else [DATASET]
 
 print(DATASETS)
 
-rule concatenate:
-    input:
-        expand(os.path.join(OUTDIR, DATASET, "{sample}_anonymous_gsa.fasta.gz")) 
-    output:
-       os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
-    conda:
-        "cami2_environment.yml"
+for dataset in DATASETS:
 
-    shell:
+    SAMPLES = ['4', '27']
+
+    rule concatenate:
+        input:
+            expand(os.path.join(OUTDIR, DATASET, "{sample}_anonymous_gsa.fasta.gz"), samples=SAMPLES) 
+        output:
+        os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
+        conda:
+            "cami2_environment.yml"
+
+        shell:
+            """
+            python src/concatenate.py {output} {input} -m 2500
         """
-        python src/concatenate.py {output} {input} -m 2500
-       """
 
 # rule alignment:
 #     input:
