@@ -31,8 +31,7 @@ for dataset in DATASETS:
 
     rule concatenate:
         input:
-            expand(os.path.join(OUTDIR_TMP, "{dataset}", "{sample}_anonymous_gsa.fasta"),
-                sample=SAMPLES.get(dataset, []), dataset=DATASETS)
+            expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_gsa.fasta"), sample=SAMPLES.get(dataset, []))
         output:
             os.path.join(OUTDIR, dataset, "catalogue.fna.gz")
         conda:
