@@ -4,9 +4,11 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - python
+  - python=3.12 # Specify the newest Python version
   - snakemake
   - pyyaml
   - samtools
   - strobealign
-  - vamb
+  - pip
+  - pip:
+      - vamb
