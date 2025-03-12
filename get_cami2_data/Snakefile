@@ -24,9 +24,6 @@ SAMPLES = {
     
 }
 
-# --- RULES ---
-
-
 
 # rule all:
 #     input:
@@ -50,6 +47,9 @@ rule concatenate:
         python src/concatenate.py {output} {input} 
     """
 
+rule all:
+    input:
+        os.path.join(OUTDIR, "{dataset}", "catalogue.fna.gz")
 
 
     #     rule concatenate:
