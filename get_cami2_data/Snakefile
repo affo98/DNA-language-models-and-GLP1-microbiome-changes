@@ -4,7 +4,7 @@ import glob
 
 
 OUTDIR_TMP = os.path.join(os.getcwd(), "get_cami2_data", "data")
-OUTDIR =  os.path.join(os.getcwd(), "data")
+OUTDIR =  os.path.join(os.getcwd(), "data" "cami2")
 CONFIG = os.path.join(os.getcwd(), "config")
 
 with open(os.path.join(CONFIG, "cami2_datasets.yml"), "r") as f:
@@ -30,7 +30,7 @@ SAMPLES = {
 
 rule all:
     input:
-        expand(os.path.join(OUTDIR, "{dataset}", "{sample}_anonymous_gsa.fasta.gz"),
+        expand(os.path.join(OUTDIR_TMP, "{dataset}", "{sample}_anonymous_gsa.fasta.gz"),
                dataset=DATASETS, sample=SAMPLES.get("{dataset}", []))
 
 for dataset in DATASETS:
@@ -45,7 +45,7 @@ for dataset in DATASETS:
 
         shell:
             """
-            python src/concatenate.py {output} {input} -m 2500
+            python src/concatenate.py {output} {input} -m 2500 
         """
 
 # rule alignment:
