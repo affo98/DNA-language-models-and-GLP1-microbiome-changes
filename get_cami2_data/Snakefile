@@ -19,9 +19,15 @@ DATASETS = ALL_DATASETS if DATASET == "all" else [DATASET]
 
 print(DATASETS)
 
+def get_samples():
+
+
+
+
+
 rule download:
     output:
-        os.path.join(OUTDIR, "{dataset}", "{sample}_anonymous_reads.fq")
+        os.path.join(OUTDIR, "{dataset}", "{sample}_anonymous_reads.fq"),
         os.path.join(OUTDIR, "{dataset}", "{sample}_anonymous_gsa.fasta")
     conda:
        "cami2_environment.yml"
@@ -31,17 +37,17 @@ rule download:
         """
 
 
-# rule concatenate:
-#     input:
-#         expand(os.path.join(OUTDIR, DATASET, "{sample}_anonymous_gsa.fasta"),sample=SAMPLES) 
-#     output:
-#         os.path.join(OUTDIR, DATASET, "global_contig_catalogue.fna.gz")
-#     conda:
-#         os.path.join(OUTDIR, "envs/concatenate.yaml")
-#     shell:
-#         """
-#         python scripts/concatenate.py {output} {input} -m 0
-#         """
+rule concatenate:
+    input:
+        expand(os.path.join(OUTDIR, DATASET, "{sample}_anonymous_gsa.fasta"),sample=SAMPLES) 
+    output:
+        os.path.join(OUTDIR, DATASET, "global_contig_catalogue.fna.gz")
+    conda:
+        os.path.join(OUTDIR, "envs/concatenate.yaml")
+    shell:
+        """
+        python scripts/concatenate.py {output} {input} -m 0
+        """
 
 # rule alignment:
 #     input:
