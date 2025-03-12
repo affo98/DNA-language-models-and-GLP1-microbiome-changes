@@ -41,21 +41,41 @@ for dataset in DATASETS:
             python src/concatenate.py {output} {input}
             """
 
+
+    rule alignment:
+        input:
+            read=expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_reads.fq.gz"),sample=SAMPLES.get(dataset, []))
+            catalogue=os.path.join(OUTDIR, "{dataset}", "catalogue.fna.gz")
+        output:
+            os.path.join(OUTDIR, dataset, "bam_files/{sample}_sorted.bam"),
+        threads:
+            8
+        conda:
+            "cami2_environment.yml"
+        shell:
+            """
+            strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
+            """
     
 
-    # rule alignment:
-    #     input:
-    #         read=expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_reads.fq.gz"),sample=SAMPLES.get(dataset, []))
-    #         catalogue=os.path.join(OUTDIR, "{dataset}", "catalogue.fna.gz")
-    #     output:
-    #         os.path.join(OUTDIR, dataset, "bam_files/{sample}_sorted.bam"),
-    #     benchmark:
-    #         "benchmarks/alignment/{sample}.txt"
-    #     threads:
-    #         8
-    #     conda:
-    #         "cami2_environment.yml"
-    #     shell:
-    #         """
-    #         strobealign -t {threads} {input.contig_catalouge} {input.r1} | samtools sort -o {output}
-    #         """
+
+        
+        # rule alignment:
+        #     input:
+        #         r1=os.path.join(OUTDIR,DATASET, "knead/{sample}/{sample}_1_kneaddata_paired_1.fastq"),
+        #         r2=os.path.join(OUTDIR,DATASET, "knead/{sample}/{sample}_1_kneaddata_paired_2.fastq"),
+        #         contig_catalouge=os.path.join(OUTDIR,DATASET,"global_contig_catalogue.fna.gz")
+        #     output:
+        #         os.path.join(OUTDIR, DATASET, "algn/{sample}_sorted.bam"),
+        #     benchmark:
+        #         "benchmarks/alignment/{sample}.txt"
+        #     threads:
+        #         8
+        #     conda:
+        #         os.path.join(OUTDIR, "envs/strobealign.yaml")
+        #     shell:
+        #         """
+        #         strobealign -t {threads} {input.contig_catalouge} {input.r1} {input.r2} | samtools sort -o {output}
+        #         """
+    
+
