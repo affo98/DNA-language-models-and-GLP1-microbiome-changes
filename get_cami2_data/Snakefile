@@ -2,9 +2,8 @@ import os
 import yaml
 import glob
 
-
 OUTDIR_TMP = os.path.join(os.getcwd(), "get_cami2_data", "data")
-OUTDIR =  os.path.join(os.getcwd(), "data" "cami2")
+OUTDIR = os.path.join(os.getcwd(), "data", "cami2")
 CONFIG = os.path.join(os.getcwd(), "config")
 
 with open(os.path.join(CONFIG, "cami2_datasets.yml"), "r") as f:
@@ -12,21 +11,22 @@ with open(os.path.join(CONFIG, "cami2_datasets.yml"), "r") as f:
 
 ALL_DATASETS = [d["name"] for d in datasets_config["datasets"]]
 
-
 # Get DATASET from command-line argument or default to "all"
 DATASET = config.get("DATASET", "all")
 DATASETS = ALL_DATASETS if DATASET == "all" else [DATASET]
 
+# Define samples for each dataset
 SAMPLES = {
     'airways_short': ['4', '27'],
     'marine_short': ['1', '5', '8'],
     'gastro_short': ['12', '34'],
-    
 }
 
+# Rule to concatenate the samples into a catalogue file
 rule concatenate:
     input:
-        expand(os.path.join(OUTDIR_TMP, "{dataset}", "{sample}_anonymous_gsa.fasta"), 
+        # Use the actual value of 'dataset' in SAMPLES
+        expand(os.path.join(OUTDIR_TMP, "{dataset}", "{sample}_anonymous_gsa.fasta"),
                sample=SAMPLES.get("{dataset}", []), dataset=DATASETS)
     output:
         os.path.join(OUTDIR, "{dataset}", "catalogue.fna.gz")
@@ -41,6 +41,8 @@ rule concatenate:
 rule all:
     input:
         os.path.join(OUTDIR, "{dataset}", "catalogue.fna.gz")
+
+
 
 
 # rule all:
