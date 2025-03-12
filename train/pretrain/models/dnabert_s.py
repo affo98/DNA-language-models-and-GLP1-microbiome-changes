@@ -2,12 +2,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from transformers import AutoModel
+from DNABERT2_MIX.bert_layers import BertModel
 
 class DNABert_S(nn.Module):
     def __init__(self, feat_dim=128, load_dict=None):
         super(DNABert_S, self).__init__()
         print("-----Initializing DNABert_S-----")
-        self.dnabert2 = AutoModel.from_pretrained("zhihan1996/DNABERT-2-117M", trust_remote_code=True)
+#        self.dnabert2 = AutoModel.from_pretrained("zhihan1996/DNABERT-2-117M", trust_remote_code=True)
+        self.dnabert2 = BertModel.from_pretrained("zhihan1996/DNABERT-2-117M")
         self.emb_size = self.dnabert2.pooler.dense.out_features
         self.feat_dim = feat_dim
 
