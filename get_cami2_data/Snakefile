@@ -37,9 +37,9 @@ for dataset in DATASETS:
         conda:
             "cami2_environment.yml"
         shell:
-        """
+            """
             python src/concatenate.py {output} {input}
-        """
+            """
 
     
 
