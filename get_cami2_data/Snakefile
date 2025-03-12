@@ -19,6 +19,12 @@ DATASETS = ALL_DATASETS if DATASET == "all" else [DATASET]
 
 print(DATASETS)
 
+
+rule all:
+    input:
+        expand(os.path.join(OUTDIR, "{dataset}", "{sample}_anonymous_gsa.fasta.gz"),
+               dataset=DATASETS, sample=SAMPLES)
+
 for dataset in DATASETS:
 
     SAMPLES = ['4', '27']
