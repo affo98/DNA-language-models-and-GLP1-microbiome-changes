@@ -45,7 +45,7 @@ for dataset in DATASETS:
 
         shell:
             """
-            python src/concatenate.py {output} {input} -m 2500 
+            python src/concatenate.py {output} {input} 
         """
 
 # rule alignment:
