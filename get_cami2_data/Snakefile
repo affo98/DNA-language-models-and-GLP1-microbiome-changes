@@ -22,32 +22,25 @@ SAMPLES = {
     'gastro_short': ['12', '34'],
 }
 
-
-# Default rule to run the whole workflow
 rule all:
     input:
-        expand(os.path.join(OUTDIR, "{dataset}", "catalogue.fna.gz"), dataset=DATASETS)
+    expand(os.path.join(OUTDIR, "{dataset}", "catalogue.fna.gz"), dataset=DATASETS)
 
+    
+for dataset in DATASETS:
 
-print(expand(SAMPLES.get("{dataset}", []),dataset=DATASETS))
-
-print(expand(os.path.join(OUTDIR_TMP, "{dataset}", "{sample}_anonymous_gsa.fasta"),
-        dataset=DATASETS, sample=SAMPLES.get("{dataset}", [])))
-
-print(expand(os.path.join(OUTDIR_TMP, "{dataset}"), dataset=DATASETS))
-
-rule concatenate:
-    input:
-        # Use the actual value of 'dataset' in SAMPLES
-        expand(os.path.join(OUTDIR_TMP, "{dataset}", "{sample}_anonymous_gsa.fasta"),
-               sample=SAMPLES.get("{dataset}", []), dataset=DATASETS)
-    output:
-        os.path.join(OUTDIR, "{dataset}", "catalogue.fna.gz")
-    conda:
-        "cami2_environment.yml"
-    shell:
-        """
-        python src/concatenate.py {output} {input}
+    rule concatenate:
+        input:
+            # Use the actual value of 'dataset' in SAMPLES
+            expand(os.path.join(OUTDIR_TMP, "{dataset}", "{sample}_anonymous_gsa.fasta"),
+                sample=SAMPLES.get(dataset, []), dataset=DATASETS)
+        output:
+            os.path.join(OUTDIR, "{dataset}", "catalogue.fna.gz")
+        conda:
+            "cami2_environment.yml"
+        shell:
+            """
+            python src/concatenate.py {output} {input}
         """
 
 
