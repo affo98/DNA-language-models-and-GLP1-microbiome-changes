@@ -22,3 +22,6 @@ src/__pycache__
 #/npz files
 *.npz
 !helper/*.npz
+
+#Snakemake
+.snakemake/

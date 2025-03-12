@@ -1,0 +1,11 @@
+name: cami2_environment
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.12
+  - snakemake
+  - pyyaml
+  - samtools
+  - strobealign
