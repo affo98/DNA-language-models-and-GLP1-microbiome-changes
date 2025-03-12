@@ -27,7 +27,9 @@ print(expand(os.path.join(OUTDIR, "{dataset}", "bam_files/{sample}_sorted.bam"),
 rule all:
     input:
         expand(os.path.join(OUTDIR, "{dataset}", "catalogue.fna.gz"), dataset=DATASETS),
-        expand(os.path.join(OUTDIR, "{dataset}", "bam_files/{sample}_sorted.bam"), dataset=DATASETS, sample=SAMPLES.get("{dataset}", []))
+        expand(os.path.join(OUTDIR, "{dataset}", "bam_files/{sample}_sorted.bam"),
+        dataset=DATASETS,
+        sample=[sample for dataset in DATASETS for sample in SAMPLES.get(dataset, [])]) 
         
 
 
