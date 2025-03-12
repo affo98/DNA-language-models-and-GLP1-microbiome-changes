@@ -17,8 +17,6 @@ ALL_DATASETS = [d["name"] for d in datasets_config["datasets"]]
 DATASET = config.get("DATASET", "all")
 DATASETS = ALL_DATASETS if DATASET == "all" else [DATASET]
 
-print(DATASETS)
-
 SAMPLES = {
     'airways_short': ['4', '27'],
     'marine_short': ['1', '5', '8'],
@@ -34,6 +32,8 @@ rule all:
                dataset=DATASETS, sample=SAMPLES.get("{dataset}", []))
 
 for dataset in DATASETS:
+    print(dataset)
+    print(expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_gsa.fasta.gz"), sample=SAMPLES.get(dataset, [])))
 
     rule concatenate:
         input:
