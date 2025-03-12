@@ -28,27 +28,27 @@ SAMPLES = {
 
 
 
-rule all:
+# rule all:
+#     input:
+#         expand(os.path.join(OUTDIR_TMP, "{dataset}", "{sample}_anonymous_gsa.fasta"),
+#                dataset=DATASETS, sample=SAMPLES.get("{dataset}", []))
+
+# for dataset in DATASETS:
+#     print(dataset)
+#     print(expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_gsa.fasta"), sample=SAMPLES.get(dataset, [])))
+
+rule concatenate:
     input:
-        expand(os.path.join(OUTDIR_TMP, "{dataset}", "{sample}_anonymous_gsa.fasta"),
-               dataset=DATASETS, sample=SAMPLES.get("{dataset}", []))
+        expand(os.path.join(OUTDIR_TMP, "{dataset}", "{sample}_anonymous_gsa.fasta"), sample=SAMPLES.get(dataset, []), dataset=DATASETS) 
+    output:
+        os.path.join(OUTDIR, "{dataset}", "catalogue.fna.gz")
+    conda:
+        "cami2_environment.yml"
 
-for dataset in DATASETS:
-    print(dataset)
-    print(expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_gsa.fasta"), sample=SAMPLES.get(dataset, [])))
-
-    rule concatenate:
-        input:
-            expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_gsa.fasta"), sample=SAMPLES.get(dataset, [])) 
-        output:
-            os.path.join(OUTDIR, dataset, "catalogue.fna.gz")
-        conda:
-            "cami2_environment.yml"
-
-        shell:
-            """
-            python src/concatenate.py {output} {input} 
+    shell:
         """
+        python src/concatenate.py {output} {input} 
+    """
 
 
 
