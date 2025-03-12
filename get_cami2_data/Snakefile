@@ -22,7 +22,12 @@ SAMPLES = {
     'gastro_short': ['12', '34'],
 }
 
-# Rule to concatenate the samples into a catalogue file
+
+# Default rule to run the whole workflow
+rule all:
+    input:
+        os.path.join(OUTDIR, "{dataset}", "catalogue.fna.gz")
+
 rule concatenate:
     input:
         # Use the actual value of 'dataset' in SAMPLES
@@ -37,10 +42,6 @@ rule concatenate:
         python src/concatenate.py {output} {input}
         """
 
-# Default rule to run the whole workflow
-rule all:
-    input:
-        os.path.join(OUTDIR, "{dataset}", "catalogue.fna.gz")
 
 
 
