@@ -29,6 +29,7 @@ rule all:
         expand(os.path.join(OUTDIR, "{dataset}", "catalogue.fna.gz"), dataset=DATASETS)
 
 
+print(expand(SAMPLES.get("{dataset}", []),dataset=DATASETS))
 
 print(expand(os.path.join(OUTDIR_TMP, "{dataset}", "{sample}_anonymous_gsa.fasta"),
         dataset=DATASETS, sample=SAMPLES.get("{dataset}", [])))
