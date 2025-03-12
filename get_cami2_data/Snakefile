@@ -26,7 +26,7 @@ SAMPLES = {
 # Default rule to run the whole workflow
 rule all:
     input:
-        os.path.join(OUTDIR, "{dataset}", "catalogue.fna.gz")
+        expand(os.path.join(OUTDIR, "{dataset}", "catalogue.fna.gz"), dataset=DATASETS)
 
 rule concatenate:
     input:
@@ -41,7 +41,6 @@ rule concatenate:
         """
         python src/concatenate.py {output} {input}
         """
-
 
 
 
