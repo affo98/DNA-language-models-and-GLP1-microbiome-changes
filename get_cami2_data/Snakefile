@@ -19,13 +19,22 @@ DATASETS = ALL_DATASETS if DATASET == "all" else [DATASET]
 
 print(DATASETS)
 
+SAMPLES = {
+    'airways_short': ['4', '27'],
+    'marine_short': ['1', '5', '8'],
+    'gastro_short': ['12', '34'],
+    
+}
+
+# --- RULES ---
 
 rule all:
     input:
         expand(os.path.join(OUTDIR, "{dataset}", "{sample}_anonymous_gsa.fasta.gz"),
-               dataset=DATASETS, sample=SAMPLES)
+               dataset=DATASETS, sample=SAMPLES.get("{dataset}", []))
 
 for dataset in DATASETS:
+
 
     SAMPLES = ['4', '27']
 
