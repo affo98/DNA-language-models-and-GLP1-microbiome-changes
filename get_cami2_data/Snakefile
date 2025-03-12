@@ -31,125 +31,32 @@ for dataset in DATASETS:
 
     rule concatenate:
         input:
-            # Use the actual value of 'dataset' in SAMPLES
-            expand(os.path.join(OUTDIR_TMP, "{dataset}", "{sample}_anonymous_gsa.fasta"),
-                sample=SAMPLES.get(dataset, []), dataset=DATASETS)
+            expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_gsa.fasta"),
+                sample=SAMPLES.get(dataset, []))
         output:
-            os.path.join(OUTDIR, "{dataset}", "catalogue.fna.gz")
+            os.path.join(OUTDIR, dataset, "catalogue.fna.gz")
         conda:
             "cami2_environment.yml"
         shell:
-            """
+        """
             python src/concatenate.py {output} {input}
         """
 
-
-
-
-# rule all:
-#     input:
-#         expand(os.path.join(OUTDIR_TMP, "{dataset}", "{sample}_anonymous_gsa.fasta"),
-#                dataset=DATASETS, sample=SAMPLES.get("{dataset}", []))
-
-# for dataset in DATASETS:
-#     print(dataset)
-#     print(expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_gsa.fasta"), sample=SAMPLES.get(dataset, [])))
-
-# rule concatenate:
-#     input:
-#         expand(os.path.join(OUTDIR_TMP, "{dataset}", "{sample}_anonymous_gsa.fasta"), sample=SAMPLES.get("{dataset}", []), dataset=DATASETS) 
-#     output:
-#         os.path.join(OUTDIR, "{dataset}", "catalogue.fna.gz")
-#     conda:
-#         "cami2_environment.yml"
-
-#     shell:
-#         """
-#         python src/concatenate.py {output} {input} 
-#     """
-
-# rule all:
-#     input:
-#         os.path.join(OUTDIR, "{dataset}", "catalogue.fna.gz")
-
-
-    #     rule concatenate:
-    #     input:
-    #         expand(os.path.join(OUTDIR, DATASET, "spades/asm_{sample}/contigs.fasta"),sample=SAMPLES)
-    #     output:
-    #         os.path.join(OUTDIR, DATASET, "global_contig_catalogue.fna.gz")
-    #     conda:
-    #         os.path.join(OUTDIR, "envs/concatenate.yaml")
-    #     shell:
-    #         """
-    #         python scripts/concatenate.py {output} {input} -m 0
-    #         """
     
+
     # rule alignment:
     #     input:
-    #         r1=os.path.join(OUTDIR,DATASET, "knead/{sample}/{sample}_1_kneaddata_paired_1.fastq"),
-    #         r2=os.path.join(OUTDIR,DATASET, "knead/{sample}/{sample}_1_kneaddata_paired_2.fastq"),
-    #         contig_catalouge=os.path.join(OUTDIR,DATASET,"global_contig_catalogue.fna.gz")
+    #         read=expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_reads.fq.gz"),sample=SAMPLES.get(dataset, []))
+    #         catalogue=os.path.join(OUTDIR, "{dataset}", "catalogue.fna.gz")
     #     output:
-    #         os.path.join(OUTDIR, DATASET, "algn/{sample}_sorted.bam"),
+    #         os.path.join(OUTDIR, dataset, "bam_files/{sample}_sorted.bam"),
     #     benchmark:
     #         "benchmarks/alignment/{sample}.txt"
     #     threads:
     #         8
     #     conda:
-    #         os.path.join(OUTDIR, "envs/strobealign.yaml")
+    #         "cami2_environment.yml"
     #     shell:
     #         """
-    #         strobealign -t {threads} {input.contig_catalouge} {input.r1} {input.r2} | samtools sort -o {output}
+    #         strobealign -t {threads} {input.contig_catalouge} {input.r1} | samtools sort -o {output}
     #         """
-
-# rule alignment:
-#     input:
-#         r1=os.path.join(OUTDIR,DATASET, "knead/{sample}/{sample}_1_kneaddata_paired_1.fastq"),
-#         r2=os.path.join(OUTDIR,DATASET, "knead/{sample}/{sample}_1_kneaddata_paired_2.fastq"),
-#         contig_catalouge=os.path.join(OUTDIR,DATASET,"global_contig_catalogue.fna.gz")
-#     output:
-#         os.path.join(OUTDIR, DATASET, "algn/{sample}_sorted.bam"),
-#     benchmark:
-#         "benchmarks/alignment/{sample}.txt"
-#     threads:
-#         8
-#     conda:
-#         os.path.join(OUTDIR, "envs/strobealign.yaml")
-#     shell:
-#         """
-#         strobealign -t {threads} {input.contig_catalouge} {input.r1} {input.r2} | samtools sort -o {output}
-#         """
-
-
-
-# rule concatenate:
-#     input:
-#         lambda wildcards: expand(os.path.join(OUTDIR, wildcards.dataset, "spades/asm_{sample}/contigs.fasta"),
-#                                  sample=get_samples(wildcards.dataset))
-#     output:
-#         os.path.join(OUTDIR, "{dataset}", "global_contig_catalogue.fna.gz")
-#     conda:
-#         os.path.join(OUTDIR, "envs/concatenate.yaml")
-#     shell:
-#         """
-#         python scripts/concatenate.py {output} {input} -m 0
-#         """
-
-# rule alignment:
-#     input:
-#         r1=os.path.join(OUTDIR, "{dataset}", "knead/{sample}/{sample}_1_kneaddata_paired_1.fastq"),
-#         r2=os.path.join(OUTDIR, "{dataset}", "knead/{sample}/{sample}_1_kneaddata_paired_2.fastq"),
-#         contig_catalogue=os.path.join(OUTDIR, "{dataset}", "global_contig_catalogue.fna.gz")
-#     output:
-#         os.path.join(OUTDIR, "{dataset}", "algn/{sample}_sorted.bam")
-#     benchmark:
-#         os.path.join("benchmarks/alignment", "{dataset}_{sample}.txt")
-#     threads:
-#         8
-#     conda:
-#         os.path.join(OUTDIR, "envs/strobealign.yaml")
-#     shell:
-#         """
-#         strobealign -t {threads} {input.contig_catalogue} {input.r1} {input.r2} | samtools sort -o {output}
-#         """
