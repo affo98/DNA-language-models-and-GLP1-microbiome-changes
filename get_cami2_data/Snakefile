@@ -13,12 +13,22 @@ ALL_DATASETS = [d["name"] for d in datasets_config["datasets"]]
 DATASET = config.get("DATASET", "all")
 DATASETS = ALL_DATASETS if DATASET == "all" else [DATASET]
 
+<<<<<<< HEAD
 
 DATASET = config.get("DATASET", "all")
 DATASETS = [d["name"] for d in datasets_config["datasets"]]
 DATASETS = DATASETS if DATASET == "all" else [DATASET]
 SAMPLES = {d["name"]: d.get("samples", []) for d in datasets_config["datasets"]}
     
+=======
+# Define samples for each dataset
+SAMPLES = {
+    'airways_short': ['4', '27'],
+    'marine_short': ['0', '1', '2', '3'],
+    'gastro_short': ['12', '34'],
+}
+        
+>>>>>>> b281f915d3161163fdde5b28f2585c4844521f1b
 
 for dataset in DATASETS:
 
