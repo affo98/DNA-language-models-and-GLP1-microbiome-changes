@@ -163,7 +163,7 @@ def main(dataset, samples):
     name, reads = dataset.split("_")
 
     if name in HUMAN_DATASETS:
-        download_human(name, reads, samples, OUTDIR_TMP_DATASET)
+        download_human(name, samples, OUTDIR_TMP_DATASET)
 
     else:
         download_plant_marine(name, reads, samples, OUTDIR_TMP_DATASET)
