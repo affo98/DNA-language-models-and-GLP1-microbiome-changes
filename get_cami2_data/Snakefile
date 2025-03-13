@@ -43,7 +43,7 @@ for dataset in DATASETS:
             "cami2_environment.yml"
         shell:
             """
-            python get_cami2_data/get_cami2_data.py {""} {""} {dataset} {sample_str}
+            python get_cami2_data/get_cami2_data.py a b {dataset} {sample_str}
             """
 
 
