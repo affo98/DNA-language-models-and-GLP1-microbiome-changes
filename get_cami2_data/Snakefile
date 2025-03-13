@@ -18,7 +18,7 @@ DATASETS = ALL_DATASETS if DATASET == "all" else [DATASET]
 # Define samples for each dataset
 SAMPLES = {
     'airways_short': ['4', '27'],
-    'marine_short': ['0', '1'],
+    'marine_short': ['0'],
     'gastro_short': ['12', '34'],
 }
         
@@ -30,7 +30,7 @@ for dataset in DATASETS:
     rule all:
         input:
             expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_gsa.fasta"), sample=SAMPLES.get(dataset, [])),
-            expand(os.path.join(OUTDIR, dataset, "catalogue.fna.gz"),dataset=DATASETS)
+            expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_reads.fq.gz"), sample=SAMPLES.get(dataset, []))
             #expand(os.path.join(OUTDIR, "{dataset}", "bam_files/{sample}_sorted.bam"),
             #dataset=DATASETS,
             #sample=[sample for dataset in DATASETS for sample in SAMPLES.get(dataset, [])])
@@ -38,7 +38,7 @@ for dataset in DATASETS:
     rule download:
         output:
             contigs=expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_gsa.fasta"), sample=SAMPLES.get(dataset, [])),
-            #reads=expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_reads.fq.gz"), sample=SAMPLES.get(dataset, []))
+            reads=expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_reads.fq.gz"), sample=SAMPLES.get(dataset, []))
         conda:
             "cami2_environment.yml"
         shell:
