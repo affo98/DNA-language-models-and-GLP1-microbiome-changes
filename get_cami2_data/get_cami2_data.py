@@ -42,7 +42,7 @@ def find_file_in_subdirectories(root_dir, filename):
     return None
 
 
-def filter_write_and_log_contigs(input_file, output_file, min_length=2500):
+def filter_write_and_log_contigs(input_file, output_file, min_length=2000):
     original_count = 0
     removed_count = 0
 
@@ -116,7 +116,7 @@ def download_plant_marine(name, reads, samples, OUTDIR_TMP_DATASET):
                 OUTDIR_TMP_DATASET, f"{sample}_contigs.fasta"
             )
             filter_write_and_log_contigs(
-                contig_file_input, contig_file_output, min_length=2500
+                contig_file_input, contig_file_output, min_length=2000
             )
             shutil.rmtree(os.path.join(OUTDIR_TMP_DATASET, "simulation_short_read"))
             os.remove(contig_tar)
