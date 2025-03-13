@@ -26,12 +26,12 @@ SAMPLES = {
 for dataset in DATASETS:
 
     rule all:
-    input:
-        expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_gsa.fasta"), sample=SAMPLES.get(dataset, [])),
-        expand(os.path.join(OUTDIR, dataset, "catalogue.fna.gz"),dataset=DATASETS)
-        #expand(os.path.join(OUTDIR, "{dataset}", "bam_files/{sample}_sorted.bam"),
-        #dataset=DATASETS,
-        #sample=[sample for dataset in DATASETS for sample in SAMPLES.get(dataset, [])])
+        input:
+            expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_gsa.fasta"), sample=SAMPLES.get(dataset, [])),
+            expand(os.path.join(OUTDIR, dataset, "catalogue.fna.gz"),dataset=DATASETS)
+            #expand(os.path.join(OUTDIR, "{dataset}", "bam_files/{sample}_sorted.bam"),
+            #dataset=DATASETS,
+            #sample=[sample for dataset in DATASETS for sample in SAMPLES.get(dataset, [])])
 
     rule download:
         output:
