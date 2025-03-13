@@ -18,7 +18,7 @@ DATASETS = ALL_DATASETS if DATASET == "all" else [DATASET]
 # Define samples for each dataset
 SAMPLES = {
     'airways_short': ['4', '27'],
-    'marine_short': ['0'],
+    'marine_short': ['0', '1'],
     'gastro_short': ['12', '34'],
 }
         
