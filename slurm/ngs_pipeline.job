@@ -1,0 +1,27 @@
+#!/bin/bash
+#SBATCH --job-name=test_ngs_pipeline  # Name of the job
+#SBATCH --nodes=1                     # Number of nodes
+#SBATCH --ntasks=1                    # Number of tasks (single job)
+#SBATCH --cpus-per-task=24             # Request 24 CPU cores
+#SBATCH --mem=64G                      # Adjust memory as needed
+#SBATCH --time=12:00:00                # Max execution time (adjust if needed)
+#SBATCH --output=logs/%x_%j.out        # Standard output log (%x = job name, %j = job ID)
+#SBATCH --error=logs/%x_%j.err         # Standard error log
+#SBATCH --partition=compute            # Change if needed for your cluster
+#SBATCH --mail-type=END,FAIL           # Email notification on job end/fail
+#SBATCH --mail-user=your@email.com     # Replace with your email
+
+# Load modules
+module load anaconda3
+
+# Clone the repository and switch branch
+git clone https://github.com/affo98/DNA-language-models-and-GLP1-microbiome-changes.git
+cd DNA-language-models-and-GLP1-microbiome-changes
+git switch feature/NGS_PIPELINE
+
+# Create and activate the Conda environment
+conda env create -f environment.yaml
+source activate snakemake-global  # Use 'source' for SLURM compatibility
+
+# Run the pipeline
+python run_pipeline.py -d T2D-EW_PRJEB1786 --snakemake-arg --forceall -j unlimited --cores 12
