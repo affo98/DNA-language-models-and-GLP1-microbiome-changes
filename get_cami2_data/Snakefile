@@ -25,6 +25,8 @@ SAMPLES = {
 
 for dataset in DATASETS:
 
+    sample_str = ' '.join(SAMPLES.get(dataset, []))
+
     rule all:
         input:
             expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_gsa.fasta"), sample=SAMPLES.get(dataset, [])),
@@ -41,7 +43,7 @@ for dataset in DATASETS:
             "cami2_environment.yml"
         shell:
             """
-            python get_cami2_data/get_cami2_data.py {output.contigs} {output.reads} {dataset} {' '.join(SAMPLES.get(dataset, []))}
+            python get_cami2_data/get_cami2_data.py {output.contigs} {output.reads} {dataset} {sample_str}
             """
 
 
