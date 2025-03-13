@@ -63,7 +63,9 @@ def download_plant_marine(name, reads, samples, OUTDIR_DATASET, OUTDIR_TMP_DATAS
         # response_contig = requests.get(sample_contig_url)
 
         try:
-            subprocess.run(["wget", url, "-O", sample_read_url], check=True)
+            subprocess.run(
+                ["wget", sample_read_url, "-O", OUTDIR_TMP_DATASET], check=True
+            )
             print(f"Downloaded Fastq: {OUTDIR_TMP_DATASET}")
         except subprocess.CalledProcessError as e:
             print(f"Error downloading file: {e}")
