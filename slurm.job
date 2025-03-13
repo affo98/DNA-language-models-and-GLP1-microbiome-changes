@@ -8,6 +8,7 @@
 
 module load Anaconda3
 echo "Running on $(hostname):"
+nvidia-smi
 #conda env create -f get_cami2_data/cami2_environment.yml
 #conda activate cami2_environment
 
