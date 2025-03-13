@@ -97,6 +97,8 @@ def main(output_contigs, output_reads, dataset, samples):
 
     OUTDIR_DATASET = os.path.join(OUTDIR, dataset)
     OUTDIR_TMP_DATASET = os.path.join(OUTDIR_TMP, dataset)
+    if os.path.exists(OUTDIR_TMP_DATASET):
+        shutil.rmtree(OUTDIR_TMP_DATASET)
     os.makedirs(OUTDIR_TMP_DATASET)
     name, reads = dataset.split("_")
 
