@@ -3,7 +3,9 @@ from argparse import ArgumentParser
 import logging
 import gzip
 import shutil
+from pathlib import Path
 import tarfile
+
 from Bio import SeqIO
 
 import subprocess
@@ -166,7 +168,7 @@ def download_human(name, samples, OUTDIR_TMP_DATASET):
             contig_file_input, contig_file_output, min_length=2000
         )
 
-        tar_dir = [d.name for d in OUTDIR_TMP_DATASET.iterdir() if d.is_dir()][0]
+        tar_dir = [d.name for d in Path(OUTDIR_TMP_DATASET).iterdir() if d.is_dir()][0]
         shutil.rmtree(os.path.join(OUTDIR_TMP_DATASET, tar_dir))
         os.remove(sample_tar)
 
