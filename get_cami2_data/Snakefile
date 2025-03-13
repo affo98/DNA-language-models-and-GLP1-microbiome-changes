@@ -41,7 +41,7 @@ for dataset in DATASETS:
             "cami2_environment.yml"
         shell:
             """
-            python get_cami2_data/get_cami2_data.py {output.contigs} {outputs.reads} {dataset} {" ".join(SAMPLES.get(dataset, []))}
+            python get_cami2_data/get_cami2_data.py {output.contigs} {output.reads} {dataset} {" ".join(SAMPLES.get(dataset, []))}
             """
 
 
