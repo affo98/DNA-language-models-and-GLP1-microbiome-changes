@@ -64,7 +64,7 @@ for dataset in DATASETS:
     #         read=os.path.join(OUTDIR_TMP, dataset, "{sample}_reads.fq.gz"),
     #         catalogue=os.path.join(OUTDIR, dataset, "catalogue.fna.gz")
     #     output:
-    #         os.path.join(OUTDIR, dataset, "bam_files/{sample}_sorted.bam")
+    #         os.path.join(OUTDIR, dataset, "{sample}_sorted.bam")
     #     threads:
     #         24
     #     conda:
