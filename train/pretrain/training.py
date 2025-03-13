@@ -1,10 +1,10 @@
 import os
+import csv
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.distributed as dist
 from tqdm import tqdm
-import wandb
 
 class Trainer(nn.Module):
     def __init__(self, model, tokenizer, criterion, optimizer, dataloaders_dict, sampler, args):
@@ -59,6 +59,14 @@ class Trainer(nn.Module):
                 self.model.module.dnabert2.save_pretrained(save_dir)
                 self.tokenizer.save_pretrained(save_dir)
                 torch.save(self.model.module.contrast_head.state_dict(), save_dir+"/con_weights.ckpt")
+    
+    def save_loss_to_csv(self, loss, step, file_path):
+        file_exists = os.path.isfile(file_path)
+        with open(file_path, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            if not file_exists:
+                writer.writerow(['step', 'loss'])
+            writer.writerow([step, loss])
 
     def train_step(self, input_ids, attention_mask, labels):    
         if self.args.gpu is not None:
@@ -72,7 +80,8 @@ class Trainer(nn.Module):
             loss = losses["instdisc_loss"]
         
         if self.args.gpu == 0:
-                wandb.log({"loss": loss.item(), "step": self.gstep})
+            self.save_loss_to_csv(loss.item(), self.gstep, 'losses.csv')
+
             
         self.optimizer.zero_grad()
         loss.backward()
@@ -81,6 +90,9 @@ class Trainer(nn.Module):
         return losses
     
     def train(self):
+        if os.path.exists('losses.csv'):
+            os.remove('losses.csv')
+
         self.all_iter = self.args.epochs * len(self.train_loader)
         print('\n={}/{}=Iterations/Batches'.format(self.all_iter, len(self.train_loader)))
 
@@ -125,8 +137,6 @@ class Trainer(nn.Module):
                         losses = self.criterion(features, labels)
                         val_loss += losses["instdisc_loss"]
             val_loss = val_loss.item()/(idx+1)
-            if self.args.gpu == 0:
-                wandb.log({"val_loss": val_loss, "val_step": step})
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
                 best_checkpoint = step
