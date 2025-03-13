@@ -4,6 +4,7 @@ import logging
 import gzip
 import shutil
 import tarfile
+from Bio import SeqIO
 
 import subprocess
 import requests
@@ -41,7 +42,25 @@ def find_file_in_subdirectories(root_dir, filename):
     return None
 
 
-def download_plant_marine(name, reads, samples, OUTDIR_DATASET, OUTDIR_TMP_DATASET):
+def filter_write_and_log_contigs(input_file, output_file, min_length=2500):
+    original_count = 0
+    removed_count = 0
+
+    with gzip.open(input_file, "rt") as f_in, open(output_file, "w") as f_out:
+        for record in SeqIO.parse(f_in, "fasta"):
+            original_count += 1
+            if len(record) >= min_length:
+                SeqIO.write(record, f_out, "fasta")
+            else:
+                removed_count += 1
+
+    logging.info(f"Number of contigs originally: {original_count}")
+    logging.info(f"Removed {removed_count} contigs below 2500 bps")
+    
+    return 
+
+
+def download_plant_marine(name, reads, samples, OUTDIR_TMP_DATASET):
 
     if name == "marine":
         base_url = f"https://frl.publisso.de/data/frl:6425521/{name}/{reads}_read/"
@@ -96,21 +115,45 @@ def download_plant_marine(name, reads, samples, OUTDIR_DATASET, OUTDIR_TMP_DATAS
             contig_file_output = os.path.join(
                 OUTDIR_TMP_DATASET, f"{sample}_contigs.fasta"
             )
-            with gzip.open(contig_file_input, "rb") as f_in, open(
-                contig_file_output, "wb"
-            ) as f_out:
-                shutil.copyfileobj(f_in, f_out)
+            filter_write_and_log_contigs(contig_file_input, contig_file_output, min_length=2500)
             shutil.rmtree(os.path.join(OUTDIR_TMP_DATASET, "simulation_short_read"))
             os.remove(contig_tar)
 
 
-def download_human(name, reads, samples, OUTDIR_DATASET, OUTDIR_TMP_DATASET): ...
+def download_human(name, samples, OUTDIR_TMP_DATASET): 
+    
+    if name in ["airways", "skin", "urogenital"]
+        base_url = f"https://frl.publisso.de/data/frl:6425518/airskinurogenital/"
+        
+    elif name in ["oral", "gastro"]:
+        base_url = f"https://frl.publisso.de/data/frl:6425518/gastrooral/"
+        
+    for sample in samples:
+        
+        try:
+            sample_tar_url = f"{base_url}sample_{sample}.tar.gz"
+            sample_tar = os.path.join(OUTDIR_TMP_DATASET, f"{sample}.tar.gz")
+            subprocess.run(
+                [
+                    "wget",
+                    sample_tar_url,
+                    "-O",
+                    sample_tar,
+                ],
+                check=True,
+            )
+        except subprocess.CalledProcessError as e:
+                print(f"Error downloading file: {e}")
+        with tarfile.open(sample_tar, "r:gz") as tar:
+            tar.extractall(path=OUTDIR_TMP_DATASET)
+        
+
+    
 
 
 def main(dataset, samples):
     logging.info(f"---------- {dataset} ----------")
 
-    OUTDIR_DATASET = os.path.join(OUTDIR, dataset)
     OUTDIR_TMP_DATASET = os.path.join(OUTDIR_TMP, dataset)
     if os.path.exists(OUTDIR_TMP_DATASET):
         shutil.rmtree(OUTDIR_TMP_DATASET)
@@ -118,10 +161,10 @@ def main(dataset, samples):
     name, reads = dataset.split("_")
 
     if name in HUMAN_DATASETS:
-        download_human(name, reads, samples, OUTDIR_DATASET, OUTDIR_TMP_DATASET)
+        download_human(name, reads, samples, OUTDIR_TMP_DATASET)
 
     else:
-        download_plant_marine(name, reads, samples, OUTDIR_DATASET, OUTDIR_TMP_DATASET)
+        download_plant_marine(name, reads, samples, OUTDIR_TMP_DATASET)
 
 
 def add_arguments() -> ArgumentParser:
