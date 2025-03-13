@@ -63,18 +63,21 @@ def download_plant_marine(name, reads, samples, OUTDIR_DATASET, OUTDIR_TMP_DATAS
         # response_contig = requests.get(sample_contig_url)
 
         try:
+            reads_tar = os.path.join(OUTDIR_TMP_DATASET, f"{sample}_reads.tar.gz")
             subprocess.run(
                 [
                     "wget",
                     sample_read_url,
                     "-O",
-                    os.path.join(OUTDIR_TMP_DATASET, f"{sample}_reads.tar.gz"),
+                    reads_tar,
                 ],
                 check=True,
             )
             print(f"Downloaded Fastq:")
         except subprocess.CalledProcessError as e:
             print(f"Error downloading file: {e}")
+        with tarfile.open(reads_tar, "r:gz") as tar:
+            tar.extractall(path=OUTDIR_TMP_DATASET)
 
         # if response_read.status_code == 200:
         #     print("si")
