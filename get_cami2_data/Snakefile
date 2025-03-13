@@ -10,18 +10,15 @@ with open(os.path.join(CONFIG, "cami2_datasets.yml"), "r") as f:
     datasets_config = yaml.safe_load(f)
 
 ALL_DATASETS = [d["name"] for d in datasets_config["datasets"]]
-
-# Get DATASET from command-line argument or default to "all"
 DATASET = config.get("DATASET", "all")
 DATASETS = ALL_DATASETS if DATASET == "all" else [DATASET]
 
-# Define samples for each dataset
-SAMPLES = {
-    'airways_short': ['4', '27'],
-    'marine_short': ['0'],
-    'gastro_short': ['12', '34'],
-}
-        
+
+DATASET = config.get("DATASET", "all")
+DATASETS = [d["name"] for d in datasets_config["datasets"]]
+DATASETS = DATASETS if DATASET == "all" else [DATASET]
+SAMPLES = {d["name"]: d.get("samples", []) for d in datasets_config["datasets"]}
+    
 
 for dataset in DATASETS:
 
@@ -35,6 +32,7 @@ for dataset in DATASETS:
             expand(os.path.join(OUTDIR, "{dataset}", "bam_files/{sample}_sorted.bam"),
             dataset=DATASETS,
             sample=[sample for dataset in DATASETS for sample in SAMPLES.get(dataset, [])])
+
 
     rule download:
         output:
@@ -61,20 +59,20 @@ for dataset in DATASETS:
             """
 
 
-    rule alignment:
-        input:
-            read=os.path.join(OUTDIR_TMP, dataset, "{sample}_reads.fq.gz"),
-            catalogue=os.path.join(OUTDIR, dataset, "catalogue.fna.gz")
-        output:
-            os.path.join(OUTDIR, dataset, "bam_files/{sample}_sorted.bam")
-        threads:
-            8
-        conda:
-            "cami2_environment.yml"
-        shell:
-            """
-            strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
-            """
+    # rule alignment:
+    #     input:
+    #         read=os.path.join(OUTDIR_TMP, dataset, "{sample}_reads.fq.gz"),
+    #         catalogue=os.path.join(OUTDIR, dataset, "catalogue.fna.gz")
+    #     output:
+    #         os.path.join(OUTDIR, dataset, "bam_files/{sample}_sorted.bam")
+    #     threads:
+    #         24
+    #     conda:
+    #         "cami2_environment.yml"
+    #     shell:
+    #         """
+    #         strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
+    #         """
 
     
 
