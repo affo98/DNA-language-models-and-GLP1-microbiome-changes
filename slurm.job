@@ -8,9 +8,10 @@
 #SBATCH --partition=scavenge    # Run on either the scavenge queue
 
 module load Anaconda3
+source activate base
 conda env create -f get_cami2_data/cami2_environment.yml
 conda init zsh
 conda activate cami2_environment
 
-srun snakemake --snakefile get_cami2_data/Snakefile --config DATASET=marine_short
+#srun snakemake --snakefile get_cami2_data/Snakefile --config DATASET=marine_short
 
