@@ -1,0 +1,4 @@
+data/*
+ngs_pipeline/src/databases/*
+.DS_Store
+get_conda.sh
