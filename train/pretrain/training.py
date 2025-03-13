@@ -4,6 +4,10 @@ import torch
 import torch.nn as nn
 import torch.distributed as dist
 from tqdm import tqdm
+import pynvml
+import wandb
+
+pynvml.nvmlInit()
 
 class Trainer(nn.Module):
     def __init__(self, model, tokenizer, criterion, optimizer, dataloaders_dict, sampler, args):
@@ -18,6 +22,16 @@ class Trainer(nn.Module):
         self.val_sampler = sampler['val']
         self.gstep = 0
         self.criterion = criterion
+    
+    def log_gpu_stats():
+        handle = pynvml.nvmlDeviceGetHandleByIndex(0)  
+        util = pynvml.nvmlDeviceGetUtilizationRates(handle)
+        mem_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
+        return {
+            "gpu_utilization": util.gpu, 
+            "memory_used_MB": mem_info.used / (1024 * 1024),
+            "memory_total_MB": mem_info.total / (1024 * 1024)
+        }
 
     def get_batch_token(self, dna_seq):
         max_length = self.args.max_length

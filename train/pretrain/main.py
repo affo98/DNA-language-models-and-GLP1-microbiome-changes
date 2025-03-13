@@ -17,6 +17,7 @@ from utils.losses import HMLC
 import builtins
 import torch.backends.cudnn as cudnn
 from dataloader.hierarchical_dataset import load_deep_genome_hierarchical
+import wandb
 
 def run(args):
     args.resPath = setup_path(args)
@@ -31,6 +32,9 @@ def run(args):
 def main_worker(gpu, ngpus_per_node, args):
     print("GPU in main worker is {}".format(gpu))
     args.gpu = gpu
+
+    if args.gpu == 0:
+        wandb.init(project="your_project_name", config=vars(args))
 
     # suppress printing if not master
     if args.gpu != 0:
@@ -51,6 +55,7 @@ def main_worker(gpu, ngpus_per_node, args):
     trainer = Trainer(model, tokenizer, criterion, optimizer, dataloaders_dict, sampler, args)
     trainer.train()
     trainer.val()
+    wandb.finish()
 
         
             
