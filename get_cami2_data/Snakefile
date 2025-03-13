@@ -28,10 +28,10 @@ for dataset in DATASETS:
         input:
             expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_contigs.fasta"), sample=SAMPLES.get(dataset, [])),
             expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_reads.fq.gz"), sample=SAMPLES.get(dataset, [])),
-            os.path.join(OUTDIR, dataset, "catalogue.fna.gz"),
-            expand(os.path.join(OUTDIR, "{dataset}", "bam_files/{sample}_sorted.bam"),
-            dataset=DATASETS,
-            sample=[sample for dataset in DATASETS for sample in SAMPLES.get(dataset, [])])
+            #os.path.join(OUTDIR, dataset, "catalogue.fna.gz"),
+            #expand(os.path.join(OUTDIR, "{dataset}", "bam_files/{sample}_sorted.bam"),
+            #dataset=DATASETS,
+            #sample=[sample for dataset in DATASETS for sample in SAMPLES.get(dataset, [])])
 
 
     rule download:
