@@ -150,6 +150,26 @@ def download_human(name, samples, OUTDIR_TMP_DATASET):
         with tarfile.open(sample_tar, "r:gz") as tar:
             tar.extractall(path=OUTDIR_TMP_DATASET)
 
+        # reads
+        read_file = find_file_in_subdirectories(
+            OUTDIR_TMP_DATASET, f"anonymous_reads.fq.gz"
+        )
+        read_file_output = os.path.join(OUTDIR_TMP_DATASET, f"{sample}_reads.fq.gz")
+        shutil.copy(read_file, read_file_output)
+
+        # contigs
+        contig_file_input = find_file_in_subdirectories(
+            OUTDIR_TMP_DATASET, "anonymous_gsa.fasta.gz"
+        )
+        contig_file_output = os.path.join(OUTDIR_TMP_DATASET, f"{sample}_contigs.fasta")
+        filter_write_and_log_contigs(
+            contig_file_input, contig_file_output, min_length=2000
+        )
+
+        tar_dir = [d.name for d in OUTDIR_TMP_DATASET.iterdir() if d.is_dir()][0]
+        shutil.rmtree(os.path.join(OUTDIR_TMP_DATASET, tar_dir))
+        os.remove(sample_tar)
+
 
 def main(dataset, samples):
 
