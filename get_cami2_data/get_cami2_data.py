@@ -56,8 +56,8 @@ def filter_write_and_log_contigs(input_file, output_file, min_length=2500):
 
     logging.info(f"Number of contigs originally: {original_count}")
     logging.info(f"Removed {removed_count} contigs below 2500 bps")
-    
-    return 
+
+    return
 
 
 def download_plant_marine(name, reads, samples, OUTDIR_TMP_DATASET):
@@ -115,21 +115,23 @@ def download_plant_marine(name, reads, samples, OUTDIR_TMP_DATASET):
             contig_file_output = os.path.join(
                 OUTDIR_TMP_DATASET, f"{sample}_contigs.fasta"
             )
-            filter_write_and_log_contigs(contig_file_input, contig_file_output, min_length=2500)
+            filter_write_and_log_contigs(
+                contig_file_input, contig_file_output, min_length=2500
+            )
             shutil.rmtree(os.path.join(OUTDIR_TMP_DATASET, "simulation_short_read"))
             os.remove(contig_tar)
 
 
-def download_human(name, samples, OUTDIR_TMP_DATASET): 
-    
-    if name in ["airways", "skin", "urogenital"]
+def download_human(name, samples, OUTDIR_TMP_DATASET):
+
+    if name in ["airways", "skin", "urogenital"]:
         base_url = f"https://frl.publisso.de/data/frl:6425518/airskinurogenital/"
-        
+
     elif name in ["oral", "gastro"]:
         base_url = f"https://frl.publisso.de/data/frl:6425518/gastrooral/"
-        
+
     for sample in samples:
-        
+
         try:
             sample_tar_url = f"{base_url}sample_{sample}.tar.gz"
             sample_tar = os.path.join(OUTDIR_TMP_DATASET, f"{sample}.tar.gz")
@@ -143,12 +145,9 @@ def download_human(name, samples, OUTDIR_TMP_DATASET):
                 check=True,
             )
         except subprocess.CalledProcessError as e:
-                print(f"Error downloading file: {e}")
+            print(f"Error downloading file: {e}")
         with tarfile.open(sample_tar, "r:gz") as tar:
             tar.extractall(path=OUTDIR_TMP_DATASET)
-        
-
-    
 
 
 def main(dataset, samples):
