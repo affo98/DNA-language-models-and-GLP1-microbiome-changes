@@ -107,7 +107,7 @@ def download_plant_marine(name, reads, samples, OUTDIR_DATASET, OUTDIR_TMP_DATAS
 def download_human(name, reads, samples, OUTDIR_DATASET, OUTDIR_TMP_DATASET): ...
 
 
-def main(output_contigs, output_reads, dataset, samples):
+def main(dataset, samples):
     logging.info(f"---------- {dataset} ----------")
 
     OUTDIR_DATASET = os.path.join(OUTDIR, dataset)
@@ -127,24 +127,20 @@ def main(output_contigs, output_reads, dataset, samples):
 def add_arguments() -> ArgumentParser:
     parser = ArgumentParser()
 
-    parser.add_argument("output_contigs", help="Path to save the contigs file")
-    parser.add_argument("output_reads", help="Path to save the reads file")
     parser.add_argument("dataset", help="Dataset name")
     parser.add_argument("samples", nargs="+", help="Samples")
     args = parser.parse_args()
-    output_contigs = args.output_contigs
-    output_reads = args.output_reads
     dataset = args.dataset
     samples = args.samples
 
-    return output_contigs, output_reads, dataset, samples
+    return dataset, samples
 
 
 if __name__ == "__main__":
 
-    output_contigs, output_reads, dataset, samples = add_arguments()
+    dataset, samples = add_arguments()
 
     print(dataset)
     print(samples)
 
-    main(output_contigs, output_reads, dataset, samples)
+    main(dataset, samples)
