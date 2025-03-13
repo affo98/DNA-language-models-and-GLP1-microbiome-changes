@@ -34,7 +34,7 @@ def main_worker(gpu, ngpus_per_node, args):
     args.gpu = gpu
 
     if args.gpu == 0:
-        wandb.init(project="your_project_name", config=vars(args))
+        wandb.init(project="thesis_project", config=vars(args))
 
     # suppress printing if not master
     if args.gpu != 0:
@@ -55,7 +55,8 @@ def main_worker(gpu, ngpus_per_node, args):
     trainer = Trainer(model, tokenizer, criterion, optimizer, dataloaders_dict, sampler, args)
     trainer.train()
     trainer.val()
-    wandb.finish()
+    if args.gpu == 0:
+        wandb.finish()
 
         
             
