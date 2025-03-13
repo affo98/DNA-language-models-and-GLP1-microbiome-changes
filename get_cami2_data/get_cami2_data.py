@@ -5,6 +5,7 @@ import gzip
 import shutil
 import tarfile
 
+import subprocess
 import requests
 
 
@@ -58,16 +59,22 @@ def download_plant_marine(name, reads, samples, OUTDIR_DATASET, OUTDIR_TMP_DATAS
         sample_contig_url = f"{url}sample_{sample}_contigs.tar.gz"
 
         print("get reponse")
-        response_read = requests.get(sample_read_url)
-        response_contig = requests.get(sample_contig_url)
+        # response_read = requests.get(sample_read_url)
+        # response_contig = requests.get(sample_contig_url)
 
-        if response_read.status_code == 200:
-            print("si")
-            read_file = os.path.join(OUTDIR_TMP_DATASET, f"{sample}_reads.tar.gz")
-            with open(read_file, "wb") as handle:
-                handle.write(response_read.content)
-            with tarfile.open(read_file, "r:gz") as tar:
-                tar.extractall(path=OUTDIR_TMP_DATASET)
+        try:
+            subprocess.run(["wget", url, "-O", sample_read_url], check=True)
+            print(f"Downloaded Fastq: {OUTDIR_TMP_DATASET}")
+        except subprocess.CalledProcessError as e:
+            print(f"Error downloading file: {e}")
+
+        # if response_read.status_code == 200:
+        #     print("si")
+        #     read_file = os.path.join(OUTDIR_TMP_DATASET, f"{sample}_reads.tar.gz")
+        #     with open(read_file, "wb") as handle:
+        #         handle.write(response_read.content)
+        #     with tarfile.open(read_file, "r:gz") as tar:
+        #         tar.extractall(path=OUTDIR_TMP_DATASET)
 
         if response_contig.status_code == 200:
             contig_tar = os.path.join(OUTDIR_TMP_DATASET, f"{sample}_contigs.tar.gz")
