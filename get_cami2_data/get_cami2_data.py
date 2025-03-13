@@ -58,6 +58,7 @@ def download_plant_marine(name, reads, samples, OUTDIR_DATASET, OUTDIR_TMP_DATAS
         sample_read_url = f"{url}sample_{sample}_reads.tar.gz"
         sample_contig_url = f"{url}sample_{sample}_contigs.tar.gz"
 
+        # reads
         try:
             reads_tar = os.path.join(OUTDIR_TMP_DATASET, f"{sample}_reads.tar.gz")
             subprocess.run(
@@ -69,7 +70,6 @@ def download_plant_marine(name, reads, samples, OUTDIR_DATASET, OUTDIR_TMP_DATAS
                 ],
                 check=True,
             )
-            print(f"Downloaded Fastq:")
         except subprocess.CalledProcessError as e:
             print(f"Error downloading file: {e}")
         with tarfile.open(reads_tar, "r:gz") as tar:
@@ -79,10 +79,10 @@ def download_plant_marine(name, reads, samples, OUTDIR_DATASET, OUTDIR_TMP_DATAS
         )
         read_file_output = os.path.join(OUTDIR_TMP_DATASET, f"{sample}_reads.fq.gz")
         shutil.copy(read_file, read_file_output)
-
         shutil.rmtree(os.path.join(OUTDIR_TMP_DATASET, "simulation_short_read"))
         os.remove(reads_tar)
 
+        # contigs
         response_contig = requests.get(sample_contig_url)
         if response_contig.status_code == 200:
             contig_tar = os.path.join(OUTDIR_TMP_DATASET, f"{sample}_contigs.tar.gz")

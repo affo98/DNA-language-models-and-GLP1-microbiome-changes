@@ -32,9 +32,9 @@ for dataset in DATASETS:
             expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_contigs.fasta"), sample=SAMPLES.get(dataset, [])),
             expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_reads.fq.gz"), sample=SAMPLES.get(dataset, [])),
             os.path.join(OUTDIR, dataset, "catalogue.fna.gz"),
-            #expand(os.path.join(OUTDIR, "{dataset}", "bam_files/{sample}_sorted.bam"),
-            #dataset=DATASETS,
-            #sample=[sample for dataset in DATASETS for sample in SAMPLES.get(dataset, [])])
+            expand(os.path.join(OUTDIR, "{dataset}", "bam_files/{sample}_sorted.bam"),
+            dataset=DATASETS,
+            sample=[sample for dataset in DATASETS for sample in SAMPLES.get(dataset, [])])
 
     rule download:
         output:
@@ -61,20 +61,20 @@ for dataset in DATASETS:
             """
 
 
-    # rule alignment:
-    #     input:
-    #         read=os.path.join(OUTDIR_TMP, dataset, "{sample}_reads.fq.gz"),
-    #         catalogue=os.path.join(OUTDIR, dataset, "catalogue.fna.gz")
-    #     output:
-    #         os.path.join(OUTDIR, dataset, "bam_files/{sample}_sorted.bam")
-    #     threads:
-    #         8
-    #     conda:
-    #         "cami2_environment.yml"
-    #     shell:
-    #         """
-    #         strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
-    #         """
+    rule alignment:
+        input:
+            read=os.path.join(OUTDIR_TMP, dataset, "{sample}_reads.fq.gz"),
+            catalogue=os.path.join(OUTDIR, dataset, "catalogue.fna.gz")
+        output:
+            os.path.join(OUTDIR, dataset, "bam_files/{sample}_sorted.bam")
+        threads:
+            8
+        conda:
+            "cami2_environment.yml"
+        shell:
+            """
+            strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
+            """
 
     
 
