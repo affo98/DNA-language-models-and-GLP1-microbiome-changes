@@ -58,7 +58,6 @@ def download_plant_marine(name, reads, samples, OUTDIR_DATASET, OUTDIR_TMP_DATAS
         sample_read_url = f"{url}sample_{sample}_reads.tar.gz"
         sample_contig_url = f"{url}sample_{sample}_contigs.tar.gz"
 
-        print("get reponse")
         # response_read = requests.get(sample_read_url)
         # response_contig = requests.get(sample_contig_url)
 
@@ -78,14 +77,16 @@ def download_plant_marine(name, reads, samples, OUTDIR_DATASET, OUTDIR_TMP_DATAS
             print(f"Error downloading file: {e}")
         with tarfile.open(reads_tar, "r:gz") as tar:
             tar.extractall(path=OUTDIR_TMP_DATASET)
+        read_file = find_file_in_subdirectories(
+            OUTDIR_TMP_DATASET, f"anonymous_reads.fq.gz"
+        )
+        read_file_output = os.path.join(
+            OUTDIR_TMP_DATASET, f"{sample}_anonymous_reads.fq.gz"
+        )
+        shutil.copy(read_file, read_file_output)
 
-        # if response_read.status_code == 200:
-        #     print("si")
-        #     read_file = os.path.join(OUTDIR_TMP_DATASET, f"{sample}_reads.tar.gz")
-        #     with open(read_file, "wb") as handle:
-        #         handle.write(response_read.content)
-        #     with tarfile.open(read_file, "r:gz") as tar:
-        #         tar.extractall(path=OUTDIR_TMP_DATASET)
+        shutil.rmtree(os.path.join(OUTDIR_TMP_DATASET, "simulation_short_read"))
+        os.remove(reads_tar)
 
         # if response_contig.status_code == 200:
         #     contig_tar = os.path.join(OUTDIR_TMP_DATASET, f"{sample}_contigs.tar.gz")
