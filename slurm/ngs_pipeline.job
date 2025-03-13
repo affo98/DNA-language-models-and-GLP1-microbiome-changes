@@ -1,15 +1,10 @@
 #!/bin/bash
 #SBATCH --job-name=test_ngs_pipeline  # Name of the job
+#SBATCH --output=job.%j.out 
 #SBATCH --nodes=1                     # Number of nodes
-#SBATCH --ntasks=1                    # Number of tasks (single job)
 #SBATCH --cpus-per-task=24             # Request 24 CPU cores
-#SBATCH --mem=64G                      # Adjust memory as needed
 #SBATCH --time=12:00:00                # Max execution time (adjust if needed)
-#SBATCH --output=logs/%x_%j.out        # Standard output log (%x = job name, %j = job ID)
-#SBATCH --error=logs/%x_%j.err         # Standard error log
-#SBATCH --partition=compute            # Change if needed for your cluster
-#SBATCH --mail-type=END,FAIL           # Email notification on job end/fail
-#SBATCH --mail-user=your@email.com     # Replace with your email
+#SBATCH --partition=cores            
 
 # Load modules
 module load anaconda3
@@ -18,6 +13,14 @@ module load anaconda3
 git clone https://github.com/affo98/DNA-language-models-and-GLP1-microbiome-changes.git
 cd DNA-language-models-and-GLP1-microbiome-changes
 git switch feature/NGS_PIPELINE
+
+echo "Downloading KneadData database..."
+wget https://huttenhower.sph.harvard.edu/kneadData_databases/Homo_sapiens_hg39_T2T_Bowtie2_v0.1.tar.gz
+echo "Unpacking database..."
+tar -xzf Homo_sapiens_hg39_T2T_Bowtie2.tar.gz
+rm Homo_sapiens_hg39_T2T_Bowtie2.tar.gz
+mv bowtie2-index ngs_pipeline/src/databases/bowtie2-index/
+echo "Database moved to ngs_pipeline/src/databases/bowtie2-index"
 
 # Create and activate the Conda environment
 conda env create -f environment.yaml
