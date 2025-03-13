@@ -56,6 +56,7 @@ def filter_write_and_log_contigs(input_file, output_file, min_length=2000):
 
     logging.info(f"Number of contigs originally: {original_count}")
     logging.info(f"Removed {removed_count} contigs below 2500 bps")
+    logging.info(f"Number of contigs: {original_count-removed_count}")
 
     return
 
