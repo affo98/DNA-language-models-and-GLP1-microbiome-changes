@@ -18,13 +18,14 @@ DATASETS = ALL_DATASETS if DATASET == "all" else [DATASET]
 # Define samples for each dataset
 SAMPLES = {
     'airways_short': ['4', '27'],
-    'marine_short': ['1', '5', '8'],
+    'marine_short': ['0', '1'],
     'gastro_short': ['12', '34'],
 }
 
 
 rule all:
     input:
+        expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_gsa.fasta"), sample=SAMPLES.get(dataset, []))
         expand(os.path.join(OUTDIR, "{dataset}", "catalogue.fna.gz"), dataset=DATASETS),
         expand(os.path.join(OUTDIR, "{dataset}", "bam_files/{sample}_sorted.bam"),
         dataset=DATASETS,
@@ -34,10 +35,16 @@ rule all:
 
 for dataset in DATASETS:
 
-    # rule download:
-    #     output:
-
-            
+    rule download:
+        output:
+            contigs=expand(os.path.join(OUTDIR_TMP, dataset, "{sample}anonymous_gsa.fasta"), sample=SAMPLES.get(dataset, []))
+            reads=expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_reads.fq.gz"), sample=SAMPLES.get(dataset, []))
+        conda:
+            "cami2_environment.yml"
+        shell:
+            """
+            python get_cami2_data/get_cami2_data.py {output.contigs} {outputs.reads} {dataset} {" ".join(SAMPLES.get(dataset, []))}
+            """
 
 
     rule concatenate:
@@ -53,40 +60,20 @@ for dataset in DATASETS:
             """
 
 
-    rule alignment:
-        input:
-            read=os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_reads.fq.gz"),
-            catalogue=os.path.join(OUTDIR, dataset, "catalogue.fna.gz")
-        output:
-            os.path.join(OUTDIR, dataset, "bam_files/{sample}_sorted.bam")
-        threads:
-            8
-        conda:
-            "cami2_environment.yml"
-        shell:
-            """
-            strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
-            """
-    
+    # rule alignment:
+    #     input:
+    #         read=os.path.join(OUTDIR_TMP, dataset, "{sample}_reads.fq.gz"),
+    #         catalogue=os.path.join(OUTDIR, dataset, "catalogue.fna.gz")
+    #     output:
+    #         os.path.join(OUTDIR, dataset, "bam_files/{sample}_sorted.bam")
+    #     threads:
+    #         8
+    #     conda:
+    #         "cami2_environment.yml"
+    #     shell:
+    #         """
+    #         strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
+    #         """
 
-
-        
-        # rule alignment:
-        #     input:
-        #         r1=os.path.join(OUTDIR,DATASET, "knead/{sample}/{sample}_1_kneaddata_paired_1.fastq"),
-        #         r2=os.path.join(OUTDIR,DATASET, "knead/{sample}/{sample}_1_kneaddata_paired_2.fastq"),
-        #         contig_catalouge=os.path.join(OUTDIR,DATASET,"global_contig_catalogue.fna.gz")
-        #     output:
-        #         os.path.join(OUTDIR, DATASET, "algn/{sample}_sorted.bam"),
-        #     benchmark:
-        #         "benchmarks/alignment/{sample}.txt"
-        #     threads:
-        #         8
-        #     conda:
-        #         os.path.join(OUTDIR, "envs/strobealign.yaml")
-        #     shell:
-        #         """
-        #         strobealign -t {threads} {input.contig_catalouge} {input.r1} {input.r2} | samtools sort -o {output}
-        #         """
     
 
