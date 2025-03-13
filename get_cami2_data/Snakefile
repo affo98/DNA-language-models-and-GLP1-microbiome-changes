@@ -29,7 +29,7 @@ for dataset in DATASETS:
 
     rule all:
         input:
-            expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_gsa.fasta"), sample=SAMPLES.get(dataset, [])),
+            expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_contigs.fasta"), sample=SAMPLES.get(dataset, [])),
             expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_reads.fq.gz"), sample=SAMPLES.get(dataset, []))
             #expand(os.path.join(OUTDIR, "{dataset}", "bam_files/{sample}_sorted.bam"),
             #dataset=DATASETS,
@@ -37,19 +37,19 @@ for dataset in DATASETS:
 
     rule download:
         output:
-            contigs=expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_gsa.fasta"), sample=SAMPLES.get(dataset, [])),
+            contigs=expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_contigs.fasta"), sample=SAMPLES.get(dataset, [])),
             reads=expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_reads.fq.gz"), sample=SAMPLES.get(dataset, []))
         conda:
             "cami2_environment.yml"
         shell:
             """
-            python get_cami2_data/get_cami2_data.py a b {dataset} {sample_str}
+            python get_cami2_data/get_cami2_data.py {dataset} {sample_str}
             """
 
 
     rule concatenate:
         input:
-            expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_anonymous_gsa.fasta"), sample=SAMPLES.get(dataset, []))
+            expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_contigs.fasta"), sample=SAMPLES.get(dataset, []))
         output:
             os.path.join(OUTDIR, dataset, "catalogue.fna.gz")
         conda:

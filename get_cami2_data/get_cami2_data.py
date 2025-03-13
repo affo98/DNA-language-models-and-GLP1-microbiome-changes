@@ -58,9 +58,6 @@ def download_plant_marine(name, reads, samples, OUTDIR_DATASET, OUTDIR_TMP_DATAS
         sample_read_url = f"{url}sample_{sample}_reads.tar.gz"
         sample_contig_url = f"{url}sample_{sample}_contigs.tar.gz"
 
-        # response_read = requests.get(sample_read_url)
-        # response_contig = requests.get(sample_contig_url)
-
         try:
             reads_tar = os.path.join(OUTDIR_TMP_DATASET, f"{sample}_reads.tar.gz")
             subprocess.run(
@@ -80,32 +77,31 @@ def download_plant_marine(name, reads, samples, OUTDIR_DATASET, OUTDIR_TMP_DATAS
         read_file = find_file_in_subdirectories(
             OUTDIR_TMP_DATASET, f"anonymous_reads.fq.gz"
         )
-        read_file_output = os.path.join(
-            OUTDIR_TMP_DATASET, f"{sample}_anonymous_reads.fq.gz"
-        )
+        read_file_output = os.path.join(OUTDIR_TMP_DATASET, f"{sample}_reads.fq.gz")
         shutil.copy(read_file, read_file_output)
 
         shutil.rmtree(os.path.join(OUTDIR_TMP_DATASET, "simulation_short_read"))
         os.remove(reads_tar)
 
-        # if response_contig.status_code == 200:
-        #     contig_tar = os.path.join(OUTDIR_TMP_DATASET, f"{sample}_contigs.tar.gz")
-        #     with open(contig_tar, "wb") as handle:
-        #         handle.write(response_contig.content)
-        #     with tarfile.open(contig_tar, "r:gz") as tar:
-        #         tar.extractall(path=OUTDIR_TMP_DATASET)
-        #     contig_file_input = find_file_in_subdirectories(
-        #         OUTDIR_TMP_DATASET, "anonymous_gsa.fasta.gz"
-        #     )
-        #     contig_file_output = os.path.join(
-        #         OUTDIR_TMP_DATASET, f"{sample}_anonymous_gsa.fasta"
-        #     )
-        #     with gzip.open(contig_file_input, "rb") as f_in, open(
-        #         contig_file_output, "wb"
-        #     ) as f_out:
-        #         shutil.copyfileobj(f_in, f_out)
-        #     shutil.rmtree(os.path.join(OUTDIR_TMP_DATASET, "simulation_short_read"))
-        #     os.remove(contig_tar)
+        response_contig = requests.get(sample_contig_url)
+        if response_contig.status_code == 200:
+            contig_tar = os.path.join(OUTDIR_TMP_DATASET, f"{sample}_contigs.tar.gz")
+            with open(contig_tar, "wb") as handle:
+                handle.write(response_contig.content)
+            with tarfile.open(contig_tar, "r:gz") as tar:
+                tar.extractall(path=OUTDIR_TMP_DATASET)
+            contig_file_input = find_file_in_subdirectories(
+                OUTDIR_TMP_DATASET, "anonymous_gsa.fasta.gz"
+            )
+            contig_file_output = os.path.join(
+                OUTDIR_TMP_DATASET, f"{sample}_contigs.fasta"
+            )
+            with gzip.open(contig_file_input, "rb") as f_in, open(
+                contig_file_output, "wb"
+            ) as f_out:
+                shutil.copyfileobj(f_in, f_out)
+            shutil.rmtree(os.path.join(OUTDIR_TMP_DATASET, "simulation_short_read"))
+            os.remove(contig_tar)
 
 
 def download_human(name, reads, samples, OUTDIR_DATASET, OUTDIR_TMP_DATASET): ...
