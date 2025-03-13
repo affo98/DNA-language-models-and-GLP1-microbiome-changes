@@ -207,7 +207,7 @@ if __name__ == "__main__":
 
     dataset, samples = add_arguments()
 
-    print(dataset)
-    print(samples)
+    print("Arguments passed:")
+    print(f"{dataset}: {samples}")
 
     main(dataset, samples)

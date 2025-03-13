@@ -59,20 +59,20 @@ for dataset in DATASETS:
             """
 
 
-    # rule alignment:
-    #     input:
-    #         read=os.path.join(OUTDIR_TMP, dataset, "{sample}_reads.fq.gz"),
-    #         catalogue=os.path.join(OUTDIR, dataset, "catalogue.fna.gz")
-    #     output:
-    #         os.path.join(OUTDIR, dataset, "{sample}_sorted.bam")
-    #     threads:
-    #         24
-    #     conda:
-    #         "cami2_environment.yml"
-    #     shell:
-    #         """
-    #         strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
-    #         """
+    rule alignment:
+        input:
+            read=os.path.join(OUTDIR_TMP, dataset, "{sample}_reads.fq.gz"),
+            catalogue=os.path.join(OUTDIR, dataset, "catalogue.fna.gz")
+        output:
+            os.path.join(OUTDIR, dataset, "{sample}_sorted.bam")
+        threads:
+            24
+        conda:
+            "cami2_environment.yml"
+        shell:
+            """
+            strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
+            """
 
     
 
