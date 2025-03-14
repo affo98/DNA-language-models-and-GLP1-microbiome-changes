@@ -34,7 +34,7 @@ for dataset in DATASETS:
 
     sample_str = ' '.join(SAMPLES.get(dataset, []))
 
-   rule_name = f"download_{dataset}"  # Generate a unique rule name for each dataset
+    rule_name = f"download_{dataset}"  # Generate a unique rule name for each dataset
     
     rule download_name:
         name: rule_name 
