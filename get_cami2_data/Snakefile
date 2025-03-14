@@ -20,8 +20,8 @@ sample_str = ' '.join(SAMPLES.get(DATASET, []))
 rule all:
     input:
         expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_contigs.fasta"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
-        expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"),  sample=[sample for sample in SAMPLES.get(DATASET, [])])
-        os.path.join(OUTDIR, dataset, "catalogue.fna.gz"),
+        expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"),  sample=[sample for sample in SAMPLES.get(DATASET, [])]),
+        os.path.join(OUTDIR, dataset, "catalogue.fna.gz")
         #expand(os.path.join(OUTDIR, "{dataset}", "{sample}_sorted.bam"),
         #dataset=DATASETS,
         #sample=[sample for dataset in DATASETS for sample in SAMPLES.get(dataset, [])]) ? include or no?
