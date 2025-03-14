@@ -138,19 +138,19 @@ def download_human(name, samples, OUTDIR_TMP_DATASET):
         try:
             sample_tar_url = f"{base_url}sample_{sample}.tar.gz"
             sample_tar = os.path.join(OUTDIR_TMP_DATASET, f"{sample}.tar.gz")
-            # subprocess.run(
-            #     [
-            #         "wget",
-            #         sample_tar_url,
-            #         "-O",
-            #         sample_tar,
-            #     ],
-            #     check=True,
-            # )
+            subprocess.run(
+                [
+                    "wget",
+                    sample_tar_url,
+                    "-O",
+                    sample_tar,
+                ],
+                check=True,
+            )
         except subprocess.CalledProcessError as e:
             print(f"Error downloading file: {e}")
-        # with tarfile.open(sample_tar, "r:gz") as tar:
-        #     tar.extractall(path=OUTDIR_TMP_DATASET)
+        with tarfile.open(sample_tar, "r:gz") as tar:
+            tar.extractall(path=OUTDIR_TMP_DATASET)
 
         # reads
         read_file_name = (
@@ -181,9 +181,9 @@ def main(dataset, samples):
     logging.info(f"---------- {dataset} ----------")
 
     OUTDIR_TMP_DATASET = os.path.join(OUTDIR_TMP, dataset)
-    # if os.path.exists(OUTDIR_TMP_DATASET):
-    #    shutil.rmtree(OUTDIR_TMP_DATASET)
-    # os.makedirs(OUTDIR_TMP_DATASET)
+    if os.path.exists(OUTDIR_TMP_DATASET):
+        shutil.rmtree(OUTDIR_TMP_DATASET)
+    os.makedirs(OUTDIR_TMP_DATASET)
     name, reads = dataset.split("_")
 
     if name in HUMAN_DATASETS:
