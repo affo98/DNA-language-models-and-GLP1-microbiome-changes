@@ -45,7 +45,7 @@ rule download_name:
         "cami2_environment.yml"
     shell:
         """
-        python get_cami2_data/get_cami2_data.py {dataset} {wildcards.' '.join(SAMPLES.get(dataset, []))}
+        python get_cami2_data/get_cami2_data.py {"{dataset}"} {wildcards.' '.join(SAMPLES.get(dataset, []))}
         """
 
 
