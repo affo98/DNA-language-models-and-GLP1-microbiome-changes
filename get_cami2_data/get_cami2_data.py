@@ -39,7 +39,8 @@ def setup_logfile(path_to_logfile: str):
 
 def find_file_in_subdirectories(root_dir, filename):
     for root, _, files in os.walk(root_dir):
-        print(os.path.join(root, files))
+        print(files)
+        # print(os.path.join(root, files))
         if filename in files:
             return os.path.join(root, filename)
         elif ".gz" in filename:
