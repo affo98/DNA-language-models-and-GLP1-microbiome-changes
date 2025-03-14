@@ -39,8 +39,8 @@ rule all:
 rule download_name:
     #name: rule_name 
     output:
-        contigs=expand(os.path.join(OUTDIR_TMP, "{dataset}", "{sample}_contigs.fasta"), dataset=DATASETS, sample=SAMPLES.get("{dataset}", [])),
-        reads=expand(os.path.join(OUTDIR_TMP, "{dataset}", "{sample}_reads.fq.gz"), dataset=DATASETS, sample=SAMPLES.get("{dataset}", []))
+        contigs=expand(os.path.join(OUTDIR_TMP, "{dataset}", "{sample}_contigs.fasta"), dataset=DATASETS, sample=[sample for dataset in DATASETS for sample in SAMPLES.get(dataset, [])]),
+        reads=expand(os.path.join(OUTDIR_TMP, "{dataset}", "{sample}_reads.fq.gz"), dataset=DATASETS, sample=[sample for dataset in DATASETS for sample in SAMPLES.get(dataset, [])])
     conda:
         "cami2_environment.yml"
     shell:
