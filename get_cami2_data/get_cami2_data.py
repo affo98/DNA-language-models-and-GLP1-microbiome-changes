@@ -153,10 +153,16 @@ def download_human(name, samples, OUTDIR_TMP_DATASET):
             tar.extractall(path=OUTDIR_TMP_DATASET)
 
         # reads
-        read_file_name = (
-            "anonymous_reads.fq.gz" if name in ["airways"] else "anonymous_reads.fq"
+        # read_file_name = (
+        #     "anonymous_reads.fq.gz" if name in ["airways"] else "anonymous_reads.fq"
+        # )
+        read_file = find_file_in_subdirectories(
+            OUTDIR_TMP_DATASET, "anonymous_reads.fq.gz"
         )
-        read_file = find_file_in_subdirectories(OUTDIR_TMP_DATASET, read_file_name)
+        if not read_file:
+            read_file = find_file_in_subdirectories(
+                OUTDIR_TMP_DATASET, "anonymous_reads.fq"
+            )
         print(f"READ FILE: {read_file}")
         read_file_output = os.path.join(OUTDIR_TMP_DATASET, f"{sample}_reads.fq.gz")
         shutil.copy(read_file, read_file_output)
