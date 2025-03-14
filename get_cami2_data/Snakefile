@@ -34,7 +34,10 @@ for dataset in DATASETS:
 
     sample_str = ' '.join(SAMPLES.get(dataset, []))
 
-    rule download:
+   rule_name = f"download_{dataset}"  # Generate a unique rule name for each dataset
+    
+    rule download_name:
+        name: rule_name 
         output:
             contigs=expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_contigs.fasta"), sample=SAMPLES.get(dataset, [])),
             reads=expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_reads.fq.gz"), sample=SAMPLES.get(dataset, []))
