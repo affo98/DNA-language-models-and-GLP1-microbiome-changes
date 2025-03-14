@@ -41,6 +41,9 @@ def find_file_in_subdirectories(root_dir, filename):
     for root, _, files in os.walk(root_dir):
         if filename in files:
             return os.path.join(root, filename)
+        elif ".gz" in filename:
+            filename = filename[:-3]
+            return os.path.join(root, filename)
     return None
 
 
@@ -138,24 +141,25 @@ def download_human(name, samples, OUTDIR_TMP_DATASET):
         try:
             sample_tar_url = f"{base_url}sample_{sample}.tar.gz"
             sample_tar = os.path.join(OUTDIR_TMP_DATASET, f"{sample}.tar.gz")
-            subprocess.run(
-                [
-                    "wget",
-                    sample_tar_url,
-                    "-O",
-                    sample_tar,
-                ],
-                check=True,
-            )
+            # subprocess.run(
+            #     [
+            #         "wget",
+            #         sample_tar_url,
+            #         "-O",
+            #         sample_tar,
+            #     ],
+            #     check=True,
+            # )
         except subprocess.CalledProcessError as e:
             print(f"Error downloading file: {e}")
-        with tarfile.open(sample_tar, "r:gz") as tar:
-            tar.extractall(path=OUTDIR_TMP_DATASET)
+        # with tarfile.open(sample_tar, "r:gz") as tar:
+        #    tar.extractall(path=OUTDIR_TMP_DATASET)
 
         # reads
         read_file = find_file_in_subdirectories(
             OUTDIR_TMP_DATASET, f"anonymous_reads.fq.gz"
         )
+        print(read_file)
         read_file_output = os.path.join(OUTDIR_TMP_DATASET, f"{sample}_reads.fq.gz")
         shutil.copy(read_file, read_file_output)
 
