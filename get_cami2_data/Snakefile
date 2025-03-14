@@ -30,23 +30,23 @@ rule all:
         #sample=[sample for dataset in DATASETS for sample in SAMPLES.get(dataset, [])]) ? include or no?
 
 
-for dataset in DATASETS:
+#for dataset in DATASETS:
 
-    sample_str = ' '.join(SAMPLES.get(dataset, []))
+#sample_str = ' '.join(SAMPLES.get(dataset, []))
 
-    rule_name = f"download_{dataset}"  # Generate a unique rule name for each dataset
-    
-    rule download_name:
-        name: rule_name 
-        output:
-            contigs=expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_contigs.fasta"), sample=SAMPLES.get(dataset, [])),
-            reads=expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_reads.fq.gz"), sample=SAMPLES.get(dataset, []))
-        conda:
-            "cami2_environment.yml"
-        shell:
-            """
-            python get_cami2_data/get_cami2_data.py {dataset} {sample_str}
-            """
+#rule_name = f"download_{dataset}"  # Generate a unique rule name for each dataset
+
+rule download_name:
+    #name: rule_name 
+    output:
+        contigs=expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_contigs.fasta"), dataset=DATASETS, sample=SAMPLES.get(dataset, [])),
+        reads=expand(os.path.join(OUTDIR_TMP, dataset, "{sample}_reads.fq.gz"), dataset=DATASETS, sample=SAMPLES.get(dataset, []))
+    conda:
+        "cami2_environment.yml"
+    shell:
+        """
+        python get_cami2_data/get_cami2_data.py {dataset} {wildcards.' '.join(SAMPLES.get(dataset, []))}
+        """
 
 
     # rule concatenate:
