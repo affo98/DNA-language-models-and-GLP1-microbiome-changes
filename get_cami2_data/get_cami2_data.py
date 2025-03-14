@@ -41,6 +41,9 @@ def find_file_in_subdirectories(root_dir, filename):
     for root, _, files in os.walk(root_dir):
         if filename in files:
             return os.path.join(root, filename)
+        elif ".gz" in filename:
+            filename = filename[:-3]
+            return os.path.join(root, filename)
     return None
 
 
@@ -156,6 +159,7 @@ def download_human(name, samples, OUTDIR_TMP_DATASET):
         read_file = find_file_in_subdirectories(
             OUTDIR_TMP_DATASET, f"anonymous_reads.fq.gz"
         )
+        print(read_file)
         read_file_output = os.path.join(OUTDIR_TMP_DATASET, f"{sample}_reads.fq.gz")
         shutil.copy(read_file, read_file_output)
 
