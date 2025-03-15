@@ -19,55 +19,53 @@ sample_str = ' '.join(SAMPLES.get(DATASET, []))
 
 rule all:
     input:
-        expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_contigs.fasta"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
-        expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"),  sample=[sample for sample in SAMPLES.get(DATASET, [])]),
-        os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
-        #expand(os.path.join(OUTDIR, "{dataset}", "{sample}_sorted.bam"),
-        #dataset=DATASETS,
-        #sample=[sample for dataset in DATASETS for sample in SAMPLES.get(dataset, [])]) ? include or no?
+        # expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_contigs.fasta"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
+        # expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"),  sample=[sample for sample in SAMPLES.get(DATASET, [])]),
+        # os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
+        expand(os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
 
 
 
-rule download_name:
-    output:
-        contigs=expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, [])),
-        reads=expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"), sample=SAMPLES.get(DATASET, []))
-    conda:
-        "cami2_environment.yml"
-    shell:
-        """
-        python get_cami2_data/get_cami2_data.py {DATASET} {sample_str}
-        """
+# rule download_name:
+#     output:
+#         contigs=expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, [])),
+#         reads=expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"), sample=SAMPLES.get(DATASET, []))
+#     conda:
+#         "cami2_environment.yml"
+#     shell:
+#         """
+#         python get_cami2_data/get_cami2_data.py {DATASET} {sample_str}
+#         """
 
 
 
-rule concatenate:
+# rule concatenate:
+#     input:
+#         expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
+#     output:
+#         os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
+#     conda:
+#         "cami2_environment.yml"
+#     shell:
+#         """
+#         python src/concatenate.py {output} {input}
+#         """
+
+
+rule alignment:
     input:
-        expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
+        read=os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz", sample=SAMPLES.get(DATASET, []))),
+        catalogue=os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
     output:
-        os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
+        os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam", sample=SAMPLES.get(DATASET, [])))
+    threads:
+        96
     conda:
         "cami2_environment.yml"
     shell:
         """
-        python src/concatenate.py {output} {input}
+        strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
         """
-
-
-    # rule alignment:
-    #     input:
-    #         read=os.path.join(OUTDIR_TMP, dataset, "{sample}_reads.fq.gz"),
-    #         catalogue=os.path.join(OUTDIR, dataset, "catalogue.fna.gz")
-    #     output:
-    #         os.path.join(OUTDIR, dataset, "{sample}_sorted.bam")
-    #     threads:
-    #         96
-    #     conda:
-    #         "cami2_environment.yml"
-    #     shell:
-    #         """
-    #         strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
-    #         """
 
     
 
