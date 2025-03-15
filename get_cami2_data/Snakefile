@@ -54,7 +54,7 @@ rule all:
 
 rule alignment:
     input:
-        read=expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz", sample=SAMPLES.get(DATASET, [])))),
+        read=expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz", sample=SAMPLES.get(DATASET, []))),
         catalogue=os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
     output:
         os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam", sample=SAMPLES.get(DATASET, []))
