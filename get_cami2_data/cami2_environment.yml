@@ -9,7 +9,7 @@ dependencies:
   - pyyaml
   - samtools
   - strobealign
-  - semibin
+  - semibin=2.1.0
   - pip
   - pip:
       - vamb
