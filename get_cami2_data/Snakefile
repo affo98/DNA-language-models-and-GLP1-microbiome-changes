@@ -54,10 +54,10 @@ rule all:
 
 rule alignment:
     input:
-        read=expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"), sample=SAMPLES.get(DATASET, [])),
+        read=os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"),
         catalogue=os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
     output:
-        expand(os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+        os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam")
     threads:
         96
     conda:
