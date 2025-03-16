@@ -57,7 +57,7 @@ def filter_write_and_log_contigs(input_file, output_file, min_length=2000):
                 removed_count += 1
 
     logging.info(f"Number of contigs originally: {original_count}")
-    logging.info(f"Removed {removed_count} contigs below 2500 bps")
+    logging.info(f"Removed {removed_count} contigs below {min_length} bps")
     logging.info(f"Number of contigs: {original_count-removed_count}")
 
     return
@@ -153,9 +153,6 @@ def download_human(name, samples, OUTDIR_TMP_DATASET):
             tar.extractall(path=OUTDIR_TMP_DATASET)
 
         # reads
-        # read_file_name = (
-        #     "anonymous_reads.fq.gz" if name in ["airways"] else "anonymous_reads.fq"
-        # )
         read_file = find_file_in_subdirectories(
             OUTDIR_TMP_DATASET, "anonymous_reads.fq.gz"
         )
@@ -163,7 +160,6 @@ def download_human(name, samples, OUTDIR_TMP_DATASET):
             read_file = find_file_in_subdirectories(
                 OUTDIR_TMP_DATASET, "anonymous_reads.fq"
             )
-        print(f"READ FILE: {read_file}")
         read_file_output = os.path.join(OUTDIR_TMP_DATASET, f"{sample}_reads.fq.gz")
         shutil.copy(read_file, read_file_output)
 
