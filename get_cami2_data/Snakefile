@@ -93,7 +93,7 @@ rule bam_process_semibin:
     shell:
         """
         samtools view -H {input.bam} | \\
-        sed -E 's/(S[0-9]+)([A-Za-z0-9]+)/\\1:\\2/' | \\
+        sed -E 's/([0-9]+)([A-Za-z0-9]+)/\\1:\\2/' | \\
         samtools reheader - {input.bam} > {output.modified_bam}
         """
 
