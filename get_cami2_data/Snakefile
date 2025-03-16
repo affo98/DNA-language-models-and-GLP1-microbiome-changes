@@ -24,7 +24,7 @@ rule all:
         # os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
         #expand(os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
         os.path.join(OUTDIR, DATASET, "semibin/catalogue_semibin.fna")
-        #expand(os.path.join(OUTDIR, DATASET, "semibin/{sample}_sorted.bam"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
+        #expand(os.path.join(OUTDIR, DATASET, "semibin/{sample}_sorted_semibin.bam"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
 
 
 # rule download_name:
@@ -69,6 +69,7 @@ rule all:
 #         """
 
 
+#for some reason does not work in snakemake, so just run manually. Problem; does not put : correctly
 rule concatenate_process_semibin:
     input:
         os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
@@ -78,7 +79,7 @@ rule concatenate_process_semibin:
         "cami2_environment.yml"
     shell:
         """
-        zcat {input} | sed 's/\([0-9]\)\([A-Za-z]\)/\1:\2/' > {output}
+        zcat {input} | sed -E 's/([0-9]+)([A-Za-z])/\1:\2/' > {output} 
         """
 
 
@@ -92,7 +93,7 @@ rule concatenate_process_semibin:
 #     shell:
 #         """
 #         samtools view -H {input.bam} | \
-#         sed 's/\([0-9]\)\([A-Za-z]\\)/\\1:\\2/' | \
+#         sed 's/\([0-9]\)\([A-Za-z]\)/\1:\2/' | \
 #         samtools reheader - {input.bam} > {output.modified_bam}
 #         """
 
