@@ -78,7 +78,7 @@ rule concatenate_process_semibin:
         "cami2_environment.yml"
     shell:
         """
-        zcat {input} | sed 's/\([0-9]\)\([A-Za-z]\)/\1:\2/' | gzip > {output}
+        zcat {input} | sed 's/\([0-9]\)\([A-Za-z]\)/\1:\2/' > {output}
         """
 
 
