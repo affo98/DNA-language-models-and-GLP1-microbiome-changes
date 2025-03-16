@@ -73,7 +73,7 @@ rule concatenate_process_semibin:
     input:
         os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
     output:
-        os.path.join(OUTDIR, DATASET, "semibin/catalogue_semibin.fna.gz")
+        os.path.join(OUTDIR, DATASET, "semibin/catalogue_semibin.fna")
     conda:
         "cami2_environment.yml"
     shell:
