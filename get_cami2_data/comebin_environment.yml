@@ -1,3 +1,4 @@
+name: comebin_environment
 channels:
   - pytorch
   - conda-forge
