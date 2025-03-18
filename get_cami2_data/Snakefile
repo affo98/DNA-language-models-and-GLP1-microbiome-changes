@@ -21,7 +21,6 @@ sample_str = ' '.join(SAMPLES.get(DATASET, []))
 ALL_MODELS  = [d["name"] for d in datasets_config["models"]]
 config_model = config.get("MODEL", "all")
 MODELS = config_model if config_model != 'all' else ALL_MODELS
-print(MODELS)
 
 
 
@@ -47,7 +46,7 @@ rule all:
 
 
         #create fasta bins
-        expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters/{model}_model_clusters.tsv"), model=MODELS)
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters/{model}_model_clusters.tsv")
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{model}_fasta_bins")
 
         #checkm2
