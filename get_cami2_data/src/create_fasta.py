@@ -52,6 +52,9 @@ def byte_iterfasta(filehandle):
     elif not header.startswith(b">"):
         raise ValueError(f"FASTA file is invalid, first line does not begin with '>'")
 
+    elif isinstance(header, bytes):
+        print("yes")
+
 
 with vamb.vambtools.Reader(args.fastapath) as file:
     byte_iterfasta(file)
