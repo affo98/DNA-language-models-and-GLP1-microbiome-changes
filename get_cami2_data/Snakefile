@@ -53,7 +53,7 @@ rule all:
 #         "envs/cami2_processing.yml"
 #     shell:
 #         """
-#         python SRC_DIR/get_cami2_data.py {DATASET} {sample_str}
+#         python {SRC_DIR}/get_cami2_data.py {DATASET} {sample_str}
 #         """
 
 
@@ -67,7 +67,7 @@ rule all:
 #         "envs/vamb.yml"
 #     shell:
 #         """
-#         python SRC_DIR/concatenate.py {output} {input}
+#         python {SRC_DIR}/concatenate.py {output} {input}
 #         """
 
 
@@ -156,7 +156,7 @@ rule create_fasta_bins:
         "envs/checkm2.yml"
     shell:
         """
-        python SRC_DIR/create_fasta.py {input.catalogue} data/cami2/airways_short/vambout/vae_clusters_unsplit.tsv {params.minsize_bins} output
+        python {SRC_DIR}/create_fasta.py {input.catalogue} data/cami2/airways_short/vambout/vae_clusters_unsplit.tsv {params.minsize_bins} output
         """
 
 
