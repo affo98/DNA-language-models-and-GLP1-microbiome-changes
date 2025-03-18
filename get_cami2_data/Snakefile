@@ -133,7 +133,7 @@ rule move_cluster_outputs:
     input:
         model_outputs=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{model}_output"), model=MODELS)
     output:
-        cluster_results=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters/{model}_model_clusters.tsv"), model=MODELS)
+        cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters")
     conda:
         "envs/cami2_processing.yml"
     shell:
