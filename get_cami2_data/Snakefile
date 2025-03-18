@@ -85,7 +85,7 @@ rule concatenate:
 rule alignment:
     input:
         read=os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"),
-        catalogue=os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
     output:
         os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam")
     threads:
