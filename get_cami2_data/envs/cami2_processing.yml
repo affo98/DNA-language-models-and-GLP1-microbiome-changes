@@ -1,4 +1,4 @@
-name: cami2_environment
+name: vamb
 channels:
   - conda-forge
   - bioconda
@@ -11,5 +11,4 @@ dependencies:
   - strobealign
   - pip
   - pip:
-      - vamb
       - Bio

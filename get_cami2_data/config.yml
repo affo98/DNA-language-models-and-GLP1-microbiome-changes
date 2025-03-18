@@ -36,3 +36,8 @@ datasets:
         "19",
         "20",
       ]
+
+models:
+  - name: vamb
+  - name: semibin2
+  - name: comebin

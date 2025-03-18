@@ -2,12 +2,14 @@ import os
 import yaml
 import glob
 
-OUTDIR_TMP = os.path.join(os.getcwd(), "get_cami2_data", "data")
+OUTDIR_RAW = os.path.join(os.getcwd(), "get_cami2_data", "raw_data")
+OUTDIR_PROCESSED = os.path.join(os.getcwd(), "get_cami2_data", "processed_data")
+OUTDIR_MODEL_RESULTS = os.path.join(os.getcwd(), "get_cami2_data", "model_results")
+OUTDIR_CLUSTERS = os.path.join(os.getcwd(), "get_cami2_data", 'clusters')
 SRC_DIR = os.path.join(os.getcdw(), "get_cami2_data", "src")
-OUTDIR = os.path.join(os.getcwd(), "data", "cami2")
-CONFIG = os.path.join(os.getcwd(), "config")
+BASE = os.path.join(os.getcwd(), "get_cami2_data")
 
-with open(os.path.join(CONFIG, "cami2_datasets.yml"), "r") as f:
+with open(os.path.join(BASE, "config.yml"), "r") as f:
     datasets_config = yaml.safe_load(f)
 
 ALL_DATASETS = [d["name"] for d in datasets_config["datasets"]]
@@ -16,82 +18,151 @@ DATASET = config.get("DATASET", "all")
 SAMPLES = {d["name"]: d.get("samples", []) for d in datasets_config["datasets"]}
 sample_str = ' '.join(SAMPLES.get(DATASET, []))
 
+ALL_MODELS = ALL_DATASETS = [d["name"] for d in datasets_config["models"]]
+config_model = config.get("MODEL", "all")
+MODELS = config_model if config_model!='all' else ALL_MODELS
+
+
 
 rule all:
     input:
+        #sample reads and contigs
         # expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_contigs.fasta"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
         # expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"),  sample=[sample for sample in SAMPLES.get(DATASET, [])]),
+
+        #catalogue
         # os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
+
+        #bams
         #expand(os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
+
+        #models
+        #if "vamb" in MODELS:
+        #    os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output")
+        #elif "semibin2" in MODELS:
+        #    os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output")
+        #elif "comebin" in MODELS:
+        #    os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output")
+
+
+        #create fasta bins
+        expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters/{model}_model_clusters.tsv"), model=MODELS)
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{model}_fasta_bins")
+
+        #checkm2
+
+
         
 
 
-# rule download_name:
-#     output:
-#         contigs=expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, [])),
-#         reads=expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"), sample=SAMPLES.get(DATASET, []))
-#     conda:
-#         "envs/cami2_environment.yml"
-#     shell:
-#         """
-#         python SRC_DIR/get_cami2_data.py {DATASET} {sample_str}
-#         """
+rule download_name:
+    output:
+        contigs=expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, [])),
+        reads=expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"), sample=SAMPLES.get(DATASET, []))
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        python SRC_DIR/get_cami2_data.py {DATASET} {sample_str}
+        """
 
 
 
-# rule concatenate:
-#     input:
-#         expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
-#     output:
-#         os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
-#     conda:
-#         "envs/cami2_environment.yml"
-#     shell:
-#         """
-#         python SRC_DIR/concatenate.py {output} {input}
-#         """
+rule concatenate:
+    input:
+        expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
+    output:
+        os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
+    conda:
+        "envs/vamb.yml"
+    shell:
+        """
+        python SRC_DIR/concatenate.py {output} {input}
+        """
 
 
-# rule alignment:
-#     input:
-#         read=os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"),
-#         catalogue=os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
-#     output:
-#         os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam")
-#     threads:
-#         96
-#     conda:
-#         "envs/cami2_environment.yml"
-#     shell:
-#         """
-#         strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
-#         """
+rule alignment:
+    input:
+        read=os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"),
+        catalogue=os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
+    output:
+        os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam")
+    threads:
+        96
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
+        """
 
-# rule vamb:
-#     input:
-#         catalogue=expand(os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")),
-#         bams=expand(os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
-#     output:
-#         os.path.join(OUTDIR, DATASET, "vamb_output")
-#     conda:
-#         "envs/cami2_environment.yml"
-#     shell:
-#         """
-#         vamb bin default --outdir {output} --fasta {input.catalogue} --bamfiles {input.bams}
-#         """
+rule vamb:
+    input:
+        catalogue=expand(os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")),
+        bams=expand(os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+    output:
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output")
+    conda:
+        "envs/cami2_environment.yml"
+    shell:
+        """
+        vamb bin default --outdir {output} --fasta {input.catalogue} --bamfiles {input.bams}
+        """
 
-# rule semibin:
-#     input:
-#         catalogue=expand(os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")),
-#         bams=expand(os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
-#     output:
-#         os.path.join(OUTDIR, DATASET, "semibin_output")
-#     conda:
-#         "envs/semibin_environment.yml"
-#     shell:
-#         """
+rule semibin:
+    input:
+        catalogue=expand(os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")),
+        bams=expand(os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+    output:
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output")
+    conda:
+        "envs/semibin_environment.yml"
+    shell:
+        """
         
-#         """
+        """¨
+
+rule comebin:
+    input:
+        catalogue=expand(os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")),
+        bams=expand(os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+    output:
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output")
+    conda:
+        "envs/comebin_environment.yml"
+    shell:
+        """
+        
+        """¨
+
+
+rule move_cluster_outputs:
+    input:
+        expand(OUTDIR_MODEL_RESULTS, DATASET, "{model}_output", model=MODELS)
+    output:
+        cluster_results = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters/{model}_model_clusters.tsv")
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        python SRC_DIR/move_cluster_outputs.py {output.cluster_results} input
+        """
+
+
+rule create_fasta_bins:
+    input:
+        catalogue=os.path.join(OUTDIR, DATASET, "catalogue.fna.gz"),
+        cluster_results = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters/{model}_model_clusters.tsv")
+    output:
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{model}_fasta_bins")
+    params:
+        minsize_bins = 250000
+    conda: 
+        "envs/checkm2.yml"
+    shell:
+        """
+        python SRC_DIR/create_fasta.py {input.catalogue} data/cami2/airways_short/vambout/vae_clusters_unsplit.tsv {params.minsize_bins} output
+        """
 
 
 
