@@ -53,7 +53,7 @@ with open(args.fastapath, "rb") as filehandle:
 lens: dict[str, int] = dict()
 # with vamb.vambtools.Reader(args.fastapath) as file:
 with open(args.fastapath, "rb") as file:
-    for record in vamb.vambtools.byte_iterfasta(file, args.fastapath):
+    for record in vamb.vambtools.byte_iterfasta(file):
         lens[record.identifier] = len(record)
 
 # with open(args.clusterspath) as file:
