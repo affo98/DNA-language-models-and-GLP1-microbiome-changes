@@ -20,6 +20,7 @@ sample_str = ' '.join(SAMPLES.get(DATASET, []))
 
 ALL_MODELS  = [d["name"] for d in datasets_config["models"]]
 config_model = config.get("MODEL", "all")
+print(config_model)
 MODELS = config_model if config_model!='all' else ALL_MODELS
 print(MODELS)
 
