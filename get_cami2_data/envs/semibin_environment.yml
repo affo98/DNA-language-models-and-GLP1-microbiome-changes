@@ -1,4 +1,4 @@
-name: SemiBint
+name: SemiBin
 channels:
   - conda-forge
   - bioconda
