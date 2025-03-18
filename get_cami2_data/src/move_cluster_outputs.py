@@ -21,7 +21,7 @@ def move_cluster_outputs(input_dirs, output_dir):
         if input_model in FILE_MAP:
             filename = FILE_MAP[input_model]
             src_path = os.path.join(input_dir, filename)
-            dest_path = os.path.join(output_dir, f"{input_model}_clusters")
+            dest_path = os.path.join(output_dir, f"{input_model}_clusters.tsv")
 
             if os.path.exists(src_path):
                 shutil.copy(src_path, dest_path)
