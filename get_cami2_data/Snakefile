@@ -138,7 +138,7 @@ rule move_cluster_outputs:
         "envs/cami2_processing.yml"
     shell:
         """
-        python SRC_DIR/move_cluster_outputs.py {output.cluster_results} {input.model_outputs}
+        python {SRC_DIR}/move_cluster_outputs.py {output.cluster_results} {input.model_outputs}
         """
 
 
