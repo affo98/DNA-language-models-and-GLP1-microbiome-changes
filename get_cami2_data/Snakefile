@@ -11,7 +11,6 @@ with open(os.path.join(CONFIG, "cami2_datasets.yml"), "r") as f:
 
 ALL_DATASETS = [d["name"] for d in datasets_config["datasets"]]
 DATASET = config.get("DATASET", "all")
-#DATASETS = ALL_DATASETS if DATASET == "all" else [DATASET]
 
 SAMPLES = {d["name"]: d.get("samples", []) for d in datasets_config["datasets"]}
 sample_str = ' '.join(SAMPLES.get(DATASET, []))
@@ -23,8 +22,7 @@ rule all:
         # expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"),  sample=[sample for sample in SAMPLES.get(DATASET, [])]),
         # os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
         #expand(os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
-        #os.path.join(OUTDIR, DATASET, "semibin/catalogue_semibin.fna")
-        expand(os.path.join(OUTDIR, DATASET, "semibin/{sample}_sorted_semibin.bam"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
+        
 
 
 # rule download_name:
@@ -32,7 +30,7 @@ rule all:
 #         contigs=expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, [])),
 #         reads=expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"), sample=SAMPLES.get(DATASET, []))
 #     conda:
-#         "cami2_environment.yml"
+#         "envs/cami2_environment.yml"
 #     shell:
 #         """
 #         python get_cami2_data/get_cami2_data.py {DATASET} {sample_str}
@@ -46,7 +44,7 @@ rule all:
 #     output:
 #         os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
 #     conda:
-#         "cami2_environment.yml"
+#         "envs/cami2_environment.yml"
 #     shell:
 #         """
 #         python src/concatenate.py {output} {input}
@@ -62,11 +60,15 @@ rule all:
 #     threads:
 #         96
 #     conda:
-#         "cami2_environment.yml"
+#         "envs/cami2_environment.yml"
 #     shell:
 #         """
 #         strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
 #         """
+
+
+
+
 
 
 
@@ -76,26 +78,31 @@ rule all:
 #     output:
 #         os.path.join(OUTDIR, DATASET, "semibin/catalogue_semibin.fna")
 #     conda:
-#         "cami2_environment.yml"
+#         "envs/cami2_environment.yml"
 #     shell:
 #         """
 #         zcat {input} | sed -E 's/([0-9]+)([A-Za-z])/\\1:\\2/' > {output} 
 #         """
 
 
-rule bam_process_semibin:
-    input:
-        bam=os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam")
-    output:
-        modified_bam=os.path.join(OUTDIR, DATASET, "semibin/{sample}_sorted_semibin.bam")
-    conda:
-        "cami2_environment.yml"
-    shell:
-        """
-        samtools view -H {input.bam} | \\
-        sed -E 's/([0-9]+)([A-Za-z0-9]+)/\\1:\\2/' | \\
-        samtools reheader - {input.bam} > {output.modified_bam}
-        """
+# rule bam_process_semibin:
+#     input:
+#         bam=os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam")
+#     output:
+#         modified_bam=os.path.join(OUTDIR, DATASET, "semibin/{sample}_sorted_semibin.bam")
+#     conda:
+#         "envs/cami2_environment.yml"
+#     shell:
+#         """
+#         samtools view -H {input.bam} | \\
+#         sed -E 's/([0-9]+)([A-Za-z0-9]+)/\\1:\\2/' | \\
+#         samtools reheader - {input.bam} > {output.modified_bam}
+#         """
+
+#rule_all
+    #input:
+        #os.path.join(OUTDIR, DATASET, "semibin/catalogue_semibin.fna")
+        #expand(os.path.join(OUTDIR, DATASET, "semibin/{sample}_sorted_semibin.bam"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
 
 
 
