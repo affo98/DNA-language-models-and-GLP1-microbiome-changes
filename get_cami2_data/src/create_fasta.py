@@ -29,7 +29,8 @@ with open(args.fastapath, "rb") as filehandle:
     try:
         for probeline in line_iterator:
             stripped = probeline.lstrip()
-            if stripped.startswith(""):
+            print(stripped)
+            if stripped.startswith(b"#"):
                 pass
 
             elif probeline[0:1] == b">":
