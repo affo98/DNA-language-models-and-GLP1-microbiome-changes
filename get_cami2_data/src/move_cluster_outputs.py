@@ -40,7 +40,10 @@ def main():
     )
 
     args = parser.parse_args()
-    print(f"Moving cluster outputs: {args}")
+    print(f"Moving cluster outputs:\n")
+    for arg in args:
+        print(arg)
+
     move_cluster_outputs(args.input_dirs, args.output_dir)
 
 
