@@ -141,22 +141,34 @@ rule move_cluster_outputs:
         """
 
 
-
-
 rule create_fasta_bins:
     input:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
         cluster_results=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters", "{model}_output_clusters.tsv"), model=MODELS)
     output:
-        dir=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{model}_fasta_bins"), model=MODELS)
+        dirs=directory(expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{model}_fasta_bins"), model=MODELS))
     params:
         minsize_bins = 250000
     conda: 
         "envs/vamb.yml"
     shell:
         """
-        python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results} {params.minsize_bins} {output.dir}
+        python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results} {params.minsize_bins} {output.dirs}
         """
+
+rule checkm2:
+    input:
+        expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{model}_fasta_bins"), model=MODELS)
+    output:
+        output=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODELS)
+    conda:
+        "envs/checkm2.yml"
+    shell:
+        """
+
+        """
+
+
 
 
 
