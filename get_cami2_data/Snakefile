@@ -169,7 +169,6 @@ rule download_checkm2_database:
     shell:
         """
         checkm2 database --download
-        rm -f {output}
         """
 
 
