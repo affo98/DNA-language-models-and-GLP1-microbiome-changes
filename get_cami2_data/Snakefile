@@ -176,7 +176,7 @@ rule download_checkm2_database:
 rule checkm2:
     input:
        fasta_bins=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{model}"), model=MODELS)
-       checkm2_database=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2_database_downloaded.txt")
+       checkm2_database_flag=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2_database_downloaded.txt")
     output:
         output=directory(expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODELS))
     conda:
