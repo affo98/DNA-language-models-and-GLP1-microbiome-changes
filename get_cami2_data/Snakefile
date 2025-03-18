@@ -152,7 +152,7 @@ rule create_fasta_bins:
     params:
         minsize_bins = 250000
     conda: 
-        "envs/cami2_processing.yml"
+        "envs/vamb.yml"
     shell:
         """
         python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results} {params.minsize_bins} {output.dir}
