@@ -36,10 +36,11 @@ MODELS = config_model if config_model != 'all' else ALL_MODELS
 rule all:
     input:
         #create fasta bins
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters"),
-        expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{model}_fasta_bins"), model=MODELS)
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters"),
+        #expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{model}"), model=MODELS))
 
         #checkm2
+        expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODELS)
 
 
         
@@ -146,7 +147,7 @@ rule create_fasta_bins:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
         cluster_results=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters", "{model}_output_clusters.tsv"), model=MODELS)
     output:
-        dirs=directory(expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{model}_fasta_bins"), model=MODELS))
+        dirs=directory(expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{model}"), model=MODELS))
     params:
         minsize_bins = 250000
     conda: 
@@ -156,16 +157,19 @@ rule create_fasta_bins:
         python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results} {params.minsize_bins} {output.dirs}
         """
 
+
 rule checkm2:
     input:
-        expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{model}_fasta_bins"), model=MODELS)
+       fasta_bins=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{model}"), model=MODELS)
     output:
-        output=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODELS)
+        output=directory(expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODELS))q
     conda:
         "envs/checkm2.yml"
+    threads:
+        96
     shell:
         """
-
+        checkm2 predict --threads {threads} --input {input.fasta_bins} --output-directory {output.output}
         """
 
 
