@@ -167,7 +167,7 @@ rule download_checkm2_database:
     conda:
         "envs/checkm2.yml"
     params:
-        database_dir="../../home/ucloud/databases/CheckM2_database/uniref100.KO.1.dmnd "
+        database_dir="../../home/ucloud/databases/CheckM2_database/uniref100.KO.1.dmnd"
     shell:
         """
         checkm2 database --download --setdblocation {params.database_dir}
