@@ -28,7 +28,7 @@ MODELS = config_model if config_model != 'all' else ALL_MODELS
 # expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"),  sample=[sample for sample in SAMPLES.get(DATASET, [])]),
 
 #catalogue
-# os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
+# os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")s
 
 #bams
 #expand(os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
@@ -40,7 +40,6 @@ MODELS = config_model if config_model != 'all' else ALL_MODELS
 rule all:
     input:
         #checkm2
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2_database_downloaded.txt"),
         expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODELS)
 
 
@@ -161,23 +160,10 @@ rule create_fasta_bins:
 
 
 
-rule download_checkm2_database:
-    output:
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2_database_downloaded.txt")
-    conda:
-        "envs/checkm2.yml"
-    params:
-        database_dir="../../home/ucloud/databases/CheckM2_database/uniref100.KO.1.dmnd"
-    shell:
-        """
-        checkm2 database --download --setdblocation {params.database_dir}
-        """
-
 
 rule checkm2:
     input:
        fasta_bins=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{model}"), model=MODELS),
-       checkm2_database_flag=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2_database_downloaded.txt")
     output:
         output=directory(expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODELS))
     conda:
