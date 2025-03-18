@@ -1,13 +1,14 @@
 import os
-import csv
+import sys
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.distributed as dist
 from tqdm import tqdm
+import time
 
 class Trainer(nn.Module):
-    def __init__(self, model, tokenizer, criterion, optimizer, dataloaders_dict, sampler, args):
+    def __init__(self, model, tokenizer, criterion, optimizer, dataloaders_dict, sampler, logger, args):
         super(Trainer, self).__init__()
         self.args = args
         self.model = model
@@ -19,6 +20,7 @@ class Trainer(nn.Module):
         self.val_sampler = sampler['val']
         self.gstep = 0
         self.criterion = criterion
+        self.logger = logger
 
     def get_batch_token(self, dna_seq):
         max_length = self.args.max_length
@@ -59,40 +61,27 @@ class Trainer(nn.Module):
                 self.model.module.dnabert2.save_pretrained(save_dir)
                 self.tokenizer.save_pretrained(save_dir)
                 torch.save(self.model.module.contrast_head.state_dict(), save_dir+"/con_weights.ckpt")
-    
-    def save_loss_to_csv(self, loss, step, file_path):
-        file_exists = os.path.isfile(file_path)
-        with open(file_path, mode='a', newline='') as file:
-            writer = csv.writer(file)
-            if not file_exists:
-                writer.writerow(['step', 'loss'])
-            writer.writerow([step, loss])
 
     def train_step(self, input_ids, attention_mask, labels):    
         if self.args.gpu is not None:
             input_ids = input_ids.cuda(self.args.gpu, non_blocking=True)
             attention_mask = attention_mask.cuda(self.args.gpu, non_blocking=True)
             labels = labels.squeeze().cuda(self.args.gpu, non_blocking=True)
+            bsz = labels.shape[0]
         with torch.autocast(device_type="cuda"):
             feat1, feat2, _, _ = self.model(input_ids, attention_mask)
             features = torch.cat([feat1.unsqueeze(1), feat2.unsqueeze(1)], dim=1)
             losses = self.criterion(features, labels)
             loss = losses["instdisc_loss"]
-        
-        if self.args.gpu == 0:
-            self.save_loss_to_csv(loss.item(), self.gstep, 'losses.csv')
 
             
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
         
-        return losses
+        return losses, bsz
     
     def train(self):
-        if os.path.exists('losses.csv'):
-            os.remove('losses.csv')
-
         self.all_iter = self.args.epochs * len(self.train_loader)
         print('\n={}/{}=Iterations/Batches'.format(self.all_iter, len(self.train_loader)))
 
@@ -100,15 +89,36 @@ class Trainer(nn.Module):
         epoch_iterator = tqdm(self.train_loader, desc="Iteration")
         for epoch in range(self.args.epochs):
             self.train_sampler.set_epoch(epoch)
-            for _, (sequences, labels) in enumerate(epoch_iterator):
+
+            batch_time = AverageMeter('Time', ':6.3f')
+            data_time = AverageMeter('Data', ':6.3f')
+            losses = AverageMeter('Loss', ':.4e')
+
+            end = time.time()
+
+            progress = ProgressMeter(len(self.train_loader),
+                    [batch_time, data_time, losses],
+                    prefix="Epoch: [{}]".format(epoch))
+            
+            for idx, (sequences, labels) in enumerate(epoch_iterator):
+                data_time.update(time.time() - end)
                 labels = labels.squeeze()
                 input_ids, attention_mask = self.prepare_pairwise_input(sequences)
-                losses = self.train_step(input_ids, attention_mask, labels)
+                loss, bsz = self.train_step(input_ids, attention_mask, labels)
+                losses.update(loss.item(), bsz)
+
+                batch_time.update(time.time() - end)
+                end = time.time()
+                sys.stdout.flush()
+                if idx % self.args.print_freq == 0:
+                    progress.display(idx)
                 if self.gstep%self.args.logging_step==0:
                     self.save_model(step=self.gstep)
                 if self.gstep > self.args.logging_step*self.args.logging_num:
                     break
                 self.gstep += 1
+
+            self.logger.log_value('loss', losses.avg, epoch)
                 
             print("Finish Epoch: ", epoch)
         return None
@@ -122,11 +132,24 @@ class Trainer(nn.Module):
             self.model.module.dnabert2.load_state_dict(torch.load(load_dir+'/pytorch_model.bin'))
             self.model.module.contrast_head.load_state_dict(torch.load(load_dir+'/con_weights.ckpt'))
             self.val_sampler.set_epoch(1)
-            val_loss = 0.
+
+            
+            batch_time = AverageMeter('Time', ':6.3f')
+            data_time = AverageMeter('Data', ':6.3f')
+            losses = AverageMeter('Loss', ':.4e')
+
+            end = time.time()
+
+            progress = ProgressMeter(len(self.train_loader),
+                    [batch_time, data_time, losses],
+                    prefix="Step: [{}]".format(step))
+            
             for idx, (sequences, labels) in enumerate(self.val_loader):
+                data_time.update(time.time() - end)
                 with torch.no_grad():
                     labels = labels.squeeze()
                     labels = labels.squeeze().cuda(self.args.gpu, non_blocking=True)
+                    bsz = labels.shape[0]
                     input_ids, attention_mask = self.prepare_pairwise_input(sequences)
                     input_ids = input_ids.cuda(self.args.gpu, non_blocking=True)
                     attention_mask = attention_mask.cuda(self.args.gpu, non_blocking=True)
@@ -134,11 +157,61 @@ class Trainer(nn.Module):
                     with torch.autocast(device_type="cuda"):
                         feat1, feat2, _, _ = self.model(input_ids, attention_mask)
                         features = torch.cat([feat1.unsqueeze(1), feat2.unsqueeze(1)], dim=1)
-                        losses = self.criterion(features, labels)
-                        val_loss += losses["instdisc_loss"]
+                        loss = self.criterion(features, labels)
+                        val_loss += loss
+
+                        losses.update(loss.item(), bsz)
+                        batch_time.update(time.time() - end)
+                        end = time.time()
+                        sys.stdout.flush()
+
+                        if idx % self.args.print_freq == 0:
+                            progress.display(idx)
+
             val_loss = val_loss.item()/(idx+1)
+            self.logger.log_value('val_loss', losses.avg, step)            
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
                 best_checkpoint = step
                 self.save_model(save_best=True)
+
+class AverageMeter(object):
+    """Computes and stores the average and current value"""
+    def __init__(self, name, fmt=':f'):
+        self.name = name
+        self.fmt = fmt
+        self.reset()
+
+    def reset(self):
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
+
+    def update(self, val, n=1):
+        self.val = val
+        self.sum += val * n
+        self.count += n
+        self.avg = self.sum / self.count
+
+    def __str__(self):
+        fmtstr = '{name} {val' + self.fmt + '} ({avg' + self.fmt + '})'
+        return fmtstr.format(**self.__dict__)
+
+
+class ProgressMeter(object):
+    def __init__(self, num_batches, meters, prefix=""):
+        self.batch_fmtstr = self._get_batch_fmtstr(num_batches)
+        self.meters = meters
+        self.prefix = prefix
+
+    def display(self, batch):
+        entries = [self.prefix + self.batch_fmtstr.format(batch)]
+        entries += [str(meter) for meter in self.meters]
+        print('\t'.join(entries))
+
+    def _get_batch_fmtstr(self, num_batches):
+        num_digits = len(str(num_batches // 1))
+        fmt = '{:' + str(num_digits) + 'd}'
+        return '[' + fmt + '/' + fmt.format(num_batches) + ']'
     

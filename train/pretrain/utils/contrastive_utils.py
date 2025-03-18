@@ -14,8 +14,6 @@ class HardConLoss(nn.Module):
         self.eps = 1e-08
 
     def forward(self, features_1, features_2, pairsimi):
-        losses = {}
-
         device = (torch.device('cuda') if features_1.is_cuda else torch.device('cpu'))
         batch_size = features_1.shape[0]
 
@@ -36,8 +34,8 @@ class HardConLoss(nn.Module):
         negimp = neg.log().exp()
         Ng = (negimp*neg).sum(dim = -1) / negimp.mean(dim = -1)
         loss_pos = (-posmask * torch.log(pos / (Ng+pos))).sum() / posmask.sum()
-        losses["instdisc_loss"] = loss_pos
-        return losses
+        
+        return loss_pos
 
 class iMIXConLoss(nn.Module):
     def __init__(self, temperature=0.05):
@@ -47,8 +45,6 @@ class iMIXConLoss(nn.Module):
         self.cross_entropy = torch.nn.CrossEntropyLoss(reduction='none')
 
     def forward(self, features_1, features_2, mix_rand_list, mix_lambda):
-        losses = {}
-
         device = (torch.device('cuda') if features_1.is_cuda else torch.device('cpu'))
         batch_size = features_1.shape[0]
     
@@ -66,5 +62,4 @@ class iMIXConLoss(nn.Module):
         output_rand = torch.log(pos_rand / (Ng+pos))
         loss_pos = -(mix_lambda * output + (1. - mix_lambda) * output_rand).mean()
         
-        losses["instdisc_loss"] = loss_pos
-        return losses
+        return loss_pos

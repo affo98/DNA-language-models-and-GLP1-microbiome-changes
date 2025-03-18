@@ -17,10 +17,15 @@ from utils.losses import HMLC
 import builtins
 import torch.backends.cudnn as cudnn
 from dataloader.hierarchical_dataset import load_deep_genome_hierarchical
+import tensorboard_logger as tb_logger
 
 def run(args):
     args.resPath = setup_path(args)
     #set_global_random_seed(args.seed)
+
+    args.tb_folder = './tensorboard'
+    if not os.path.isdir(args.tb_folder):
+        os.makedirs(args.tb_folder)
 
     device_id = torch.cuda.device_count()
     print("\t {} GPUs available to use!".format(device_id))
@@ -31,6 +36,7 @@ def run(args):
 def main_worker(gpu, ngpus_per_node, args):
     print("GPU in main worker is {}".format(gpu))
     args.gpu = gpu
+    logger = tb_logger.Logger(logdir=args.tb_folder, flush_secs=2)
 
     # suppress printing if not master
     if args.gpu != 0:
@@ -48,7 +54,7 @@ def main_worker(gpu, ngpus_per_node, args):
 
     dataloaders_dict, sampler = load_deep_genome_hierarchical(args)
 
-    trainer = Trainer(model, tokenizer, criterion, optimizer, dataloaders_dict, sampler, args)
+    trainer = Trainer(model, tokenizer, criterion, optimizer, dataloaders_dict, sampler, logger, args)
     trainer.train()
     trainer.val()
 
@@ -86,6 +92,7 @@ def get_args(argv):
     parser.add_argument('--lr', type=float, default=3e-06, help="Learning rate")
     parser.add_argument('--lr_scale', type=int, default=100, help="")
     parser.add_argument('--epochs', type=int, default=3)
+    parser.add_argument('--print-freq', '-p', default=10, type=int, metavar='N', help='print frequency (default: 10)')
     #parser.add_argument('--train_batch_size', type=int, default=48, help="Batch size used for training dataset")
     #parser.add_argument('--val_batch_size', type=int, default=360, help="Batch size used for validating dataset")
      
