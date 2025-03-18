@@ -38,10 +38,6 @@ with open(args.fastafile, "rb") as filehandle:
             else:
                 raise ValueError("First non-comment line is not a Fasta header")
 
-        else:  # no break
-            return None
-            # raise ValueError('Empty or outcommented file')
-
     except TypeError:
         errormsg = (
             "First line does not contain bytes. Are you reading file in binary mode?"
