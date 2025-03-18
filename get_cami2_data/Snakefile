@@ -40,6 +40,7 @@ MODELS = config_model if config_model != 'all' else ALL_MODELS
 rule all:
     input:
         #checkm2
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2_database_downloaded.txt")
         expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODELS)
 
 
@@ -159,10 +160,16 @@ rule create_fasta_bins:
 
 
 rule download_checkm2_database:
+    output:
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2_database_downloaded.txt")
     conda:
         "envs/checkm2.yml"
     shell:
-        "checkm2 database --download"
+        """
+        checkm2 database --download
+        rm -f {output}
+        """
+
 
 
 
