@@ -38,8 +38,6 @@ rule all:
 
         #models
         #expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{model}_output"), model=MODELS)
-
-        
         #create fasta bins
         expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters/{model}_model_clusters.tsv"), model=MODELS)
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{model}_fasta_bins")
