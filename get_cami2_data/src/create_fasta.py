@@ -24,7 +24,9 @@ args = parser.parse_args()
 # Read in FASTA files only to get its length. This way, we can avoid storing
 # in memory contigs for sequences that will never get output anyway
 lens: dict[str, int] = dict()
-with vamb.vambtools.Reader(args.fastapath) as file:
+
+# Open the FASTA file in binary mode
+with open(args.fastapath, "rb") as file:
     for record in vamb.vambtools.byte_iterfasta(file, args.fastapath):
         lens[record.identifier] = len(record)
 
@@ -37,5 +39,6 @@ clusters = {
     if sum(lens[c] for c in contigs) >= args.minsize
 }
 
-with vamb.vambtools.Reader(args.fastapath) as file:
+# Open the FASTA file in binary mode again for writing bins
+with open(args.fastapath, "rb") as file:
     vamb.vambtools.write_bins(pathlib.Path(args.outdir), clusters, file, maxbins=None)
