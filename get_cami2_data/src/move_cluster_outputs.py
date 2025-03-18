@@ -16,9 +16,10 @@ def move_cluster_outputs(input_dirs, output_dir):
     os.makedirs(output_dir, exist_ok=True)
 
     for input_dir in input_dirs:
-        if input_dir in FILE_MAP:
-            filename = FILE_MAP[input_dir]
-            src_path = os.path.join(input_dir, filename)
+        input_model = input_dir.split["/"][-1]
+        if input_model in FILE_MAP:
+            filename = FILE_MAP[input_model]
+            src_path = os.path.join(input_model, filename)
             dest_path = os.path.join(output_dir, filename)
 
             if os.path.exists(src_path):
@@ -27,7 +28,7 @@ def move_cluster_outputs(input_dirs, output_dir):
             else:
                 print(f"Warning: {src_path} does not exist.")
         else:
-            print(f"Warning: No filename mapping for input directory {input_dir}.")
+            print(f"Warning: No filename mapping for input directory {input_model}.")
 
 
 def main():
