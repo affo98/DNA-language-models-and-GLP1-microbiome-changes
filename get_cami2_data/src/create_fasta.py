@@ -23,14 +23,10 @@ args = parser.parse_args()
 
 with vamb.vambtools.Reader(args.fastapath) as file:
     first_byte = file.filehandle.read(1)
-
-    # Check if the result is a byte object, which means the file is in binary mode
     if isinstance(first_byte, bytes):
-        return True
+        print("Yes")
     else:
-        return False
-
-print("File is binary:", is_binary)
+        print("no")
 
 
 # Read in FASTA files only to get its length. This way, we can avoid storing
