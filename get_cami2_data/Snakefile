@@ -26,7 +26,7 @@ MODELS = config_model if config_model != 'all' else ALL_MODELS
 
 rule all:
     input:
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters/{model}_model_clusters.tsv")
+        expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters/{model}_model_clusters.tsv"), model=MODELS)
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{model}_fasta_bins")
 
         #checkm2
