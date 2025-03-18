@@ -1,7 +1,10 @@
-name: checkm2
+name: checkm2_test
 channels:
   - bioconda
   - conda-forge
   - defaults
 dependencies:
   - checkm2
+  - pip
+  - pip:
+      - vamb

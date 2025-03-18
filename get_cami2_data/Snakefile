@@ -3,6 +3,7 @@ import yaml
 import glob
 
 OUTDIR_TMP = os.path.join(os.getcwd(), "get_cami2_data", "data")
+SRC_DIR = os.path.join(os.getcdw(), "get_cami2_data", "src")
 OUTDIR = os.path.join(os.getcwd(), "data", "cami2")
 CONFIG = os.path.join(os.getcwd(), "config")
 
@@ -33,7 +34,7 @@ rule all:
 #         "envs/cami2_environment.yml"
 #     shell:
 #         """
-#         python get_cami2_data/get_cami2_data.py {DATASET} {sample_str}
+#         python SRC_DIR/get_cami2_data.py {DATASET} {sample_str}
 #         """
 
 
@@ -47,7 +48,7 @@ rule all:
 #         "envs/cami2_environment.yml"
 #     shell:
 #         """
-#         python src/concatenate.py {output} {input}
+#         python SRC_DIR/concatenate.py {output} {input}
 #         """
 
 
@@ -65,6 +66,36 @@ rule all:
 #         """
 #         strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
 #         """
+
+# rule vamb:
+#     input:
+#         catalogue=expand(os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")),
+#         bams=expand(os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+#     output:
+#         os.path.join(OUTDIR, DATASET, "vamb_output")
+#     conda:
+#         "envs/cami2_environment.yml"
+#     shell:
+#         """
+#         vamb bin default --outdir {output} --fasta {input.catalogue} --bamfiles {input.bams}
+#         """
+
+# rule semibin:
+#     input:
+#         catalogue=expand(os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")),
+#         bams=expand(os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+#     output:
+#         os.path.join(OUTDIR, DATASET, "semibin_output")
+#     conda:
+#         "envs/semibin_environment.yml"
+#     shell:
+#         """
+        
+#         """
+
+
+
+
 
 
 
