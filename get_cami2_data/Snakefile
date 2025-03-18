@@ -39,8 +39,6 @@ MODELS = config_model if config_model != 'all' else ALL_MODELS
 
 rule all:
     input:
-        
-
         #checkm2
         expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODELS)
 
