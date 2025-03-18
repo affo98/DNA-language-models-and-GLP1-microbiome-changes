@@ -6,7 +6,7 @@ OUTDIR_RAW = os.path.join(os.getcwd(), "get_cami2_data", "raw_data")
 OUTDIR_PROCESSED = os.path.join(os.getcwd(), "get_cami2_data", "processed_data")
 OUTDIR_MODEL_RESULTS = os.path.join(os.getcwd(), "get_cami2_data", "model_results")
 OUTDIR_CLUSTERS = os.path.join(os.getcwd(), "get_cami2_data", 'clusters')
-SRC_DIR = os.path.join(os.getcdw(), "get_cami2_data", "src")
+SRC_DIR = os.path.join(os.getcwd(), "get_cami2_data", "src")
 BASE = os.path.join(os.getcwd(), "get_cami2_data")
 
 with open(os.path.join(BASE, "config.yml"), "r") as f:
