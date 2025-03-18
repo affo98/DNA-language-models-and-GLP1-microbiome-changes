@@ -22,19 +22,20 @@ ALL_MODELS  = [d["name"] for d in datasets_config["models"]]
 config_model = config.get("MODEL", "all")
 MODELS = config_model if config_model != 'all' else ALL_MODELS
 
+#input:
+#sample reads and contigs
+# expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_contigs.fasta"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
+# expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"),  sample=[sample for sample in SAMPLES.get(DATASET, [])]),
 
+#catalogue
+# os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
+
+#bams
+#expand(os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
 
 rule all:
     input:
-        #sample reads and contigs
-        # expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_contigs.fasta"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
-        # expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"),  sample=[sample for sample in SAMPLES.get(DATASET, [])]),
 
-        #catalogue
-        # os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
-
-        #bams
-        #expand(os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
 
         #create fasta bins
         expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters/{model}_model_clusters.tsv"), model=MODELS),
