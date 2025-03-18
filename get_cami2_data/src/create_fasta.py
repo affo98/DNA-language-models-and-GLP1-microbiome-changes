@@ -31,9 +31,11 @@ with open(args.fastapath, "rb") as filehandle:
             stripped = probeline.lstrip()
             print(stripped)
             if stripped.startswith(b"#"):
+                print("1")
                 pass
 
             elif probeline[0:1] == b">":
+                print("2")
                 break
 
             else:
