@@ -57,6 +57,7 @@ def main_worker(gpu, ngpus_per_node, args):
     trainer = Trainer(model, tokenizer, criterion, optimizer, dataloaders_dict, sampler, logger, args)
     trainer.train()
     trainer.val()
+    dist.destroy_process_group()
 
         
             

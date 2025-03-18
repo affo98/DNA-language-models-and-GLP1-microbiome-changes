@@ -73,7 +73,6 @@ class Trainer(nn.Module):
             features = torch.cat([feat1.unsqueeze(1), feat2.unsqueeze(1)], dim=1)
             losses = self.criterion(features, labels)
             loss = losses["instdisc_loss"]
-
             
         self.optimizer.zero_grad()
         loss.backward()
@@ -105,7 +104,7 @@ class Trainer(nn.Module):
                 labels = labels.squeeze()
                 input_ids, attention_mask = self.prepare_pairwise_input(sequences)
                 loss, bsz = self.train_step(input_ids, attention_mask, labels)
-                losses.update(loss.item(), bsz)
+                losses.update(loss["instdisc_loss"].item(), bsz)
 
                 batch_time.update(time.time() - end)
                 end = time.time()
@@ -121,6 +120,8 @@ class Trainer(nn.Module):
             self.logger.log_value('loss', losses.avg, epoch)
                 
             print("Finish Epoch: ", epoch)
+
+        dist.barrier()
         return None
     
     def val(self):
@@ -158,7 +159,7 @@ class Trainer(nn.Module):
                         feat1, feat2, _, _ = self.model(input_ids, attention_mask)
                         features = torch.cat([feat1.unsqueeze(1), feat2.unsqueeze(1)], dim=1)
                         loss = self.criterion(features, labels)
-                        val_loss += loss
+                        val_loss += loss["instdisc_loss"]
 
                         losses.update(loss.item(), bsz)
                         batch_time.update(time.time() - end)
@@ -174,6 +175,11 @@ class Trainer(nn.Module):
                 best_val_loss = val_loss
                 best_checkpoint = step
                 self.save_model(save_best=True)
+
+            print("Finish Step: ", step)
+            
+        dist.barrier()
+        return None
 
 class AverageMeter(object):
     """Computes and stores the average and current value"""
