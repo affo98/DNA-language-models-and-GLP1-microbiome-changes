@@ -36,8 +36,6 @@ rule all:
         #bams
         #expand(os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
 
-        #models
-
         #create fasta bins
         expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters/{model}_model_clusters.tsv"), model=MODELS)
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{model}_fasta_bins")
