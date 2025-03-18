@@ -120,8 +120,8 @@ class Trainer(nn.Module):
             self.logger.log_value('loss', losses.avg, epoch)
                 
             print("Finish Epoch: ", epoch)
+            dist.barrier()
 
-        dist.barrier()
         return None
     
     def val(self):
@@ -177,8 +177,8 @@ class Trainer(nn.Module):
                 self.save_model(save_best=True)
 
             print("Finish Step: ", step)
+            dist.barrier()
             
-        dist.barrier()
         return None
 
 class AverageMeter(object):
