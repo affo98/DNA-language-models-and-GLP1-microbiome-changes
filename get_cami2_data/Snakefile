@@ -146,7 +146,7 @@ rule move_cluster_outputs:
 rule create_fasta_bins:
     input:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
-        cluster_results = expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters/{model}_output_models.tsv". model=MODELS))
+        cluster_results=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters/{model}_output_models.tsv"), model=MODELS)
     output:
         dir=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{model}_fasta_bins")
     params:
