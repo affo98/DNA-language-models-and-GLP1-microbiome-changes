@@ -134,7 +134,7 @@ rule comebin:
     shell:
         """
         
-        """¨
+        """
 
 
 rule move_cluster_outputs:
