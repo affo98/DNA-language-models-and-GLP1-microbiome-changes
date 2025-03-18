@@ -18,9 +18,10 @@ DATASET = config.get("DATASET", "all")
 SAMPLES = {d["name"]: d.get("samples", []) for d in datasets_config["datasets"]}
 sample_str = ' '.join(SAMPLES.get(DATASET, []))
 
-ALL_MODELS = ALL_DATASETS = [d["name"] for d in datasets_config["models"]]
+ALL_MODELS  = [d["name"] for d in datasets_config["models"]]
 config_model = config.get("MODEL", "all")
 MODELS = config_model if config_model!='all' else ALL_MODELS
+print(MODELS)
 
 
 
