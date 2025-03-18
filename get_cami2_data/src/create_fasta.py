@@ -22,7 +22,7 @@ if len(sys.argv) == 1:
 args = parser.parse_args()
 
 
-with open(args.fastafile, "rb") as filehandle:
+with open(args.fastapath, "rb") as filehandle:
     # Make it work for persistent iterators, e.g. lists
     line_iterator = iter(filehandle)
     # Skip to first header
