@@ -21,21 +21,48 @@ if len(sys.argv) == 1:
 
 args = parser.parse_args()
 
+
+with open(args.fastafile, "rb") as filehandle:
+    # Make it work for persistent iterators, e.g. lists
+    line_iterator = iter(filehandle)
+    # Skip to first header
+    try:
+        for probeline in line_iterator:
+            stripped = probeline.lstrip()
+            if stripped.startswith(""):
+                pass
+
+            elif probeline[0:1] == b">":
+                break
+
+            else:
+                raise ValueError("First non-comment line is not a Fasta header")
+
+        else:  # no break
+            return None
+            # raise ValueError('Empty or outcommented file')
+
+    except TypeError:
+        errormsg = (
+            "First line does not contain bytes. Are you reading file in binary mode?"
+        )
+        raise TypeError(errormsg) from None
+
 # Read in FASTA files only to get its length. This way, we can avoid storing
 # in memory contigs for sequences that will never get output anyway
-lens: dict[str, int] = dict()
-with vamb.vambtools.Reader(args.fastapath) as file:
-    for record in vamb.vambtools.byte_iterfasta(file, args.fastapath):
-        lens[record.identifier] = len(record)
+# lens: dict[str, int] = dict()
+# with vamb.vambtools.Reader(args.fastapath) as file:
+#     for record in vamb.vambtools.byte_iterfasta(file, args.fastapath):
+#         lens[record.identifier] = len(record)
 
-with open(args.clusterspath) as file:
-    clusters = vamb.vambtools.read_clusters(file)
+# with open(args.clusterspath) as file:
+#     clusters = vamb.vambtools.read_clusters(file)
 
-clusters = {
-    cluster: contigs
-    for (cluster, contigs) in clusters.items()
-    if sum(lens[c] for c in contigs) >= args.minsize
-}
+# clusters = {
+#     cluster: contigs
+#     for (cluster, contigs) in clusters.items()
+#     if sum(lens[c] for c in contigs) >= args.minsize
+# }
 
-with vamb.vambtools.Reader(args.fastapath) as file:
-    vamb.vambtools.write_bins(pathlib.Path(args.outdir), clusters, file, maxbins=None)
+# with vamb.vambtools.Reader(args.fastapath) as file:
+#     vamb.vambtools.write_bins(pathlib.Path(args.outdir), clusters, file, maxbins=None)
