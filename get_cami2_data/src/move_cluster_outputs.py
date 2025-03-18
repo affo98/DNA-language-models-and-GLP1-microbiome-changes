@@ -24,7 +24,8 @@ def move_cluster_outputs(input_dirs, output_dir):
             dest_path = os.path.join(output_dir, f"{input_model}_{filename}")
 
             if os.path.exists(src_path):
-                shutil.copy(src_path, output_dir)
+                shutil.copy(src_path, dest_path)
+                shutil.rename()
                 print(f"Copied {src_path} -> {dest_path}")
             else:
                 print(f"Warning: {src_path} does not exist.")
