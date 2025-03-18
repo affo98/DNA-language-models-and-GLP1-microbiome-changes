@@ -139,7 +139,7 @@ rule comebin:
 
 rule move_cluster_outputs:
     input:
-        expand(OUTDIR_MODEL_RESULTS, DATASET, "{model}_output", model=MODELS)
+        expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{model}_output"), model=MODELS)
     output:
         cluster_results = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters/{model}_model_clusters.tsv")
     conda:
