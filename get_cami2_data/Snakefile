@@ -166,9 +166,11 @@ rule download_checkm2_database:
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2_database_downloaded.txt")
     conda:
         "envs/checkm2.yml"
+    params:
+        database_dir="/home/ucloud/databases/CheckM2_database/uniref100.KO.1.dmnd"
     shell:
         """
-        checkm2 database --download
+        checkm2 database --download --setdblocation {params.database_dir}
         """
 
 
