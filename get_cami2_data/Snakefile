@@ -43,7 +43,7 @@ rule all:
         #    os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output")
         #elif "comebin" in MODELS:
         #    os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output")
-
+        
 
         #create fasta bins
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters/{model}_model_clusters.tsv")
