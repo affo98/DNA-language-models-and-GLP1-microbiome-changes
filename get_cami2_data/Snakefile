@@ -58,8 +58,8 @@ rule all:
 
 rule download_name:
     output:
-        contigs=expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, [])),
-        reads=expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"), sample=SAMPLES.get(DATASET, []))
+        contigs=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, [])),
+        reads=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), sample=SAMPLES.get(DATASET, []))
     conda:
         "envs/cami2_processing.yml"
     shell:
@@ -71,9 +71,9 @@ rule download_name:
 
 rule concatenate:
     input:
-        expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
+        expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
     output:
-        os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
+        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
     conda:
         "envs/vamb.yml"
     shell:
@@ -84,10 +84,10 @@ rule concatenate:
 
 rule alignment:
     input:
-        read=os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"),
+        read=os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"),
         catalogue=os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
     output:
-        os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam")
+        os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam")
     threads:
         96
     conda:
@@ -99,8 +99,8 @@ rule alignment:
 
 rule vamb:
     input:
-        catalogue=expand(os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")),
-        bams=expand(os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+        catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
+        bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
     output:
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output")
     conda:
@@ -112,8 +112,8 @@ rule vamb:
 
 rule semibin:
     input:
-        catalogue=expand(os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")),
-        bams=expand(os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+        catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
+        bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
     output:
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output")
     conda:
@@ -125,8 +125,8 @@ rule semibin:
 
 rule comebin:
     input:
-        catalogue=expand(os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")),
-        bams=expand(os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+        catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
+        bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
     output:
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output")
     conda:
