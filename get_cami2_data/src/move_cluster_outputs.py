@@ -1,6 +1,7 @@
 import argparse
 import os
 import shutil
+from pathlib import Path
 
 # Define a mapping of input directories to specific filenames
 FILE_MAP = {
@@ -16,7 +17,7 @@ def move_cluster_outputs(input_dirs, output_dir):
     os.makedirs(output_dir, exist_ok=True)
 
     for input_dir in input_dirs:
-        input_model = input_dir.split["/"][-1]
+        input_model = Path(input_dir).name
         if input_model in FILE_MAP:
             filename = FILE_MAP[input_model]
             src_path = os.path.join(input_model, filename)
