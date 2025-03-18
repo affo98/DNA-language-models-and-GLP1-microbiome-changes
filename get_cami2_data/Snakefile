@@ -158,6 +158,14 @@ rule create_fasta_bins:
         """
 
 
+rule download_checkm2_database:
+    conda:
+        "envs/checkm2.yml"
+    shell:
+        "checkm2 database --download"
+
+
+
 rule checkm2:
     input:
        fasta_bins=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{model}"), model=MODELS)
