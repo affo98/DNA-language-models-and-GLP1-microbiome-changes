@@ -24,7 +24,7 @@ args = parser.parse_args()
 # Read in FASTA files only to get its length. This way, we can avoid storing
 # in memory contigs for sequences that will never get output anyway
 lens: dict[str, int] = dict()
-with vamb.vambtools.Reader(args.fastapath) as file:
+with vamb.vambtools.Reader(args.fastapath, "rb") as file:
     for record in vamb.vambtools.byte_iterfasta(file, args.fastapath):
         lens[record.identifier] = len(record)
 
