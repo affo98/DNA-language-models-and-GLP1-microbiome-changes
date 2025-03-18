@@ -45,59 +45,59 @@ rule all:
         
 
 
-rule download_name:
-    output:
-        contigs=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, [])),
-        reads=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), sample=SAMPLES.get(DATASET, []))
-    conda:
-        "envs/cami2_processing.yml"
-    shell:
-        """
-        python SRC_DIR/get_cami2_data.py {DATASET} {sample_str}
-        """
+# rule download_name:
+#     output:
+#         contigs=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, [])),
+#         reads=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), sample=SAMPLES.get(DATASET, []))
+#     conda:
+#         "envs/cami2_processing.yml"
+#     shell:
+#         """
+#         python SRC_DIR/get_cami2_data.py {DATASET} {sample_str}
+#         """
 
 
 
-rule concatenate:
-    input:
-        expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
-    output:
-        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
-    conda:
-        "envs/vamb.yml"
-    shell:
-        """
-        python SRC_DIR/concatenate.py {output} {input}
-        """
+# rule concatenate:
+#     input:
+#         expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
+#     output:
+#         os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+#     conda:
+#         "envs/vamb.yml"
+#     shell:
+#         """
+#         python SRC_DIR/concatenate.py {output} {input}
+#         """
 
 
-rule alignment:
-    input:
-        read=os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"),
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
-    output:
-        os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam")
-    threads:
-        96
-    conda:
-        "envs/cami2_processing.yml"
-    shell:
-        """
-        strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
-        """
+# rule alignment:
+#     input:
+#         read=os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"),
+#         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+#     output:
+#         os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam")
+#     threads:
+#         96
+#     conda:
+#         "envs/cami2_processing.yml"
+#     shell:
+#         """
+#         strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
+#         """
 
-rule vamb:
-    input:
-        catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
-        bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
-    output:
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output")
-    conda:
-        "envs/cami2_environment.yml"
-    shell:
-        """
-        vamb bin default --outdir {output} --fasta {input.catalogue} --bamfiles {input.bams}
-        """
+# rule vamb:
+#     input:
+#         catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
+#         bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+#     output:
+#         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output")
+#     conda:
+#         "envs/cami2_environment.yml"
+#     shell:
+#         """
+#         vamb bin default --outdir {output} --fasta {input.catalogue} --bamfiles {input.bams}
+#         """
 
 rule semibin:
     input:
