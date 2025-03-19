@@ -56,9 +56,9 @@ rule all:
         expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
         expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
         #concatenate
-        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        #os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
         #alignment
-        expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_reads.fq.gz"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
+        #expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_reads.fq.gz"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
         #vamb
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output"),
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_postprocess"),
