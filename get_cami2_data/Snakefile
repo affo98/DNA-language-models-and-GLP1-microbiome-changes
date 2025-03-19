@@ -132,10 +132,8 @@ if MODEL in ['vamb', 'taxvamb']:
 
             output:
                 database = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "gtdb_database"),  
-                database_tmp = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "gtdb_database_tmp") 
+                database_tmp = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "gtdb_database_tmp"), 
                 results = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results")
-
-                "get_cami2_data/model_results/airways_short/metabuli/metabuli_results"
                 
             params:
                 seq_mode=1,
@@ -143,9 +141,8 @@ if MODEL in ['vamb', 'taxvamb']:
 
             shell:
                 """
-                wget https://mmseqs.com/metabuli/metabuli-linux-avx2.tar.gz; tar xvzf metabuli-linux-avx2.tar.gz; export PATH=$(pwd)/metabuli/bin/:$PATH \
+                wget https://mmseqs.com/metabuli/metabuli-linux-avx2.tar.gz; tar xvzf metabuli-linux-avx2.tar.gz; export PATH=$(pwd)/metabuli/bin/:$PATH 
                 metabuli databases GTDB {ouput.database} {output.database_tmp}
-
                 metabuli classify --seq-mode {params.seq_mode} {input.catalogue} {input.database} get_cami2_data/model_results/airways_short/metabuli/metabuli_results 100 --max-ram 6	
                 """
 
