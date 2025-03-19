@@ -24,20 +24,21 @@ MODEL = config_model if config_model != 'all' else ALL_MODELS
 
 
 #processing flow of snakemake 
-config_download = config.get("DOWNLOAD", None)
-config_concatenate = config.get("CONCATENATE", None)
-config_alignment = config.get("ALIGNMENT", None)
-config_checkm2 = config.get("CHECKM2", None)
+config_download = config.get("DOWNLOAD", False)
+config_concatenate = config.get("CONCATENATE", False)
+config_alignment = config.get("ALIGNMENT", False)
+config_checkm2 = config.get("CHECKM2", False)
 
 MINSIZE_BINS=250000
 
 
 print(f"-------------Configuration Flags:--------------")
-print(f"  - Selected Model: {MODEL}")
-print(f"  - Download:       {config_download}")
-print(f"  - Concatenate:    {config_concatenate}")
-print(f"  - Alignment:      {config_alignment}")
-print(f"  - CheckM2:        {config_checkm2}")
+print(f"  - Selected Model:      {MODEL}")
+print(f"  - Download:            {config_download}")
+print(f"  - Concatenate:         {config_concatenate}")
+print(f"  - Alignment:           {config_alignment}")
+print(f"  - CheckM2:             {config_checkm2}")
+print(f"  - MinSize Bins:        {MINSIZE_BINS}")
 
 
 
@@ -57,7 +58,7 @@ print(f"  - CheckM2:        {config_checkm2}")
 
 
 input_files = []
-if config_download:
+if config_download==True:
     input_files += expand(
         os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"),
         sample=SAMPLES.get(DATASET, [])
@@ -67,12 +68,12 @@ if config_download:
         sample=SAMPLES.get(DATASET, [])
     )
 
-if config_concatenate:
+if config_concatenate==True:
     input_files.append(
         os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
     )
 
-if config_alignment:
+if config_alignment==True:
     input_files += expand(
         os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_reads.fq.gz"),
         sample=SAMPLES.get(DATASET, [])
