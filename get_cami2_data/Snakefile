@@ -211,7 +211,7 @@ elif MODEL=='taxvamb':
     rule taxvamb:
         input:
             catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
-            bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+            bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, [])),
             taxonomy=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv")
         output:
             os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_output")
