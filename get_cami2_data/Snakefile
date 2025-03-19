@@ -53,6 +53,7 @@ rule all:
     input:
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results")
+        result = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv")
 
         #expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODEL)
         
