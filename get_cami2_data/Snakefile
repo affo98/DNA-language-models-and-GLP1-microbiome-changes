@@ -160,7 +160,7 @@ elif MODEL in ['comebin']:
         output:
             os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output")
         params:
-            views=6
+            views=6,
             threads=48
         conda:
             "envs/comebin_environment.yml"
