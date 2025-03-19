@@ -44,7 +44,7 @@ print(f"  - MinSize Bins:        {MINSIZE_BINS}")
 
 
 input_files = []
-if config_download=='yes':
+if config_download:
     input_files += expand(
         os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"),
         sample=SAMPLES.get(DATASET, [])
