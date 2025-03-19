@@ -5,7 +5,6 @@ channels:
   - defaults
 dependencies:
   - python
-  - snakemake
   - pip
   - pip:
       - vamb

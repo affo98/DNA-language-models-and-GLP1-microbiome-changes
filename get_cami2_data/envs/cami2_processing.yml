@@ -9,7 +9,6 @@ dependencies:
   - pyyaml
   - samtools
   - strobealign
-  - checkm2
   - pip
   - pip:
       - Bio
