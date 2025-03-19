@@ -82,8 +82,8 @@ if config_alignment:
 if MODEL=='vamb':
     input_files += [
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_postprocess"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "vamb"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_postprocess"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "vamb"),
     ]
 
 elif MODEL=='taxvamb':
