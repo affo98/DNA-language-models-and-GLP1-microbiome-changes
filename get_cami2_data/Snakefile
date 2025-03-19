@@ -88,7 +88,7 @@ elif MODEL == 'comebin':
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"),
     ]
 
-if config_checkm2:
+if config_checkm2=='yes':
     input_files += expand(
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"),
         model=MODEL
