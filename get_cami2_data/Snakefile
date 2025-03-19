@@ -32,8 +32,8 @@ config_checkm2 = config.get("CHECKM2", False)
 MINSIZE_BINS=250000
 
 
-print(f"Configuration Flags:")
-print(f"Selected Model: {MODEL}")
+print(f"-------------Configuration Flags:--------------")
+print(f"  - Selected Model: {MODEL}")
 print(f"  - Download: {'Enabled' if config_download else 'Disabled'}")
 print(f"  - Concatenate: {'Enabled' if config_concatenate else 'Disabled'}")
 print(f"  - Alignment: {'Enabled' if config_alignment else 'Disabled'}")
