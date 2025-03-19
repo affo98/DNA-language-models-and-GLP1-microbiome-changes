@@ -166,9 +166,7 @@ elif MODEL=='taxvamb':
 
     rule metabuli:
         input:
-            catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
-            database=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "gtdb_database_tmp", "gtdb")
-
+            catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
         output:
             database = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "gtdb_database"),  
             database_tmp = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "gtdb_database_tmp"), 
@@ -181,7 +179,7 @@ elif MODEL=='taxvamb':
         shell:
             """
             wget https://mmseqs.com/metabuli/metabuli-linux-avx2.tar.gz; tar xvzf metabuli-linux-avx2.tar.gz; export PATH=$(pwd)/metabuli/bin/:$PATH 
-            metabuli databases GTDB {ouput.database} {output.database_tmp}
+            metabuli databases GTDB {ouput.database}/gtdb {output.database_tmp}
             metabuli classify --seq-mode {params.seq_mode} {input.catalogue} {input.database} {output.results} {params.job_id}
             """
     
