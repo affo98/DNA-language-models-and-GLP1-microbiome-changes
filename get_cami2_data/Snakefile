@@ -173,7 +173,7 @@ elif MODEL in ['comebin']:
         input:
             model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output", "comebin_res", "comebin_res_bins")
         output:
-            cluster_fasta=dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"))
+            cluster_fasta=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"))
         params:
             minsize_bins = 250000
         conda:
