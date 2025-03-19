@@ -54,7 +54,7 @@ config_checkm2 = config.get("CHECKM2", False)
 rule all:
     input:
         if config_download:
-            expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
+            expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
             expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
         if config_concatenate:
             os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
