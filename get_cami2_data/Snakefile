@@ -290,7 +290,7 @@ elif MODEL == 'comebin':
 if config_checkm2:
     rule checkm2:
         input:
-        fasta_bins=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{model}"), model=MODEL),
+            fasta_bins=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{model}"), model=MODEL)
         output:
             output=directory(expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODEL))
         conda:
