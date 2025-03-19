@@ -24,10 +24,10 @@ MODEL = config_model if config_model != 'all' else ALL_MODELS
 
 
 #processing flow of snakemake 
-config_download = config.get("DOWNLOAD", False)
-config_concatenate = config.get("CONCATENATE", False)
-config_alignment = config.get("ALIGNMENT", False)
-config_checkm2 = config.get("CHECKM2", False)
+config_download = config.get("DOWNLOAD", None)
+config_concatenate = config.get("CONCATENATE", None)
+config_alignment = config.get("ALIGNMENT", None)
+config_checkm2 = config.get("CHECKM2", None)
 
 MINSIZE_BINS=250000
 
