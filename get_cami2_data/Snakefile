@@ -15,7 +15,7 @@ BASE = os.path.join(os.getcwd(), "get_cami2_data")
 with open(os.path.join(BASE, "config.yml"), "r") as f:
     datasets_model_config = yaml.safe_load(f)
 
-ALL_DATASETS = [d["name"] for d in datasets_model_config["DATASET"]]
+ALL_DATASETS = [d["name"] for d in datasets_model_config["datasets"]]
 DATASET = config.get("DATASET", None)
 assert DATASET in ALL_DATASETS, f"Error: Selected dataset '{DATASET}' is not in the available DATASET: {ALL_DATASETS}"
 
@@ -102,33 +102,6 @@ if config_checkm2:
 rule all:
     input: input_files
 
-
-
-
-# rule all:
-#     input:
-#         if config_download:
-#             expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
-#             expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
-#         if config_concatenate:
-#             os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
-        #alignment
-        #expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_reads.fq.gz"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
-        #vamb
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_postprocess"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "vamb"),
-        #taxvamb
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_output"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_postprocess"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "taxvamb"),
-        #comebin
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"),
-        #checkm2
-        #expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODEL)
         
         
 
