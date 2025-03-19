@@ -142,8 +142,6 @@ rule all:
         
 
 
-
-
 rule download:
     output:
         contigs=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, [])),
