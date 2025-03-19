@@ -50,14 +50,35 @@ config_checkm2 = config.get("CHECKM2", False)
 #expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODEL)
 
 
+input_files = []
+if config_download:
+    input_files += expand(
+        os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), 
+        sample=SAMPLES.get(DATASET, [])
+    )
+    input_files += expand(
+        os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), 
+        sample=SAMPLES.get(DATASET, [])
+    )
 
+if config_concatenate:
+    input_files.append(
+        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+    )
+
+# Use the precomputed list in rule all
 rule all:
-    input:
-        if config_download:
-            expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
-            expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
-        if config_concatenate:
-            os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+    input: input_files
+
+
+
+# rule all:
+#     input:
+#         if config_download:
+#             expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
+#             expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
+#         if config_concatenate:
+#             os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
         #alignment
         #expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_reads.fq.gz"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
         #vamb
