@@ -20,7 +20,7 @@ SAMPLES = {d["name"]: d.get("samples", []) for d in datasets_model_config["datas
 sample_str = ' '.join(SAMPLES.get(DATASET, []))
 ALL_MODELS  = [d["name"] for d in datasets_model_config["models"]]
 config_model = config.get("MODEL", "all")
-MODEL = config_model if config_model != 'all' else ALL_MODELS
+MODEL = config_model if config_model != 'all' else None
 
 
 #processing flow of snakemake 
