@@ -100,12 +100,9 @@ for DATASET in DATASETS:
             model=MODEL
         )
 
-
+    
     rule all:
         input: input_files
-
-            
-            
 
 
     rule download:
