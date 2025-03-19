@@ -8,7 +8,7 @@ from Bio import SeqIO
 def postprocess_comebin(input_dir, output_dir, min_total_length):
     """
     Filters FASTA files in the input directory, retaining only those where the sum of all sequence lengths
-    exceeds min_total_length. Writes the filtered files to the output directory.
+    exceeds min_total_length. Writes the filtered files to the output directory with .fna extension.
 
     Parameters:
     - input_dir (str): Path to the directory containing input FASTA files.
@@ -30,7 +30,8 @@ def postprocess_comebin(input_dir, output_dir, min_total_length):
                     total_length += len(record.seq)
 
             if total_length > min_total_length:
-                output_file_path = os.path.join(output_dir, filename)
+                output_filename = os.path.splitext(filename)[0] + ".fna"
+                output_file_path = os.path.join(output_dir, output_filename)
                 with open(input_file_path, "r") as infile, open(
                     output_file_path, "w"
                 ) as outfile:

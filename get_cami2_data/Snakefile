@@ -107,20 +107,50 @@ rule all:
 
 
 
-if MODEL in ['vamb']:
+if MODEL in ['vamb', 'taxvamb']:
 
-    rule vamb:
-        input:
-            catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
-            bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
-        output:
-            os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output")
-        conda:
-            "envs/cami2_environment.yml"
-        shell:
-            """
-            vamb bin default --outdir {output} --fasta {input.catalogue} --bamfiles {input.bams}
-            """
+    if MODEL=='vamb':
+        rule vamb:
+            input:
+                catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+                bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+            output:
+                os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output")
+            conda:
+                "envs/cami2_environment.yml"
+            shell:
+                """
+                vamb bin default --outdir {output} --fasta {input.catalogue} --bamfiles {input.bams}
+                """
+
+
+    elif MODEL=='taxvamb':
+        rule metabuli:
+            input:
+                catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+                database=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "gtdb_database_tmp", "gtdb")
+
+            output:
+                database = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "gtdb_database"),  
+                database_tmp = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "gtdb_database_tmp") 
+                results = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results")
+
+                "get_cami2_data/model_results/airways_short/metabuli/metabuli_results"
+                
+            params:
+                seq_mode=1,
+                job_id=100
+
+            shell:
+                """
+                wget https://mmseqs.com/metabuli/metabuli-linux-avx2.tar.gz; tar xvzf metabuli-linux-avx2.tar.gz; export PATH=$(pwd)/metabuli/bin/:$PATH \
+                metabuli databases GTDB {ouput.database} {output.database_tmp}
+
+                metabuli classify --seq-mode {params.seq_mode} {input.catalogue} {input.database} get_cami2_data/model_results/airways_short/metabuli/metabuli_results 100 --max-ram 6	
+                """
+
+
+    
 
     rule move_cluster_outputs_vamb:
         input:
