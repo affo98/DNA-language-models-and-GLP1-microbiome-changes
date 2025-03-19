@@ -97,7 +97,7 @@ class Trainer(nn.Module):
 
             progress = ProgressMeter(len(self.train_loader),
                     [batch_time, data_time, losses],
-                    prefix="Epoch: [{}]".format(epoch))
+                    prefix = "Epoch: [{}]".format(epoch))
             
             for idx, (sequences, labels) in enumerate(epoch_iterator):
                 data_time.update(time.time() - end)
@@ -121,10 +121,12 @@ class Trainer(nn.Module):
                 
             print("Finish Epoch: ", epoch)
             dist.barrier()
-
+        
+        #dist.barrier()
         return None
     
     def val(self):
+        print("Start Validation... ")
         self.model.eval()
         best_checkpoint = 0
         best_val_loss = 10000
@@ -178,7 +180,8 @@ class Trainer(nn.Module):
 
             print("Finish Step: ", step)
             dist.barrier()
-            
+        
+        #dist.barrier()
         return None
 
 class AverageMeter(object):

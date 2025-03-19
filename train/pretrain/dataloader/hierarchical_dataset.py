@@ -232,10 +232,10 @@ def load_deep_genome_hierarchical(args):
                       'val': val_dataset}
     
     train_sampler = HierarchicalBatchSampler(batch_size=args.batch_size,
-                                       drop_last=False,
+                                       drop_last=True,
                                        dataset=train_dataset)
     val_sampler = HierarchicalBatchSampler(batch_size=args.batch_size,
-                                           drop_last=False,
+                                           drop_last=True,
                                            dataset=val_dataset)
     sampler = {'train': train_sampler,
                'val': val_sampler}

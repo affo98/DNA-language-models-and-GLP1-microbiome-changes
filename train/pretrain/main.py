@@ -18,14 +18,11 @@ import builtins
 import torch.backends.cudnn as cudnn
 from dataloader.hierarchical_dataset import load_deep_genome_hierarchical
 import tensorboard_logger as tb_logger
+from datetime import timedelta
 
 def run(args):
     args.resPath = setup_path(args)
     #set_global_random_seed(args.seed)
-
-    args.tb_folder = './tensorboard'
-    if not os.path.isdir(args.tb_folder):
-        os.makedirs(args.tb_folder)
 
     device_id = torch.cuda.device_count()
     print("\t {} GPUs available to use!".format(device_id))
@@ -36,6 +33,11 @@ def run(args):
 def main_worker(gpu, ngpus_per_node, args):
     print("GPU in main worker is {}".format(gpu))
     args.gpu = gpu
+
+    args.tb_folder = f'./tensorboard_{args.gpu}'
+    if not os.path.isdir(args.tb_folder):
+        os.makedirs(args.tb_folder)
+
     logger = tb_logger.Logger(logdir=args.tb_folder, flush_secs=2)
 
     # suppress printing if not master
@@ -45,12 +47,12 @@ def main_worker(gpu, ngpus_per_node, args):
         builtins.print = print_pass
 
     dist.init_process_group(backend="nccl", init_method="env://",
-                            world_size=ngpus_per_node, rank=args.gpu)
+                            world_size=ngpus_per_node, rank=args.gpu, timeout=timedelta(minutes=5))
     
     model, criterion = set_model(ngpus_per_node, args)
     tokenizer = AutoTokenizer.from_pretrained("zhihan1996/DNABERT-2-117M", trust_remote_code=True)
     optimizer = get_optimizer(model, args)
-    cudnn.benchmark = True
+    #cudnn.benchmark = True
 
     dataloaders_dict, sampler = load_deep_genome_hierarchical(args)
 
