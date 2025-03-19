@@ -40,7 +40,7 @@ MODEL = config_model if config_model != 'all' else ALL_MODELS
 
 
 #comebin
-os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"),
+#os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"),
 
 #create fasta bins
 #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters"),
@@ -179,8 +179,8 @@ elif MODEL=='taxvamb':
         shell:
             """
             wget https://mmseqs.com/metabuli/metabuli-linux-avx2.tar.gz; tar xvzf metabuli-linux-avx2.tar.gz; export PATH=$(pwd)/metabuli/bin/:$PATH 
-            metabuli databases GTDB {ouput.database}/gtdb {output.database_tmp}
-            metabuli classify --seq-mode {params.seq_mode} {input.catalogue} {input.database} {output.results} {params.job_id}
+            metabuli databases GTDB {output.database} {output.database_tmp}
+            metabuli classify --seq-mode {params.seq_mode} {input.catalogue} {output.database}/gtdb {output.results} {params.job_id}
             """
     
     rule taxconverter:
@@ -218,7 +218,6 @@ elif MODEL=='taxvamb':
         shell:
             """
             vamb bin taxvamb --outdir {output} --fasta {input.catalogue} --bamfiles {input.bams} --taxonomy {input.taxonomy}
-            vamb bin taxvamb --outdir path/to/outdir --fasta /path/to/catalogue.fna.gz --abundance_tsv abundance.tsv --taxonomy taxonomy.tsv
             """
 
 
