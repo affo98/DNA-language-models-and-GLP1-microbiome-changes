@@ -54,12 +54,12 @@ if config_download:
         sample=SAMPLES.get(DATASET, [])
     )
 
-if config_concatenate=='yes':
+if config_concatenate:
     input_files.append(
         os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
     )
 
-if config_alignment=='yes':
+if config_alignment:
     input_files += expand(
         os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"),
         sample=SAMPLES.get(DATASET, [])
@@ -88,7 +88,7 @@ elif MODEL == 'comebin':
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"),
     ]
 
-if config_checkm2=='yes':
+if config_checkm2:
     input_files += expand(
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"),
         model=MODEL
