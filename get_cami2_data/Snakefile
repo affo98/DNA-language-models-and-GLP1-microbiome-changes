@@ -34,6 +34,7 @@ MINSIZE_BINS=250000
 
 
 print(f"-------------Configuration Flags:--------------")
+print(f"  - Datasets:            {DATASETS}")
 print(f"  - Selected Model:      {MODEL}")
 print(f"  - Download:            {config_download}")
 print(f"  - Concatenate:         {config_concatenate}")
