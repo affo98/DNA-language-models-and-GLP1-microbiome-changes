@@ -48,7 +48,7 @@ print(f"  - CheckM2:             {config_checkm2}")
 print(f"  - MinSize Bins:        {MINSIZE_BINS}")
 
 
-for DATASET IN DATASETS:
+for DATASET in DATASETS:
     sample_str = ' '.join(SAMPLES.get(DATASET, []))
     input_files = []
     if config_download:
