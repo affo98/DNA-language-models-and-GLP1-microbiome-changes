@@ -38,7 +38,7 @@ MINSIZE_BINS=250000
 
 
 print(f"-------------Configuration Flags:--------------")
-print(f"  - DATASET:            {DATASET}")
+print(f"  - DATASET:             {DATASET}")
 print(f"  - Selected Model:      {MODEL}")
 print(f"  - Download:            {config_download}")
 print(f"  - Concatenate:         {config_concatenate}")
@@ -297,7 +297,7 @@ rule comebin:
 
 rule postprocess_cluster_outputs_comebin:
     input:
-        model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output", "comebin_res", "comebin_res_bins")
+        model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output")
     output:
         cluster_fasta=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"))
     params:
@@ -306,7 +306,7 @@ rule postprocess_cluster_outputs_comebin:
         "envs/cami2_processing.yml"
     shell:
         """
-        python {SRC_DIR}/postprocess_cluster_outputs_comebin.py {output.cluster_fasta} {input.model_outputs} {params.minsize_bins}
+        python {SRC_DIR}/postprocess_cluster_outputs_comebin.py {output.cluster_fasta} {input.model_outputs}/comebin_res/comebin_res_bins \ {params.minsize_bins}
         """
 #END COMEBIN
 
