@@ -61,7 +61,7 @@ if config_concatenate=='yes':
 
 if config_alignment=='yes':
     input_files += expand(
-        os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_reads.fq.gz"),
+        os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"),
         sample=SAMPLES.get(DATASET, [])
     )
 
