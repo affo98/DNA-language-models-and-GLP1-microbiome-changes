@@ -242,7 +242,7 @@ rule taxvamb:
     output:
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_output")
     conda:
-        "envs/cami2_environment.yml"
+        "envs/cami2_processing.yml"
     shell:
         """
         vamb bin taxvamb --outdir {output} --fasta {input.catalogue} --bamfiles {input.bams} --taxonomy {input.taxonomy}
