@@ -34,10 +34,10 @@ MINSIZE_BINS=250000
 
 print(f"-------------Configuration Flags:--------------")
 print(f"  - Selected Model: {MODEL}")
-print(f"  - Download: {'Enabled' if config_download else 'Disabled'}")
-print(f"  - Concatenate: {'Enabled' if config_concatenate else 'Disabled'}")
-print(f"  - Alignment: {'Enabled' if config_alignment else 'Disabled'}")
-print(f"  - CheckM2: {'Enabled' if config_checkm2 else 'Disabled'}")
+print(f"  - Download:       {config_download}")
+print(f"  - Concatenate:    {config_concatenate}")
+print(f"  - Alignment:      {config_alignment}")
+print(f"  - CheckM2:        {config_checkm2}")
 
 
 
