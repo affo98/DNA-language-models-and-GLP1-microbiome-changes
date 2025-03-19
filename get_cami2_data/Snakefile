@@ -194,7 +194,7 @@ rule vamb:
     output:
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output")
     conda:
-        "envs/cami2_environment.yml"
+        "envs/cami2_processing.yml"
     shell:
         """
         vamb bin default --outdir {output} --fasta {input.catalogue} --bamfiles {input.bams}
