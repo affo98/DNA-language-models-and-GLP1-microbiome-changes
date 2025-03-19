@@ -20,7 +20,7 @@ sample_str = ' '.join(SAMPLES.get(DATASET, []))
 
 ALL_MODELS  = [d["name"] for d in datasets_config["models"]]
 config_model = config.get("MODEL", "all")
-MODELS = config_model if config_model != 'all' else ALL_MODELS
+MODEL = config_model if config_model != 'all' else ALL_MODELS
 
 #input:
 #sample reads and contigs
@@ -40,7 +40,7 @@ MODELS = config_model if config_model != 'all' else ALL_MODELS
 rule all:
     input:
         #checkm2
-        expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODELS)
+        expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODEL)
 
 
         
@@ -87,94 +87,114 @@ rule all:
 #         strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
 #         """
 
-# rule vamb:
+
+# rule semibin:
 #     input:
 #         catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
 #         bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
 #     output:
-#         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output")
+#         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output")
 #     conda:
-#         "envs/cami2_environment.yml"
+#         "envs/semibin_environment.yml"
 #     shell:
 #         """
-#         vamb bin default --outdir {output} --fasta {input.catalogue} --bamfiles {input.bams}
+        
 #         """
 
-rule semibin:
-    input:
-        catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
-        bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
-    output:
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output")
-    conda:
-        "envs/semibin_environment.yml"
-    shell:
-        """
-        
-        """
-
-rule comebin:
-    input:
-        catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
-        bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
-    output:
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output")
-    conda:
-        "envs/comebin_environment.yml"
-    shell:
-        """
-        
-        """
 
 
+if MODEL in ['vamb']:
+
+    rule vamb:
+        input:
+            catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
+            bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+        output:
+            os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output")
+        conda:
+            "envs/cami2_environment.yml"
+        shell:
+            """
+            vamb bin default --outdir {output} --fasta {input.catalogue} --bamfiles {input.bams}
+            """
+
+    rule move_cluster_outputs_vamb:
+        input:
+            model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output")
+        output:
+            cluster_results=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters"))
+        conda:
+            "envs/cami2_processing.yml"
+        shell:
+            """
+            python {SRC_DIR}/move_cluster_outputs_vamb.py {output.cluster_results} {input.model_outputs}
+            """
+
+    rule create_fasta_bins:
+        input:
+            catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+            cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters", "vamb_output_clusters.tsv")
+        output:
+            dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "vamb"))
+        params:
+            minsize_bins = 250000
+        conda: 
+            "envs/vamb.yml"
+        shell:
+            """
+            python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results} {params.minsize_bins} {output.dirs}
+            """
 
 
-rule move_cluster_outputs:
-    input:
-        model_outputs=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{model}_output"), model=MODELS)
-    output:
-        cluster_results=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters"))
-    conda:
-        "envs/cami2_processing.yml"
-    shell:
-        """
-        python {SRC_DIR}/move_cluster_outputs.py {output.cluster_results} {input.model_outputs}
-        """
 
+elif MODEL in ['comebin']:
 
-rule create_fasta_bins:
-    input:
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
-        cluster_results=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters", "{model}_output_clusters.tsv"), model=MODELS)
-    output:
-        dirs=directory(expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{model}"), model=MODELS))
-    params:
-        minsize_bins = 250000
-    conda: 
-        "envs/vamb.yml"
-    shell:
-        """
-        python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results} {params.minsize_bins} {output.dirs}
-        """
+    rule comebin:
+        input:
+            catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
+            bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+        output:
+            os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output")
+        params:
+            views=6
+            threads=48
+        conda:
+            "envs/comebin_environment.yml"
+        shell:
+            """
+            bash run_comebin.sh -a {input.catalogue} -p {input.bams} -o {output} -n {params.views} -t {params.threads}
+            """
 
+    rule postprocess_cluster_outputs_comebin:
+        input:
+            model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output")
+        output:
+            dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"))
+        params:
+            minsize_bins = 250000
+        conda:
+            "envs/cami2_processing.yml"
+        shell:
+            """
+            python {SRC_DIR}/postprocess_cluster_outputs_comebin.py {output.cluster_results} {input.model_outputs} {params.minsize_bins}
+            """
 
 
 
 
 rule checkm2:
     input:
-       fasta_bins=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{model}"), model=MODELS),
+       fasta_bins=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{model}"), model=MODEL),
     output:
-        output=directory(expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODELS))
+        output=directory(expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODEL))
     conda:
         "envs/checkm2.yml"
     threads:
-        96
+        128
     shell:
         """
         checkm2 predict --threads {threads} --input {input.fasta_bins} --output-directory {output.output}
         """
-
 
 
 
