@@ -42,8 +42,8 @@ expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results")
 
 rule all:
     input:
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin")
-        output=directory(expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODEL))
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"),
+        expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODEL)
         
 
 
