@@ -4,6 +4,7 @@ import glob
 
 MINSIZE_BINS=250000
 
+#dirs
 OUTDIR_RAW = os.path.join(os.getcwd(), "get_cami2_data", "raw_data")
 OUTDIR_PROCESSED = os.path.join(os.getcwd(), "get_cami2_data", "processed_data")
 OUTDIR_MODEL_RESULTS = os.path.join(os.getcwd(), "get_cami2_data", "model_results")
@@ -11,32 +12,32 @@ OUTDIR_CLUSTERS = os.path.join(os.getcwd(), "get_cami2_data", 'clusters')
 SRC_DIR = os.path.join(os.getcwd(), "get_cami2_data", "src")
 BASE = os.path.join(os.getcwd(), "get_cami2_data")
 
+#dataset, sample and model config
 with open(os.path.join(BASE, "config.yml"), "r") as f:
-    datasets_config = yaml.safe_load(f)
+    datasets_model_config = yaml.safe_load(f)
 
 ALL_DATASETS = [d["name"] for d in datasets_config["datasets"]]
 DATASET = config.get("DATASET", "all")
-
-SAMPLES = {d["name"]: d.get("samples", []) for d in datasets_config["datasets"]}
+SAMPLES = {d["name"]: d.get("samples", []) for d in datasets_model_config["datasets"]}
 sample_str = ' '.join(SAMPLES.get(DATASET, []))
-
-ALL_MODELS  = [d["name"] for d in datasets_config["models"]]
+ALL_MODELS  = [d["name"] for d in datasets_model_config["models"]]
 config_model = config.get("MODEL", "all")
 MODEL = config_model if config_model != 'all' else ALL_MODELS
 
-#input:
-#sample reads and contigs
-# expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_contigs.fasta"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
-# expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"),  sample=[sample for sample in SAMPLES.get(DATASET, [])]),
 
-#catalogue
-# os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")s
+#processing flow of snakemake 
+config_download = config.get("DOWNLOAD", False)
+config_concatenate = config.get("CONCATENATE", False)
+config_alignment = config.get("ALIGNMENT", False)
+config_checkm2 = config.get("CHECKM2", False)
+
+
+
+
+
 
 #bams
 #expand(os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
-
-
-
 
 
 #comebin
@@ -49,74 +50,77 @@ MODEL = config_model if config_model != 'all' else ALL_MODELS
 #checkm2
 #expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODEL)
 
+
+
 rule all:
     input:
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"),
+        expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_contigs.fasta"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
+        expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"),  sample=[sample for sample in SAMPLES.get(DATASET, [])]),
+        #concatenate
+        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        #alignment
+        os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam", sample=[sample for sample in SAMPLES.get(DATASET, [])]),
+        #vamb
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_postprocess"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "vamb"),
+        #taxvamb
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results"),
-        result = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv")
-
-        #expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODEL)
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_output"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_postprocess"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "taxvamb"),
+        #comebin
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"),
+        #checkm2
+        expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODEL)
+        
         
 
 
-        
+
+if config_download:
+    rule download_name:
+        output:
+            contigs=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, [])),
+            reads=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), sample=SAMPLES.get(DATASET, []))
+        conda:
+            "envs/cami2_processing.yml"
+        shell:
+            """
+            python {SRC_DIR}/get_cami2_data.py {DATASET} {sample_str}
+            """
 
 
-# rule download_name:
-#     output:
-#         contigs=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, [])),
-#         reads=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), sample=SAMPLES.get(DATASET, []))
-#     conda:
-#         "envs/cami2_processing.yml"
-#     shell:
-#         """
-#         python {SRC_DIR}/get_cami2_data.py {DATASET} {sample_str}
-#         """
+if config_concatenate:
+    rule concatenate:
+        input:
+            expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
+        output:
+            os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+        conda:
+            "envs/vamb.yml"
+        shell:
+            """
+            python {SRC_DIR}/concatenate.py {output} {input}
+            """
 
-
-
-# rule concatenate:
-#     input:
-#         expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
-#     output:
-#         os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
-#     conda:
-#         "envs/vamb.yml"
-#     shell:
-#         """
-#         python {SRC_DIR}/concatenate.py {output} {input}
-#         """
-
-
-# rule alignment:
-#     input:
-#         read=os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"),
-#         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
-#     output:
-#         os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam")
-#     threads:
-#         96
-#     conda:
-#         "envs/cami2_processing.yml"
-#     shell:
-#         """
-#         strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
-#         """
-
-
-# rule semibin:
-#     input:
-#         catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
-#         bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
-#     output:
-#         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output")
-#     conda:
-#         "envs/semibin_environment.yml"
-#     shell:
-#         """
-        
-#         """
-
+if config_alignment:
+    rule alignment:
+        input:
+            read=os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"),
+            catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+        output:
+            os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam")
+        threads:
+            96
+        conda:
+            "envs/cami2_processing.yml"
+        shell:
+            """
+            strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
+            """
 
 
 
@@ -171,8 +175,7 @@ elif MODEL=='taxvamb':
         output:
             database = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "gtdb_database"),  
             database_tmp = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "gtdb_database_tmp"), 
-            results = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results")
-            
+            results = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results")   
         params:
             seq_mode=1,
             job_id=100
@@ -285,24 +288,39 @@ elif MODEL == 'comebin':
 
 
 
-rule checkm2:
-    input:
-       fasta_bins=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{model}"), model=MODEL),
-    output:
-        output=directory(expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODEL))
-    conda:
-        "envs/checkm2.yml"
-    threads:
-        128
-    shell:
-        """
-        checkm2 predict --threads {threads} --input {input.fasta_bins} --output-directory {output.output}
-        """
+if config_checkm2:
+    rule checkm2:
+        input:
+        fasta_bins=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{model}"), model=MODEL),
+        output:
+            output=directory(expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODEL))
+        conda:
+            "envs/checkm2.yml"
+        threads:
+            128
+        shell:
+            """
+            checkm2 predict --threads {threads} --input {input.fasta_bins} --output-directory {output.output}
+            """
 
 
 
 
 
+
+
+# rule semibin:
+#     input:
+#         catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
+#         bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+#     output:
+#         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output")
+#     conda:
+#         "envs/semibin_environment.yml"
+#     shell:
+#         """
+        
+#         """
 
 
 
