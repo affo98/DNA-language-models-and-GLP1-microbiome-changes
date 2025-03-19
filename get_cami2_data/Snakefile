@@ -2,8 +2,6 @@ import os
 import yaml
 import glob
 
-MINSIZE_BINS=250000
-
 #dirs
 OUTDIR_RAW = os.path.join(os.getcwd(), "get_cami2_data", "raw_data")
 OUTDIR_PROCESSED = os.path.join(os.getcwd(), "get_cami2_data", "processed_data")
@@ -31,7 +29,15 @@ config_concatenate = config.get("CONCATENATE", False)
 config_alignment = config.get("ALIGNMENT", False)
 config_checkm2 = config.get("CHECKM2", False)
 
+MINSIZE_BINS=250000
 
+
+print(f"Configuration Flags:")
+print(f"Selected Model: {MODEL}")
+print(f"  - Download: {'Enabled' if config_download else 'Disabled'}")
+print(f"  - Concatenate: {'Enabled' if config_concatenate else 'Disabled'}")
+print(f"  - Alignment: {'Enabled' if config_alignment else 'Disabled'}")
+print(f"  - CheckM2: {'Enabled' if config_checkm2 else 'Disabled'}")
 
 
 
@@ -100,10 +106,6 @@ if config_checkm2:
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"),
         model=MODEL
     )
-
-import pprint
-print("\nGenerated Input Files for Snakemake Rule 'all':")
-pprint.pprint(input_files, width=100)
 
 
 rule all:
