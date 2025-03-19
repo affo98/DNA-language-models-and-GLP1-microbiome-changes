@@ -24,10 +24,10 @@ MODEL = config_model if config_model != 'all' else ALL_MODELS
 
 
 #processing flow of snakemake 
-config_download = config.get("DOWNLOAD", False)
-config_concatenate = config.get("CONCATENATE", False)
-config_alignment = config.get("ALIGNMENT", False)
-config_checkm2 = config.get("CHECKM2", False)
+config_download = config.get("DOWNLOAD", 'no')
+config_concatenate = config.get("CONCATENATE", 'no')
+config_alignment = config.get("ALIGNMENT", 'no')
+config_checkm2 = config.get("CHECKM2", 'no')
 
 MINSIZE_BINS=250000
 
@@ -42,23 +42,8 @@ print(f"  - MinSize Bins:        {MINSIZE_BINS}")
 
 
 
-#bams
-#expand(os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
-
-
-#comebin
-#os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"),
-
-#create fasta bins
-#os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "all_clusters"),
-#expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{model}"), model=MODELS))
-
-#checkm2
-#expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODEL)
-
-
 input_files = []
-if config_download==True:
+if config_download=='yes':
     input_files += expand(
         os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"),
         sample=SAMPLES.get(DATASET, [])
@@ -68,12 +53,12 @@ if config_download==True:
         sample=SAMPLES.get(DATASET, [])
     )
 
-if config_concatenate==True:
+if config_concatenate=='yes':
     input_files.append(
         os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
     )
 
-if config_alignment==True:
+if config_alignment=='yes':
     input_files += expand(
         os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_reads.fq.gz"),
         sample=SAMPLES.get(DATASET, [])
@@ -251,7 +236,7 @@ rule metabuli:
 
 rule taxconverter:
     input:
-        input_dir = directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results"))
+        input_dir = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results")
     output:
         result = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv")
     conda:
