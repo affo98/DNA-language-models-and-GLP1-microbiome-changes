@@ -16,7 +16,7 @@ BASE = os.path.join(os.getcwd(), "get_cami2_data")
 with open(os.path.join(BASE, "config.yml"), "r") as f:
     datasets_model_config = yaml.safe_load(f)
 
-ALL_DATASETS = [d["name"] for d in datasets_config["datasets"]]
+ALL_DATASETS = [d["name"] for d in datasets_model_config["datasets"]]
 DATASET = config.get("DATASET", "all")
 SAMPLES = {d["name"]: d.get("samples", []) for d in datasets_model_config["datasets"]}
 sample_str = ' '.join(SAMPLES.get(DATASET, []))
