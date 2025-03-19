@@ -190,7 +190,7 @@ elif MODEL=='taxvamb':
         output:
             result = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv")
         conda:
-            "get_cami2_Data/envs/taxconverter.yml"
+            "envs/taxconverter.yml"
         params:
             lineage_zip="https://github.com/RasmussenLab/taxconverter/raw/7f5ff980612dc59d3290b5ddfe97eb814e96c42f/data/lineage.zip",
             lineage_dir="taxconverter/data"
