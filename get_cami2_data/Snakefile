@@ -60,20 +60,20 @@ rule all:
         #alignment
         expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_reads.fq.gz"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
         #vamb
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_postprocess"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "vamb"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_postprocess"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "vamb"),
         #taxvamb
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_output"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_postprocess"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "taxvamb"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_output"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_postprocess"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "taxvamb"),
         #comebin
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"),
         #checkm2
-        expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODEL)
+        #expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODEL)
         
         
 
