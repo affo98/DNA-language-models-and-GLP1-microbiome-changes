@@ -19,7 +19,7 @@ ALL_DATASETS = [d["name"] for d in datasets_model_config["datasets"]]
 DATASET = config.get("DATASET", None)
 assert DATASET in ALL_DATASETS, f"Error: Selected dataset '{DATASET}' is not in the available DATASET: {ALL_DATASETS}"
 
-SAMPLES = {d["name"]: d.get("samples", []) for d in datasets_model_config["DATASET"]}
+SAMPLES = {d["name"]: d.get("samples", []) for d in datasets_model_config["datasets"]}
 sample_str = ' '.join(SAMPLES.get(DATASET, []))
 
 ALL_MODELS  = [d["name"] for d in datasets_model_config["models"]]
