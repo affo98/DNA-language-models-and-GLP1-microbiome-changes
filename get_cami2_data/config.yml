@@ -39,5 +39,6 @@ datasets:
 
 models:
   - name: vamb
+  - name: taxvamb
   - name: semibin2
   - name: comebin
