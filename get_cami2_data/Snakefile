@@ -186,8 +186,7 @@ elif MODEL=='taxvamb':
     
     rule taxconverter:
         input:
-            classification = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results", "100_classifications.tsv"),
-            report = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results", "100_report.tsv")
+            input_dir = directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results"))
         output:
             result = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv")
         conda:
@@ -204,7 +203,7 @@ elif MODEL=='taxvamb':
             curl -L -o {params.lineage_dir}/lineage.zip "{params.lineage_zip}"
             unzip -o {params.lineage_dir}/lineage.zip -d {params.lineage_dir}
 
-            taxconverter metabuli -c {input.classifications} -r {input.report} -o {output.result}
+            taxconverter metabuli -c {input.input_dir}/100_classifications.tsv -r {input.input_dir}/100_report.tsv -o {output.result}
             """
 
     rule taxvamb:
