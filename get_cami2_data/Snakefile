@@ -53,10 +53,11 @@ config_checkm2 = config.get("CHECKM2", False)
 
 rule all:
     input:
-        expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
-        expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
-        #concatenate
-        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        if config_download:
+            expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
+            expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
+        if config_concatenate:
+            os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
         #alignment
         #expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_reads.fq.gz"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
         #vamb
@@ -79,31 +80,31 @@ rule all:
 
 
 
-if config_download:
-    rule download:
-        output:
-            contigs=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, [])),
-            reads=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), sample=SAMPLES.get(DATASET, []))
-        conda:
-            "envs/cami2_processing.yml"
-        shell:
-            """
-            python {SRC_DIR}/get_cami2_data.py {DATASET} {sample_str}
-            """
+
+rule download:
+    output:
+        contigs=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, [])),
+        reads=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), sample=SAMPLES.get(DATASET, []))
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        python {SRC_DIR}/get_cami2_data.py {DATASET} {sample_str}
+        """
 
 
-if config_concatenate:
-    rule concatenate:
-        input:
-            expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
-        output:
-            os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
-        conda:
-            "envs/vamb.yml"
-        shell:
-            """
-            python {SRC_DIR}/concatenate.py {output} {input}
-            """
+
+rule concatenate:
+    input:
+        expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
+    output:
+        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+    conda:
+        "envs/vamb.yml"
+    shell:
+        """
+        python {SRC_DIR}/concatenate.py {output} {input}
+        """
 
 if config_alignment:
     rule alignment:
