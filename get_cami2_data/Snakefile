@@ -11,14 +11,14 @@ OUTDIR_CLUSTERS = os.path.join(os.getcwd(), "get_cami2_data", 'clusters')
 SRC_DIR = os.path.join(os.getcwd(), "get_cami2_data", "src")
 BASE = os.path.join(os.getcwd(), "get_cami2_data")
 
-#dataset, sample and model config
+#DATASETS, sample and model config
 with open(os.path.join(BASE, "config.yml"), "r") as f:
     datasets_model_config = yaml.safe_load(f)
-
 ALL_DATASETS = [d["name"] for d in datasets_model_config["datasets"]]
-DATASET = config.get("DATASET", "all")
+config_dataset = config.get("DATASETS", "all")
+DATASETS = config_dataset if config_dataset != 'all' else ALL_DATASETS
 SAMPLES = {d["name"]: d.get("samples", []) for d in datasets_model_config["datasets"]}
-sample_str = ' '.join(SAMPLES.get(DATASET, []))
+sample_str = ' '.join(SAMPLES.get(DATASETS, []))
 ALL_MODELS  = [d["name"] for d in datasets_model_config["models"]]
 config_model = config.get("MODEL", "all")
 MODEL = config_model if config_model != 'all' else None
@@ -46,51 +46,50 @@ print(f"  - MinSize Bins:        {MINSIZE_BINS}")
 input_files = []
 if config_download:
     input_files += expand(
-        os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"),
-        sample=SAMPLES.get(DATASET, [])
+        os.path.join(OUTDIR_RAW, DATASETS, "{sample}_contigs.fasta"),
+        sample=SAMPLES.get(DATASETS, [])
     )
     input_files += expand(
-        os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"),
-        sample=SAMPLES.get(DATASET, [])
+        os.path.join(OUTDIR_RAW, DATASETS, "{sample}_reads.fq.gz"),
+        sample=SAMPLES.get(DATASETS, [])
     )
 
 if config_concatenate:
     input_files.append(
-        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+        os.path.join(OUTDIR_PROCESSED, DATASETS, "catalogue.fna.gz")
     )
 
 if config_alignment:
     input_files += expand(
-        os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"),
-        sample=SAMPLES.get(DATASET, [])
+        os.path.join(OUTDIR_PROCESSED, DATASETS, "{sample}_sorted.bam"),
+        sample=SAMPLES.get(DATASETS, [])
     )
-
 
 if MODEL=='vamb':
     input_files += [
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_postprocess"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "vamb"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "vamb_output"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "vamb_postprocess"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "fasta_bins", "vamb"),
     ]
 
 elif MODEL=='taxvamb':
     input_files += [
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_output"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_postprocess"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "taxvamb"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "metabuli", "metabuli_results"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "taxconverter", "result.tsv"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "taxvamb_output"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "taxvamb_postprocess"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "fasta_bins", "taxvamb"),
     ]
 
 elif MODEL == 'comebin':
     input_files += [
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "comebin_output"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "fasta_bins", "comebin"),
     ]
 
 if config_checkm2:
     input_files += expand(
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "checkm2", "{model}_results"),
         model=MODEL
     )
 
@@ -104,49 +103,49 @@ rule all:
 # rule all:
 #     input:
 #         if config_download:
-#             expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
-#             expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
+#             expand(os.path.join(OUTDIR_RAW, DATASETS, "{sample}_contigs.fasta"), sample=[sample for sample in SAMPLES.get(DATASETS, [])]),
+#             expand(os.path.join(OUTDIR_RAW, DATASETS, "{sample}_reads.fq.gz"), sample=[sample for sample in SAMPLES.get(DATASETS, [])])
 #         if config_concatenate:
-#             os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+#             os.path.join(OUTDIR_PROCESSED, DATASETS, "catalogue.fna.gz")
         #alignment
-        #expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_reads.fq.gz"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
+        #expand(os.path.join(OUTDIR_PROCESSED, DATASETS, "{sample}_reads.fq.gz"), sample=[sample for sample in SAMPLES.get(DATASETS, [])]),
         #vamb
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_postprocess"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "vamb"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "vamb_output"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "vamb_postprocess"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "fasta_bins", "vamb"),
         #taxvamb
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_output"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_postprocess"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "taxvamb"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "metabuli", "metabuli_results"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "taxconverter", "result.tsv"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "taxvamb_output"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "taxvamb_postprocess"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "fasta_bins", "taxvamb"),
         #comebin
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "comebin_output"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "fasta_bins", "comebin"),
         #checkm2
-        #expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODEL)
+        #expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "checkm2", "{model}_results"), model=MODEL)
         
         
 
 
 rule download:
     output:
-        contigs=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, [])),
-        reads=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), sample=SAMPLES.get(DATASET, []))
+        contigs=expand(os.path.join(OUTDIR_RAW, DATASETS, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASETS, [])),
+        reads=expand(os.path.join(OUTDIR_RAW, DATASETS, "{sample}_reads.fq.gz"), sample=SAMPLES.get(DATASETS, []))
     conda:
         "envs/cami2_processing.yml"
     shell:
         """
-        python {SRC_DIR}/get_cami2_data.py {DATASET} {sample_str}
+        python {SRC_DIR}/get_cami2_data.py {DATASETS} {sample_str}
         """
 
 
 
 rule concatenate:
     input:
-        expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
+        expand(os.path.join(OUTDIR_RAW, DATASETS, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASETS, []))
     output:
-        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+        os.path.join(OUTDIR_PROCESSED, DATASETS, "catalogue.fna.gz")
     conda:
         "envs/vamb.yml"
     shell:
@@ -157,10 +156,10 @@ rule concatenate:
 
 rule alignment:
     input:
-        read=os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"),
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+        read=os.path.join(OUTDIR_RAW, DATASETS, "{sample}_reads.fq.gz"),
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASETS, "catalogue.fna.gz")
     output:
-        os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam")
+        os.path.join(OUTDIR_PROCESSED, DATASETS, "{sample}_sorted.bam")
     threads:
         96
     conda:
@@ -176,10 +175,10 @@ rule alignment:
 #VAMB
 rule vamb:
     input:
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
-        bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASETS, "catalogue.fna.gz"),
+        bams=expand(os.path.join(OUTDIR_PROCESSED, DATASETS, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASETS, []))
     output:
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output")
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "vamb_output")
     conda:
         "envs/cami2_processing.yml"
     shell:
@@ -189,9 +188,9 @@ rule vamb:
 
 rule move_cluster_outputs_vamb:
     input:
-        model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output")
+        model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "vamb_output")
     output:
-        cluster_results=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_postprocess"))
+        cluster_results=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "vamb_postprocess"))
     conda:
         "envs/cami2_processing.yml"
     shell:
@@ -201,10 +200,10 @@ rule move_cluster_outputs_vamb:
 
 rule create_fasta_bins_vamb:
     input:
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
-        cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_postprocess", "vamb_output_clusters.tsv")
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASETS, "catalogue.fna.gz"),
+        cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "vamb_postprocess", "vamb_output_clusters.tsv")
     output:
-        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "vamb"))
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "fasta_bins", "vamb"))
     params:
         minsize_bins = MINSIZE_BINS
     conda: 
@@ -219,11 +218,11 @@ rule create_fasta_bins_vamb:
 #TAXVAMB
 rule metabuli:
     input:
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASETS, "catalogue.fna.gz")
     output:
-        database = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "gtdb_database"),  
-        database_tmp = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "gtdb_database_tmp"), 
-        results = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results")   
+        database = os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "metabuli", "gtdb_database"),  
+        database_tmp = os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "metabuli", "gtdb_database_tmp"), 
+        results = os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "metabuli", "metabuli_results")   
     params:
         seq_mode=1,
         job_id=100
@@ -237,9 +236,9 @@ rule metabuli:
 
 rule taxconverter:
     input:
-        input_dir = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results")
+        input_dir = os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "metabuli", "metabuli_results")
     output:
-        result = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv")
+        result = os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "taxconverter", "result.tsv")
     conda:
         "envs/taxconverter.yml"
     params:
@@ -259,11 +258,11 @@ rule taxconverter:
 
 rule taxvamb:
     input:
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
-        bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, [])),
-        taxonomy=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv")
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASETS, "catalogue.fna.gz"),
+        bams=expand(os.path.join(OUTDIR_PROCESSED, DATASETS, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASETS, [])),
+        taxonomy=os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "taxconverter", "result.tsv")
     output:
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_output")
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "taxvamb_output")
     conda:
         "envs/cami2_environment.yml"
     shell:
@@ -274,9 +273,9 @@ rule taxvamb:
 
 rule move_cluster_outputs_taxvamb:
     input:
-        model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_output")
+        model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "taxvamb_output")
     output:
-        cluster_results=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_postprocess"))
+        cluster_results=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "taxvamb_postprocess"))
     conda:
         "envs/cami2_processing.yml"
     shell:
@@ -286,10 +285,10 @@ rule move_cluster_outputs_taxvamb:
 
 rule create_fasta_bins_taxvamb:
     input:
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
-        cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_postprocess", "vamb_output_clusters.tsv")
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASETS, "catalogue.fna.gz"),
+        cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "taxvamb_postprocess", "vamb_output_clusters.tsv")
     output:
-        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "taxvamb"))
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "fasta_bins", "taxvamb"))
     params:
         minsize_bins = MINSIZE_BINS
     conda: 
@@ -304,10 +303,10 @@ rule create_fasta_bins_taxvamb:
 #COMEBIN
 rule comebin:
     input:
-        catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
-        bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+        catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASETS, "catalogue.fna.gz")),
+        bams=expand(os.path.join(OUTDIR_PROCESSED, DATASETS, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASETS, []))
     output:
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output")
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "comebin_output")
     params:
         views=6,
         threads=48
@@ -320,9 +319,9 @@ rule comebin:
 
 rule postprocess_cluster_outputs_comebin:
     input:
-        model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output", "comebin_res", "comebin_res_bins")
+        model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "comebin_output", "comebin_res", "comebin_res_bins")
     output:
-        cluster_fasta=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"))
+        cluster_fasta=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "fasta_bins", "comebin"))
     params:
         minsize_bins = 250000
     conda:
@@ -338,9 +337,9 @@ rule postprocess_cluster_outputs_comebin:
 
 rule checkm2:
     input:
-        fasta_bins=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{model}"), model=MODEL)
+        fasta_bins=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "fasta_bins", "{model}"), model=MODEL)
     output:
-        output=directory(expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODEL))
+        output=directory(expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "checkm2", "{model}_results"), model=MODEL))
     conda:
         "envs/checkm2.yml"
     threads:
@@ -358,10 +357,10 @@ rule checkm2:
 
 # rule semibin:
 #     input:
-#         catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
-#         bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+#         catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASETS, "catalogue.fna.gz")),
+#         bams=expand(os.path.join(OUTDIR_PROCESSED, DATASETS, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASETS, []))
 #     output:
-#         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output")
+#         os.path.join(OUTDIR_MODEL_RESULTS, DATASETS, "semibin_output")
 #     conda:
 #         "envs/semibin_environment.yml"
 #     shell:
@@ -377,9 +376,9 @@ rule checkm2:
 
 # rule concatenate_process_semibin:
 #     input:
-#         os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
+#         os.path.join(OUTDIR, DATASETS, "catalogue.fna.gz")
 #     output:
-#         os.path.join(OUTDIR, DATASET, "semibin/catalogue_semibin.fna")
+#         os.path.join(OUTDIR, DATASETS, "semibin/catalogue_semibin.fna")
 #     conda:
 #         "envs/cami2_environment.yml"
 #     shell:
@@ -390,9 +389,9 @@ rule checkm2:
 
 # rule bam_process_semibin:
 #     input:
-#         bam=os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam")
+#         bam=os.path.join(OUTDIR, DATASETS, "{sample}_sorted.bam")
 #     output:
-#         modified_bam=os.path.join(OUTDIR, DATASET, "semibin/{sample}_sorted_semibin.bam")
+#         modified_bam=os.path.join(OUTDIR, DATASETS, "semibin/{sample}_sorted_semibin.bam")
 #     conda:
 #         "envs/cami2_environment.yml"
 #     shell:
@@ -404,8 +403,8 @@ rule checkm2:
 
 #rule_all
     #input:
-        #os.path.join(OUTDIR, DATASET, "semibin/catalogue_semibin.fna")
-        #expand(os.path.join(OUTDIR, DATASET, "semibin/{sample}_sorted_semibin.bam"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
+        #os.path.join(OUTDIR, DATASETS, "semibin/catalogue_semibin.fna")
+        #expand(os.path.join(OUTDIR, DATASETS, "semibin/{sample}_sorted_semibin.bam"), sample=[sample for sample in SAMPLES.get(DATASETS, [])])
 
 
 
