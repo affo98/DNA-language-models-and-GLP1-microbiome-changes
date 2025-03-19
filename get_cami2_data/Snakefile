@@ -53,8 +53,8 @@ config_checkm2 = config.get("CHECKM2", False)
 
 rule all:
     input:
-        expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_contigs.fasta"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
-        expand(os.path.join(OUTDIR_TMP, DATASET, "{sample}_reads.fq.gz"),  sample=[sample for sample in SAMPLES.get(DATASET, [])]),
+        expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
+        expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"),  sample=[sample for sample in SAMPLES.get(DATASET, [])]),
         #concatenate
         os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
         #alignment
