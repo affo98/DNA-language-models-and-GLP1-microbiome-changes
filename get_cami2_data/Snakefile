@@ -56,7 +56,7 @@ rule all:
         expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
         expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
         #concatenate
-        #os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
         #alignment
         #expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_reads.fq.gz"), sample=[sample for sample in SAMPLES.get(DATASET, [])]),
         #vamb
@@ -80,7 +80,7 @@ rule all:
 
 
 if config_download:
-    rule download_name:
+    rule download:
         output:
             contigs=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, [])),
             reads=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), sample=SAMPLES.get(DATASET, []))
