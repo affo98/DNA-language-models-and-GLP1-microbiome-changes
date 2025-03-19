@@ -12,3 +12,6 @@ textaugment
 scipy
 gdown
 textblob==0.17.1
+importlib_metadata
+tensorboard_logger
+tensorflow
