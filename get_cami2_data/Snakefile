@@ -289,7 +289,7 @@ rule comebin:
         views=6,
         threads=48
     conda:
-        "envs/comebin_environment.yml"
+        "envs/comebin.yml"
     shell:
         """
         bash run_comebin.sh -a {input.catalogue} -p {input.bams} -o {output} -n {params.views} -t {params.threads}
