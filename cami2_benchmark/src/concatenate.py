@@ -71,10 +71,13 @@ except:
     raise
 
 
-contig_lengths_before = []
+contig_lengths_after = []
 with vamb.vambtools.Reader(outpath) as file:
+    # Initialize a temporary list to store sequence lengths
+    temp_lengths = []
     for record in SeqIO.parse(file, "fasta"):
-        contig_lengths_before.append(len(record.seq))
+        temp_lengths.append(len(record.seq))
+    contig_lengths_after.extend(temp_lengths)
 
 
 def compute_summary_stats(lengths):
