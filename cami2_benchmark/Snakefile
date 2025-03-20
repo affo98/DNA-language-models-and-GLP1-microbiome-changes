@@ -36,6 +36,7 @@ config_alignment = bool(config.get("ALIGNMENT", False))
 config_checkm2 = bool(config.get("CHECKM2", False))
 
 MINSIZE_BINS=250000
+MINSIZE_CONTIGS=2000
 
 
 print(f"-------------Configuration Flags:--------------")
@@ -46,6 +47,7 @@ print(f"  - Concatenate:         {config_concatenate}")
 print(f"  - Alignment:           {config_alignment}")
 print(f"  - CheckM2:             {config_checkm2}")
 print(f"  - MinSize Bins:        {MINSIZE_BINS}")
+print(f"  - MinSize Contigs:     {MINSIZE_CONTIGS}")
 
 
 
@@ -126,7 +128,7 @@ rule concatenate:
     log:
         os.path.join(LOGS, DATASET, "concatenate.log")
     params:
-        min_length=2000
+        min_length=MINSIZE_CONTIGS
     conda:
         "envs/vamb.yml"
     shell:
