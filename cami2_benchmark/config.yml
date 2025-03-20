@@ -2,16 +2,17 @@ datasets:
   - name: airways_short
     samples: ["4", "7", "8", "9", "10", "11", "12", "23", "26", "27"]
   - name: gastro_short
-    samples: ["0", "1", "2", "3", "4", "5", "9", "10", "11", "12"]
+    samples: ["0"]
+    #samples: ["0", "1", "2", "3", "4", "5", "9", "10", "11", "12"]
   - name: oral_short
     samples: ["6", "7", "8", "13", "14", "15", "16", "17", "18", "19"]
-  - name: skin_short
+  - name: skin_short #
     samples: ["1", "13", "14", "15", "16", "17", "18", "19", "20", "28"]
-  - name: urogenital_short
+  - name: urogenital_short #
     samples: ["0", "2", "3", "5", "6", "21", "22", "24", "25"]
-  - name: marine_short
+  - name: marine_short #
     samples: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-  - name: plant_short
+  - name: plant_short #
     samples:
       [
         "0",
