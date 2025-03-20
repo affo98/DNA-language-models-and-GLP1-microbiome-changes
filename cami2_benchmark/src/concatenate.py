@@ -55,7 +55,6 @@ for path in args.inpaths:
     with open(path, "r") as handle:
         for record in SeqIO.parse(handle, "fasta"):
             contig_lengths_before.append(len(record.seq))
-num_contigs_before = len(contig_lengths_before)
 
 
 # Run the code. Compressing DNA is easy, this is not much bigger than level 9, but
@@ -71,18 +70,10 @@ except:
     filehandle.close()
     raise
 
-
-# if args.nozip:
-#     with open(outpath, "r") as handle:
-#         contig_lengths_after = [
-#             len(record.seq) for record in SeqIO.parse(handle, "fasta")
-#         ]
-# else:
-#     with gzip.open(outpath, "rt") as handle:
-#         contig_lengths_after = [
-#             len(record.seq) for record in SeqIO.parse(handle, "fasta")
-#         ]
-# num_contigs_after = len(contig_lengths_after)
+contig_lengths_before
+with gzip.open(outpath, "rt") as handle:
+    for record in SeqIO.parse(handle, "fasta"):
+        contig_lengths_before.append(len(record.seq))
 
 
 def compute_summary_stats(lengths):
@@ -102,11 +93,11 @@ stats_before = compute_summary_stats(contig_lengths_before)
 
 # Write log file
 with open(args.log, "w") as log_f:
-    log_f.write(f"Using minimum contig length of {args.minlength} ")
-    log_f.write(f"Total contigs before filtering: {num_contigs_before}\n")
-    # log_f.write(f"Total contigs after filtering: {num_contigs_after}\n")
+    log_f.write(f"Using minimum contig length of {args.minlength}\n")
+    log_f.write(f"Total contigs before filtering: {len(contig_lengths_before)}\n")
+    # log_f.write(f"Total contigs after filtering: {len(contig_lengths_after)}\n")
     # log_f.write(
-    #     f"Number of contigs removed: {num_contigs_before - num_contigs_after}\n\n"
+    #     f"Number of contigs removed: {len(contig_lengths_before) - len(contig_lengths_after)}\n\n"
     # )
 
     log_f.write(f"Contig length statistics (before filtering):\n")
