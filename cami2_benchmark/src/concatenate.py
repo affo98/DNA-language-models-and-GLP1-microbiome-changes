@@ -86,7 +86,7 @@ def compute_summary_stats(lengths):
 stats_before = compute_summary_stats(contig_lengths_before)
 
 contig_lengths_before = []
-with gzip.open(outpath, "rt") as handle:
+with gzip.open(outpath, "rt", compresslevel=1) as handle:
     for record in SeqIO.parse(handle, "fasta"):
         contig_lengths_before.append(len(record.seq))
 

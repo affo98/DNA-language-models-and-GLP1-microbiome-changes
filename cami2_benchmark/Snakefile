@@ -127,7 +127,7 @@ rule concatenate:
     log:
         os.path.join(LOGS, DATASET, "concatenate.log")
     params:
-        min_length=2500
+        min_length=2000
     conda:
         "envs/vamb.yml"
     shell:
