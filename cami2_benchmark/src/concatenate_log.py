@@ -54,8 +54,10 @@ def main():
         description="Contig length statistics and logging script."
     )
     parser.add_argument("inpaths", help="Paths to input FASTA file(s)", nargs="+")
-    parser.add_argument("outpath", help="Paths to output FASTA")
-    parser.add_argument("logfile", "--log", help="Path to log file")
+    parser.add_argument("outpath", help="Path to output FASTA")
+    parser.add_argument(
+        "--log", help="Path to log file", required=True
+    )  # Fixed the logfile argument
     parser.add_argument(
         "-m",
         "--minlength",
@@ -70,8 +72,8 @@ def main():
     contig_lengths_after = get_contig_lengths([args.outpath])
 
     # Log statistics to the provided logfile
-    log_statistics(contig_lengths_before, args.logfile, args.minlength)
-    log_statistics(contig_lengths_after, args.logfile, args.minlength)
+    log_statistics(contig_lengths_before, args.log, args.minlength)
+    log_statistics(contig_lengths_after, args.log, args.minlength)
 
 
 if __name__ == "__main__":
