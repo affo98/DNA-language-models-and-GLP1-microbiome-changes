@@ -31,23 +31,6 @@ def get_contig_lengths(paths):
     return contig_lengths
 
 
-def log_statistics(contig_lengths_before, logfile, minlength):
-    stats_before = compute_summary_stats(contig_lengths_before)
-
-    with open(logfile, "w") as log_f:
-        log_f.write(f"Using minimum contig length of {minlength}\n")
-        log_f.write(f"Total contigs before filtering: {len(contig_lengths_before)}\n")
-
-        log_f.write(f"Contig length statistics (before filtering):\n")
-        log_f.write(f"  Min length: {stats_before[0]}\n")
-        log_f.write(f"  Max length: {stats_before[1]}\n")
-        log_f.write(f"  Median length: {stats_before[2]:.2f}\n")
-        log_f.write(f"  25th percentile: {stats_before[3]}\n")
-        log_f.write(f"  75th percentile: {stats_before[4]}\n\n")
-
-    print(f"Log saved to {logfile}")
-
-
 def main():
     # Argument parsing
     parser = argparse.ArgumentParser(
@@ -68,12 +51,34 @@ def main():
     args = parser.parse_args()
 
     # Get contig lengths from input FASTA files
+
     contig_lengths_before = get_contig_lengths(args.inpaths)
     contig_lengths_after = get_contig_lengths([args.outpath])
 
-    # Log statistics to the provided logfile
-    log_statistics(contig_lengths_before, args.log, args.minlength)
-    log_statistics(contig_lengths_after, args.log, args.minlength)
+    stats_before = compute_summary_stats(contig_lengths_before)
+    stats_after = compute_summary_stats(contig_lengths_after)
+
+    # Write the statistics to the log file
+    with open(args.log, "w") as log_f:
+        log_f.write(f"Using minimum contig length of {args.minlength}\n")
+        log_f.write(f"Total contigs before filtering: {len(contig_lengths_before)}\n")
+        log_f.write(f"Total contigs after filtering: {len(contig_lengths_after)}\n")
+
+        # Before statistics
+        log_f.write(f"Contig length statistics (before filtering):\n")
+        log_f.write(f"  Min length: {stats_before[0]}\n")
+        log_f.write(f"  Max length: {stats_before[1]}\n")
+        log_f.write(f"  Median length: {stats_before[2]:.2f}\n")
+        log_f.write(f"  25th percentile: {stats_before[3]}\n")
+        log_f.write(f"  75th percentile: {stats_before[4]}\n\n")
+
+        # After statistics
+        log_f.write(f"Contig length statistics (after filtering):\n")
+        log_f.write(f"  Min length: {stats_after[0]}\n")
+        log_f.write(f"  Max length: {stats_after[1]}\n")
+        log_f.write(f"  Median length: {stats_after[2]:.2f}\n")
+        log_f.write(f"  25th percentile: {stats_after[3]}\n")
+        log_f.write(f"  75th percentile: {stats_after[4]}\n\n")
 
 
 if __name__ == "__main__":
