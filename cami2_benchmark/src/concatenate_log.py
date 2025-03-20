@@ -128,7 +128,7 @@ def main():
 
     # Get contig lengths from input FASTA files
     contig_lengths_before = get_contig_lengths(args.inpaths)
-    contig_lengths_after = get_contig_lengths(args.outpath)
+    contig_lengths_after = get_contig_lengths([args.outpath])
 
     # Log statistics to the provided logfile
     log_statistics(contig_lengths_before, args.logfile, args.minlength)
