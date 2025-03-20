@@ -3,12 +3,9 @@ import os
 import shutil
 from pathlib import Path
 
-# Define a mapping of input directories to specific filenames
 FILE_MAP = {
     "vamb_output": "vae_clusters_unsplit.tsv",
-    "semibin_output": "some_other_clusters.tsv",
-    "comebin_output": "model_clusters.tsv",
-    # Add more directories and filenames as needed
+    "taxvamb_output": "vaevae_clusters_unsplit.tsv",
 }
 
 
