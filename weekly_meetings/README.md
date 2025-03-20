@@ -3,10 +3,49 @@
 [Overleaf report](https://www.overleaf.com/project/679796b5a02b660e4f96beff)
 
 #### Meeting Outline
+* [20 March 2025](#date-30-january-2025)
 * [11 March 2025](#date-30-january-2025)
 * [27 February 2025](#date-30-january-2025)
 * [20 February 2025](#date-30-january-2025)
 * [06 February 2025](#date-30-january-2025)
+
+
+#### Date: 20 March 2025
+
+##### Who did you help this week?
+
+
+##### Who helped you this week?
+
+* The new HPC Admin at ITU.
+
+##### What did you achieve?
+
+
+* Processing Cami2 dataset, bioinformatics pipeline, e.g. align reads to contigs, and using tools from vamb.
+* Got vamb to work on a single cami2 dataset. It turns out that we did not implement vamb correctly in the research project.
+* Implemented evaluation tool CheckM2 which determines completion and contamination in clusters/bins. In realistic data, there are no labels that we can use to evaluate.
+* Using Snakemake for data processing flow works well. 
+* Got pretty far with pre-training code, but there is some reproducibility problems. 
+
+
+##### What did you struggle with?
+
+* Other binning models have a lot of errors: Comebin, Semibin2. They are also quite heavy to run, and require a lot of compute time. It is quite time-consuming. 
+* We have problems getting access to A100 80GB on Ucloud. We created a ticket to Ucloud, and talked to Inna. 
+
+##### What would you like to work on next week?
+
+* Finish Cami2 dataset processing and benchmark the other models on CAMI2: vamb, taxvamb, comebin, and maybe semibin2. 
+
+##### Where do you need help from Veronika?
+
+
+
+
+
+
+
 
 #### Date: 11 March 2025
 
@@ -28,17 +67,11 @@
 
 ##### What did you struggle with?
 
-
-
-
 ##### What would you like to work on next week?
-
-
 
 ##### Where do you need help from Veronika?
 
 * In pre-training, we wonder whether we should use varying length DNA sequences, or fixed length 10.000 bps. 
-
 
 
 
