@@ -70,6 +70,11 @@ except:
     filehandle.close()
     raise
 
+
+import time
+
+time.sleep(20)
+
 contig_lengths_before = []
 print(outpath)
 with gzip.open(outpath, "rt") as handle:
