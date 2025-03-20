@@ -5,7 +5,7 @@ import shutil
 from Bio import SeqIO
 
 
-def postprocess_comebin(input_dir, output_dir, min_total_length):
+def postprocess_comebin(input_dir, output_dir, min_total_length, log_file):
     """
     Filters FASTA files in the input directory, retaining only those where the sum of all sequence lengths
     exceeds min_total_length. Writes the filtered files to the output directory with .fna extension.
@@ -20,16 +20,26 @@ def postprocess_comebin(input_dir, output_dir, min_total_length):
         shutil.rmtree(output_dir)  # overwrite
     os.makedirs(output_dir)
 
+    num_clusters_before = 0
+    num_clusters_after = 0
+
     for filename in os.listdir(input_dir):
         if filename.endswith(".fasta") or filename.endswith(".fa"):
             input_file_path = os.path.join(input_dir, filename)
             total_length = 0
+            num_sequences = 0
 
+            # Read sequences and calculate total length
             with open(input_file_path, "r") as file:
                 for record in SeqIO.parse(file, "fasta"):
                     total_length += len(record.seq)
+                    num_sequences += 1
 
+            num_clusters_before += 1
+
+            # If the total length exceeds the threshold, write to the output directory
             if total_length > min_total_length:
+                num_clusters_after += 1
                 output_filename = os.path.splitext(filename)[0] + ".fna"
                 output_file_path = os.path.join(output_dir, output_filename)
                 with open(input_file_path, "r") as infile, open(
@@ -37,6 +47,19 @@ def postprocess_comebin(input_dir, output_dir, min_total_length):
                 ) as outfile:
                     for record in SeqIO.parse(infile, "fasta"):
                         SeqIO.write(record, outfile, "fasta")
+
+                # Log stats for this cluster
+                log.write(
+                    f"{filename} - Total Length: {total_length}, Number of Sequences: {num_sequences}\n"
+                )
+
+        with open(log_file, "w") as log_f:
+            log_f.write(f"Using minimum binsize of {min_total_length} base-pairs")
+            log_f.write(f"Total clusters before filtering: {num_clusters_before}\n")
+            log_f.write(f"Total clusters after filtering: {num_clusters_after}\n")
+            log_f.write(
+                f"Number of clusters removed: {num_clusters_before - num_clusters_after}\n"
+            )
 
     return
 
@@ -56,8 +79,12 @@ def main():
     print(f"Input: {args.input_dirs}")
     print(f"Output: {args.output_dir}")
     print(f"Minsize Bins: {args.minsize_bins}")
+    print(f"Log File: {args.log_file}")
 
-    postprocess_comebin(args.input_dirs, args.output_dir, args.minsize_bins)
+    postprocess_comebin(
+        args.input_dirs, args.output_dir, args.minsize_bins, args.log_file
+    )
+    print(f"Postprocess clustering complete. Log saved to {args.log}")
 
 
 if __name__ == "__main__":
