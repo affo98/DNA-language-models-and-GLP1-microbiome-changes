@@ -48,11 +48,6 @@ def postprocess_comebin(input_dir, output_dir, min_total_length, log_file):
                     for record in SeqIO.parse(infile, "fasta"):
                         SeqIO.write(record, outfile, "fasta")
 
-                # Log stats for this cluster
-                log.write(
-                    f"{filename} - Total Length: {total_length}, Number of Sequences: {num_sequences}\n"
-                )
-
         with open(log_file, "w") as log_f:
             log_f.write(f"Using minimum binsize of {min_total_length} base-pairs")
             log_f.write(f"Total clusters before filtering: {num_clusters_before}\n")

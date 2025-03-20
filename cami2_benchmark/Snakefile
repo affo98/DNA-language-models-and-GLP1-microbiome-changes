@@ -106,7 +106,6 @@ rule all:
         
         
 
-
 rule download:
     output:
         contigs=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, [])),
@@ -127,7 +126,7 @@ rule concatenate:
     log:
         os.path.join(LOGS, DATASET, "concatenate.log")
     params:
-        min_length=4000
+        min_length=2000
     conda:
         "envs/vamb.yml"
     shell:
