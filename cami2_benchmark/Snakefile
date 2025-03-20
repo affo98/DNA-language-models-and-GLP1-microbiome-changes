@@ -286,7 +286,7 @@ rule create_fasta_bins_taxvamb:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
         cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_postprocess")
     output:
-        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "taxvamb"))
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{MODEL}"))
     log:
         os.path.join(LOGS, DATASET, "{MODEL}_bin_postprocessing.log")
     params:
@@ -322,7 +322,7 @@ rule postprocess_cluster_outputs_comebin:
     input:
         model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output")
     output:
-        cluster_fasta=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"))
+        cluster_fasta=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{MODEL}"))
     log:
         os.path.join(LOGS, DATASET, "{MODEL}_bin_postprocessing.log")
     params:
