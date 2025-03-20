@@ -1,0 +1,10 @@
+name: comebin
+channels:
+  - pytorch
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.7
+  - mkl=2024.0.0
+  - comebin
