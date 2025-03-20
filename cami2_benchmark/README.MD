@@ -31,7 +31,7 @@ The list of models are specified in the file `config.yml`. They include:
 
 * **VAMB** [github](https://github.com/RasmussenLab/vamb).
 * **TaxVAMB** [github](https://github.com/RasmussenLab/vamb).
-* **Comebin** [paper](https://github.com/ziyewang/COMEBin).
+* **Comebin** [github](https://github.com/ziyewang/COMEBin).
 
 ### Output
 
