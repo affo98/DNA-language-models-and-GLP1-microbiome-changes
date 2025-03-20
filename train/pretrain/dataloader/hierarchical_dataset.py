@@ -159,34 +159,43 @@ class HierarchicalBatchSampler(Sampler):
         return idx
 
     def __iter__(self):
+        # Set random generator with epoch seed for reproducibility
         g = torch.Generator()
         g.manual_seed(self.epoch)
-        batch = []
         visited = set()
+        # Shuffle dataset indices
         indices = torch.randperm(len(self.dataset), generator=g).tolist()
-
         if not self.drop_last:
-            # add extra samples to make it evenly divisible
+            # Add extra samples to make indices evenly divisible by total_size
             indices += indices[:(self.total_size - len(indices))]
         else:
-            # remove tail of data to make it evenly divisible.
+            # Remove tail samples to make indices evenly divisible
             indices = indices[:self.total_size]
-
         assert len(indices) == self.total_size
 
-        # subsample
+        # Subsample indices for the current rank in distributed training
         indices = indices[self.rank:self.total_size:self.num_replicas]
         assert len(indices) == self.num_samples
 
-        remaining = list(set(indices).difference(visited))
-        while len(remaining) > self.batch_size:
-            idx = indices[torch.randint(len(indices), (1,))]
-            batch.append(idx)
-            visited.add(idx)
-            superkingdom, kingdom, phylum, class_, order, family, genus, species, id = self.dataset.get_label_by_index(
-                idx)
+        # Define a fixed number of batches per epoch
+        num_batches = self.__len__()
+        for _ in range(num_batches):
+            batch = []
+            # Calculate remaining indices that haven't been visited
+            remaining = list(set(indices).difference(visited))
+            # If there are no remaining indices, reset the visited set to allow re-sampling
+            if not remaining:
+                visited = set()
+                remaining = indices.copy()
+            # Sample an initial index from the remaining indices
+            init_idx = remaining[torch.randint(len(remaining), (1,)).item()]
+            batch.append(init_idx)
+            visited.add(init_idx)
+            # Get the hierarchical labels for the chosen index
+            superkingdom, kingdom, phylum, class_, order, family, genus, species, id = \
+                self.dataset.get_label_by_index(init_idx)
             
-            # Create hierarchical path and labels
+            # Create hierarchical path with corresponding label dictionaries
             hierarchy_path = [
                 (superkingdom, self.dataset.labels),
                 (kingdom, self.dataset.labels[superkingdom]),
@@ -199,23 +208,21 @@ class HierarchicalBatchSampler(Sampler):
                 (id, self.dataset.labels[superkingdom][kingdom][phylum][class_][order][family][genus][species])
             ]
             
-            # Get random samples for each level
-            sampled_indices = [
-                self.random_unvisited_sample(label, dict_, visited, indices, remaining)
-                for label, dict_ in hierarchy_path
-            ]
+            # Sample one index for each level in the hierarchical path
+            for label, dict_ in hierarchy_path:
+                sampled_idx = self.random_unvisited_sample(label, dict_, visited, indices, remaining)
+                batch.append(sampled_idx)
+                visited.add(sampled_idx)
             
-            # Update batch and visited sets
-            batch.extend(sampled_indices)
-            visited.update(sampled_indices)
-            remaining = list(set(indices).difference(visited))
-            if len(batch) >= self.batch_size:
-                yield batch
-                batch = []
-            remaining = list(set(indices).difference(visited))
-
-        if (len(remaining) > self.batch_size) and not self.drop_last:
-            batch.update(list(remaining))
+            # If batch size exceeds the target, truncate the batch
+            if len(batch) > self.batch_size:
+                batch = batch[:self.batch_size]
+            # If the batch has fewer samples than required, fill in with random indices
+            while len(batch) < self.batch_size:
+                extra = indices[torch.randint(len(indices), (1,)).item()]
+                batch.append(extra)
+                visited.add(extra)
+            
             yield batch
 
     def set_epoch(self, epoch):
