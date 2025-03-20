@@ -72,17 +72,17 @@ except:
     raise
 
 
-if args.nozip:
-    with open(outpath, "r") as handle:
-        contig_lengths_after = [
-            len(record.seq) for record in SeqIO.parse(handle, "fasta")
-        ]
-else:
-    with gzip.open(outpath, "rt") as handle:
-        contig_lengths_after = [
-            len(record.seq) for record in SeqIO.parse(handle, "fasta")
-        ]
-num_contigs_after = len(contig_lengths_after)
+# if args.nozip:
+#     with open(outpath, "r") as handle:
+#         contig_lengths_after = [
+#             len(record.seq) for record in SeqIO.parse(handle, "fasta")
+#         ]
+# else:
+#     with gzip.open(outpath, "rt") as handle:
+#         contig_lengths_after = [
+#             len(record.seq) for record in SeqIO.parse(handle, "fasta")
+#         ]
+# num_contigs_after = len(contig_lengths_after)
 
 
 def compute_summary_stats(lengths):
@@ -98,16 +98,16 @@ def compute_summary_stats(lengths):
 
 
 stats_before = compute_summary_stats(contig_lengths_before)
-stats_after = compute_summary_stats(contig_lengths_after)
+# stats_after = compute_summary_stats(contig_lengths_after)
 
 # Write log file
 with open(args.log, "w") as log_f:
     log_f.write(f"Using minimum contig length of {args.minlength} ")
     log_f.write(f"Total contigs before filtering: {num_contigs_before}\n")
-    log_f.write(f"Total contigs after filtering: {num_contigs_after}\n")
-    log_f.write(
-        f"Number of contigs removed: {num_contigs_before - num_contigs_after}\n\n"
-    )
+    # log_f.write(f"Total contigs after filtering: {num_contigs_after}\n")
+    # log_f.write(
+    #     f"Number of contigs removed: {num_contigs_before - num_contigs_after}\n\n"
+    # )
 
     log_f.write(f"Contig length statistics (before filtering):\n")
     log_f.write(f"  Min length: {stats_before[0]}\n")
@@ -116,11 +116,11 @@ with open(args.log, "w") as log_f:
     log_f.write(f"  25th percentile: {stats_before[3]}\n")
     log_f.write(f"  75th percentile: {stats_before[4]}\n\n")
 
-    log_f.write(f"Contig length statistics (after filtering):\n")
-    log_f.write(f"  Min length: {stats_after[0]}\n")
-    log_f.write(f"  Max length: {stats_after[1]}\n")
-    log_f.write(f"  Median length: {stats_after[2]:.2f}\n")
-    log_f.write(f"  25th percentile: {stats_after[3]}\n")
-    log_f.write(f"  75th percentile: {stats_after[4]}\n")
+    # log_f.write(f"Contig length statistics (after filtering):\n")
+    # log_f.write(f"  Min length: {stats_after[0]}\n")
+    # log_f.write(f"  Max length: {stats_after[1]}\n")
+    # log_f.write(f"  Median length: {stats_after[2]:.2f}\n")
+    # log_f.write(f"  25th percentile: {stats_after[3]}\n")
+    # log_f.write(f"  75th percentile: {stats_after[4]}\n")
 
 print(f"Concatenation complete. Log saved to {args.log}")
