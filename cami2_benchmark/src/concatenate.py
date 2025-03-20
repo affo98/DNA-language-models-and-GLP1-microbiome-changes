@@ -55,7 +55,6 @@ for path in args.inpaths:
     with open(path, "r") as handle:
         for record in SeqIO.parse(handle, "fasta"):
             contig_lengths_before.append(len(record.seq))
-
 num_contigs_before = len(contig_lengths_before)
 
 
@@ -74,10 +73,9 @@ except:
 
 
 contig_lengths_after = []
-with gzip.open(outpath, "rt") if not args.nozip else open(outpath, "r") as handle:
+with gzip.open(outpath, "rt") as handle:
     for record in SeqIO.parse(handle, "fasta"):
         contig_lengths_after.append(len(record.seq))
-
 num_contigs_after = len(contig_lengths_after)
 
 
