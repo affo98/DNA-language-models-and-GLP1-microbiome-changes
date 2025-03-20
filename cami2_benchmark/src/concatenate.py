@@ -72,10 +72,16 @@ except:
     raise
 
 
-contig_lengths_after = []
-with gzip.open(outpath, "rt") as handle:
-    for record in SeqIO.parse(handle, "fasta"):
-        contig_lengths_after.append(len(record.seq))
+if args.nozip:
+    with open(outpath, "r") as handle:
+        contig_lengths_after = [
+            len(record.seq) for record in SeqIO.parse(handle, "fasta")
+        ]
+else:
+    with gzip.open(outpath, "rt") as handle:
+        contig_lengths_after = [
+            len(record.seq) for record in SeqIO.parse(handle, "fasta")
+        ]
 num_contigs_after = len(contig_lengths_after)
 
 
