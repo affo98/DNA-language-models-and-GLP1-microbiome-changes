@@ -185,7 +185,7 @@ rule create_fasta_bins_vamb:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
         cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_postprocess")
     output:
-        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "vamb"))
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{MODEL}"))
     log:
         log_file=os.path.join(LOGS, DATASET, "{MODEL}_bin_postprocessing.log")
     params:
