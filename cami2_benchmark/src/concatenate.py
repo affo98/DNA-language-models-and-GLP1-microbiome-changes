@@ -70,14 +70,11 @@ except:
     filehandle.close()
     raise
 
-
-contig_lengths_after = []
-with vamb.vambtools.Reader(outpath) as file:
-    # Initialize a temporary list to store sequence lengths
-    temp_lengths = []
-    for record in SeqIO.parse(file, "fasta"):
-        temp_lengths.append(len(record.seq))
-    contig_lengths_after.extend(temp_lengths)
+contig_lengths_before = []
+print(outpath)
+with gzip.open(outpath, "rt") as handle:
+    for record in SeqIO.parse(handle, "fasta"):
+        contig_lengths_before.append(len(record.seq))
 
 
 def compute_summary_stats(lengths):
