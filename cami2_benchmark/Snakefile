@@ -187,7 +187,7 @@ rule create_fasta_bins_vamb:
     output:
         dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "vamb"))
     log:
-        os.path.join(LOGS, DATASET, "{MODEL}_bin_postprocessing.log")
+        log_file=os.path.join(LOGS, DATASET, "{MODEL}_bin_postprocessing.log")
     params:
         minsize_bins = MINSIZE_BINS
     conda: 
@@ -195,7 +195,7 @@ rule create_fasta_bins_vamb:
     shell:
         """
         python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results}/vamb_output_clusters.tsv {params.minsize_bins} {output.dirs}
-        --log {log}
+        --log {log.log_file}
         """
 #END VAMB
 
