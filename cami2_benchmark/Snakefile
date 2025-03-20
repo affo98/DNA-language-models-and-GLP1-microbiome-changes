@@ -10,7 +10,7 @@ OUTDIR_MODEL_RESULTS = os.path.join(os.getcwd(), "cami2_benchmark", "model_resul
 OUTDIR_CLUSTERS = os.path.join(os.getcwd(), "cami2_benchmark", 'clusters')
 SRC_DIR = os.path.join(os.getcwd(), "cami2_benchmark", "src")
 BASE = os.path.join(os.getcwd(), "cami2_benchmark")
-LOGS = os.path.join(os.getcwd(), "logs")
+LOGS = os.path.join(os.getcwd(), "cami2_benchmark", "logs")
 
 #DATASET, sample and model config
 with open(os.path.join(BASE, "config.yml"), "r") as f:
