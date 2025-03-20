@@ -133,7 +133,7 @@ rule concatenate:
     shell:
         """
         python {SRC_DIR}/concatenate.py {output} {input} -m {params.min_length}
-        python {SRC_DIR]/concatenate_log.py {input} {output} -m  {params.min_length} --log {log}
+        python {SRC_DIR]/concatenate_log.py {input} {output} -m {params.min_length} --log {log}
         """
 
 
