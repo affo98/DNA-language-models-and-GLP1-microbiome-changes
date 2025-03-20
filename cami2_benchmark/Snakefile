@@ -145,7 +145,7 @@ rule alignment:
     output:
         os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam")
     threads:
-        96
+        192
     conda:
         "envs/cami2_processing.yml"
     shell:
