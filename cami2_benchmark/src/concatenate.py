@@ -71,6 +71,12 @@ except:
     raise
 
 
+contig_lengths_before = []
+with vamb.vambtools.Reader(outpath) as file:
+    for record in SeqIO.parse(file, "fasta"):
+        contig_lengths_before.append(len(record.seq))
+
+
 def compute_summary_stats(lengths):
     if not lengths:
         return 0, 0, 0, 0, 0  # Handle empty case
@@ -84,12 +90,6 @@ def compute_summary_stats(lengths):
 
 
 stats_before = compute_summary_stats(contig_lengths_before)
-
-contig_lengths_before = []
-with gzip.open(outpath, "rt", compresslevel=1) as handle:
-    for record in SeqIO.parse(handle, "fasta"):
-        contig_lengths_before.append(len(record.seq))
-
 # stats_after = compute_summary_stats(contig_lengths_after)
 
 # Write log file
