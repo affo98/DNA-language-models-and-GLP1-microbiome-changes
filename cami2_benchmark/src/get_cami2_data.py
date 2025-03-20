@@ -177,9 +177,6 @@ def download_human(name, samples, OUTDIR_TMP_DATASET):
 
 def main(dataset, samples):
 
-    setup_logfile(LOG_PATH)
-    logging.info(f"---------- {dataset} ----------")
-
     OUTDIR_TMP_DATASET = os.path.join(OUTDIR_TMP, dataset)
     if os.path.exists(OUTDIR_TMP_DATASET):
         shutil.rmtree(OUTDIR_TMP_DATASET)
