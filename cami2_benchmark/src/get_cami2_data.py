@@ -158,6 +158,14 @@ def download_human(name, samples, OUTDIR_TMP_DATASET):
             read_file = find_file_in_subdirectories(
                 OUTDIR_TMP_DATASET, "anonymous_reads.fq"
             )
+            with open(read_file, "rb") as f_in:
+                with gzip.open(f"{read_file}.gz", "wb") as f_out:
+                    shutil.copyfileobj(f_in, f_out)
+
+            read_file = find_file_in_subdirectories(
+                OUTDIR_TMP_DATASET, "anonymous_reads.fq.gz"
+            )
+
         read_file_output = os.path.join(OUTDIR_TMP_DATASET, f"{sample}_reads.fq.gz")
         shutil.copy(read_file, read_file_output)
 
