@@ -55,7 +55,7 @@ def main():
     )
     parser.add_argument("inpaths", help="Paths to input FASTA file(s)", nargs="+")
     parser.add_argument("outpath", help="Paths to output FASTA")
-    parser.add_argument("logfile", help="Path to log file")
+    parser.add_argument("--log", help="Path to log file")
     parser.add_argument(
         "-m",
         "--minlength",
