@@ -70,7 +70,7 @@ except:
     filehandle.close()
     raise
 
-contig_lengths_before
+contig_lengths_before = []
 with gzip.open(outpath, "rt") as handle:
     for record in SeqIO.parse(handle, "fasta"):
         contig_lengths_before.append(len(record.seq))
