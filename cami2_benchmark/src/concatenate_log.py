@@ -16,67 +16,6 @@ def compute_summary_stats(lengths):
     )
 
 
-contig_lengths_before = []
-for path in args.inpaths:
-    with open(path, "r") as handle:
-        for record in SeqIO.parse(handle, "fasta"):
-            contig_lengths_before.append(len(record.seq))
-
-
-contig_lengths_before = []
-print(outpath)
-with gzip.open(outpath, "rt") as handle:
-    for record in SeqIO.parse(handle, "fasta"):
-        contig_lengths_before.append(len(record.seq))
-
-
-stats_before = compute_summary_stats(contig_lengths_before)
-# stats_after = compute_summary_stats(contig_lengths_after)
-
-# Write log file
-with open(args.log, "w") as log_f:
-    log_f.write(f"Using minimum contig length of {args.minlength}\n")
-    log_f.write(f"Total contigs before filtering: {len(contig_lengths_before)}\n")
-    # log_f.write(f"Total contigs after filtering: {len(contig_lengths_after)}\n")
-    # log_f.write(
-    #     f"Number of contigs removed: {len(contig_lengths_before) - len(contig_lengths_after)}\n\n"
-    # )
-
-    log_f.write(f"Contig length statistics (before filtering):\n")
-    log_f.write(f"  Min length: {stats_before[0]}\n")
-    log_f.write(f"  Max length: {stats_before[1]}\n")
-    log_f.write(f"  Median length: {stats_before[2]:.2f}\n")
-    log_f.write(f"  25th percentile: {stats_before[3]}\n")
-    log_f.write(f"  75th percentile: {stats_before[4]}\n\n")
-
-    # log_f.write(f"Contig length statistics (after filtering):\n")
-    # log_f.write(f"  Min length: {stats_after[0]}\n")
-    # log_f.write(f"  Max length: {stats_after[1]}\n")
-    # log_f.write(f"  Median length: {stats_after[2]:.2f}\n")
-    # log_f.write(f"  25th percentile: {stats_after[3]}\n")
-    # log_f.write(f"  75th percentile: {stats_after[4]}\n")
-
-print(f"Concatenation complete. Log saved to {args.log}")
-
-
-import argparse
-import gzip
-import numpy as np
-from Bio import SeqIO
-
-
-def compute_summary_stats(lengths):
-    if not lengths:
-        return 0, 0, 0, 0, 0  # Handle empty case
-    return (
-        np.min(lengths),
-        np.max(lengths),
-        np.percentile(lengths, 50),
-        np.percentile(lengths, 25),
-        np.percentile(lengths, 75),
-    )
-
-
 def get_contig_lengths(paths):
     """Get contig lengths from one or more FASTA files, handling .gz files."""
     contig_lengths = []
