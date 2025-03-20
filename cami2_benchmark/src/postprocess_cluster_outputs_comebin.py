@@ -68,18 +68,16 @@ def main():
     parser.add_argument(
         "minsize_bins", help="Minimum size of bin in bp", type=int, default=0
     )
+    parser.add_argument("--log", help="Path to log file", required=True)
 
     args = parser.parse_args()
     print(f"Postprocessing comebin cluster outputs:\n")
     print(f"Input: {args.input_dirs}")
     print(f"Output: {args.output_dir}")
     print(f"Minsize Bins: {args.minsize_bins}")
-    print(f"Log File: {args.log_file}")
+    print(f"Log File: {args.log}")
 
-    postprocess_comebin(
-        args.input_dirs, args.output_dir, args.minsize_bins, args.log_file
-    )
-    print(f"Postprocess clustering complete. Log saved to {args.log}")
+    postprocess_comebin(args.input_dirs, args.output_dir, args.minsize_bins, args.log)
 
 
 if __name__ == "__main__":
