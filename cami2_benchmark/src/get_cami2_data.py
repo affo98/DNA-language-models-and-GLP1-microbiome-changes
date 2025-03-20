@@ -12,7 +12,7 @@ import subprocess
 import requests
 
 
-OUTDIR_TMP = os.path.join(os.getcwd(), "get_cami2_data", "raw_data")
+OUTDIR_TMP = os.path.join(os.getcwd(), "cami2_benchmark", "raw_data")
 LOG_PATH = os.path.join(os.getcwd(), "logs")
 
 
