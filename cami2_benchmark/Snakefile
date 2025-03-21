@@ -161,13 +161,13 @@ rule vamb:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
         bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
     output:
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output")
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output"))
     conda:
         "envs/cami2_processing.yml"
     shell:
         """
         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
-        vamb bin default --outdir {output} --fasta {input.catalogue} --bamfiles {input.bams}
+        vamb bin default --outdir {output.dirs} --fasta {input.catalogue} --bamfiles {input.bams}
         """
 
 rule move_cluster_outputs_vamb:
