@@ -196,8 +196,7 @@ rule create_fasta_bins_vamb:
         "envs/vamb.yml"
     shell:
         """
-        python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results}/vamb_output_clusters.tsv {params.minsize_bins} {output.dirs}
-        --log {log.log_file}
+        python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results}/vamb_output_clusters.tsv {params.minsize_bins} {output.dirs} --log {log.log_file}
         """
 #END VAMB
 
@@ -297,8 +296,7 @@ rule create_fasta_bins_taxvamb:
         "envs/vamb.yml"
     shell:
         """
-        python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results}/vamb_output_clusters.tsv {params.minsize_bins} {output.dirs}
-        --log {log}
+        python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results}/vamb_output_clusters.tsv {params.minsize_bins} {output.dirs} --log {log}
         """
 #END TAXVAMB
 
@@ -334,7 +332,7 @@ rule postprocess_cluster_outputs_comebin:
         "envs/cami2_processing.yml"
     shell:
         """
-        python {SRC_DIR}/postprocess_cluster_outputs_comebin.py {output.cluster_fasta} {input.model_outputs}/comebin_res/comebin_res_bins {params.minsize_bins} --log {log}
+        python {SRC_DIR}/postprocess_cluster_outputs_comebin.py {output.cluster_fasta} {input.model_outputs}/comebin_res/comebin_res_bins {params.minsize_bins} --log \{log}
         """
 #END COMEBIN
 
