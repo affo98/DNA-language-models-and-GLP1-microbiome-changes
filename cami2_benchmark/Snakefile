@@ -318,7 +318,7 @@ rule comebin:
         """
         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
         gzip -dkc {input.catalogue} > {OUTDIR_PROCESSED}/{DATASET}/catalogue.fna
-        bash run_comebin.sh -a {input.catalogue} -p {input.bams} -o {output} -n {params.views} -t {params.threads}
+        bash run_comebin.sh -a {OUTDIR_PROCESSED}/{DATASET}/catalogue.fna -p {input.bams} -o {output} -n {params.views} -t {params.threads}
         """
 
 rule postprocess_cluster_outputs_comebin:
