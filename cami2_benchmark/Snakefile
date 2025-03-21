@@ -306,7 +306,7 @@ rule create_fasta_bins_taxvamb:
 rule comebin:
     input:
         catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
-        bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+        bams=directory(os.path.join(OUTDIR_PROCESSED, DATASET))
     output:
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output")
     params:
