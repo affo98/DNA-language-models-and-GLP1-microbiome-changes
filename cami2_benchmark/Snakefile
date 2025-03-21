@@ -186,9 +186,9 @@ rule create_fasta_bins_vamb:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
         cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_postprocess")
     output:
-        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{MODEL}"))
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "vamb"))
     log:
-        log_file=os.path.join(LOGS, DATASET, "{MODEL}_bin_postprocessing.log")
+        log_file=os.path.join(LOGS, DATASET, "vamb_bin_postprocessing.log")
     params:
         minsize_bins = MINSIZE_BINS
     conda: 
@@ -323,9 +323,9 @@ rule postprocess_cluster_outputs_comebin:
     input:
         model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output")
     output:
-        cluster_fasta=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{MODEL}"))
+        cluster_fasta=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"))
     log:
-        os.path.join(LOGS, DATASET, "{MODEL}_bin_postprocessing.log")
+        os.path.join(LOGS, DATASET, "comebin_bin_postprocessing.log")
     params:
         minsize_bins = 250000
     conda:
