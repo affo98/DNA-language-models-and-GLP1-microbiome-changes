@@ -311,7 +311,7 @@ rule comebin:
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output")
     params:
         views=6,
-        threads=48
+        threads=192
     conda:
         "envs/comebin.yml"
     shell:
