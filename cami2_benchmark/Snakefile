@@ -317,7 +317,7 @@ rule comebin:
     shell:
         """
         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
-        gzip -dkc {input.catalogue} > {OUTDIR_PROCESSED}/{DATASET}
+        gzip -dkc {input.catalogue} > {OUTDIR_PROCESSED}/{DATASET}/catalogue.fna
         bash run_comebin.sh -a {input.catalogue} -p {input.bams} -o {output} -n {params.views} -t {params.threads}
         """
 
