@@ -344,7 +344,7 @@ rule checkm2:
     output:
         output=directory(expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODEL))
     conda:
-        "envs/checkm2.yml"
+        "envs/cami2_processing.yml"
     threads:
         128
     shell:
