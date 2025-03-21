@@ -262,12 +262,12 @@ rule taxvamb:
         bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, [])),
         taxonomy=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv")
     output:
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_output")
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_output"))
     conda:
         "envs/cami2_processing.yml"
     shell:
         """
-        vamb bin taxvamb --outdir {output} --fasta {input.catalogue} --bamfiles {input.bams} --taxonomy {input.taxonomy}
+        vamb bin taxvamb --outdir {output.dirs} --fasta {input.catalogue} --bamfiles {input.bams} --taxonomy {input.taxonomy}
         """
 
 
@@ -317,6 +317,7 @@ rule comebin:
         "envs/comebin.yml"
     shell:
         """
+        mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
         bash run_comebin.sh -a {input.catalogue} -p {input.bams} -o {output} -n {params.views} -t {params.threads}
         """
 
