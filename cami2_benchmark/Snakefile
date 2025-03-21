@@ -34,6 +34,7 @@ config_download = bool(config.get("DOWNLOAD", False))
 config_concatenate = bool(config.get("CONCATENATE", False))
 config_alignment = bool(config.get("ALIGNMENT", False))
 config_checkm2 = bool(config.get("CHECKM2", False))
+config_nomodelrun = bool(config.get("NOMODELRUN", False))
 
 MINSIZE_BINS=250000
 MINSIZE_CONTIGS=2000
@@ -73,14 +74,14 @@ if config_alignment:
         sample=SAMPLES.get(DATASET, [])
     )
 
-if MODEL=='vamb':
+if MODEL=='vamb' and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_postprocess"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "vamb"),
     ]
 
-elif MODEL=='taxvamb':
+elif MODEL=='taxvamb' and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv"),
@@ -89,7 +90,7 @@ elif MODEL=='taxvamb':
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "taxvamb"),
     ]
 
-elif MODEL == 'comebin':
+elif MODEL == 'comebin' and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"),
