@@ -166,6 +166,7 @@ rule vamb:
         "envs/cami2_processing.yml"
     shell:
         """
+        mkdir {output}
         vamb bin default --outdir {output} --fasta {input.catalogue} --bamfiles {input.bams}
         """
 
