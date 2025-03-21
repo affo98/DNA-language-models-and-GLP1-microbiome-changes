@@ -287,9 +287,9 @@ rule create_fasta_bins_taxvamb:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
         cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_postprocess")
     output:
-        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{MODEL}"))
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "taxvamb"))
     log:
-        os.path.join(LOGS, DATASET, "{MODEL}_bin_postprocessing.log")
+        os.path.join(LOGS, DATASET, "taxvamb_bin_postprocessing.log")
     params:
         minsize_bins = MINSIZE_BINS
     conda: 
