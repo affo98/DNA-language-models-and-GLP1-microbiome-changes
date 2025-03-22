@@ -209,7 +209,7 @@ rule metabuli:
     output:
         database = os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database"),  
         database_tmp = os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database_tmp"), 
-        results = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results")   
+        results = directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results"))   
     params:
         seq_mode=1,
         job_id=100
@@ -231,7 +231,7 @@ rule metabuli:
 
 rule taxconverter:
     input:
-        input_dir = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results")
+        input_dir = directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results"))
     output:
         result = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv")
     conda:
@@ -273,7 +273,7 @@ rule taxvamb:
 
 rule move_cluster_outputs_taxvamb:
     input:
-        model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_output")
+        model_outputs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_output"))
     output:
         cluster_results=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_postprocess"))
     conda:
@@ -308,7 +308,7 @@ rule comebin:
         catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
         bams=directory(os.path.join(OUTDIR_PROCESSED, DATASET))
     output:
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output")
+        directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output"))
     params:
         views=6,
         threads=192
@@ -327,7 +327,7 @@ rule comebin:
 
 rule postprocess_cluster_outputs_comebin:
     input:
-        model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output")
+        model_outputs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output"))
     output:
         cluster_fasta=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"))
     log:
