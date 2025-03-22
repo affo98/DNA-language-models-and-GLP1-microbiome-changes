@@ -207,8 +207,8 @@ rule metabuli:
     input:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
     output:
-        database = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "gtdb_database"),  
-        database_tmp = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "gtdb_database_tmp"), 
+        database = os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database"),  
+        database_tmp = os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database_tmp"), 
         results = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results")   
     params:
         seq_mode=1,
