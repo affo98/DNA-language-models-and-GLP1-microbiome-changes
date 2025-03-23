@@ -238,6 +238,7 @@ rule metabuli_classify:
 
     shell:
         """
+        mkdir {OUTDIR_MODEL_RESULTS}/{DATASET}/metabuli
         metabuli classify --seq-mode {params.seq_mode} {input.catalogue} {input.database}/gtdb {output.results} {params.job_id}
         """
 
@@ -258,7 +259,6 @@ rule taxconverter_download:
         curl -L -o data "{params.lineage_zip}"   
         unzip -o data/lineage.zip -d data
         """
-
      
 
 rule taxconverter_run:
