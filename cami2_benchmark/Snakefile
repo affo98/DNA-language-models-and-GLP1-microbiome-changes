@@ -239,13 +239,13 @@ rule metabuli_classify:
 
     shell:
         """
+        wget https://mmseqs.com/metabuli/metabuli-linux-avx2.tar.gz
+        tar xvzf metabuli-linux-avx2.tar.gz
+        export PATH=$(pwd)/metabuli/bin/:$PATH
         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}/metabuli
         metabuli classify --seq-mode {params.seq_mode} {input.catalogue} {input.database}/gtdb {output.results} {params.job_id}
         """
 
- #wget https://mmseqs.com/metabuli/metabuli-linux-avx2.tar.gz
-    #tar xvzf metabuli-linux-avx2.tar.gz
-        #export PATH=$(pwd)/metabuli/bin/:$PATH
 
 
 rule taxconverter_download:
