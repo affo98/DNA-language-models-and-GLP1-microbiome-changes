@@ -238,7 +238,7 @@ rule metabuli_classify:
 
     shell:
         """
-     wget https://mmseqs.com/metabuli/metabuli-linux-avx2.tar.gz
+        wget https://mmseqs.com/metabuli/metabuli-linux-avx2.tar.gz
         tar xvzf metabuli-linux-avx2.tar.gz
         export PATH=$(pwd)/metabuli/bin/:$PATH
 
