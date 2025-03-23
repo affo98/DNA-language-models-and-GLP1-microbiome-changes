@@ -248,7 +248,7 @@ rule metabuli_classify:
 
 rule taxconverter_download:
     output:
-        taxconverter_dir="taxconverter"
+        taxconverter_dir=directory("taxconverter")
     params:
         lineage_zip="https://github.com/RasmussenLab/taxconverter/raw/7f5ff980612dc59d3290b5ddfe97eb814e96c42f/data/lineage.zip"
     conda:
