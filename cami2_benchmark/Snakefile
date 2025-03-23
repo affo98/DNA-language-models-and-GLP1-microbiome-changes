@@ -321,7 +321,7 @@ rule create_fasta_bins_taxvamb:
         "envs/vamb.yml"
     shell:
         """
-        python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results}/vamb_output_clusters.tsv {params.minsize_bins} {output.dirs} --log {log}
+        python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results}/taxvamb_output_clusters.tsv {params.minsize_bins} {output.dirs} --log {log}
         """
 #END TAXVAMB
 
