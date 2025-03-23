@@ -227,7 +227,7 @@ rule metabuli_database:
 
 rule metabuli_classify:
     input:
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
         database = os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database")
     output:
         results = directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results"))   
