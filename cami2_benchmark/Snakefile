@@ -83,7 +83,7 @@ if MODEL=='vamb' and not config_nomodelrun:
 
 elif MODEL=='taxvamb' and not config_nomodelrun:
     input_files += [
-        #"metabuli-linux-avx2.tar.gz",
+        "metabuli-linux-avx2.tar.gz",
         os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database"),  
         os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database_tmp"), 
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results"),
