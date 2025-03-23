@@ -226,6 +226,7 @@ rule metabuli_database:
         metabuli databases GTDB {output.database_out} {output.database_tmp}
         """
 
+
 rule metabuli_classify:
     input:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
@@ -242,9 +243,9 @@ rule metabuli_classify:
         tar xvzf metabuli-linux-avx2.tar.gz
         export PATH=$(pwd)/metabuli/bin/:$PATH
 
-        mkdir {OUTDIR_MODEL_RESULTS}/{DATASET}/metabuli
         metabuli classify --seq-mode {params.seq_mode} {input.catalogue} {input.database}/gtdb {output.results} {params.job_id}
         """
+
 
 rule taxconverter_download:
     output:
