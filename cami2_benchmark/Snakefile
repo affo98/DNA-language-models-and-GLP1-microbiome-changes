@@ -208,7 +208,7 @@ rule metabuli:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
     output:
         database = directory(os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database")),  
-        database_tmp = directory(os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database_tmp")), 
+        database_tmp = os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database_tmp"), 
         results = directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results"))   
     params:
         seq_mode=1,
@@ -220,8 +220,7 @@ rule metabuli:
         tar xvzf metabuli-linux-avx2.tar.gz
         export PATH=$(pwd)/metabuli/bin/:$PATH
 
-
-        if [ ! -d "{output.database}/gtdb" ]; then
+        if [ ! -d "{output.database_tmp}" ]; then
             metabuli databases GTDB {output.database} {output.database_tmp}
         fi
 
