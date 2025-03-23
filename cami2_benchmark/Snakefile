@@ -239,8 +239,6 @@ rule metabuli_classify:
 
     shell:
         """
-       
-
         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}/metabuli
         metabuli classify --seq-mode {params.seq_mode} {input.catalogue} {input.database}/gtdb {output.results} {params.job_id}
         """
