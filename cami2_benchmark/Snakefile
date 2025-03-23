@@ -314,7 +314,7 @@ rule comebin:
         threads=192
     conda:
         "envs/comebin.yml"
-    shell:
+    shell:  
         """
         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
 
@@ -349,7 +349,7 @@ rule checkm2:
     output:
         output=directory(expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODEL))
     conda:
-        "envs/cami2_processing.yml"
+        "envs/checkm2.yml"
     threads:
         128
     shell:
