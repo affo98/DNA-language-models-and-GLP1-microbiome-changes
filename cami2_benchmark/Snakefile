@@ -83,7 +83,7 @@ if MODEL=='vamb' and not config_nomodelrun:
 
 elif MODEL=='taxvamb' and not config_nomodelrun:
     input_files += [
-        "metabuli-linux-avx2.tar.gz",
+        #"metabuli-linux-avx2.tar.gz",
         os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database"),  
         os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database_tmp"), 
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results"),
@@ -238,6 +238,10 @@ rule metabuli_classify:
 
     shell:
         """
+     wget https://mmseqs.com/metabuli/metabuli-linux-avx2.tar.gz
+        tar xvzf metabuli-linux-avx2.tar.gz
+        export PATH=$(pwd)/metabuli/bin/:$PATH
+
         mkdir {OUTDIR_MODEL_RESULTS}/{DATASET}/metabuli
         metabuli classify --seq-mode {params.seq_mode} {input.catalogue} {input.database}/gtdb {output.results} {params.job_id}
         """
