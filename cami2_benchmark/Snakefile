@@ -260,7 +260,7 @@ rule taxconverter_download:
         pip install -e .
         
         rm data/lineage.zip
-        curl -L -o data "{params.lineage_zip}"   
+        curl -L -o data/lineage.zip "{params.lineage_zip}"   
         unzip -o data/lineage.zip -d data
         """
      
