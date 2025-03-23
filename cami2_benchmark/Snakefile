@@ -206,8 +206,9 @@ rule create_fasta_bins_vamb:
 rule metabuli:
     input:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+        database_inp = os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database")
     output:
-        database = directory(os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database")),  
+        database_out = directory(os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database")),  
         database_tmp = os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database_tmp"), 
         results = directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results"))   
     params:
@@ -221,10 +222,10 @@ rule metabuli:
         export PATH=$(pwd)/metabuli/bin/:$PATH
 
         if [ ! -d "{output.database_tmp}" ]; then
-            metabuli databases GTDB {output.database} {output.database_tmp}
+            metabuli databases GTDB {output.database_out} {output.database_tmp}
         fi
 
-        metabuli classify --seq-mode {params.seq_mode} {input.catalogue} {output.database}/gtdb {output.results} {params.job_id}
+        metabuli classify --seq-mode {params.seq_mode} {input.catalogue} {output.database_inp}/gtdb {output.results} {params.job_id}
         """
 
 rule taxconverter:
