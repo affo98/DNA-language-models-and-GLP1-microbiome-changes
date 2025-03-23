@@ -240,29 +240,33 @@ rule metabuli_classify:
         metabuli classify --seq-mode {params.seq_mode} {input.catalogue} {input.database}/gtdb {output.results} {params.job_id}
         """
 
-rule taxconverter:
+rule taxconverter_download:
+    output:
+        lineage_dir="taxconverter"
+    params:
+        lineage_zip="https://github.com/RasmussenLab/taxconverter/raw/7f5ff980612dc59d3290b5ddfe97eb814e96c42f/data/lineage.zip"
+    shell:
+        """
+        git clone git@github.com:RasmussenLab/taxconverter.git
+        cd taxconverter
+        pip install -e .
+
+        curl -L -o {params.lineage_dir}/lineage.zip "{params.lineage_zip}"
+        unzip -o {params.lineage_dir}/lineage.zip -d {params.lineage_dir}
+        """
+        
+
+
+rule taxconverter_run:
     input:
         input_dir = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results")
     output:
         result = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv")
     conda:
         "envs/taxconverter.yml"
-    params:
-        lineage_zip="https://github.com/RasmussenLab/taxconverter/raw/7f5ff980612dc59d3290b5ddfe97eb814e96c42f/data/lineage.zip",
-        lineage_dir="taxconverter/data"
+
     shell:
         """
-        if [ ! -d "taxconverter" ]; then
-            git clone git@github.com:RasmussenLab/taxconverter.git
-            cd taxconverter
-            pip install -e .
-        fi
-
-        if [ ! -f "{params.lineage_dir}/ncbi_lineage.csv" ] || [ ! -f "{params.lineage_dir}/metabuli_lineage.csv" ]; then
-            curl -L -o {params.lineage_dir}/lineage.zip "{params.lineage_zip}"
-            unzip -o {params.lineage_dir}/lineage.zip -d {params.lineage_dir}
-        fi
-
         taxconverter metabuli -c {input.input_dir}/100_classifications.tsv -r {input.input_dir}/100_report.tsv -o {output.result}
         """
 
