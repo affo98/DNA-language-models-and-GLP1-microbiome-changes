@@ -83,6 +83,9 @@ if MODEL=='vamb' and not config_nomodelrun:
 
 elif MODEL=='taxvamb' and not config_nomodelrun:
     input_files += [
+        "metabuli-linux-avx2.tar.gz",
+        os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database"),  
+        os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database_tmp"), 
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_output"),
@@ -106,8 +109,8 @@ if config_checkm2:
 rule all:
     input: input_files
 
-        
-        
+
+
 
 rule download:
     output:
@@ -203,13 +206,30 @@ rule create_fasta_bins_vamb:
 
 
 #TAXVAMB
-rule metabuli:
-    input:
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
-        database_inp = os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database")
+rule metabuli_download:
+    output:
+        metabuli_bin = "metabuli-linux-avx2.tar.gz"
+    shell:
+        """
+        wget https://mmseqs.com/metabuli/metabuli-linux-avx2.tar.gz
+        tar xvzf metabuli-linux-avx2.tar.gz
+        export PATH=$(pwd)/metabuli/bin/:$PATH
+        """
+
+rule metabuli_database:
     output:
         database_out = directory(os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database")),  
-        database_tmp = os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database_tmp"), 
+        database_tmp = directory(os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database_tmp")), 
+    shell:
+    """
+    metabuli databases GTDB {output.database_out} {output.database_tmp}
+    """
+
+rule metabuli_classify:
+    input:
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+        database = os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database")
+    output:
         results = directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results"))   
     params:
         seq_mode=1,
@@ -217,15 +237,7 @@ rule metabuli:
 
     shell:
         """
-        wget https://mmseqs.com/metabuli/metabuli-linux-avx2.tar.gz
-        tar xvzf metabuli-linux-avx2.tar.gz
-        export PATH=$(pwd)/metabuli/bin/:$PATH
-
-        if [ ! -d "{output.database_tmp}" ]; then
-            metabuli databases GTDB {output.database_out} {output.database_tmp}
-        fi
-
-        metabuli classify --seq-mode {params.seq_mode} {input.catalogue} {output.database_inp}/gtdb {output.results} {params.job_id}
+        metabuli classify --seq-mode {params.seq_mode} {input.catalogue} {input.database}/gtdb {output.results} {params.job_id}
         """
 
 rule taxconverter:
