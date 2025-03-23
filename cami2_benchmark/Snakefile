@@ -87,6 +87,7 @@ elif MODEL=='taxvamb' and not config_nomodelrun:
         os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database"),  
         os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database_tmp"), 
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results"),
+        "taxconverter",
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_output"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_postprocess"),
