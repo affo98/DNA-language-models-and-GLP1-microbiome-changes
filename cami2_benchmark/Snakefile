@@ -243,7 +243,7 @@ rule metabuli_classify:
 
 rule taxconverter_download:
     output:
-        lineage_dir="taxconverter"
+        taxconverter_dir="taxconverter"
     params:
         lineage_zip="https://github.com/RasmussenLab/taxconverter/raw/7f5ff980612dc59d3290b5ddfe97eb814e96c42f/data/lineage.zip"
     shell:
@@ -251,12 +251,11 @@ rule taxconverter_download:
         git clone git@github.com:RasmussenLab/taxconverter.git
         cd taxconverter
         pip install -e .
-
-        curl -L -o {params.lineage_dir}/lineage.zip "{params.lineage_zip}"
-        unzip -o {params.lineage_dir}/lineage.zip -d {params.lineage_dir}
-        """
         
+        unzip -o taxconverter/data/lineage.zip -d taxconverter/data
+        """
 
+#curl -L -o lineage.zip "{params.lineage_zip}"        
 
 rule taxconverter_run:
     input:
