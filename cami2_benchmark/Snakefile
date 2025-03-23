@@ -92,7 +92,7 @@ elif MODEL=='taxvamb' and not config_nomodelrun:
 
 elif MODEL == 'comebin' and not config_nomodelrun:
     input_files += [
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"),
     ]
 
