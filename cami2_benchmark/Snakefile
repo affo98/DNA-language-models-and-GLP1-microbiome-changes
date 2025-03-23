@@ -220,7 +220,7 @@ rule metabuli_download:
 rule metabuli_database:
     output:
         database_out = directory(os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database")),  
-        database_tmp = directory(os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database_tmp")), 
+        database_tmp = directory(os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database_tmp"))
     shell:
         """
         metabuli databases GTDB {output.database_out} {output.database_tmp}
