@@ -246,16 +246,20 @@ rule taxconverter_download:
         taxconverter_dir="taxconverter"
     params:
         lineage_zip="https://github.com/RasmussenLab/taxconverter/raw/7f5ff980612dc59d3290b5ddfe97eb814e96c42f/data/lineage.zip"
+    conda:
+        "envs/taxconverter.yml"
     shell:
         """
-        git clone git@github.com:RasmussenLab/taxconverter.git
+        git clone https://github.com/RasmussenLab/taxconverter.git
         cd taxconverter
         pip install -e .
         
-        unzip -o taxconverter/data/lineage.zip -d taxconverter/data
+        rm data/lineage.zip
+        curl -L -o data "{params.lineage_zip}"   
+        unzip -o data/lineage.zip -d data
         """
 
-#curl -L -o lineage.zip "{params.lineage_zip}"        
+     
 
 rule taxconverter_run:
     input:
@@ -264,7 +268,6 @@ rule taxconverter_run:
         result = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv")
     conda:
         "envs/taxconverter.yml"
-
     shell:
         """
         taxconverter metabuli -c {input.input_dir}/100_classifications.tsv -r {input.input_dir}/100_report.tsv -o {output.result}
