@@ -30,7 +30,7 @@ Parameters:
 
 Sample labels are unfortuantly not available as metadata on ENA. Below is a description of how sample labels were obtained for each study. 
 
-For study_ids `PRJDB3601`, `PRJNA448494`, `PRJEB12123`, `PRJEB21528`, and `PRJNA422434`, sample labels are obtained from the GMREPO, which is a curated database of reads and metadata from gut microbiome studies. We downloaded the metadata for each study respectively. They are saved in `.data/sample_labels_raw/gmrepo/`
+For study_ids `PRJNA448494`, `PRJEB12123`, `PRJEB21528`, and `PRJNA422434`, sample labels are obtained from the GMREPO, which is a curated database of reads and metadata from gut microbiome studies. We downloaded the metadata for each study respectively. They are saved in `.data/sample_labels_raw/gmrepo/`
 Reference: https://gmrepo.humangut.info/home
 
 

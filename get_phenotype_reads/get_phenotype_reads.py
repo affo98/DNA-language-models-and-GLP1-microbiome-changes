@@ -20,19 +20,23 @@ def setup_data_paths() -> None:
         # "DATA_PATH": os.path.join(os.getcwd(), "data"),
         # "CONFIG_PATH": os.path.join(os.getcwd(), "config"),
         "STUDIES_FASTQ_PATH": os.path.join(
-            os.getcwd(), "NGS_PIPELINE", "metadata", "studies_fastq_list"
+            os.getcwd(), "get_phenotype_reads", "metadata", "studies_fastq_list"
         ),
         "SAMPLE_LABELS_RAW_PATH": os.path.join(
-            os.getcwd(), "NGS_PIPELINE", "metadata", "sample_labels_raw"
+            os.getcwd(), "get_phenotype_reads", "metadata", "sample_labels_raw"
         ),
         "SAMPLE_LABELS_RAW_METAML_PATH": os.path.join(
-            os.getcwd(), "NGS_PIPELINE", "data", "sample_labels_raw", "metaml"
+            os.getcwd(),
+            "get_phenotype_reads",
+            "metadata",
+            "sample_labels_raw",
+            "metaml",
         ),
         "SAMPLE_LABELS_OUTPUT_PATH": os.path.join(
-            os.getcwd(), "NGS_PIPELINE", "raw_data", "sample_labels"
+            os.getcwd(), "get_phenotype_reads", "raw_data", "sample_labels"
         ),
         "READS_OUTPUT_PATH": os.path.join(
-            os.getcwd(), "NGS_PIPELINE", "raw_data", "reads"
+            os.getcwd(), "get_phenotype_reads", "raw_data", "reads"
         ),
     }
 
@@ -80,26 +84,26 @@ def preprocess_abundance_metaml(path_to_abundance: str) -> None:
     return
 
 
-def read_studies(file_path: str) -> tuple[list[str], dict[str, str]]:
-    """Reads a YAML file and returns a list of study_ids and a dict mapping study id to name."""
+# def read_studies(file_path: str) -> tuple[list[str], dict[str, str]]:
+#     """Reads a YAML file and returns a list of study_ids and a dict mapping study id to name."""
 
-    study_id_to_name = {}
-    file_path = os.path.join(os.environ["CONFIG_PATH"], "phenotype_studies.yml")
-    with open(file_path, "r") as file:
-        data = yaml.safe_load(file)
-        for study in data["studies"]:
-            study_id_to_name[study["id"]] = study["name"]
+#     study_id_to_name = {}
+#     file_path = os.path.join(os.environ["CONFIG_PATH"], "phenotype_studies.yml")
+#     with open(file_path, "r") as file:
+#         data = yaml.safe_load(file)
+#         for study in data["studies"]:
+#             study_id_to_name[study["id"]] = study["name"]
 
-    return list(study_id_to_name.keys()), study_id_to_name
+#     return list(study_id_to_name.keys()), study_id_to_name
 
 
-def fetch_metadata_from_study(study_id) -> None:
+def fetch_metadata_from_study(study_id: str, study_name: str) -> None:
     """Download list of fastq files from a study id from ENA"""
 
     url = f"https://www.ebi.ac.uk/ena/portal/api/filereport?accession={study_id}&result=read_run&fields=study_accession,sample_accession,experiment_accession,run_accession,fastq_ftp"
     destination = os.path.join(
         os.environ["STUDIES_FASTQ_PATH"],
-        f"{study_id_to_names[study_id]}_{study_id}_fastq_list.txt",
+        f"{study_name}_{study_id}_fastq_list.txt",
     )
 
     try:
@@ -108,19 +112,16 @@ def fetch_metadata_from_study(study_id) -> None:
         print(f"Error downloading the file: {e}")
 
 
-def create_studies_dictionary(file_path: str, study_ids: list) -> dict:
+def create_studies_dictionary(study_id: str) -> dict:
     """
     Read list of fastq files from multiple studies and organize them in a nested dictionary.
     Structure: {study_accession: {run_accession: [fastq_files]}}
     """
     studies_data = {}
 
-    for filename in os.listdir(file_path):
-        if filename.endswith("_fastq_list.txt"):
-            study_id = filename.split("_")[1]
-            if study_id not in study_ids:
-                continue
-            study_file_path = os.path.join(file_path, filename)
+    for filename in os.listdir(os.environ["STUDIES_FASTQ_PATH"]):
+        if study_id in filename:
+            study_file_path = os.path.join(os.environ["STUDIES_FASTQ_PATH"], filename)
 
             with open(study_file_path, "r") as file:
                 next(file)
@@ -143,7 +144,7 @@ def create_studies_dictionary(file_path: str, study_ids: list) -> dict:
     return studies_data
 
 
-def map_sampleid_to_alias(all_studies_fastq: dict) -> dict:
+def map_sampleid_to_alias(samples_fastq: dict, study_name: str) -> dict:
     """Creates a mapping of sample_id to sample_alias and updates the sample_labels file with the new sample_id.
     Also removes samples that are not in the sample_labels file.
 
@@ -153,11 +154,8 @@ def map_sampleid_to_alias(all_studies_fastq: dict) -> dict:
     Returns:
         dict: processed dictionary all_studies_fastq, where some samples have been removed.
     """
-    for study_id, samples in tqdm(all_studies_fastq.items(), desc="Mapping Sample IDs"):
-        study_name = study_id_to_names[study_id]
-        logging.info(
-            f"#Samples {study_id} {study_name} \n    Before: {len(all_studies_fastq[study_id])}"
-        )
+    for study_id, samples in tqdm(samples_fastq.items(), desc="Mapping Sample IDs"):
+        samples_before = len(samples_fastq[study_id])
 
         all_sample_labels_raw = [
             os.path.relpath(
@@ -201,9 +199,9 @@ def map_sampleid_to_alias(all_studies_fastq: dict) -> dict:
                 if k in sample_aliases_to_include
             }
 
-            all_studies_fastq[study_id] = {
+            samples_fastq[study_id] = {
                 sample_id: runs
-                for sample_id, runs in all_studies_fastq[study_id].items()
+                for sample_id, runs in samples_fastq[study_id].items()
                 if sample_id in [ele[1] for ele in sample_alias_to_id.items()]
             }
 
@@ -227,9 +225,9 @@ def map_sampleid_to_alias(all_studies_fastq: dict) -> dict:
                     for label in sample_labels
                 ]
 
-            all_studies_fastq[study_id] = {
+            samples_fastq[study_id] = {
                 sample_id: runs
-                for sample_id, runs in all_studies_fastq[study_id].items()
+                for sample_id, runs in samples_fastq[study_id].items()
                 if sample_id in sample_ids
             }
 
@@ -280,9 +278,9 @@ def map_sampleid_to_alias(all_studies_fastq: dict) -> dict:
 
             sample_ids = [run_id_to_sample_id[run_id][0] for run_id in run_ids]
 
-            all_studies_fastq[study_id] = {
+            samples_fastq[study_id] = {
                 sample_id: runs
-                for sample_id, runs in all_studies_fastq[study_id].items()
+                for sample_id, runs in samples_fastq[study_id].items()
                 if sample_id in sample_ids
             }
 
@@ -310,11 +308,17 @@ def map_sampleid_to_alias(all_studies_fastq: dict) -> dict:
                     updated_line = "\t".join([sample_id, str(sample_label)])
                     file.write(updated_line + "\n")
 
-        logging.info(f"    After:  {len(all_studies_fastq[study_id])} \n")
-    return all_studies_fastq
+            samples_after = len(samples_fastq[study_id])
+            with open(args.log, "a") as log:
+                log.write(
+                    f"#Samples {study_id} {study_name} \n    Before: {samples_before}"
+                )
+                log.write(f"    After:  {samples_after} \n")
+
+    return samples_fastq
 
 
-def download_fastq(url, destination):
+def download_fastq(url: str, destination: str) -> None:
     """Download a fastq file using wget."""
     try:
         subprocess.run(["wget", url, "-O", destination], check=True)
@@ -323,33 +327,34 @@ def download_fastq(url, destination):
         print(f"Error downloading file: {e}")
 
 
-def download_all_fastq_files(all_studies_fastq: dict) -> None:
+def download_all_fastq_files(samples_fastq: dict, study_name: str) -> None:
     """
     Download all FASTQ files from all studies.
 
     Expects a nested dictionary structure:
-      all_studies_fastq[study_id][sample_id][run_accession] = fastq_file
+      samples_fastq[study_id][sample_id][run_accession] = fastq_file
 
     Requires that `study_id_to_names` is defined (mapping study_id to study_name).
     """
-    for study_id in all_studies_fastq.keys():
-        study_name = study_id_to_names[study_id]
+    for study_id in samples_fastq.keys():
         study_dir = os.path.join(
             os.environ["READS_OUTPUT_PATH"], f"{study_name}_{study_id}"
         )
         os.makedirs(study_dir, exist_ok=True)
 
-        for sample_id in all_studies_fastq[study_id]:
+        for sample_id in samples_fastq[study_id]:
             sample_dir = os.path.join(study_dir, sample_id)
             os.makedirs(sample_dir, exist_ok=True)
 
-            for run_accession in all_studies_fastq[study_id][sample_id]:
+            for run_accession in samples_fastq[study_id][sample_id]:
                 run_dir = os.path.join(sample_dir, run_accession)
                 os.makedirs(run_dir, exist_ok=True)
 
-                for fastq_file in all_studies_fastq[study_id][sample_id][run_accession]:
+                for fastq_file in samples_fastq[study_id][sample_id][run_accession]:
                     fastq_filename = os.path.basename(fastq_file)
-                    destination_path = os.path.join(run_dir, fastq_filename)
+                    destination_path = os.path.join(
+                        sample_dir, fastq_filename.split("_")[-1]
+                    )
                     download_fastq(fastq_file, destination_path)
 
     return
@@ -359,25 +364,21 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="List files in multiple study directories."
     )
-    parser.add_argument(
-        "-s", "--studies", nargs="*", help="Study IDs to filter (optional)"
-    )
+    parser.add_argument("-i", "--studyid", help="Study ID to filter")
+    parser.add_argument("-n", "--studyname", help="Study ID to filter")
+    parser.add_argument("--log", help="Path to log file", required=True)
     args = parser.parse_args()
+
+    study_id = args.studyid
+    study_name = args.studyname
 
     setup_data_paths()
 
     preprocess_abundance_metaml(os.environ["SAMPLE_LABELS_RAW_METAML_PATH"])
 
-    all_study_ids, study_id_to_names = read_studies(os.environ["CONFIG_PATH"])
-    study_ids = args.studies if args.studies else all_study_ids
+    fetch_metadata_from_study(study_id, study_name)
 
-    [fetch_metadata_from_study(study_id) for study_id in study_ids]
+    samples_fastq = create_studies_dictionary(study_id)
+    samples_fastq = map_sampleid_to_alias(samples_fastq, study_name)
 
-    all_studies_fastq = create_studies_dictionary(
-        os.environ["STUDIES_FASTQ_PATH"], study_ids
-    )
-    all_studies_fastq = map_sampleid_to_alias(all_studies_fastq)
-
-    # 3400 fastq files, every fastq-file is 1.5 GB approx, every run has two fastq files
-
-    download_all_fastq_files(all_studies_fastq)
+    # download_all_fastq_files(samples_fastq, study_name)
