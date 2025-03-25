@@ -6,5 +6,9 @@ channels:
 dependencies:
   - python
   - pip
+  - numpy
+  - scikit-learn
+  - biopython
+  - tqdm
   - pip:
       - torch

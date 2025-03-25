@@ -6,6 +6,7 @@ from tqdm import tqdm
 
 def get_embeddings(
     dna_sequences: list[str],
+    batch_size: list[int],
     model_name: str,
     model_path: str,
     save_path: str,
@@ -43,7 +44,7 @@ def get_embeddings(
     if model_name == "TNF":
         embeddings = calculate_tnf(dna_sequences, model_path)
     elif model_name == "TNF_KERNEL":
-        embeddings = calculate_tnf(dna_sequences, model_path, kernel=True)
+        embeddings = calculate_tnf(dna_sequences, model_path, use_kernel=True)
 
     print(f"Embeddings shape: {embeddings.shape}")
     with open(save_path, "wb") as f:
@@ -52,8 +53,19 @@ def get_embeddings(
     return embeddings
 
 
+def validate_input_array(array: np.ndarray) -> np.ndarray:
+    "Returns array similar to input array but C-contiguous and with own data."
+    if not array.flags["C_CONTIGUOUS"]:
+        array = _np.ascontiguousarray(array)
+    if not array.flags["OWNDATA"]:
+        array = array.copy()
+
+    assert array.flags["C_CONTIGUOUS"] and array.flags["OWNDATA"]
+    return array
+
+
 def calculate_tnf(
-    dna_sequences: list[str], model_path: str, kernel: bool = False
+    dna_sequences: list[str], model_path: str, use_kernel: bool = False
 ) -> np.ndarray:
     """Calculates tetranucleotide frequencies in a list of DNA sequences.
 
@@ -69,7 +81,6 @@ def calculate_tnf(
             - embeddings (np.ndarray): A 2D numpy array of shape (n, 256), where `n` is the number of DNA sequences,
               and each row contains the tetranucleotide frequency vector for a sequence.
 
-    TO-DO: UPDATE TNF TO USE 103-DIMENSIONAL - SEE VAMB
     """
 
     nucleotides = ["A", "T", "C", "G"]
@@ -109,20 +120,12 @@ def calculate_tnf(
     total_counts[total_counts == 0] = 1e-10  # avoid division by 0
     embeddings = embeddings / total_counts[:, None]
 
-    if kernel:
-        kernel = np.load(model_path)
-        vamb_embeddings = validate_input_array(vamb_embeddings["arr_0"])
+    if use_kernel:
+        kernel_raw = np.load(model_path)
+        kernel = validate_input_array(kernel_raw["arr_0"])
 
         tnf_embeddings += -(1 / 256)
 
-        embeddings = np.dot(tnf_embeddings, vamb_embeddings)
-
-    def _project(fourmers: _np.ndarray, kernel: _np.ndarray = _KERNEL) -> _np.ndarray:
-        "Project fourmers down in dimensionality"
-        s = fourmers.sum(axis=1).reshape(-1, 1)
-        s[s == 0] = 1.0
-        fourmers *= 1 / s
-        fourmers += -(1 / 256)
-        return _np.dot(fourmers, kernel)
+        embeddings = np.dot(embeddings, kernel)
 
     return embeddings
