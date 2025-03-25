@@ -11,8 +11,8 @@ from sklearn.preprocessing import normalize
 
 import torch
 
-from binning.src.clustering import KMediod
-from binning.src.get_embeddings import get_embeddings
+from src.clustering import KMediod
+from src.get_embeddings import get_embeddings
 
 csv.field_size_limit(2**30)
 
