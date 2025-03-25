@@ -382,7 +382,7 @@ rule checkm2:
         if [ ! -d "{OUTDIR_MODEL_RESULTS}/checkm2_database" ]; then
             checkm2 database --download --path {OUTDIR_MODEL_RESULTS}/checkm2_database
         fi
-        checkm2 predict --threads {threads} --input {input.fasta_bins} --output-directory {output.output} --database_path {OUTDIR_MODEL_RESULTS}/checkm2_database
+        checkm2 predict --threads {threads} --input {input.fasta_bins} --output-directory {output.output} --database_path {OUTDIR_MODEL_RESULTS}/checkm2_database/CheckM2_database
         """
 
 
