@@ -32,7 +32,7 @@ assert MODEL==None or MODEL in ALL_MODELS, f"Error: Selected model '{MODEL}' is 
 
 MODEL_PATH=None
 if MODEL in other_model_config.keys():
-    MODEL_PATH = other_model_config[MODEL]
+    MODEL_PATH = other_model_config[MODEL]["model_path"]
 BATCH_SIZES = 0
 
 #processing flow of snakemake 
