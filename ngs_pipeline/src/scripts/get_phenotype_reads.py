@@ -18,10 +18,11 @@ def setup_data_paths() -> None:
     paths = {
         "STUDIES_FASTQ_PATH": os.path.join(BASEDIR, "metadata", "studies_fastq_list"),
         "SAMPLE_LABELS_RAW_PATH": os.path.join(
-            BASEDIR, "metadata", "sample_labels_raw"
+            BASEDIR, "src", "metadata", "sample_labels_raw"
         ),
         "SAMPLE_LABELS_RAW_METAML_PATH": os.path.join(
             BASEDIR,
+            "src",
             "metadata",
             "sample_labels_raw",
             "metaml",
