@@ -381,4 +381,4 @@ if __name__ == "__main__":
     samples_fastq = create_studies_dictionary(study_id)
     samples_fastq = map_sampleid_to_alias(samples_fastq, study_name)
 
-    # download_all_fastq_files(samples_fastq, study_name)
+    download_all_fastq_files(samples_fastq, study_name)
