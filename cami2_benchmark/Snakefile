@@ -112,8 +112,7 @@ if config_checkm2:
 
 rule all:
     input: input_files
-    
-print(f"Final input_files: {input_files}")
+
 
 
 
@@ -383,7 +382,7 @@ rule checkm2:
         if [ ! -d "{OUTDIR_MODEL_RESULTS}/checkm2_database" ]; then
             checkm2 database --download --path {OUTDIR_MODEL_RESULTS}/checkm2_database
         fi
-        checkm2 predict --threads {threads} --input {input.fasta_bins} --output-directory {output.output}
+        checkm2 predict --threads {threads} --input {input.fasta_bins} --output-directory {output.output} --database_path {OUTDIR_MODEL_RESULTS}/checkm2_database
         """
 
 
