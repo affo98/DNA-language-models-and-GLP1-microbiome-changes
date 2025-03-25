@@ -48,7 +48,7 @@ rule fastqc:
     log:
         os.path.join(LOGS, "fastqc/{sample}_{reads}.log")
     threads:
-        8
+        24
     conda:
         os.path.join(CONDA_ENVS, "fastqc.yaml")
     shell:
@@ -90,7 +90,7 @@ rule kneaddata:
         p2 = os.path.join(OUTDIR, "knead/{sample}/{sample}_1_kneaddata_paired_2.fastq"),
     log:
         os.path.join(LOGS, "knead/{sample}.log")
-    threads: 12
+    threads: 64
     conda:
         os.path.join(CONDA_ENVS, "kneaddata.yaml"),
     benchmark:
@@ -132,11 +132,11 @@ rule metaspades:
         os.path.join(BENCHMARKS, "assembly", "{sample}.txt"),
     params:
         k="auto", #k-mer size
-        m="6", #memory 100gb vamb
+        m="90", #memory 100gb vamb
         tmp_dir = os.path.join(OUTDIR, "spades/asm_{sample}/tmp"),
     log:
         os.path.join(LOGS, "metaspades/{sample}.log")
-    threads: 12 # 24 vamb
+    threads: 64 # 24 vamb
     conda:
         os.path.join(CONDA_ENVS, "metaspades.yaml")
     shell:
@@ -173,7 +173,7 @@ rule alignment:
     benchmark:
         os.path.join(BENCHMARKS, "alignment", "{sample}.txt")
     threads:
-        8
+        64
     conda:
         os.path.join(CONDA_ENVS, "strobealign.yaml")
     shell:
@@ -188,7 +188,7 @@ rule get_coverage:
     output:
         os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv"),
     threads:
-        8
+        32
     conda:
         os.path.join(CONDA_ENVS, "coverm.yaml")
     params:
