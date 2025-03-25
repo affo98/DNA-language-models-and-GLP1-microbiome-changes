@@ -4,5 +4,3 @@ channels:
   - conda-forge
 dependencies:
   - checkm2
-  - python=3.8 # Specify Python version for compatibility
-  - tensorflow=2.4 # Add the compatible version of tensorflow
