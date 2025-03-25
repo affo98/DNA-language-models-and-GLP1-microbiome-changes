@@ -38,7 +38,6 @@ def main(args):
             args.model_path,
             os.path.join(args.save_path, "embeddings"),
         )
-        embeddings = normalize(embeddings)
     except Exception:
         print(
             f"|===========| Error in getting embeddings for {args.model_name}|===========|\n{traceback.format_exc()}"
@@ -47,7 +46,7 @@ def main(args):
 
     kmediod = KMediod(
         embeddings,
-        min_similarity=0.01,  # 0.0075
+        min_similarity=0.008,  # 0.0075
         min_bin_size=10,
         num_steps=3,
         max_iter=1000,
