@@ -15,7 +15,7 @@ LOGS = os.path.join(os.getcwd(), "cami2_benchmark", "logs")
 with open(os.path.join(BASE, "config.yml"), "r") as f:
     datasets_model_config = yaml.safe_load(f)
 
-with open(os.path,join("evaluate", "models.yml"), "r") as f:
+with open(os.path.join("evaluate", "models.yml"), "r") as f:
     other_model_config = yaml.safe_load(f)
 
 ALL_DATASETS = [d["name"] for d in datasets_model_config["datasets"]]
@@ -29,7 +29,9 @@ ALL_MODELS  = [d["name"] for d in datasets_model_config["models"]]
 MODEL = config.get("MODEL", None)
 assert MODEL==None or MODEL in ALL_MODELS, f"Error: Selected model '{MODEL}' is not in the available DATASET: {ALL_MODELS}"
 
-
+MODEL_PATH=None
+if MODEL in other_model_config.keys():
+    MODEL_PATH = other_model_config[MODEL]
 
 
 #processing flow of snakemake 
@@ -46,6 +48,7 @@ MINSIZE_CONTIGS=2000
 print(f"-------------Configuration Flags:--------------")
 print(f"  - DATASET:             {DATASET}")
 print(f"  - Selected Model:      {MODEL}")
+print(f"   - Model Path:         {model_path}")
 print(f"  - Download:            {config_download}")
 print(f"  - Concatenate:         {config_concatenate}")
 print(f"  - Alignment:           {config_alignment}")
@@ -107,6 +110,12 @@ elif MODEL == 'comebin' and not config_nomodelrun:
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"),
     ]
 
+elif MODEL == 'tnf' and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "tnf"),
+    ]
+
 if config_checkm2:
     input_files += [os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", f"{MODEL}_results")]
 
@@ -114,6 +123,40 @@ if config_checkm2:
 rule all:
     input: input_files
 
+
+
+#TNF
+rule tnf:
+    input:
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+    output:
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output"))
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
+        LOGIC
+        """
+
+rule create_fasta_bins_vamb:
+    input:
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output")
+    output:
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "vamb"))
+    log:
+        log_file=os.path.join(LOGS, DATASET, "tnf_bin_postprocessing.log")
+    params:
+        minsize_bins = MINSIZE_BINS
+    conda: 
+        "envs/vamb.yml"
+    shell:
+        """
+        python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results}/tnf_output_clusters.tsv {params.minsize_bins} {output.dirs} \
+        --log {log.log_file}
+        """
+#END TNF
 
 
 
@@ -162,7 +205,6 @@ rule alignment:
         """
         strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
         """
-
 
 
 #VAMB

@@ -1,0 +1,10 @@
+name: llm
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python
+  - pip
+  - pip:
+      - torch

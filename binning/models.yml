@@ -1,11 +1,8 @@
 tnf:
   model_path: "tnf"
-  save_name: "tnf.npy"
 
 tnf_kernel:
   model_path: "helpers/tnf_kernel.npz"
-  save_name: "tnf_kernel.npy"
 
 dna2vec:
   model_path: "helpers/4mer_embedding.npy"
-  save_name: "dna2vec.npy"
