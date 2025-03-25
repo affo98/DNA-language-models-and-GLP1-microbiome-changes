@@ -59,13 +59,9 @@ print(f"  - MinSize Bins:        {MINSIZE_BINS}")
 print(f"  - MinSize Contigs:     {MINSIZE_CONTIGS}")
 print(f"  - No model run:        {config_nomodelrun}")
 
-print("Configuration from Snakemake:")
-for key, value in config.items():
-    print(f"{key}: {value} (type: {type(value)})")
-
 
 input_files = []
-if config_dowload:
+if config_download:
     input_filens += expand(
         os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"),
         sample=SAMPLES.get(DATASET, [])
