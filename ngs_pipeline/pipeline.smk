@@ -24,17 +24,18 @@ for sample in samples:
     sample_name = sample.split("/")[-1].split("_")[0]
     SAMPLES_LU[sample_name] = sample
     SAMPLES.append(sample_name)
-
+print("ALL SAMPLES FOUND:",SAMPLES)
 rule all:
     input:
+        # expand(os.path.join(OUTDIR, "fastqc/{sample}_{reads}_fastqc.html"),sample=SAMPLES,reads=READS),
+        # expand(os.path.join(OUTDIR, "fastqc/{sample}_{reads}_fastqc.zip"),sample=SAMPLES,reads=READS),
+        # expand(os.path.join(OUTDIR, "knead/{sample}/{sample}_1_kneaddata_paired_1.fastq"),sample=SAMPLES),
+        # expand(os.path.join(OUTDIR, "knead/{sample}/{sample}_1_kneaddata_paired_2.fastq"),sample=SAMPLES),
+        # expand(os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"),sample=SAMPLES),
+        # expand(os.path.join(OUTDIR, "algn/{sample}_sorted.bam"),sample=SAMPLES),
+        # expand(os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv"), sample=SAMPLES),
+        # os.path.join(OUTDIR, "global_contig_catalogue.fna.gz"),
         os.path.join(OUTDIR, "abdn_coverm/abundances.tsv"),
-        expand(os.path.join(OUTDIR, "algn/{sample}_sorted.bam"),sample=SAMPLES),
-        os.path.join(OUTDIR, "global_contig_catalogue.fna.gz"),
-        expand(os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"),sample=SAMPLES),
-        expand(os.path.join(OUTDIR, "knead/{sample}/{sample}_1_kneaddata_paired_1.fastq"),sample=SAMPLES),
-        expand(os.path.join(OUTDIR, "knead/{sample}/{sample}_1_kneaddata_paired_2.fastq"),sample=SAMPLES),
-        expand(os.path.join(OUTDIR, "fastqc/{sample}_{reads}_fastqc.html"),sample=SAMPLES,reads=READS),
-        expand(os.path.join(OUTDIR, "fastqc/{sample}_{reads}_fastqc.zip"),sample=SAMPLES,reads=READS),
 
 
 rule fastqc:
@@ -163,7 +164,7 @@ rule concatenate:
         concatenate = os.path.join(PY_SCRIPTS, "concatenate.py")
     shell:
         """
-        python {params.concatenate} {output} {input} -m 0
+        python {params.concatenate} {output} {input} -m 94
         """
 
 rule alignment:
