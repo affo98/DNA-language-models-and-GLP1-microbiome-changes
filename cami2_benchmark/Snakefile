@@ -10,13 +10,13 @@ OUTDIR_MODEL_RESULTS = os.path.join(os.getcwd(), "cami2_benchmark", "model_resul
 SRC_DIR = os.path.join(os.getcwd(), "cami2_benchmark", "src")
 BASE = os.path.join(os.getcwd(), "cami2_benchmark")
 LOGS = os.path.join(os.getcwd(), "cami2_benchmark", "logs")
-BINNING_SCRIPT = os.path.join(os.getcwd(), "binning", "binning.py")
+BINNING_DIR = os.path.join(os.getcwd(), "binning")
 
 #DATASET, sample and model config
 with open(os.path.join(BASE, "config.yml"), "r") as f:
     datasets_model_config = yaml.safe_load(f)
 
-with open(os.path.join("evaluate", "models.yml"), "r") as f:
+with open(os.path.join(BINNING_DIR, "models.yml"), "r") as f:
     other_model_config = yaml.safe_load(f)
 
 ALL_DATASETS = [d["name"] for d in datasets_model_config["datasets"]]
@@ -137,7 +137,7 @@ rule other_model:
     shell:
         """
         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
-        python {BINNING_SCRIPT} -c {input.catalogue} -m {MODEL} -mp {MODEL_PATH} \
+        python {BINNING_DIR}/binning.py -c {input.catalogue} -m {MODEL} -mp {MODEL_PATH} \
         -b {BATCH_SIZES} -s {output.dirs}
         """
 
