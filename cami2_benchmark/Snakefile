@@ -51,6 +51,11 @@ print(f"  - MinSize Bins:        {MINSIZE_BINS}")
 print(f"  - MinSize Contigs:     {MINSIZE_CONTIGS}")
 print(f"  - No model run:        {config_nomodelrun}")
 
+print("Configuration from Snakemake:")
+for key, value in config.items():
+    print(f"{key}: {value} (type: {type(value)})")
+
+
 
 
 input_files = []
