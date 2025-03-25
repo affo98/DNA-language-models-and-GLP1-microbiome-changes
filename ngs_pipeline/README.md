@@ -5,7 +5,7 @@
 
 2) Run the download script with: `./get_conda.sh`. Once downloaded, restart the shell, by the instructions written to stdout.
 
-3) Create the conda env from global snakemake pipeline configuration "environment.yaml" file : `conda env create -f environment.yaml`
+3) Create the conda env from global snakemake pipeline configuration "environment.yaml" file : `conda env create -f pipeline.yaml`
 
 4) Download the human genome bowtie2 index, unpack it, and place into the folder created at `ngs_pipeline/src/databases/bowtie2-index`.
 
