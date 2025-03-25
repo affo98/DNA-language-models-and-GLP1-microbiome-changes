@@ -49,6 +49,7 @@ print(f"  - Alignment:           {config_alignment}")
 print(f"  - CheckM2:             {config_checkm2}")
 print(f"  - MinSize Bins:        {MINSIZE_BINS}")
 print(f"  - MinSize Contigs:     {MINSIZE_CONTIGS}")
+print(f"  - No model run:        {config_nomodelrun}")
 
 
 
