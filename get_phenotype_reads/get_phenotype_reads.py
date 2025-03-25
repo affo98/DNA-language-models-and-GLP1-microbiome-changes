@@ -324,7 +324,7 @@ def download_all_fastq_files(samples_fastq: dict, study_name: str) -> None:
 
     Requires that `study_id_to_names` is defined (mapping study_id to study_name).
     """
-    for study_id in samples_fastq.keys():
+    for study_id in tqdm(samples_fastq.keys(), desc="Downloading Fastq Files"):
         study_dir = os.path.join(
             os.environ["READS_OUTPUT_PATH"], f"{study_name}_{study_id}"
         )

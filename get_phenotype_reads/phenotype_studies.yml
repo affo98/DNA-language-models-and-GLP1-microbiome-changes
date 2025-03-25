@@ -1,6 +1,4 @@
 studies:
-  - id: PRJEB4336
-    name: OBE-D
   - id: PRJEB12123
     name: OBE-C
   - id: PRJNA422434
@@ -11,5 +9,9 @@ studies:
     name: T2D-EW
   - id: PRJEB21528
     name: CAR
-  #- id: PRJDB3601
+
+  #potential inclusion
+  #- id: PRJEB4336 - multiple runs per patient
+  #  name: OBE-D
+  #- id: PRJDB3601 - too few fat people
   #  name: OBE-J
