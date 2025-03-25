@@ -1,0 +1,14 @@
+name: cami2_processing
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python
+  - snakemake
+  - pyyaml
+  - samtools
+  - strobealign
+  - pip
+  - pip:
+      - Bio
