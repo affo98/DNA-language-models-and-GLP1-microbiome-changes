@@ -10,5 +10,3 @@ dependencies:
   - requests
   - wget
   - pip
-  - pip:
-      - xml
