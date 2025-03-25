@@ -9,7 +9,7 @@ def calc_coverage(bams: list[str], output_file: str, threads: int = 4):
         trim_upper=0.1,
         trim_lower=0.1,
         threads=threads,
-        minid=0.001,
+        min_identity=0.001,
     )
     with open(output_file, "w") as f:
         for contig, cov in zip(contigs, coverage):
