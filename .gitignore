@@ -1,3 +1,4 @@
 data/*
 ngs_pipeline/src/databases/*
 .DS_Store
+.snakemake
