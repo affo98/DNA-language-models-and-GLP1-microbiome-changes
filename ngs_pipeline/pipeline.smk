@@ -51,7 +51,7 @@ rule fastqc:
     log:
         os.path.join(LOGS, "fastqc/{sample}_{reads}.log")
     threads:
-        24
+        64
     conda:
         os.path.join(CONDA_ENVS, "fastqc.yaml")
     shell:
@@ -93,7 +93,7 @@ rule kneaddata:
         p2 = os.path.join(OUTDIR, "knead/{sample}/{sample}_1_kneaddata_paired_2.fastq"),
     log:
         os.path.join(LOGS, "knead/{sample}.log")
-    threads: 64
+    threads: 96
     conda:
         os.path.join(CONDA_ENVS, "kneaddata.yaml"),
     benchmark:
@@ -135,11 +135,11 @@ rule metaspades:
         os.path.join(BENCHMARKS, "assembly", "{sample}.txt"),
     params:
         k="auto", #k-mer size
-        m="90", #memory 100gb vamb
+        m="94", #memory 100gb vamb
         tmp_dir = os.path.join(OUTDIR, "spades/asm_{sample}/tmp"),
     log:
         os.path.join(LOGS, "metaspades/{sample}.log")
-    threads: 64 # 24 vamb
+    threads: 96 # 24 vamb
     conda:
         os.path.join(CONDA_ENVS, "metaspades.yaml")
     shell:
