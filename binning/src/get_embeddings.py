@@ -41,12 +41,11 @@ def get_embeddings(
                 f"Mismatch in number of embeddings from {save_path} and DNA sequences.\nRecalculating embeddings."
             )
 
-    if model_name == "TNF":
+    if model_name == "tnf":
         embeddings = calculate_tnf(dna_sequences, model_path)
-    elif model_name == "TNF_KERNEL":
+    elif model_name == "tnf_kernel":
         embeddings = calculate_tnf(dna_sequences, model_path, use_kernel=True)
 
-    print(f"Embeddings shape: {embeddings.shape}")
     with open(save_path, "wb") as f:
         np.save(f, embeddings)
 
