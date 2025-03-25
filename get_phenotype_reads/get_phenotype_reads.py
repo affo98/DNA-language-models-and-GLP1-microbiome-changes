@@ -336,7 +336,6 @@ def download_all_fastq_files(samples_fastq: dict, study_name: str) -> None:
 
             for run_accession in samples_fastq[study_id][sample_id]:
                 run_dir = os.path.join(sample_dir, run_accession)
-                os.makedirs(run_dir, exist_ok=True)
 
                 for fastq_file in samples_fastq[study_id][sample_id][run_accession]:
                     fastq_filename = os.path.basename(fastq_file)
