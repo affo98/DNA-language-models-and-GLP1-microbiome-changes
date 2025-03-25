@@ -83,7 +83,6 @@ if MODEL=='vamb' and not config_nomodelrun:
     ]
 
 elif MODEL=='taxvamb' and not config_nomodelrun:
-    print("GDFSFDSFDSSDFSD---------------------------------")
     input_files += [
         "metabuli-linux-avx2.tar.gz",
         os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database"),  
@@ -368,9 +367,9 @@ rule postprocess_cluster_outputs_comebin:
 
 rule checkm2:
     input:
-        fasta_bins=expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{model}"), model=MODEL)
+        fasta_bins=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{MODEL}")
     output:
-        output=directory(expand(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"), model=MODEL))
+        output=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{MODEL}_results"))
     conda:
         "envs/checkm2.yml"
     threads:
