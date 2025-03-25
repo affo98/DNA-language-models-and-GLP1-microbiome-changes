@@ -1,8 +1,0 @@
-numpy==1.26.4
-pandas==2.2.2
-biopython==1.84
-tqdm==4.66.5
-requests==2.32.3
-PyYAML==6.0.1
-scikit-learn==1.6
-torch==2.4.0

@@ -10,33 +10,24 @@ import xml.etree.ElementTree as ET
 
 from tqdm import tqdm
 
-
-BASEDIR = "NGS_PIPELINE"
+BASEDIR = os.path.join(os.getcwd(), "ngs_pipeline")
 
 
 def setup_data_paths() -> None:
     """Check if the required folders exist, create them if they don't, and set environment variables."""
     paths = {
-        # "LOG_PATH": os.path.join(os.getcwd(), "logs"),
-        # "DATA_PATH": os.path.join(os.getcwd(), "data"),
-        # "CONFIG_PATH": os.path.join(os.getcwd(), "config"),
-        "STUDIES_FASTQ_PATH": os.path.join(
-            os.getcwd(), BASEDIR, "metadata", "studies_fastq_list"
-        ),
+        "STUDIES_FASTQ_PATH": os.path.join(BASEDIR, "metadata", "studies_fastq_list"),
         "SAMPLE_LABELS_RAW_PATH": os.path.join(
-            os.getcwd(), BASEDIR, "metadata", "sample_labels_raw"
+            BASEDIR, "metadata", "sample_labels_raw"
         ),
         "SAMPLE_LABELS_RAW_METAML_PATH": os.path.join(
-            os.getcwd(),
             BASEDIR,
             "metadata",
             "sample_labels_raw",
             "metaml",
         ),
-        "SAMPLE_LABELS_OUTPUT_PATH": os.path.join(
-            os.getcwd(), BASEDIR, "raw_data", "sample_labels"
-        ),
-        "READS_OUTPUT_PATH": os.path.join(os.getcwd(), BASEDIR, "raw_data", "reads"),
+        "SAMPLE_LABELS_OUTPUT_PATH": os.path.join(BASEDIR, "raw_data", "sample_labels"),
+        "READS_OUTPUT_PATH": os.path.join(BASEDIR, "raw_data", "reads"),
     }
 
     for var_name, path in paths.items():
@@ -351,7 +342,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("-i", "--studyid", help="Study ID to filter")
     parser.add_argument("-n", "--studyname", help="Study ID to filter")
-    parser.add_argument("--log", help="Path to log file", required=True)
+    # parser.add_argument("--log", help="Path to log file", required=True)
     args = parser.parse_args()
 
     study_id = args.studyid

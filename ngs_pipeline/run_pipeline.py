@@ -14,24 +14,24 @@ def get_fastqc_path():
         raise FileNotFoundError("FastQC not found in the active Conda environment.")
 
 
-def update_config(config_file, dataset):
+def update_config(config_file):
     """Update the config.yaml file with the specified dataset and output directory."""
 
     with open(config_file, "r") as f:
         config = yaml.safe_load(f)
 
-    config["dataset"] = dataset
-    config["OUTDIR"] = dataset
-    config["DATADIR"] = os.path.join("data", "samples", dataset)
+    # config["dataset"] = dataset
+    # config["OUTDIR"] = dataset
+    # config["DATADIR"] = os.path.join("data", "samples", dataset)
     config["PY_SCRIPTS"] = os.path.join("src", "scripts")
-    config["BENCHMARKS"] = os.path.join(dataset, "benchmarks")
-    config["LOGS"] = os.path.join(dataset, "logs")
+    # config["BENCHMARKS"] = os.path.join(dataset, "benchmarks")
+    # config["LOGS"] = os.path.join(dataset, "logs")
     config["CONDA_ENVS"] = os.path.join("src", "envs")
     config["DB"] = os.path.join("src", "databases", "bowtie2-index")
     config["FASTQC_PATH"] = get_fastqc_path()
 
     with open(config_file, "w") as f:
-        yaml.dump(config, f, default_flow_style=False)
+        yaml.dump(config, f, default_flow_style=True)
 
 
 def run_snakemake(snakefile, extra_args):
@@ -44,9 +44,11 @@ def main():
     parser = argparse.ArgumentParser(
         description="Run Snakemake pipeline with config parameters."
     )
-    parser.add_argument("-d", "--dataset", required=True, help="Name of the dataset")
     parser.add_argument(
-        "-c", "--config", default="config.yaml", help="Path to the config.yaml file"
+        "-c",
+        "--config",
+        default="config/config.yaml",
+        help="Path to the config.yaml file",
     )
     parser.add_argument(
         "-s",
@@ -62,7 +64,7 @@ def main():
 
     args = parser.parse_args()
 
-    update_config(args.config, args.dataset)
+    update_config(args.config)
 
     snakemake_args = args.snakemake_args if args.snakemake_args else []
     run_snakemake(args.snakefile, snakemake_args)

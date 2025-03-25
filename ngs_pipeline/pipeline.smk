@@ -1,20 +1,44 @@
 """Local Snakemake pipeline for testing reads, mapping, sorting, indexing, alignment, and quality checks"""
 import os
 import glob
-configfile: "config.yaml"
+configfile: "config/config.yaml"
+configfile: "config/phenotype_studies.yaml"
 
-#Configure paths from config.yaml
-OUTDIR = config['OUTDIR']
-DATADIR = config['DATADIR']
 PY_SCRIPTS = config['PY_SCRIPTS']
-BENCHMARKS = config['BENCHMARKS']
-LOGS = config['LOGS']
 CONDA_ENVS = config['CONDA_ENVS']
 DB = config['DB']
 FASTQC_PATH = config['FASTQC_PATH']
 
+STUDY_ID = config["studies"][0].get("id")
+STUDY_NAME = config["studies"][0].get("name")
+
+
+OUTDIR = f"{STUDY_NAME}_{STUDY_ID}"
+DATAPATH = os.path.join("raw_data", "reads", OUTDIR)
+BENCHMARKS = os.path.join(OUTDIR, "benchmarks")
+LOGS = os.path.join(OUTDIR,"logs")
+
+rule all:
+    input:
+        os.path.join(OUTDIR, "abdn_coverm/abundances.tsv"),
+        directory(DATAPATH),
+
+rule download:
+    output:
+        directory(DATAPATH),
+    conda:
+        os.path.join(CONDA_ENVS, "get_phenotype_reads.yaml"),
+    params:
+        dataset_id = STUDY_ID,
+        dataset_name = STUDY_NAME,
+        get_reads_py = os.path.join(PY_SCRIPTS, "get_phenotype_reads.py"),
+    shell:
+        """
+        python {params.get_reads_py} -i {params.dataset_id} -n {params.dataset_name}
+        """
+
 # Retrieve Sample Paths
-samples = glob.glob(f"{DATADIR}/*/*/*_1.fastq.gz")
+samples = glob.glob(f"{DATAPATH}/*/*/*_1.fastq.gz")
 # Construct Wildcards
 READS = ["1","2"]
 SAMPLES_LU = {}
@@ -23,19 +47,15 @@ for sample in samples:
     sample_name = sample.split("/")[-1].split("_")[0]
     SAMPLES_LU[sample_name] = sample
     SAMPLES.append(sample_name)
-print("ALL SAMPLES FOUND:",SAMPLES)
-rule all:
-    input:
-        # expand(os.path.join(OUTDIR, "fastqc/{sample}_{reads}_fastqc.html"),sample=SAMPLES,reads=READS),
-        # expand(os.path.join(OUTDIR, "fastqc/{sample}_{reads}_fastqc.zip"),sample=SAMPLES,reads=READS),
-        # expand(os.path.join(OUTDIR, "knead/{sample}/{sample}_1_kneaddata_paired_1.fastq"),sample=SAMPLES),
-        # expand(os.path.join(OUTDIR, "knead/{sample}/{sample}_1_kneaddata_paired_2.fastq"),sample=SAMPLES),
-        # expand(os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"),sample=SAMPLES),
-        # expand(os.path.join(OUTDIR, "algn/{sample}_sorted.bam"),sample=SAMPLES),
-        # expand(os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv"), sample=SAMPLES),
-        # os.path.join(OUTDIR, "global_contig_catalogue.fna.gz"),
-        os.path.join(OUTDIR, "abdn_coverm/abundances.tsv"),
 
+print("\n"*2)
+print("\t"*1,"#"*100)
+print("\n")
+print("\t"*5,f"# Dataset: {STUDY_NAME} ({STUDY_ID})")
+print("\t"*5,f"# Total Samples Found: {len(SAMPLES)}")
+print("\n")
+print("\t"*1,"#"*100)
+print("\n"*2)
 
 rule fastqc:
     input: 
