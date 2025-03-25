@@ -31,7 +31,7 @@ def update_config(config_file):
     config["FASTQC_PATH"] = get_fastqc_path()
 
     with open(config_file, "w") as f:
-        yaml.dump(config, f, default_flow_style=True)
+        yaml.dump(config, f, default_flow_style=False)
 
 
 def run_snakemake(snakefile, extra_args):
