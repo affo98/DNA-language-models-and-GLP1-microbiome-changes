@@ -15,7 +15,7 @@ FASTQC_PATH = config['FASTQC_PATH']
 
 # Retrieve Sample Paths
 samples = glob.glob(f"{DATADIR}/*/*/*_1.fastq.gz")
-
+print("glob samples",samples)
 # Construct Wildcards
 READS = ["1","2"]
 SAMPLES_LU = {}
