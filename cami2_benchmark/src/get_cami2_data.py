@@ -13,7 +13,6 @@ import requests
 
 
 OUTDIR_TMP = os.path.join(os.getcwd(), "cami2_benchmark", "raw_data")
-LOG_PATH = os.path.join(os.getcwd(), "logs")
 
 
 HUMAN_DATASETS = ["airways", "gastro", "oral", "skin", "urogenital"]

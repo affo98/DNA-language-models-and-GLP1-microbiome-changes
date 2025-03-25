@@ -10,8 +10,8 @@ import xml.etree.ElementTree as ET
 
 from tqdm import tqdm
 
-# todo
-# change get_phenotype_reads to NGS_PIPELINE
+
+BASEDIR = "NGS_PIPELINE"
 
 
 def setup_data_paths() -> None:
@@ -21,24 +21,22 @@ def setup_data_paths() -> None:
         # "DATA_PATH": os.path.join(os.getcwd(), "data"),
         # "CONFIG_PATH": os.path.join(os.getcwd(), "config"),
         "STUDIES_FASTQ_PATH": os.path.join(
-            os.getcwd(), "get_phenotype_reads", "metadata", "studies_fastq_list"
+            os.getcwd(), BASEDIR, "metadata", "studies_fastq_list"
         ),
         "SAMPLE_LABELS_RAW_PATH": os.path.join(
-            os.getcwd(), "get_phenotype_reads", "metadata", "sample_labels_raw"
+            os.getcwd(), BASEDIR, "metadata", "sample_labels_raw"
         ),
         "SAMPLE_LABELS_RAW_METAML_PATH": os.path.join(
             os.getcwd(),
-            "get_phenotype_reads",
+            BASEDIR,
             "metadata",
             "sample_labels_raw",
             "metaml",
         ),
         "SAMPLE_LABELS_OUTPUT_PATH": os.path.join(
-            os.getcwd(), "get_phenotype_reads", "raw_data", "sample_labels"
+            os.getcwd(), BASEDIR, "raw_data", "sample_labels"
         ),
-        "READS_OUTPUT_PATH": os.path.join(
-            os.getcwd(), "get_phenotype_reads", "raw_data", "reads"
-        ),
+        "READS_OUTPUT_PATH": os.path.join(os.getcwd(), BASEDIR, "raw_data", "reads"),
     }
 
     for var_name, path in paths.items():
