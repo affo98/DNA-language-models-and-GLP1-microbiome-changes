@@ -363,7 +363,8 @@ rule postprocess_cluster_outputs_comebin:
         "envs/cami2_processing.yml"
     shell:
         """
-        python {SRC_DIR}/postprocess_cluster_outputs_comebin.py {output.cluster_fasta} {input.model_outputs}/comebin_res/comebin_res_bins {params.minsize_bins} --log \{log}
+        python {SRC_DIR}/postprocess_cluster_outputs_comebin.py {output.cluster_fasta} {input.model_outputs}/comebin_res/comebin_res_bins \ 
+        {params.minsize_bins} --log {log}
         """
 #END COMEBIN
 
@@ -382,7 +383,8 @@ rule checkm2:
         if [ ! -d "{OUTDIR_MODEL_RESULTS}/checkm2_database" ]; then
             checkm2 database --download --path {OUTDIR_MODEL_RESULTS}/checkm2_database
         fi
-        checkm2 predict --threads {threads} --input {input.fasta_bins} --output-directory {output.output} --database_path {OUTDIR_MODEL_RESULTS}/checkm2_database/CheckM2_database
+        checkm2 predict --threads {threads} --input {input.fasta_bins} --output-directory {output.output} \ 
+        --database_path {OUTDIR_MODEL_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
         """
 
 
