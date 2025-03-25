@@ -16,22 +16,24 @@ from tqdm import tqdm
 def setup_data_paths() -> None:
     """Check if the required folders exist, create them if they don't, and set environment variables."""
     paths = {
-        "LOG_PATH": os.path.join(os.getcwd(), "logs"),
-        "DATA_PATH": os.path.join(os.getcwd(), "data"),
-        "CONFIG_PATH": os.path.join(os.getcwd(), "config"),
+        # "LOG_PATH": os.path.join(os.getcwd(), "logs"),
+        # "DATA_PATH": os.path.join(os.getcwd(), "data"),
+        # "CONFIG_PATH": os.path.join(os.getcwd(), "config"),
         "STUDIES_FASTQ_PATH": os.path.join(
-            os.getcwd(), "get_phenotype_reads", "data", "studies_fastq_list"
+            os.getcwd(), "NGS_PIPELINE", "metadata", "studies_fastq_list"
         ),
         "SAMPLE_LABELS_RAW_PATH": os.path.join(
-            os.getcwd(), "get_phenotype_reads", "data", "sample_labels_raw"
+            os.getcwd(), "NGS_PIPELINE", "metadata", "sample_labels_raw"
         ),
         "SAMPLE_LABELS_RAW_METAML_PATH": os.path.join(
-            os.getcwd(), "get_phenotype_reads", "data", "sample_labels_raw", "metaml"
+            os.getcwd(), "NGS_PIPELINE", "data", "sample_labels_raw", "metaml"
         ),
         "SAMPLE_LABELS_OUTPUT_PATH": os.path.join(
-            os.getcwd(), "data", "phenotype", "sample_labels"
+            os.getcwd(), "NGS_PIPELINE", "raw_data", "sample_labels"
         ),
-        "READS_OUTPUT_PATH": os.path.join(os.getcwd(), "data", "phenotype", "reads"),
+        "READS_OUTPUT_PATH": os.path.join(
+            os.getcwd(), "NGS_PIPELINE", "raw_data", "reads"
+        ),
     }
 
     for var_name, path in paths.items():
@@ -40,22 +42,6 @@ def setup_data_paths() -> None:
             print(f"Created directory: {path}")
         os.environ[var_name] = path
 
-    return
-
-
-def setup_logfile(path_to_logfile: str):
-
-    log_file = os.path.join(path_to_logfile, "phenotype_studies.log")
-
-    logging.basicConfig(
-        filename=log_file,  # Log file name
-        level=logging.INFO,  # Log level
-        format="%(message)s",  # Only log the message (no timestamp, level, etc. in the format)
-        filemode="w",  # 'w' to overwrite log file each time
-    )
-    logging.info(
-        f"Run started at: {logging.Formatter('%(asctime)s').formatTime(logging.LogRecord('', '', '', '', '', '', ''))}"
-    )
     return
 
 
@@ -379,7 +365,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     setup_data_paths()
-    setup_logfile(os.environ["LOG_PATH"])
 
     preprocess_abundance_metaml(os.environ["SAMPLE_LABELS_RAW_METAML_PATH"])
 
