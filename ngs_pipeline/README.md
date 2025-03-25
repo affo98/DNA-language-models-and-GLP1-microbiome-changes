@@ -14,7 +14,7 @@
 wget https://huttenhower.sph.harvard.edu/kneadData_databases/Homo_sapiens_hg39_T2T_Bowtie2_v0.1.tar.gz
 tar -xzf Homo_sapiens_hg39_T2T_Bowtie2_v0.1.tar.gz
 rm Homo_sapiens_hg39_T2T_Bowtie2_v0.1.tar.gz
-mv bowtie2-index ngs_pipeline/src/databases/bowtie2-index/
+mv bowtie2-index src/databases/bowtie2-index/
 
 ```
 
