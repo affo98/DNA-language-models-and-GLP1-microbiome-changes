@@ -27,11 +27,14 @@ for sample in samples:
 
 rule all:
     input:
-        os.path.join(OUTDIR, "abdn_coverm/abundances.tsv")
-        # expand(os.path.join(OUTDIR, "knead/{sample}/{sample}_1_kneaddata_paired_1.fastq"),sample="ERR260152"),
-        # expand(os.path.join(OUTDIR, "knead/{sample}/{sample}_1_kneaddata_paired_2.fastq"),sample="ERR260152")
-        # expand(os.path.join(OUTDIR, "fastqc/{sample}_{reads}_fastqc.html"),sample="ERR260152",reads=READS),
-        # expand(os.path.join(OUTDIR, "fastqc/{sample}_{reads}_fastqc.zip"),sample="ERR260152",reads=READS)
+        os.path.join(OUTDIR, "abdn_coverm/abundances.tsv"),
+        expand(os.path.join(OUTDIR, "algn/{sample}_sorted.bam"),sample=SAMPLES),
+        os.path.join(OUTDIR, "global_contig_catalogue.fna.gz"),
+        expand(os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"),sample=SAMPLES),
+        expand(os.path.join(OUTDIR, "knead/{sample}/{sample}_1_kneaddata_paired_1.fastq"),sample=SAMPLES),
+        expand(os.path.join(OUTDIR, "knead/{sample}/{sample}_1_kneaddata_paired_2.fastq"),sample=SAMPLES),
+        expand(os.path.join(OUTDIR, "fastqc/{sample}_{reads}_fastqc.html"),sample=SAMPLES,reads=READS),
+        expand(os.path.join(OUTDIR, "fastqc/{sample}_{reads}_fastqc.zip"),sample=SAMPLES,reads=READS),
 
 
 rule fastqc:
