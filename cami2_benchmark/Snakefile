@@ -7,7 +7,6 @@ import glob
 OUTDIR_RAW = os.path.join(os.getcwd(), "cami2_benchmark", "raw_data")
 OUTDIR_PROCESSED = os.path.join(os.getcwd(), "cami2_benchmark", "processed_data")
 OUTDIR_MODEL_RESULTS = os.path.join(os.getcwd(), "cami2_benchmark", "model_results")
-OUTDIR_CLUSTERS = os.path.join(os.getcwd(), "cami2_benchmark", 'clusters')
 SRC_DIR = os.path.join(os.getcwd(), "cami2_benchmark", "src")
 BASE = os.path.join(os.getcwd(), "cami2_benchmark")
 LOGS = os.path.join(os.getcwd(), "cami2_benchmark", "logs")
@@ -15,6 +14,9 @@ LOGS = os.path.join(os.getcwd(), "cami2_benchmark", "logs")
 #DATASET, sample and model config
 with open(os.path.join(BASE, "config.yml"), "r") as f:
     datasets_model_config = yaml.safe_load(f)
+
+with open(os.path,join("evaluate", "models.yml"), "r") as f:
+    other_model_config = yaml.safe_load(f)
 
 ALL_DATASETS = [d["name"] for d in datasets_model_config["datasets"]]
 DATASET = config.get("DATASET", None)
@@ -26,6 +28,7 @@ sample_str = ' '.join(SAMPLES.get(DATASET, []))
 ALL_MODELS  = [d["name"] for d in datasets_model_config["models"]]
 MODEL = config.get("MODEL", None)
 assert MODEL==None or MODEL in ALL_MODELS, f"Error: Selected model '{MODEL}' is not in the available DATASET: {ALL_MODELS}"
+
 
 
 
@@ -56,11 +59,9 @@ for key, value in config.items():
     print(f"{key}: {value} (type: {type(value)})")
 
 
-
-
 input_files = []
-if config_download:
-    input_files += expand(
+if config_dowload:
+    input_filens += expand(
         os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"),
         sample=SAMPLES.get(DATASET, [])
     )

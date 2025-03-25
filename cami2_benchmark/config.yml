@@ -40,5 +40,8 @@ datasets:
 models:
   - name: vamb
   - name: taxvamb
-  - name: semibin2
   - name: comebin
+  - name: tnf
+  - name: tnf_kernel
+  - name: dna2vec
+  #- name: semibin2
