@@ -12,6 +12,9 @@ import xml.etree.ElementTree as ET
 
 from tqdm import tqdm
 
+# todo
+# change get_phenotype_reads to NGS_PIPELINE
+
 
 def setup_data_paths() -> None:
     """Check if the required folders exist, create them if they don't, and set environment variables."""
@@ -82,19 +85,6 @@ def preprocess_abundance_metaml(path_to_abundance: str) -> None:
         f"{path_to_abundance}/PRJEB1786_sample_labels.txt", sep="\t", index=False
     )
     return
-
-
-# def read_studies(file_path: str) -> tuple[list[str], dict[str, str]]:
-#     """Reads a YAML file and returns a list of study_ids and a dict mapping study id to name."""
-
-#     study_id_to_name = {}
-#     file_path = os.path.join(os.environ["CONFIG_PATH"], "phenotype_studies.yml")
-#     with open(file_path, "r") as file:
-#         data = yaml.safe_load(file)
-#         for study in data["studies"]:
-#             study_id_to_name[study["id"]] = study["name"]
-
-#     return list(study_id_to_name.keys()), study_id_to_name
 
 
 def fetch_metadata_from_study(study_id: str, study_name: str) -> None:
