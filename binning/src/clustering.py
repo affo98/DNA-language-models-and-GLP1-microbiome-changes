@@ -8,7 +8,6 @@ from src.utils import get_available_device
 
 
 class KMediod:
-
     def check_params(
         self,
         embeddings: np.ndarray,
@@ -20,7 +19,7 @@ class KMediod:
     ):
         if embeddings.dtype != np.float32:
             embeddings = embeddings.astype(np.float32)
-            print("Embeddings chenged to dtype float32")
+            print("Embeddings changed to dtype float32")
         if not normalized:
             embeddings = normalize(embeddings)
             print("Normalizing embeddings")

@@ -7,7 +7,6 @@ import traceback
 
 import numpy as np
 
-from sklearn.preprocessing import normalize
 
 import torch
 
@@ -46,15 +45,15 @@ def main(args):
         )
     torch.cuda.empty_cache()
 
-    # kmediod = KMediod(
-    #     embeddings,
-    #     min_similarity=float(args.min_similarity),  # 0.0075
-    #     min_bin_size=10,
-    #     num_steps=3,
-    #     max_iter=1000,
-    #     normalized=False,
-    # )
-    # predictions = kmediod.fit()
+    kmediod = KMediod(
+        embeddings,
+        min_similarity=0.01,  # 0.0075
+        min_bin_size=10,
+        num_steps=3,
+        max_iter=1000,
+        normalized=False,
+    )
+    predictions = kmediod.fit()
     # print(predictions)
 
 

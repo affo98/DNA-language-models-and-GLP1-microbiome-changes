@@ -40,6 +40,8 @@ def get_embeddings(
             print(
                 f"Mismatch in number of embeddings from {save_path} and DNA sequences.\nRecalculating embeddings."
             )
+    else:
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
     if model_name == "tnf":
         embeddings = calculate_tnf(dna_sequences, model_path)
@@ -55,7 +57,7 @@ def get_embeddings(
 def validate_input_array(array: np.ndarray) -> np.ndarray:
     "Returns array similar to input array but C-contiguous and with own data."
     if not array.flags["C_CONTIGUOUS"]:
-        array = _np.ascontiguousarray(array)
+        array = np.ascontiguousarray(array)
     if not array.flags["OWNDATA"]:
         array = array.copy()
 
