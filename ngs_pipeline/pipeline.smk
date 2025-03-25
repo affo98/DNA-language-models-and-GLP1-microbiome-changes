@@ -21,7 +21,7 @@ LOGS = os.path.join(OUTDIR,"logs")
 rule all:
     input:
         os.path.join(OUTDIR, "abdn_coverm/abundances.tsv"),
-        directory(DATAPATH),
+        DATAPATH,
 
 rule download:
     output:

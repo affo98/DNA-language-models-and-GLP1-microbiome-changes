@@ -10,7 +10,7 @@ import xml.etree.ElementTree as ET
 
 from tqdm import tqdm
 
-BASEDIR = os.path.join(os.getcwd(), "ngs_pipeline")
+BASEDIR = os.path.join(os.getcwd())
 
 
 def setup_data_paths() -> None:
