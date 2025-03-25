@@ -287,11 +287,11 @@ def map_sampleid_to_alias(samples_fastq: dict, study_name: str) -> dict:
                     file.write(updated_line + "\n")
 
             samples_after = len(samples_fastq[study_id])
-            with open(args.log, "a") as log:
-                log.write(
-                    f"#Samples {study_id} {study_name} \n    Before: {samples_before}"
-                )
-                log.write(f"    After:  {samples_after} \n")
+            # with open(args.log, "a") as log:
+            #     log.write(
+            #         f"#Samples {study_id} {study_name} \n    Before: {samples_before}"
+            #     )
+            #     log.write(f"    After:  {samples_after} \n")
 
     return samples_fastq
 
