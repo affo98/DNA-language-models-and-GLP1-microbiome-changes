@@ -27,7 +27,7 @@ src/__pycache__
 #Snakemake
 .snakemake/
 
-ngs_pipeline/src/databases/*
+ngs_pipeline/src/databases/bowtie2-index
 .DS_Store
 .snakemake
 ngs_pipeline/data/samples/*
