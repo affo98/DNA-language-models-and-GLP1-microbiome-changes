@@ -102,10 +102,7 @@ elif MODEL == 'comebin' and not config_nomodelrun:
     ]
 
 if config_checkm2:
-    input_files += expand(
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{model}_results"),
-        model=MODEL
-    )
+    input_files += os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{MODEL}_results")
 
 
 rule all:
