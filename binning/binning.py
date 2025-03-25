@@ -44,7 +44,6 @@ def main(args):
         print(
             f"|===========| Error in getting embeddings for {args.model_name}|===========|\n{traceback.format_exc()}"
         )
-        continue
     torch.cuda.empty_cache()
 
     # kmediod = KMediod(
