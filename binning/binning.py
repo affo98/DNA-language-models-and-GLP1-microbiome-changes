@@ -26,7 +26,7 @@ def main(args):
             args.model_name,
             args.model_path,
             os.path.join(args.save_path, "embeddings"),
-            normalize=True,
+            normalize_embeddings=True,
         )
     except Exception:
         print(
