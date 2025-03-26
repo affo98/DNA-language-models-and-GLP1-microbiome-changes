@@ -99,7 +99,7 @@ class Trainer(nn.Module):
                     [batch_time, data_time, losses],
                     prefix = "Epoch: [{}]".format(epoch))
             
-            for idx, (sequences, labels) in enumerate(epoch_iterator):
+            for _, (sequences, labels) in enumerate(epoch_iterator):
                 data_time.update(time.time() - end)
                 labels = labels.squeeze()
                 input_ids, attention_mask = self.prepare_pairwise_input(sequences)
@@ -109,20 +109,18 @@ class Trainer(nn.Module):
                 batch_time.update(time.time() - end)
                 end = time.time()
                 sys.stdout.flush()
-                if idx % self.args.print_freq == 0:
-                    progress.display(idx)
+                if self.gstep % self.args.print_freq == 0:
+                    progress.display(self.gstep)
                 if self.gstep%self.args.logging_step==0:
+                    self.logger.log_value('loss', losses.avg, self.gstep)
                     self.save_model(step=self.gstep)
-                if self.gstep > self.args.logging_step*self.args.logging_num:
-                    break
+                #if self.gstep > self.args.logging_step*self.args.logging_num:
+                #    break
                 self.gstep += 1
-
-            self.logger.log_value('loss', losses.avg, epoch)
                 
             print("Finish Epoch: ", epoch)
             dist.barrier()
         
-        #dist.barrier()
         return None
     
     def val(self):
@@ -177,11 +175,13 @@ class Trainer(nn.Module):
                 best_val_loss = val_loss
                 best_checkpoint = step
                 self.save_model(save_best=True)
+                
 
             print("Finish Step: ", step)
             dist.barrier()
+
+        print("Best Checkpoint at Step: ", best_checkpoint)
         
-        #dist.barrier()
         return None
 
 class AverageMeter(object):

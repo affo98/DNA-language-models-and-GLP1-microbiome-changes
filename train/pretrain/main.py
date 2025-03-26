@@ -95,7 +95,7 @@ def get_args(argv):
     parser.add_argument('--lr', type=float, default=3e-06, help="Learning rate")
     parser.add_argument('--lr_scale', type=int, default=100, help="")
     parser.add_argument('--epochs', type=int, default=3)
-    parser.add_argument('--print-freq', '-p', default=10, type=int, metavar='N', help='print frequency (default: 10)')
+    parser.add_argument('--print-freq', '-p', default=1000, type=int, metavar='N', help='print frequency (default: 10)')
     #parser.add_argument('--train_batch_size', type=int, default=48, help="Batch size used for training dataset")
     #parser.add_argument('--val_batch_size', type=int, default=360, help="Batch size used for validating dataset")
      
