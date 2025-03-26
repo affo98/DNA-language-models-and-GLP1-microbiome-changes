@@ -1,172 +1,172 @@
-    import os
+import os
 
-    import numpy as np
-    from tqdm import tqdm
-    import matplotlib.pyplot as plt
+import numpy as np
+from tqdm import tqdm
+import matplotlib.pyplot as plt
 
-    import torch
+import torch
 
-    from src.utils import get_available_device
+from src.utils import get_available_device
 
 
-    class Threshold:
+class Threshold:
 
-        def check_params(
-            self,
-            embeddings: np.ndarray,
-            n_bins: int,
-            block_size: int,
+    def check_params(
+        self,
+        embeddings: np.ndarray,
+        n_bins: int,
+        block_size: int,
+    ):
+        if embeddings.dtype != np.float64:
+            embeddings = embeddings.astype(np.float64)
+            print("Embeddings changed to dtype float64")
+        if block_size < 1:
+            raise ValueError("Block size must be at least 1")
+        if n_bins < 1:
+            raise ValueError("Number of bins must be at least 1")
+
+    def __init__(
+        self,
+        embeddings: np.ndarray,
+        save_path: str,
+        n_bins: int,
+        block_size: int,
+    ):
+        self.check_params(embeddings, n_bins, block_size)
+
+        device, gpu_count = get_available_device()
+        embeddings = torch.from_numpy(embeddings).to(device)
+        print(f"Using {device} for Threshold calculations")
+
+        self.embeddings = embeddings
+        self.n_bins = n_bins
+        self.device = device
+        self.block_size = block_size
+        self.save_path = save_path
+
+        self.bin_vector = self.similarity_bin_vector()
+
+    def similarity_bin_vector(self) -> float:
+        """
+        Calculates pairwise similarities of embeddings and returns a histogram of similarities.
+        """
+
+        n_samples = self.embeddings.shape[0]
+        bin_vector = torch.zeros(self.n_bins, dtype=torch.float32, device=self.device)
+
+        # loop through to get global min/max pairwise similarity
+        global_min = torch.tensor([1], dtype=torch.float32, device=self.device)
+        global_max = torch.tensor([0], dtype=torch.float32, device=self.device)
+        for i in tqdm(
+            range(0, n_samples, self.block_size), desc="Calculating global min/max"
         ):
-            if embeddings.dtype != np.float64:
-                embeddings = embeddings.astype(np.float64)
-                print("Embeddings changed to dtype float64")
-            if block_size < 1:
-                raise ValueError("Block size must be at least 1")
-            if n_bins < 1:
-                raise ValueError("Number of bins must be at least 1")
+            block_start = i
+            block_end = min(i + self.block_size, n_samples)
+            block_embeddings = self.embeddings[block_start:block_end]
 
-        def __init__(
-            self,
-            embeddings: np.ndarray,
-            save_path: str,
-            n_bins: int,
-            block_size: int,
+            block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
+            local_min = block_sim_matrix.flatten().min()
+            local_max = block_sim_matrix.flatten().max()
+            global_min = torch.min(global_min, local_min)
+            global_max = torch.max(global_max, local_max)
+
+        # loop through again to get histogram
+        for i in tqdm(
+            range(0, n_samples, self.block_size), desc="Calculating histogram"
         ):
-            self.check_params(embeddings, n_bins, block_size)
+            block_start = i
+            block_end = min(i + self.block_size, n_samples)
+            block_embeddings = self.embeddings[block_start:block_end]
 
-            device, gpu_count = get_available_device()
-            embeddings = torch.from_numpy(embeddings).to(device)
-            print(f"Using {device} for Threshold calculations")
+            block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
 
-            self.embeddings = embeddings
-            self.n_bins = n_bins
-            self.device = device
-            self.block_size = block_size
-            self.save_path = save_path
+            block_sim_flatten = block_sim_matrix.flatten()
 
-            self.bin_vector = self.similarity_bin_vector()
-
-        def similarity_bin_vector(self) -> float:
-            """
-            Calculates pairwise similarities of embeddings and returns a histogram of similarities.
-            """
-
-            n_samples = self.embeddings.shape[0]
-            bin_vector = torch.zeros(self.n_bins, dtype=torch.float32, device=self.device)
-
-            # loop through to get global min/max pairwise similarity
-            global_min = torch.tensor([1], dtype=torch.float32, device=self.device)
-            global_max = torch.tensor([0], dtype=torch.float32, device=self.device)
-            for i in tqdm(
-                range(0, n_samples, self.block_size), desc="Calculating global min/max"
-            ):
-                block_start = i
-                block_end = min(i + self.block_size, n_samples)
-                block_embeddings = self.embeddings[block_start:block_end]
-
-                block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
-                local_min = block_sim_matrix.flatten().min()
-                local_max = block_sim_matrix.flatten().max()
-                global_min = torch.min(global_min, local_min)
-                global_max = torch.max(global_max, local_max)
-
-            # loop through again to get histogram
-            for i in tqdm(
-                range(0, n_samples, self.block_size), desc="Calculating histogram"
-            ):
-                block_start = i
-                block_end = min(i + self.block_size, n_samples)
-                block_embeddings = self.embeddings[block_start:block_end]
-
-                block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
-
-                block_sim_flatten = block_sim_matrix.flatten()
-
-                bin_vector += torch.histc(
-                    block_sim_flatten,
-                    bins=self.n_bins,
-                    min=global_min.item(),
-                    max=global_max.item(),
-                )
-
-            bin_vector = bin_vector / bin_vector.sum()
-            # bin_vector = bin_vector.cpu().numpy()
-
-            NORMALPDF = 0.005 * torch.tensor(
-                [
-                    2.43432053e-11,
-                    9.13472041e-10,
-                    2.66955661e-08,
-                    6.07588285e-07,
-                    1.07697600e-05,
-                    1.48671951e-04,
-                    1.59837411e-03,
-                    1.33830226e-02,
-                    8.72682695e-02,
-                    4.43184841e-01,
-                    1.75283005e00,
-                    5.39909665e00,
-                    1.29517596e01,
-                    2.41970725e01,
-                    3.52065327e01,
-                    3.98942280e01,
-                    3.52065327e01,
-                    2.41970725e01,
-                    1.29517596e01,
-                    5.39909665e00,
-                    1.75283005e00,
-                    4.43184841e-01,
-                    8.72682695e-02,
-                    1.33830226e-02,
-                    1.59837411e-03,
-                    1.48671951e-04,
-                    1.07697600e-05,
-                    6.07588285e-07,
-                    2.66955661e-08,
-                    9.13472041e-10,
-                    2.43432053e-11,
-                ],
-                device=self.device,
+            bin_vector += torch.histc(
+                block_sim_flatten,
+                bins=self.n_bins,
+                min=global_min.item(),
+                max=global_max.item(),
             )
-            pdf_len = len(NORMALPDF)
-            densities = torch.zeros(len(bin_vector) + pdf_len - 1, device=self.device)
-            for i in range(len(densities) - pdf_len + 1):
-                densities[i : i + pdf_len] += NORMALPDF * bin_vector[i]
-            densities = densities[15:-15]
 
-            return densities
+        bin_vector = bin_vector / bin_vector.sum()
+        # bin_vector = bin_vector.cpu().numpy()
 
-        def get_threshold() -> float:
-            pass
+        NORMALPDF = 0.005 * torch.tensor(
+            [
+                2.43432053e-11,
+                9.13472041e-10,
+                2.66955661e-08,
+                6.07588285e-07,
+                1.07697600e-05,
+                1.48671951e-04,
+                1.59837411e-03,
+                1.33830226e-02,
+                8.72682695e-02,
+                4.43184841e-01,
+                1.75283005e00,
+                5.39909665e00,
+                1.29517596e01,
+                2.41970725e01,
+                3.52065327e01,
+                3.98942280e01,
+                3.52065327e01,
+                2.41970725e01,
+                1.29517596e01,
+                5.39909665e00,
+                1.75283005e00,
+                4.43184841e-01,
+                8.72682695e-02,
+                1.33830226e-02,
+                1.59837411e-03,
+                1.48671951e-04,
+                1.07697600e-05,
+                6.07588285e-07,
+                2.66955661e-08,
+                9.13472041e-10,
+                2.43432053e-11,
+            ],
+            device=self.device,
+        )
+        pdf_len = len(NORMALPDF)
+        densities = torch.zeros(len(bin_vector) + pdf_len - 1, device=self.device)
+        for i in range(len(densities) - pdf_len + 1):
+            densities[i : i + pdf_len] += NORMALPDF * bin_vector[i]
+        densities = densities[15:-15]
 
-        def save_histogram(self) -> None:
-            """
-            Plots and saves the histogram of similarities from the provided bin_vector.
+        return densities
 
-            Parameters:
-            - bin_vector: The normalized histogram values from similarity calculations.
-            - output_dir: Directory where the plot will be saved.
-            """
+    def get_threshold() -> float:
+        pass
 
-            plt.figure(figsize=(8, 6))
-            plt.plot(
-                np.arange(len(self.bin_vector)),
-                self.bin_vector,
-                color="skyblue",
-                linestyle="-",
-                linewidth=2,
-            )
-            plt.xlabel("Similarity Bins")
-            plt.ylabel("Frequency")
-            plt.title("Similarity Histogram")
-            tick_positions = np.linspace(0, self.n_bins - 1, 20).astype(
-                int
-            )  # 10 evenly spaced positions
-            plt.xticks(tick_positions)
+    def save_histogram(self) -> None:
+        """
+        Plots and saves the histogram of similarities from the provided bin_vector.
 
-            # Save the figure
-            file_path = os.path.join(self.save_path, "similarity_histogram.png")
-            plt.tight_layout()
-            plt.savefig(file_path)
-            plt.close()
-            print(f"Plot saved at: {self.save_path}")
+        Parameters:
+        - bin_vector: The normalized histogram values from similarity calculations.
+        - output_dir: Directory where the plot will be saved.
+        """
+
+        plt.figure(figsize=(8, 6))
+        plt.plot(
+            np.arange(len(self.bin_vector)),
+            self.bin_vector,
+            color="skyblue",
+            linestyle="-",
+            linewidth=2,
+        )
+        plt.xlabel("Similarity Bins")
+        plt.ylabel("Frequency")
+        plt.title("Similarity Histogram")
+        tick_positions = np.linspace(0, self.n_bins - 1, 20).astype(
+            int
+        )  # 10 evenly spaced positions
+        plt.xticks(tick_positions)
+
+        # Save the figure
+        file_path = os.path.join(self.save_path, "similarity_histogram.png")
+        plt.tight_layout()
+        plt.savefig(file_path)
+        plt.close()
+        print(f"Plot saved at: {self.save_path}")
