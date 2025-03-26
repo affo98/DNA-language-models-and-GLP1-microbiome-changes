@@ -44,9 +44,10 @@ class Threshold:
         self.device = device
         self.block_size = block_size
         self.save_path = save_path
-        self.bin_vector = None
-
-
+        
+        self.bin_vector = self.similarity_bin_vector(self)
+        
+        
     def similarity_bin_vector(self) -> float:
         """
         Calculates pairwise similarities of embeddings and returns a histogram of similarities.
@@ -91,9 +92,9 @@ class Threshold:
             )
 
         bin_vector = bin_vector / bin_vector.sum()
-        self.bin_vector = bin_vector.cpu().numpy()
+        bin_vector = bin_vector.cpu().numpy()
 
-        return 
+        return bin_vector
 
 
     def plot_similarity_histogram(self)->None:

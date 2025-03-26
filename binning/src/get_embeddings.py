@@ -4,6 +4,7 @@ import numpy as np
 from tqdm import tqdm
 
 from sklearn.preprocessing import normalize
+from src.utils import validate_input_array
 
 
 def get_embeddings(
@@ -58,17 +59,6 @@ def get_embeddings(
         np.save(f, embeddings)
 
     return embeddings
-
-
-def validate_input_array(array: np.ndarray) -> np.ndarray:
-    "Returns array similar to input array but C-contiguous and with own data."
-    if not array.flags["C_CONTIGUOUS"]:
-        array = np.ascontiguousarray(array)
-    if not array.flags["OWNDATA"]:
-        array = array.copy()
-
-    assert array.flags["C_CONTIGUOUS"] and array.flags["OWNDATA"]
-    return array
 
 
 def calculate_tnf(

@@ -15,7 +15,7 @@ class KMediod:
         min_similarity: float,
         min_bin_size: int,
         num_steps: int,
-        max_iter: int
+        max_iter: int,
         block_size: int = 1000,
     ):
         if embeddings.dtype != np.float32:
@@ -41,9 +41,7 @@ class KMediod:
         max_iter: int = 1000,
         block_size: int = 1000,
     ):
-        self.check_params(
-            embeddings, min_similarity, min_bin_size, num_steps, max_iter
-        )
+        self.check_params(embeddings, min_similarity, min_bin_size, num_steps, max_iter)
 
         device, gpu_count = get_available_device()
         embeddings = torch.from_numpy(embeddings).to(device)

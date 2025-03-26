@@ -1,8 +1,7 @@
 import csv
 import os
 from argparse import ArgumentParser
-import gzip
-from Bio import SeqIO
+
 import traceback
 
 import numpy as np
@@ -13,18 +12,7 @@ import torch
 from src.clustering import KMediod
 from src.get_embeddings import get_embeddings
 from src.threshold import Threshold
-
-csv.field_size_limit(2**30)
-
-
-def read_contigs(contigs_file: str) -> list[str]:
-    """Read in contigs from a fasta file."""
-
-    contigs = []
-    with gzip.open(contigs_file, "rt") as handle:
-        for record in SeqIO.parse(handle, "fasta"):
-            contigs.append(str(record.seq))
-    return contigs[0:10000]
+from src.utils import read_contigs
 
 
 def main(args):
@@ -52,7 +40,6 @@ def main(args):
         block_size=1000,
         save_path=os.path.join(args.save_path, "threshold"),
     )
-    thres.bin_vector()
     thres.plot_histogram()
 
     # kmediod = KMediod(
