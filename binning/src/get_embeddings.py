@@ -13,7 +13,7 @@ def get_embeddings(
     model_name: str,
     model_path: str,
     save_path: str,
-    normalize: bool,
+    normalize_embeddings: bool,
 ) -> np.array:
     """
     Generate or load embeddings for a given set of DNA sequences using the specified model.
@@ -53,7 +53,7 @@ def get_embeddings(
         embeddings = calculate_tnf(dna_sequences, model_path, use_kernel=True)
 
     print(embeddings.dtype)
-    if normalize:
+    if normalize_embeddings:
         embeddings = normalize(embeddings)
 
     with open(save_path, "wb") as f:
