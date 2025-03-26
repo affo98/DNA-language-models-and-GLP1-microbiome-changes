@@ -18,14 +18,67 @@ DATAPATH = os.path.join("raw_data", "reads", OUTDIR)
 BENCHMARKS = os.path.join(OUTDIR, "benchmarks")
 LOGS = os.path.join(OUTDIR,"logs")
 
+# samples = glob.glob(f"{DATAPATH}/*/1.fastq.gz")
+
+# # Construct Wildcards
+# READS = ["1","2"]
+# SAMPLES_LU = {}
+# SAMPLES = []
+# for sample in samples:
+#     sample_name = sample.split("/")[-2].split("_")[0][5:]
+#     SAMPLES_LU[sample_name] = sample
+#     SAMPLES.append(sample_name)
+
+# print("\n"*2)
+# print("\t"*1,"#"*100)
+# print("\n")
+# print("\t"*5,f"# Dataset: {STUDY_NAME} ({STUDY_ID})")
+# print("\t"*5,f"# Total Samples Found: {SAMPLES} {len(SAMPLES)}")
+# print("\n")
+# print("\t"*1,"#"*100)
+# print("\n"*2)
+
+def get_samples(wildcards):
+    checkpoint_output = checkpoints.download.get().output[0]
+    samples = glob.glob(f"{checkpoint_output}/*/1.fastq.gz")
+    sample_names = []
+    for sample in samples:
+        # Customize logic based on your file structure
+        sample_name = sample.split("/")[-2].split("_")[0][5:]
+        sample_names.append(sample_name)
+    return sample_names
+
+
+# def get_samples(wildcards):
+#     checkpoint_output = checkpoints.download.get().output[0]
+    
+#     # Your custom logic — glob + extract sample names
+#     samples = glob.glob(f"{checkpoint_output}/*/1.fastq.gz")
+
+#     SAMPLES = []
+#     for sample in samples:
+#         sample_name = sample.split("/")[-2].split("_")[0][5:]  # Your logic here
+#         SAMPLES.append(sample_name)
+
+#     # Expand per-sample rule outputs, which will be inputs to some rule(s)
+    
+#     # THIS DOESNT WORK
+#     return expand(os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv"), sample=SAMPLES), os.path.join(OUTDIR, "abdn_coverm/abundances.tsv"),
+    # return expand(os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv"), sample=SAMPLES)
+    # THIS DOESNT WORKT
+    # return oSs.path.join(OUTDIR, "abdn_coverm/abundances.tsv")
+    # expand(os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"), sample=SAMPLES)
+
 rule all:
     input:
-        os.path.join(OUTDIR, "abdn_coverm/abundances.tsv"),
-        DATAPATH,
+        os.path.join(OUTDIR, "abdn_coverm/abundances.tsv")
+        # os.path.join(OUTDIR, "abdn_coverm/abundances.tsv")
+        # os.path.join(DATAPATH, "SAMEA{sample}/1.fastq.gz"),
+        # os.path.join(DATAPATH, "SAMEA{sample}/2.fastq.gz"),
 
-rule download:
+checkpoint download:
     output:
-        directory(DATAPATH),
+        directory(DATAPATH)
     conda:
         os.path.join(CONDA_ENVS, "get_phenotype_reads.yaml"),
     params:
@@ -37,39 +90,23 @@ rule download:
         python {params.get_reads_py} -i {params.dataset_id} -n {params.dataset_name}
         """
 
-# Retrieve Sample Paths
-samples = glob.glob(f"{DATAPATH}/*/*/*_1.fastq.gz")
-# Construct Wildcards
-READS = ["1","2"]
-SAMPLES_LU = {}
-SAMPLES = []
-for sample in samples:
-    sample_name = sample.split("/")[-1].split("_")[0]
-    SAMPLES_LU[sample_name] = sample
-    SAMPLES.append(sample_name)
-
-print("\n"*2)
-print("\t"*1,"#"*100)
-print("\n")
-print("\t"*5,f"# Dataset: {STUDY_NAME} ({STUDY_ID})")
-print("\t"*5,f"# Total Samples Found: {len(SAMPLES)}")
-print("\n")
-print("\t"*1,"#"*100)
-print("\n"*2)
 
 rule fastqc:
     input: 
-        r1 = lambda wildcards: SAMPLES_LU[wildcards.sample],
-        r2 = lambda wildcards: SAMPLES_LU[wildcards.sample].replace("_1.fastq.gz", "_2.fastq.gz")
+        # r1 = lambda wildcards: SAMPLES_LU[wildcards.sample],
+        # r2 = lambda wildcards: SAMPLES_LU[wildcards.sample].replace("_1.fastq.gz", "_2.fastq.gz")
+        r1 = os.path.join(DATAPATH, "SAMEA{sample}/1.fastq.gz"),
+        r2 = os.path.join(DATAPATH, "SAMEA{sample}/2.fastq.gz")
     output:
-        html = os.path.join(OUTDIR, "fastqc/{sample}_{reads}_fastqc.html"),
-        zip = os.path.join(OUTDIR, "fastqc/{sample}_{reads}_fastqc.zip"),
-        
+        html1 = os.path.join(OUTDIR, "fastqc/{sample}/1_fastqc.html"),
+        zip1 = os.path.join(OUTDIR, "fastqc/{sample}/1_fastqc.zip"),
+        html2 = os.path.join(OUTDIR, "fastqc/{sample}/2_fastqc.html"),
+        zip2 = os.path.join(OUTDIR, "fastqc/{sample}/2_fastqc.zip")
     params:
         output_dir = os.path.join(OUTDIR, "fastqc"),
         tmp_dir = os.path.join(OUTDIR, "tmp/{sample}", "fastqc")
     log:
-        os.path.join(LOGS, "fastqc/{sample}_{reads}.log")
+        os.path.join(LOGS, "fastqc/{sample}.log")
     threads:
         64
     conda:
@@ -80,37 +117,41 @@ rule fastqc:
 
         (fastqc -t {threads} {input.r1} {input.r2} -o {params.tmp_dir}) 2> {log}
         
-        cp {params.tmp_dir}/{wildcards.sample}_{wildcards.reads}_fastqc.html {output.html}
-        cp {params.tmp_dir}/{wildcards.sample}_{wildcards.reads}_fastqc.zip {output.zip}
+        cp {params.tmp_dir}/1_fastqc.html {output.html1}
+        cp {params.tmp_dir}/1_fastqc.zip {output.zip1}
+        cp {params.tmp_dir}/2_fastqc.html {output.html2}
+        cp {params.tmp_dir}/2_fastqc.zip {output.zip2}
 
-        rm -rf {params.tmp_dir}
+        rm -rf tmp
         """
 
 
 rule detect_adapter:
     input: 
-        os.path.join(OUTDIR, "fastqc/{sample}_1_fastqc.zip")
+        os.path.join(OUTDIR, "fastqc/{sample}/1_fastqc.zip")
     output: 
-        os.path.join(OUTDIR, "adapters/{sample}_fastqc.txt")
+        os.path.join(OUTDIR, "fastqc/{sample}/adapters.txt")
     log: 
         os.path.join(LOGS, "detect_adapter/{sample}.log")
     params:
         detect_adapters = os.path.join(PY_SCRIPTS, "detect_adapters.py")    
     shell:
         """
-        (python {params.detect_adapters} {input} > {output}) 2> {log}
+        python {params.detect_adapters} {input} > {output}
         """
 
 
 rule kneaddata:
     input:
-        r1 = lambda wildcards: SAMPLES_LU[wildcards.sample],
-        r2 = lambda wildcards: SAMPLES_LU[wildcards.sample].replace("_1.fastq.gz", "_2.fastq.gz"),
-        adapter=os.path.join(OUTDIR, "adapters/{sample}_fastqc.txt")
+        # r1 = lambda wildcards: SAMPLES_LU[wildcards.sample],
+        # r2 = lambda wildcards: SAMPLES_LU[wildcards.sample].replace("_1.fastq.gz", "_2.fastq.gz"),
+        r1 = os.path.join(DATAPATH, "SAMEA{sample}/1.fastq.gz"),
+        r2 = os.path.join(DATAPATH, "SAMEA{sample}/2.fastq.gz"),
+        adapter=os.path.join(OUTDIR, "fastqc/{sample}/adapters.txt")
     output:
         # dir = temp(directory(os.path.join(OUTDIR, "knead/{sample}/tmp"))),
-        p1 = os.path.join(OUTDIR, "knead/{sample}/{sample}_1_kneaddata_paired_1.fastq"),
-        p2 = os.path.join(OUTDIR, "knead/{sample}/{sample}_1_kneaddata_paired_2.fastq"),
+        p1 = os.path.join(OUTDIR, "knead/{sample}/paired_1.fastq"),
+        p2 = os.path.join(OUTDIR, "knead/{sample}/paired_2.fastq"),
     log:
         os.path.join(LOGS, "knead/{sample}.log")
     threads: 96
@@ -126,6 +167,8 @@ rule kneaddata:
         db_path=DB # path to human genome bowtie index
     shell:
          """
+         mkdir -p {params.tmp_dir}
+
          kneaddata\
          --input1 {input.r1}\
          --input2 {input.r2}\
@@ -139,16 +182,16 @@ rule kneaddata:
          --threads {threads}\
          -o {params.tmp_dir}\
 
-         cp {params.tmp_dir}/{wildcards.sample}_1_kneaddata_paired_1.fastq {output.p1}
-         cp {params.tmp_dir}/{wildcards.sample}_1_kneaddata_paired_2.fastq {output.p2}
+         cp {params.tmp_dir}/1_kneaddata_paired_1.fastq {output.p1}
+         cp {params.tmp_dir}/1_kneaddata_paired_2.fastq {output.p2}
         
          rm -rf {params.tmp_dir}
          """
 
 rule metaspades: 
     input:
-        r1=os.path.join(OUTDIR, "knead/{sample}/{sample}_1_kneaddata_paired_1.fastq"),
-        r2=os.path.join(OUTDIR, "knead/{sample}/{sample}_1_kneaddata_paired_2.fastq")
+        r1=os.path.join(OUTDIR, "knead/{sample}/paired_1.fastq"),
+        r2=os.path.join(OUTDIR, "knead/{sample}/paired_2.fastq")
     output:
         contigs=os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"),
     benchmark:
@@ -173,8 +216,13 @@ rule metaspades:
 
 
 rule concatenate:
+    # input:
+    #     os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta")
     input:
-        expand(os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"),sample=SAMPLES)
+        lambda wildcards: expand(
+            os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"),
+            sample=get_samples(wildcards)
+        )
     output:
         os.path.join(OUTDIR, "global_contig_catalogue.fna.gz")
     conda:
@@ -188,8 +236,8 @@ rule concatenate:
 
 rule alignment:
     input:
-        r1=os.path.join(OUTDIR, "knead/{sample}/{sample}_1_kneaddata_paired_1.fastq"),
-        r2=os.path.join(OUTDIR, "knead/{sample}/{sample}_1_kneaddata_paired_2.fastq"),
+        r1=os.path.join(OUTDIR, "knead/{sample}/paired_1.fastq"),
+        r2=os.path.join(OUTDIR, "knead/{sample}/paired_2.fastq"),
         contig_catalouge=os.path.join(OUTDIR,"global_contig_catalogue.fna.gz")
     output:
         os.path.join(OUTDIR, "algn/{sample}_sorted.bam"),
@@ -222,8 +270,13 @@ rule get_coverage:
         """
 
 rule merge_abundances:
+    # input:
+    #     os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv")
     input:
-        expand(os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv"),sample=SAMPLES)
+        lambda wildcards: expand(
+            os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv"),
+            sample=get_samples(wildcards)
+        )
     output:
         os.path.join(OUTDIR, "abdn_coverm/abundances.tsv")
     params:
