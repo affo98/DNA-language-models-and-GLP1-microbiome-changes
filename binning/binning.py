@@ -18,6 +18,7 @@ from src.utils import read_contigs
 def main(args):
 
     contigs = read_contigs(args.contigs)
+    contigs = contigs[0:10000]
 
     try:
         embeddings = get_embeddings(
