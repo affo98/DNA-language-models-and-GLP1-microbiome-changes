@@ -90,10 +90,8 @@ class Threshold:
 
         return bin_vector
 
-
     def get_threshold(self) -> float:
-        
-
+        pass
 
     def save_histogram(self) -> None:
         """
