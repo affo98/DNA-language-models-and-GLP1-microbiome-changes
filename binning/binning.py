@@ -12,6 +12,7 @@ import torch
 
 from src.clustering import KMediod
 from src.get_embeddings import get_embeddings
+from src.threshold import Threshold
 
 csv.field_size_limit(2**30)
 
@@ -37,6 +38,7 @@ def main(args):
             args.model_name,
             args.model_path,
             os.path.join(args.save_path, "embeddings"),
+            normalize=True,
         )
     except Exception:
         print(
@@ -44,15 +46,24 @@ def main(args):
         )
     torch.cuda.empty_cache()
 
-    kmediod = KMediod(
+    thres = Threshold(
         embeddings,
-        min_similarity=0.008,  # 0.0075
-        min_bin_size=10,
-        num_steps=3,
-        max_iter=1000,
-        normalized=False,
+        n_bins=1000,
+        block_size=1000,
+        save_path=os.path.join(args.save_path, "threshold"),
     )
-    predictions = kmediod.fit()
+    thres.bin_vector()
+    thres.plot_histogram()
+
+    # kmediod = KMediod(
+    #     embeddings,
+    #     min_similarity=0.008,  # 0.0075
+    #     min_bin_size=10,
+    #     num_steps=3,
+    #     max_iter=1000,
+    #     normalized=True,
+    # )
+    # predictions = kmediod.fit()
     # print(predictions)
 
 
