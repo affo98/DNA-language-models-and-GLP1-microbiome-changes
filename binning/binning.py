@@ -24,7 +24,7 @@ def read_contigs(contigs_file: str) -> list[str]:
     with gzip.open(contigs_file, "rt") as handle:
         for record in SeqIO.parse(handle, "fasta"):
             contigs.append(str(record.seq))
-    return contigs
+    return contigs[0:10000]
 
 
 def main(args):
