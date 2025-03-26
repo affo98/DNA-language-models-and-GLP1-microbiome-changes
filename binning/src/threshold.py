@@ -57,7 +57,9 @@ class Threshold:
         # loop through to get global min/max pairwise similarity
         global_min = torch.tensor([1], dtype=torch.float32, device=self.device)
         global_max = torch.tensor([0], dtype=torch.float32, device=self.device)
-        for i in range(0, n_samples, self.block_size):
+        for i in tqdm(
+            range(0, n_samples, self.block_size), desc="Calculating global min/max"
+        ):
             block_start = i
             block_end = min(i + self.block_size, n_samples)
             block_embeddings = self.embeddings[block_start:block_end]
@@ -69,7 +71,9 @@ class Threshold:
             global_max = torch.max(global_max, local_max)
 
         # loop through again to get histogram
-        for i in range(0, n_samples, self.block_size):
+        for i in tqdm(
+            range(0, n_samples, self.block_size), desc="Calculating histogram"
+        ):
             block_start = i
             block_end = min(i + self.block_size, n_samples)
             block_embeddings = self.embeddings[block_start:block_end]
@@ -93,7 +97,7 @@ class Threshold:
     def get_threshold() -> float:
         pass
 
-    def save_histogram() -> None:
+    def save_histogram(self) -> None:
         """
         Plots and saves the histogram of similarities from the provided bin_vector.
 
