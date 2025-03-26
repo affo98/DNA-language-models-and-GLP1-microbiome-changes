@@ -52,6 +52,7 @@ def get_embeddings(
     elif model_name == "tnf_kernel":
         embeddings = calculate_tnf(dna_sequences, model_path, use_kernel=True)
 
+    print(embeddings.dtype)
     if normalize:
         embeddings = normalize(embeddings)
 

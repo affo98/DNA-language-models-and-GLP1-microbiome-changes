@@ -90,7 +90,12 @@ class Threshold:
 
         return bin_vector
 
-    def plot_similarity_histogram(self) -> None:
+
+    def get_threshold(self) -> float:
+        
+
+
+    def save_histogram(self) -> None:
         """
         Plots and saves the histogram of similarities from the provided bin_vector.
 
