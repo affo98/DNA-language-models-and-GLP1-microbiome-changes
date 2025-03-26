@@ -90,7 +90,9 @@ class Threshold:
             )
 
         bin_vector = bin_vector / bin_vector.sum()
-        # bin_vector = bin_vector.cpu().numpy()
+        bin_vector = bin_vector.cpu().numpy()
+        bin_vector.save(os.path.join(self.save_path, "bin_vector.npy"))
+        return bin_vector, global_min.item(), global_max.item()
 
         NORMALPDF = 0.005 * torch.tensor(
             [
