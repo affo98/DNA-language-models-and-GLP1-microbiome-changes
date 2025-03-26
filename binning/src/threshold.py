@@ -18,8 +18,8 @@ class Threshold:
         block_size: int,
     ):
         if embeddings.dtype != np.float32:
-            embeddings = embeddings.astype(np.float32)
-            print("Embeddings changed to dtype float32")
+            embeddings = embeddings.astype(np.float64)
+            print("Embeddings changed to dtype float64")
         if block_size < 1:
             raise ValueError("Block size must be at least 1")
         if n_bins < 1:
@@ -125,7 +125,8 @@ class Threshold:
                 2.66955661e-08,
                 9.13472041e-10,
                 2.43432053e-11,
-            ]
+            ],
+            device=self.device,
         )
         pdf_len = len(NORMALPDF)
         densities = torch.zeros(len(bin_vector) + pdf_len - 1)

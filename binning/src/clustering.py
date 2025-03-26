@@ -19,8 +19,8 @@ class KMediod:
         block_size: int = 1000,
     ):
         if embeddings.dtype != np.float32:
-            embeddings = embeddings.astype(np.float32)
-            print("Embeddings changed to dtype float32")
+            embeddings = embeddings.astype(np.float64)
+            print("Embeddings changed to dtype float64")
         if not 0 < min_similarity < 1:
             raise (ValueError("Minimum similarity must be between 0 and 1"))
         if min_bin_size < 1:
