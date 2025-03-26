@@ -17,7 +17,7 @@ class Threshold:
         n_bins: int,
         block_size: int,
     ):
-        if embeddings.dtype != np.float32:
+        if embeddings.dtype != np.float64:
             embeddings = embeddings.astype(np.float64)
             print("Embeddings changed to dtype float64")
         if block_size < 1:
@@ -92,7 +92,7 @@ class Threshold:
         bin_vector = bin_vector / bin_vector.sum()
         # bin_vector = bin_vector.cpu().numpy()
 
-        NORMALPDF = 0.005 * torch.Tensor(
+        NORMALPDF = 0.005 * torch.tensor(
             [
                 2.43432053e-11,
                 9.13472041e-10,
