@@ -44,7 +44,7 @@ class Threshold:
         self.block_size = block_size
         self.save_path = save_path
 
-        self.bin_vector = self.similarity_bin_vector(self)
+        self.bin_vector = self.similarity_bin_vector()
 
     def similarity_bin_vector(self) -> float:
         """
@@ -90,10 +90,10 @@ class Threshold:
 
         return bin_vector
 
-    def get_threshold(self) -> float:
+    def get_threshold() -> float:
         pass
 
-    def save_histogram(self) -> None:
+    def save_histogram() -> None:
         """
         Plots and saves the histogram of similarities from the provided bin_vector.
 
