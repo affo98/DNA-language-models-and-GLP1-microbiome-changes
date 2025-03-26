@@ -90,9 +90,50 @@ class Threshold:
             )
 
         bin_vector = bin_vector / bin_vector.sum()
-        bin_vector = bin_vector.cpu().numpy()
+        # bin_vector = bin_vector.cpu().numpy()
 
-        return bin_vector
+        NORMALPDF = 0.005 * torch.Tensor(
+            [
+                2.43432053e-11,
+                9.13472041e-10,
+                2.66955661e-08,
+                6.07588285e-07,
+                1.07697600e-05,
+                1.48671951e-04,
+                1.59837411e-03,
+                1.33830226e-02,
+                8.72682695e-02,
+                4.43184841e-01,
+                1.75283005e00,
+                5.39909665e00,
+                1.29517596e01,
+                2.41970725e01,
+                3.52065327e01,
+                3.98942280e01,
+                3.52065327e01,
+                2.41970725e01,
+                1.29517596e01,
+                5.39909665e00,
+                1.75283005e00,
+                4.43184841e-01,
+                8.72682695e-02,
+                1.33830226e-02,
+                1.59837411e-03,
+                1.48671951e-04,
+                1.07697600e-05,
+                6.07588285e-07,
+                2.66955661e-08,
+                9.13472041e-10,
+                2.43432053e-11,
+            ]
+        )
+        pdf_len = len(NORMALPDF)
+        densities = torch.zeros(len(bin_vector) + pdf_len - 1)
+        for i in range(len(densities) - pdf_len + 1):
+            densities[i : i + pdf_len] += NORMALPDF * bin_vector[i]
+        densities = densities[15:-15]
+
+        return densities
 
     def get_threshold() -> float:
         pass
