@@ -15,7 +15,7 @@ class Threshold:
         self,
         embeddings: np.ndarray,
         n_bins: int,
-        block_size: int = 1000,
+        block_size: int,
     ):
         if embeddings.dtype != np.float32:
             embeddings = embeddings.astype(np.float32)
@@ -24,14 +24,13 @@ class Threshold:
             raise ValueError("Block size must be at least 1")
         if n_bins < 1:
             raise ValueError("Number of bins must be at least 1")
-        
 
     def __init__(
         self,
         embeddings: np.ndarray,
-        n_bins: int = 1000,
-        block_size: int = 1000,
-        save_path:str,
+        save_path: str,
+        n_bins: int,
+        block_size: int,
     ):
         self.check_params(embeddings, n_bins, block_size)
 
@@ -44,10 +43,9 @@ class Threshold:
         self.device = device
         self.block_size = block_size
         self.save_path = save_path
-        
+
         self.bin_vector = self.similarity_bin_vector(self)
-        
-        
+
     def similarity_bin_vector(self) -> float:
         """
         Calculates pairwise similarities of embeddings and returns a histogram of similarities.
@@ -55,8 +53,8 @@ class Threshold:
 
         n_samples = self.embeddings.shape[0]
         bin_vector = torch.zeros(self.n_bins, dtype=torch.float32, device=self.device)
-        
-        #loop through to get global min/max pairwise similarity
+
+        # loop through to get global min/max pairwise similarity
         global_min = torch.tensor([1], dtype=torch.float32, device=self.device)
         global_max = torch.tensor([0], dtype=torch.float32, device=self.device)
         for i in range(0, n_samples, self.block_size):
@@ -64,23 +62,19 @@ class Threshold:
             block_end = min(i + self.block_size, n_samples)
             block_embeddings = self.embeddings[block_start:block_end]
 
-            block_sim_matrix = torch.mm(
-                block_embeddings, self.embeddings.T
-            ) 
+            block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
             local_min = block_sim_matrix.flatten().min()
             local_max = block_sim_matrix.flatten().max()
             global_min = torch.min(global_min, local_min)
             global_max = torch.max(global_max, local_max)
 
-        #loop through again to get histogram                    
+        # loop through again to get histogram
         for i in range(0, n_samples, self.block_size):
             block_start = i
             block_end = min(i + self.block_size, n_samples)
             block_embeddings = self.embeddings[block_start:block_end]
 
-            block_sim_matrix = torch.mm(
-                block_embeddings, self.embeddings.T
-            )  
+            block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
 
             block_sim_flatten = block_sim_matrix.flatten()
 
@@ -96,8 +90,7 @@ class Threshold:
 
         return bin_vector
 
-
-    def plot_similarity_histogram(self)->None:
+    def plot_similarity_histogram(self) -> None:
         """
         Plots and saves the histogram of similarities from the provided bin_vector.
 
@@ -105,22 +98,22 @@ class Threshold:
         - bin_vector: The normalized histogram values from similarity calculations.
         - output_dir: Directory where the plot will be saved.
         """
-        
+
         plt.figure(figsize=(8, 6))
         plt.plot(
-            np.arange(len(self.bin_vector)), 
-            self.bin_vector, 
-            color="skyblue", 
-            linestyle='-',
-            linewidth=2
-            )
+            np.arange(len(self.bin_vector)),
+            self.bin_vector,
+            color="skyblue",
+            linestyle="-",
+            linewidth=2,
+        )
         plt.xlabel("Similarity Bins")
         plt.ylabel("Frequency")
         plt.title("Similarity Histogram")
         plt.xticks(np.arange(len(self.bin_vector)))
 
         # Save the figure
-        file_path = os.path.join(self.save_path, "similarity_histogram.png")        
+        file_path = os.path.join(self.save_path, "similarity_histogram.png")
         plt.tight_layout()
         plt.savefig(file_path)
         plt.close()
