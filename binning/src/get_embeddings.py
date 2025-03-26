@@ -3,6 +3,8 @@ import os
 import numpy as np
 from tqdm import tqdm
 
+from sklearn.preprocessing import normalize
+
 
 def get_embeddings(
     dna_sequences: list[str],
@@ -10,6 +12,7 @@ def get_embeddings(
     model_name: str,
     model_path: str,
     save_path: str,
+    normalize: bool,
 ) -> np.array:
     """
     Generate or load embeddings for a given set of DNA sequences using the specified model.
@@ -47,6 +50,9 @@ def get_embeddings(
         embeddings = calculate_tnf(dna_sequences, model_path)
     elif model_name == "tnf_kernel":
         embeddings = calculate_tnf(dna_sequences, model_path, use_kernel=True)
+
+    if normalize:
+        embeddings = normalize(embeddings)
 
     with open(save_path, "wb") as f:
         np.save(f, embeddings)

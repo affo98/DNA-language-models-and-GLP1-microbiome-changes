@@ -8,21 +8,19 @@ from src.utils import get_available_device
 
 
 class KMediod:
+
     def check_params(
         self,
         embeddings: np.ndarray,
         min_similarity: float,
         min_bin_size: int,
         num_steps: int,
-        max_iter: int,
-        normalized: bool,
+        max_iter: int
+        block_size: int = 1000,
     ):
         if embeddings.dtype != np.float32:
             embeddings = embeddings.astype(np.float32)
             print("Embeddings changed to dtype float32")
-        if not normalized:
-            embeddings = normalize(embeddings)
-            print("Normalizing embeddings")
         if not 0 < min_similarity < 1:
             raise (ValueError("Minimum similarity must be between 0 and 1"))
         if min_bin_size < 1:
@@ -41,10 +39,10 @@ class KMediod:
         min_bin_size: int = 10,
         num_steps: int = 3,
         max_iter: int = 1000,
-        normalized: bool = False,
+        block_size: int = 1000,
     ):
         self.check_params(
-            embeddings, min_similarity, min_bin_size, num_steps, max_iter, normalized
+            embeddings, min_similarity, min_bin_size, num_steps, max_iter
         )
 
         device, gpu_count = get_available_device()
@@ -57,19 +55,19 @@ class KMediod:
         self.num_steps = num_steps
         self.max_iter = max_iter
         self.device = device
+        self.block_size = block_size
 
     def fit(
         self,
     ) -> np.array:
 
-        block_size = 30000
         n_samples = self.embeddings.shape[0]
 
         density_vector = torch.zeros(n_samples, device=self.device)
 
-        for i in range(0, n_samples, block_size):
+        for i in range(0, n_samples, self.block_size):
             block_start = i
-            block_end = min(i + block_size, n_samples)
+            block_end = min(i + self.block_size, n_samples)
             block_embeddings = self.embeddings[block_start:block_end]
 
             block_sim_matrix = torch.mm(
