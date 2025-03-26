@@ -44,7 +44,7 @@ class Threshold:
         self.block_size = block_size
         self.save_path = save_path
 
-        self.bin_vector = self.similarity_bin_vector()
+        self.bin_vector, self.global_min, self.global_max = self.similarity_bin_vector()
 
     def similarity_bin_vector(self) -> float:
         """
@@ -135,7 +135,7 @@ class Threshold:
         densities = densities[15:-15]
         densities = densities.to("cpu").numpy()
 
-        return densities
+        return densities, global_min.item(), global_max.item()
 
     def get_threshold() -> float:
         pass
@@ -160,7 +160,7 @@ class Threshold:
         plt.xlabel("Similarity Bins")
         plt.ylabel("Frequency")
         plt.title("Similarity Histogram")
-        tick_positions = np.linspace(0, self.n_bins - 1, 20).astype(
+        tick_positions = np.linspace(self.global_min, self.global_max - 1, 20).astype(
             int
         )  # 10 evenly spaced positions
         plt.xticks(tick_positions)
