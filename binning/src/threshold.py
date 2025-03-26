@@ -133,6 +133,7 @@ class Threshold:
         for i in range(len(densities) - pdf_len + 1):
             densities[i : i + pdf_len] += NORMALPDF * bin_vector[i]
         densities = densities[15:-15]
+        densities = densities.to("cpu").numpy()
 
         return densities
 
