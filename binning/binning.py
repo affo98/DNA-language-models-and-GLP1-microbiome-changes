@@ -38,7 +38,7 @@ def main(args):
         embeddings,
         n_bins=1000,
         block_size=1000,
-        save_path=os.path.join(args.save_path, "threshold"),
+        save_path=os.path.join(args.save_path),
     )
     thres.save_histogram()
 
