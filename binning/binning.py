@@ -40,7 +40,7 @@ def main(args):
         block_size=1000,
         save_path=os.path.join(args.save_path, "threshold"),
     )
-    thres.plot_histogram()
+    thres.save_histogram()
 
     # kmediod = KMediod(
     #     embeddings,
