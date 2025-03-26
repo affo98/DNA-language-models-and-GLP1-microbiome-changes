@@ -159,7 +159,10 @@ class Threshold:
         plt.xlabel("Similarity Bins")
         plt.ylabel("Frequency")
         plt.title("Similarity Histogram")
-        plt.xticks(np.arange(len(self.bin_vector)))
+        tick_positions = np.linspace(0, self.n_bins - 1, 20).astype(
+            int
+        )  # 10 evenly spaced positions
+        plt.xticks(tick_positions)
 
         # Save the figure
         file_path = os.path.join(self.save_path, "similarity_histogram.png")
