@@ -71,7 +71,7 @@ def get_embeddings(
         embeddings = calculate_dna2vec(dna_sequences, model_path)
     elif model_name in ["dnaberts", "dnabert2"]:
 
-        # process in
+        # process in chunks to with varying batch sizes to increase effeciency
         min_sequence_lengths = [min([len(seq) for seq in dna_sequences]), 10000, 20000]
         max_sequence_lengths = [10000, 20000, max([len(seq) for seq in dna_sequences])]
 
@@ -119,6 +119,7 @@ def get_embeddings(
     with open(save_path, "wb") as f:
         np.save(f, embeddings)
 
+    torch.cuda.empty_cache()
     return embeddings
 
 
