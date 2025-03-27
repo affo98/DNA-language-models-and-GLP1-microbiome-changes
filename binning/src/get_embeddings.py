@@ -69,7 +69,7 @@ def get_embeddings(
         embeddings = calculate_tnf(dna_sequences, model_path, use_kernel=True)
     elif model_name == "dna2vec":
         embeddings = calculate_dna2vec(dna_sequences, model_path)
-    elif model_name in ['dnabert_s','dnabert_2']:
+    elif model_name in ['dnaberts','dnabert2']:
         
         #process in 
         min_sequence_lengths = [min([len(seq) for seq in dna_sequences]) 10000, 20000]

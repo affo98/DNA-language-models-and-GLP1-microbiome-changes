@@ -44,6 +44,6 @@ models:
   - name: tnf
   - name: tnf_kernel
   - name: dna2vec
-  - name: dnabert_s
-  - name: dnabert_2
+  - name: dnaberts
+  - name: dnabert2
   #- name: semibin2
