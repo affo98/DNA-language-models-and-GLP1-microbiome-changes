@@ -318,6 +318,7 @@ def download_all_fastq_files(samples_fastq: dict, study_name: str) -> None:
         study_dir = os.path.join(
             os.environ["READS_OUTPUT_PATH"], f"{study_name}_{study_id}"
         )
+
         os.makedirs(study_dir, exist_ok=True)
 
         for sample_id in samples_fastq[study_id]:
@@ -329,10 +330,12 @@ def download_all_fastq_files(samples_fastq: dict, study_name: str) -> None:
 
                 for fastq_file in samples_fastq[study_id][sample_id][run_accession]:
                     fastq_filename = os.path.basename(fastq_file)
+
                     destination_path = os.path.join(
                         sample_dir, fastq_filename.split("_")[-1]
                     )
-                    download_fastq(fastq_file, destination_path)
+                    if not os.path.exists(destination_path):
+                        download_fastq(fastq_file, destination_path)
 
     return
 
