@@ -3,11 +3,37 @@
 [Overleaf report](https://www.overleaf.com/project/679796b5a02b660e4f96beff)
 
 #### Meeting Outline
+* [27 March 2025](#date-30-january-2025)
 * [20 March 2025](#date-30-january-2025)
 * [11 March 2025](#date-30-january-2025)
 * [27 February 2025](#date-30-january-2025)
 * [20 February 2025](#date-30-january-2025)
 * [06 February 2025](#date-30-january-2025)
+
+
+#### Date: 27 March 2025
+
+##### Who did you help this week?
+
+
+##### Who helped you this week?
+
+
+##### What did you achieve?
+
+* Get first results from benchmarked models in metagenomics binning
+* Test Bionfinformatics pipeline on full dataset
+* Pre-training our model with hierarchical contrastive loss.
+
+##### What did you struggle with?
+
+* What is the best way to empirically define a distance threshold used by the k-medoid algorithm?
+   * Theoretically we want the bottom of the valley of our histogram of pairwise distances, but practically we find it a bit up in the air. VAMB uses some loop and tries to see if numbers increase og decrease compared to some `peak_valley` variable. 
+
+##### Where do you need help from Veronika?
+
+* What ideas would you have for defining a distance threshold empirically for clustering?
+
 
 
 #### Date: 20 March 2025
