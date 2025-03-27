@@ -48,13 +48,15 @@ def main_worker(gpu, ngpus_per_node, args):
 
     dist.init_process_group(backend="nccl", init_method="env://",
                             world_size=ngpus_per_node, rank=args.gpu, timeout=timedelta(minutes=5))
-    
+    dist.barrier()
     model, criterion = set_model(ngpus_per_node, args)
+    dist.barrier()
     tokenizer = AutoTokenizer.from_pretrained("zhihan1996/DNABERT-2-117M", trust_remote_code=True)
     optimizer = get_optimizer(model, args)
     #cudnn.benchmark = True
-
+ 
     dataloaders_dict, sampler = load_deep_genome_hierarchical(args)
+    dist.barrier()
 
     trainer = Trainer(model, tokenizer, criterion, optimizer, dataloaders_dict, sampler, logger, args)
     trainer.train()
@@ -83,7 +85,7 @@ def get_args(argv):
     parser.add_argument('--gpuid', nargs="+", type=int, default=[0], help="The list of gpuid. Negative value means cpu-only")
     parser.add_argument('--seed', type=int, default=1, help="Random seed")
     parser.add_argument('--resdir', type=str, default="./results")
-    parser.add_argument('--logging_step', type=int, default=10000, help="How many iteration steps to save the model checkpoint and loss value once")
+    parser.add_argument('--logging_step', type=int, default=1000, help="How many iteration steps to save the model checkpoint and loss value once")
     parser.add_argument('--logging_num', type=int, default=12, help="How many times to log totally")
     # Dataset
     parser.add_argument('--datapath', type=str, default='./data/reference_genome_links/', help="The dict of data")
@@ -95,7 +97,7 @@ def get_args(argv):
     parser.add_argument('--lr', type=float, default=3e-06, help="Learning rate")
     parser.add_argument('--lr_scale', type=int, default=100, help="")
     parser.add_argument('--epochs', type=int, default=3)
-    parser.add_argument('--print-freq', '-p', default=1000, type=int, metavar='N', help='print frequency (default: 10)')
+    parser.add_argument('--print-freq', '-p', default=100, type=int, metavar='N', help='print frequency (default: 10)')
     #parser.add_argument('--train_batch_size', type=int, default=48, help="Batch size used for training dataset")
     #parser.add_argument('--val_batch_size', type=int, default=360, help="Batch size used for validating dataset")
      
