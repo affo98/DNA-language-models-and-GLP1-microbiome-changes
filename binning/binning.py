@@ -42,6 +42,7 @@ def main(args, log):
         n_bins=1000,
         block_size=10000,
         save_path=os.path.join(args.save_path),
+        model_name=args.model_name,
         log=log,
     )
     thres.save_histogram()

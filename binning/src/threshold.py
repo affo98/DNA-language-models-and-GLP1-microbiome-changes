@@ -30,9 +30,10 @@ class Threshold:
     def __init__(
         self,
         embeddings: np.ndarray,
-        save_path: str,
         n_bins: int,
         block_size: int,
+        save_path: str,
+        model_name: str,
         log: Logger,
     ):
         self.check_params(embeddings, n_bins, block_size)
@@ -42,10 +43,11 @@ class Threshold:
 
         self.embeddings = embeddings
         self.n_bins = n_bins
-        self.device = device
         self.block_size = block_size
         self.save_path = save_path
+        self.model_name = model_name
         self.log = log
+        self.device = device
 
         self.log.append(f"Using {device} for Threshold calculations")
 
