@@ -163,7 +163,6 @@ def calculate_llm_embedding(
         trust_remote_code=True,
         padding="max_length",
     )
-    tokenizer.model_max_length = 1000
     print(f"{model_name} tokenizer max length: {tokenizer.model_max_length}")
 
     config = BertConfig.from_pretrained(
@@ -193,7 +192,7 @@ def calculate_llm_embedding(
                 return_tensors="pt",
                 return_attention_mask=True,
                 padding=True,
-                max_length=tokenizer.model_max_length,
+                max_length=2000,  # change to avoid OOM erros
             )
 
             input_ids = inputs_tokenized["input_ids"].to(device)
