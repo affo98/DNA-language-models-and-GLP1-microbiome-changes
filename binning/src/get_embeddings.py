@@ -155,7 +155,7 @@ def calculate_llm_embedding(
         dna_sequences
     )  # To reduce Padding overhead
 
-    sorted_dna_sequences = [seq for seq in sorted_dna_sequences if len(seq) < 300000]
+    sorted_dna_sequences = [seq for seq in sorted_dna_sequences if len(seq) < 100000]
 
     dna_sequences = ContigDataset(sorted_dna_sequences)
 
