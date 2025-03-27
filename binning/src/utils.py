@@ -71,3 +71,23 @@ def validate_input_array(array: np.ndarray) -> np.ndarray:
 
     assert array.flags["C_CONTIGUOUS"] and array.flags["OWNDATA"]
     return array
+
+
+class Logger:
+    def __init__(self, log_path: str):
+        """Initialize the Logger with a path to the log file.
+
+        Args:
+            log_path (str): The path to the log file.
+        """
+        self.log_path = log_path
+
+    def append(self, message: str) -> None:
+        """Print and append a log message to the log file.
+
+        Args:
+            message (str): The message to log.
+        """
+        print(message)
+        with open(self.log_path, "a") as log_file:
+            log_file.write(message + "\n")

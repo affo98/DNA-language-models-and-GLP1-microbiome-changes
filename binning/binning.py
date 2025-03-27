@@ -12,10 +12,10 @@ import torch
 from src.clustering import KMediod
 from src.get_embeddings import get_embeddings
 from src.threshold import Threshold
-from src.utils import read_contigs
+from src.utils import read_contigs, Logger
 
 
-def main(args):
+def main(args, log):
 
     contigs = read_contigs(args.contigs)
     contigs = contigs[0:10000]
@@ -28,11 +28,10 @@ def main(args):
             args.model_path,
             os.path.join(args.save_path, "embeddings", f"{args.model_name}.npy"),
             normalize_embeddings=True,
+            log=log,
         )
     except Exception:
-        print(
-            f"|===========| Error in getting embeddings for {args.model_name}|===========|\n{traceback.format_exc()}"
-        )
+        log.append(f"|===========| Error in getting embeddings for {args.model_name}|===========|\n{traceback.format_exc()}")
 
     thres = Threshold(
         embeddings,
@@ -83,6 +82,11 @@ def add_arguments() -> ArgumentParser:
         "-s",
         help="Path to save the computed embeddings or to load existing ones",
     )
+     parser.add_argument(
+        "--log",
+        "-l",
+        help="Path to save logfile",
+    )
 
     args = parser.parse_args()
 
@@ -92,12 +96,13 @@ def add_arguments() -> ArgumentParser:
 if __name__ == "__main__":
 
     args = add_arguments()
+    
+    log = Logger(args.log_path)
 
-    print("BINNING:")
     for arg, value in vars(args).items():
-        print(f"{arg}: {value}")
+        log.append(f"{arg}: {value}")
 
-    main(args)
+    main(args, log)
 
 
 # def setup_paths() -> None:

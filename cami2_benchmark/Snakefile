@@ -135,6 +135,8 @@ rule other_model:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
     output:
         dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output"))
+    log:
+        os.path.join(LOGS, DATASET, "{MODEL}_binning.log")
     conda:
         "envs/llm.yml"
     shell:
@@ -142,7 +144,7 @@ rule other_model:
         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
         pip uninstall -y triton
         python {BINNING_DIR}/binning.py -c {input.catalogue} -m {MODEL} -mp {MODEL_PATH} \
-        -b {BATCH_SIZES} -s {output.dirs}
+        -b {BATCH_SIZES} -s {output.dirs} --l {log}
         """
 
 rule create_fasta_bins_other_model:
