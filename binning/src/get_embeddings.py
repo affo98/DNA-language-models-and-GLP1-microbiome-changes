@@ -1,4 +1,5 @@
 import os
+import warnings
 
 import numpy as np
 from tqdm import tqdm
@@ -21,6 +22,11 @@ from transformers.models.bert.configuration_bert import BertConfig
 from sklearn.preprocessing import normalize
 from src.utils import validate_input_array, sort_sequences, get_available_device
 from src.dataset import ContigDataset
+
+
+warnings.simplefilter("ignore", UserWarning)
+warnings.filterwarnings("ignore", message="Increasing alibi size")
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
 def get_embeddings(
@@ -157,6 +163,7 @@ def calculate_llm_embedding(
         trust_remote_code=True,
         padding="max_length",
     )
+    tokenizer.model_max_length = 100000
     print(f"{model_name} tokenizer max length: {tokenizer.model_max_length}")
 
     config = BertConfig.from_pretrained(
@@ -197,6 +204,11 @@ def calculate_llm_embedding(
                 .detach()
                 .cpu()
             )
+            token_lengths = attention_mask.sum(dim=1).cpu().numpy()
+            print(
+                f"Min token length: {token_lengths.min()}, Max token length: {token_lengths.max()}"
+            )
+
             attention_mask = attention_mask.unsqueeze(-1).detach().cpu()
             embedding = torch.sum(model_output * attention_mask, dim=1) / torch.sum(
                 attention_mask, dim=1
