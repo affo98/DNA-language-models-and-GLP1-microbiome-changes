@@ -53,9 +53,9 @@ class Threshold:
 
         self.bin_vector, self.pairsim_vector = self.get_similarity_bin_vector()
 
-        self.otsu, self.otsu_mul, self.isodata, self.minimum, self.yen = (
-            self.get_threshold()
-        )
+    # self.otsu, self.otsu_mul, self.isodata, self.minimum, self.yen = (
+    #    self.get_threshold()
+    # )
 
     def get_similarity_bin_vector(self) -> float:
         """
