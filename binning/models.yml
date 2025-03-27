@@ -9,7 +9,7 @@ dna2vec:
 
 dnaberts:
   model_path: "zhihan1996/DNABERT-S"
-  batch_sizes: [50, 8, 1]
+  batch_sizes: [50, 10, 1]
 
 dnabert2:
   model_path: "zhihan1996/DNABERT-2-117M"
