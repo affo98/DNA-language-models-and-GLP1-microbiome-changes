@@ -38,7 +38,6 @@ LLM_SEQ_MAX_LENGTH = 50000
 
 
 class Embedder:
-
     def check_params():
         pass
 
@@ -98,7 +97,7 @@ class Embedder:
 
         if self.model_name == "tnf":
             embeddings = self.calculate_tnf()
-        elif self.model_name == "tnf_kernel":
+        elif self.model_name == "tnfkernel":
             embeddings = self.calculate_tnf(use_kernel=True)
         elif self.model_name == "dna2vec":
             embeddings = self.calculate_dna2vec()
