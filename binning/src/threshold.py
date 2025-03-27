@@ -178,8 +178,8 @@ class Threshold:
             linewidth=2,
         )
 
-        tick_positions = np.linspace(0, len(self.pairsim_vector) - 1, 10, dtype=int)
-        plt.xticks(ticks=tick_positions)
+        # tick_positions = np.linspace(0, len(self.pairsim_vector) - 1, 10, dtype=int)
+        # plt.xticks(ticks=tick_positions)
 
         plt.xlabel("Similarity Bins")
         plt.ylabel("Frequency")
