@@ -188,7 +188,7 @@ class Threshold:
         - output_dir: Directory where the plot will be saved.
         """
 
-        for k in [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]:
+        for k in [100, 200, 300, 400, 500, 600, 700, 800]:
             self.threshold, self.pairsim_vector, self.bin_vector = self.knn_threshold(
                 k, p=0.7
             )
