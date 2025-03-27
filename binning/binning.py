@@ -33,7 +33,6 @@ def main(args):
         print(
             f"|===========| Error in getting embeddings for {args.model_name}|===========|\n{traceback.format_exc()}"
         )
-    torch.cuda.empty_cache()
 
     thres = Threshold(
         embeddings,
@@ -75,6 +74,8 @@ def add_arguments() -> ArgumentParser:
     parser.add_argument(
         "--batch_sizes",
         "-b",
+        nargs="+",
+        type=int,
         help="batch sizes for embeddings",
     )
     parser.add_argument(
