@@ -51,9 +51,7 @@ class Threshold:
 
         self.log.append(f"Using {device} for Threshold calculations")
 
-        self.bin_vector, self.global_min, self.global_max = (
-            self.get_similarity_bin_vector()
-        )
+        self.bin_vector, self.pairsim_vector = self.get_similarity_bin_vector()
 
         self.otsu, self.otsu_mul, self.isodata, self.minimum, self.yen = (
             self.get_threshold()
@@ -106,7 +104,13 @@ class Threshold:
         bin_vector = bin_vector.cpu().numpy()
         np.save(os.path.join(self.save_path, "bin_vector.npy"), bin_vector)
 
-        return bin_vector, global_min.item(), global_max.item()
+        pairsim_vector = (
+            torch.linspace(global_min.item(), global_max.item(), self.n_bins)
+            .cpu()
+            .numpy
+        )
+
+        return bin_vector, pairsim_vector
 
     def get_threshold(self) -> tuple[float, float, float, float, float]:
 
@@ -129,57 +133,52 @@ class Threshold:
 
         plt.figure(figsize=(8, 6))
         plt.axvline(
-            x=np.argmin(np.abs(self.bin_vector - self.otsu)),
+            x=np.argmin(np.abs(self.pairsim_vector - self.otsu)),
             color="r",
             linestyle="--",
             label=f"Otsu (t={self.otsu:.5f})",
         )
         plt.axvline(
-            x=np.argmin(np.abs(self.bin_vector - self.otsu_mul[0])),
+            x=np.argmin(np.abs(self.pairsim_vector - self.otsu_mul[0])),
             color="indianred",
             linestyle="--",
             label=f"MULTIPLE OTSU (t={self.otsu_mul[0]:.5f})",
         )
         plt.axvline(
-            x=np.argmin(np.abs(self.bin_vector - self.isodata)),
+            x=np.argmin(np.abs(self.pairsim_vector - self.isodata)),
             color="b",
             linestyle="--",
             label=f"ISODATA  (t={self.isodata:.5f})",
         )
         plt.axvline(
-            x=np.argmin(np.abs(self.bin_vector - self.minimum)),
+            x=np.argmin(np.abs(self.pairsim_vector - self.minimum)),
             color="y",
             linestyle="--",
             label=f"MINIMUM (t={self.minimum:.5f})",
         )
         plt.axvline(
-            x=np.argmin(np.abs(self.bin_vector - self.yen)),
+            x=np.argmin(np.abs(self.pairsim_vector - self.yen)),
             color="slategrey",
             linestyle="--",
             label=f"YEN Threshold (t={self.yen:.5f})",
         )
         plt.axvline(
-            x=350 + self.bin_vector[350:700].argmin(),
+            x=350 + self.pairsim_vector[350:700].argmin(),
             color="k",
             linestyle="--",
-            label=f"Manual: {self.bin_vector[self.bin_vector[350:700].argmin()]:.5f}",
+            label=f"Manual: {self.pairsim_vector[self.pairsim_vector[350:700].argmin()]:.5f}",
         )
 
         plt.plot(
-            np.arange(len(self.bin_vector)),
+            np.arange(len(self.pairsim_vector)),
             self.bin_vector,
             color="skyblue",
             linestyle="-",
             linewidth=2,
         )
 
-        tick_positions = np.linspace(0, len(self.bin_vector) - 1, 10).astype(
-            int
-        )  # 10 evenly spaced positions
-        tick_labels = [
-            f"{self.bin_vector[i]:.5f}" for i in tick_positions
-        ]  # Use indices as tick labels or adjust as necessary
-        plt.xticks(tick_positions, tick_labels)
+        tick_positions = np.linspace(0, len(self.pairsim_vector) - 1, 10, dtype=int)
+        plt.xticks(ticks=tick_positions)
 
         plt.xlabel("Similarity Bins")
         plt.ylabel("Frequency")
