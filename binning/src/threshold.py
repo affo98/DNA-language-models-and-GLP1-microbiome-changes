@@ -190,7 +190,7 @@ class Threshold:
 
         for k in [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]:
             self.knn_threshold, self.pairsim_vector, self.bin_vector = (
-                self.knn_threshold(k=k, p=0.7)
+                self.knn_threshold(k, p=0.7)
             )
 
             plt.figure(figsize=(8, 6))
