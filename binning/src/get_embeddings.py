@@ -75,7 +75,7 @@ def get_embeddings(
         min_sequence_lengths = [min([len(seq) for seq in dna_sequences]), 10000, 20000]
         max_sequence_lengths = [10000, 20000, max([len(seq) for seq in dna_sequences])]
 
-        processed_ids = (
+        original_ids = (
             []
         )  # [index in the original list, so if dna_seq is in position 4512, teh index is 4512]
         processed_embeddings = []
@@ -104,13 +104,13 @@ def get_embeddings(
             processed_embeddings.append(embeddings)
 
             indices_filtered = list(indices_filtered)
-            processed_ids.extend(indices_filtered)
+            original_ids.extend(indices_filtered)
 
         embeddings = np.concatenate(
             processed_embeddings,
             axis=0,
         )
-        embeddings = embeddings[np.argsort(processed_ids)]
+        embeddings = embeddings[np.argsort(original_ids)]
 
     if normalize_embeddings:
         embeddings = normalize(embeddings)
