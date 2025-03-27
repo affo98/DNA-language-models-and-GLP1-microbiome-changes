@@ -51,7 +51,7 @@ class Threshold:
 
         self.log.append(f"Using {device} for Threshold calculations")
 
-        self.bin_vector, self.pairsim_vector = self.get_similarity_bin_vector()
+        # self.bin_vector, self.pairsim_vector = self.get_similarity_bin_vector()
 
         self.knn_threshold = self.knn_threshold(k=200, p=0.7)
 
