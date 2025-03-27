@@ -254,7 +254,7 @@ class Embedder:
                 min_token_length = min(min_token_length, token_lengths.min())
                 max_token_length = max(max_token_length, token_lengths.max())
 
-        print(
+        self.log(
             f"Min token length: {token_lengths.min()}, Max token length: {token_lengths.max()}"
         )
 
@@ -280,7 +280,7 @@ class Embedder:
                         to the embedding of a DNA sequence.
         """
 
-        tnf_embeddings = self.calculate_tnf(self.dna_sequences)
+        tnf_embeddings = self.calculate_tnf()
 
         pretrained_4mer_embedding = np.load(self.model_path)  # dim (256,100)
         embeddings = np.dot(tnf_embeddings, pretrained_4mer_embedding)

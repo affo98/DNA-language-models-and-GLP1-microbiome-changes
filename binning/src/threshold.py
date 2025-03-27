@@ -46,12 +46,15 @@ class Threshold:
         self.block_size = block_size
         self.save_path = save_path
 
-        self.bin_vector, self.global_min, self.global_max = self.similarity_bin_vector()
+        self.bin_vector, self.global_min, self.global_max = (
+            self.get_similarity_bin_vector()
+        )
+
         self.otsu, self.otsu_mul, self.isodata, self.minimum, self.yen = (
             self.get_threshold()
         )
 
-    def similarity_bin_vector(self) -> float:
+    def get_similarity_bin_vector(self) -> float:
         """
         Calculates pairwise similarities of embeddings and returns a histogram of similarities.
         """
@@ -108,7 +111,7 @@ class Threshold:
         minimum = filters.threshold_minimum(self.bin_vector)
         yen = filters.threshold_yen(self.bin_vector)
 
-        return otsu, otsu_mul, isodata, minimum, yen
+        return (otsu, otsu_mul, isodata, minimum, yen)
 
     def save_histogram(self) -> None:
         """
@@ -156,7 +159,7 @@ class Threshold:
             x=np.argmin(np.abs(self.bin_vector - self.yen)),
             color="slategrey",
             linestyle="--",
-            label=f"YEN Threshold (t={yen:.5f})",
+            label=f"YEN Threshold (t={self.yen:.5f})",
         )
         plt.axvline(
             x=350 + self.bin_vector[350:700].argmin(),
