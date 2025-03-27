@@ -144,7 +144,7 @@ rule other_model:
         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
         pip uninstall -y triton
         python {BINNING_DIR}/binning.py -c {input.catalogue} -m {MODEL} -mp {MODEL_PATH} \
-        -b {BATCH_SIZES} -s {output.dirs} --l {log}
+        -b {BATCH_SIZES} -s {output.dirs} -l {log}
         """
 
 rule create_fasta_bins_other_model:

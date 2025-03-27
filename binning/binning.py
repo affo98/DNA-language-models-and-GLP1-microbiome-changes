@@ -10,7 +10,7 @@ import numpy as np
 import torch
 
 from src.clustering import KMediod
-from src.get_embeddings import get_embeddings
+from src.get_embeddings import Embedder
 from src.threshold import Threshold
 from src.utils import read_contigs, Logger
 
@@ -22,7 +22,7 @@ def main(args, log):
     contigs = [contig for contig in contigs if len(contig) < 50000]
 
     try:
-        embeddings = get_embeddings(
+        embeddings = Embedder(
             contigs,
             args.batch_sizes,
             args.model_name,
@@ -30,9 +30,11 @@ def main(args, log):
             os.path.join(args.save_path, "embeddings", f"{args.model_name}.npy"),
             normalize_embeddings=True,
             log=log,
-        )
+        ).get_embeddings()
     except Exception:
-        log.append(f"|===========| Error in getting embeddings for {args.model_name}|===========|\n{traceback.format_exc()}")
+        log.append(
+            f"|===========| Error in getting embeddings for {args.model_name}|===========|\n{traceback.format_exc()}"
+        )
 
     thres = Threshold(
         embeddings,
@@ -83,7 +85,7 @@ def add_arguments() -> ArgumentParser:
         "-s",
         help="Path to save the computed embeddings or to load existing ones",
     )
-     parser.add_argument(
+    parser.add_argument(
         "--log",
         "-l",
         help="Path to save logfile",
@@ -97,7 +99,7 @@ def add_arguments() -> ArgumentParser:
 if __name__ == "__main__":
 
     args = add_arguments()
-    
+
     log = Logger(args.log_path)
 
     for arg, value in vars(args).items():

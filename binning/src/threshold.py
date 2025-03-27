@@ -97,9 +97,10 @@ class Threshold:
         bin_vector = bin_vector / bin_vector.sum()
         bin_vector = bin_vector.cpu().numpy()
         np.save(os.path.join(self.save_path, "bin_vector.npy"), bin_vector)
+
         return bin_vector, global_min.item(), global_max.item()
 
-    def get_threshold(self) -> float:
+    def get_threshold(self) -> tuple[float, float, float, float, float]:
 
         otsu = filters.threshold_otsu(self.bin_vector[:980])
         otsu_mul = filters.threshold_multiotsu(self.bin_vector, classes=3)
