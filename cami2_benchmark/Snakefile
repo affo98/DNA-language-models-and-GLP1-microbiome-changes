@@ -146,8 +146,8 @@ rule all:
 #TNF
 rule other_model:
     input:
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
-        #catalogue = "test_contigs.fna.gz"
+        #catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+        catalogue = "test_contigs.fna.gz"
     output:
         dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output"))
     log:
