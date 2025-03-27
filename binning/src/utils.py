@@ -9,12 +9,17 @@ csv.field_size_limit(2**30)
 
 
 def read_contigs(contigs_file: str) -> list[str]:
-    """Read in contigs from a fasta file."""
+    """Read in contigs from a fasta file. Either Gzip or normal file."""
 
     contigs = []
-    with gzip.open(contigs_file, "rt") as handle:
-        for record in SeqIO.parse(handle, "fasta"):
-            contigs.append(str(record.seq))
+    try:
+        with gzip.open(contigs_file, "rt") as handle:
+            for record in SeqIO.parse(handle, "fasta"):
+                contigs.append(str(record.seq))
+    except Exception:
+        with open(contigs_file, "r") as handle:
+            for record in SeqIO.parse(handle, "fasta"):
+                contigs.append(str(record.seq))
     return contigs
 
 
