@@ -65,6 +65,7 @@ class Threshold:
         n_samples = self.embeddings.shape[0]
         bin_vector = torch.zeros(self.n_bins, dtype=torch.float32, device=self.device)
 
+        test_all_similarities = []
         # loop through to get global min/max pairwise similarity
         global_min = torch.tensor([1], dtype=torch.float32, device=self.device)
         global_max = torch.tensor([-1], dtype=torch.float32, device=self.device)
@@ -91,7 +92,8 @@ class Threshold:
 
             block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
 
-            block_sim_flatten = block_sim_matrix.flatten()
+            block_sim_flatten = block_sim_matrix.flatten().cpu()
+            test_all_similarities.append(block_sim_flatten)
 
             bin_vector += torch.histc(
                 block_sim_flatten,
@@ -102,7 +104,6 @@ class Threshold:
 
         bin_vector = bin_vector / bin_vector.sum()
         bin_vector = bin_vector.cpu().numpy()
-        np.save(os.path.join(self.save_path, "bin_vector.npy"), bin_vector)
 
         pairsim_vector = (
             torch.linspace(global_min.item(), global_max.item(), self.n_bins)
@@ -111,7 +112,7 @@ class Threshold:
         )
         print(global_min.item(), global_max.item())
 
-        return bin_vector, pairsim_vector
+        return test_all_similarities, pairsim_vector
 
     def get_threshold(self) -> tuple[float, float, float, float, float]:
 
@@ -170,12 +171,15 @@ class Threshold:
         #     label=f"Manual: {self.pairsim_vector[self.pairsim_vector[350:700].argmin()]:.5f}",
         # )
 
-        plt.plot(
-            self.pairsim_vector,
-            self.bin_vector,
-            color="skyblue",
-            linestyle="-",
-            linewidth=2,
+        # plt.plot(
+        #     self.pairsim_vector,
+        #     self.bin_vector,
+        #     color="skyblue",
+        #     linestyle="-",
+        #     linewidth=2,
+        # )
+        plt.hist(
+            self.bin_vector, bins=50, color="skyblue", edgecolor="black", alpha=0.7
         )
 
         # tick_positions = np.linspace(0, len(self.pairsim_vector) - 1, 10, dtype=int)
