@@ -177,7 +177,7 @@ class Threshold:
             int
         )  # 10 evenly spaced positions
         tick_labels = [
-            f"{i}" for i in tick_positions
+            f"{self.bin_vector[i]}" for i in tick_positions
         ]  # Use indices as tick labels or adjust as necessary
         plt.xticks(tick_positions, tick_labels)
 
