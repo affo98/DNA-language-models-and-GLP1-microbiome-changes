@@ -140,7 +140,7 @@ rule other_model:
     shell:
         """
         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
-        pip uninstall triton
+        pip uninstall -y triton
         python {BINNING_DIR}/binning.py -c {input.catalogue} -m {MODEL} -mp {MODEL_PATH} \
         -b {BATCH_SIZES} -s {output.dirs}
         """
