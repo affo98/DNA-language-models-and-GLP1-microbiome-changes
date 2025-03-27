@@ -171,7 +171,7 @@ class Threshold:
         )
 
         plt.plot(
-            np.arange(len(self.pairsim_vector)),
+            self.pairsim_vector,
             self.bin_vector,
             color="skyblue",
             linestyle="-",
