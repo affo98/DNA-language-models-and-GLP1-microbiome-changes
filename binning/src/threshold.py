@@ -92,8 +92,8 @@ class Threshold:
 
             block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
 
-            block_sim_flatten = block_sim_matrix.flatten().cpu()
-            test_all_similarities.append(block_sim_flatten)
+            block_sim_flatten = block_sim_matrix.flatten()
+            test_all_similarities.append(block_sim_flatten.cpu())
 
             bin_vector += torch.histc(
                 block_sim_flatten,
