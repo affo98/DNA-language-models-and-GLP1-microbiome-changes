@@ -26,7 +26,7 @@ def main(args):
             args.batch_sizes,
             args.model_name,
             args.model_path,
-            os.path.join(args.save_path, "embeddings"),
+            os.path.join(args.save_path, "embeddings", f"{args.model_name}.npy"),
             normalize_embeddings=True,
         )
     except Exception:

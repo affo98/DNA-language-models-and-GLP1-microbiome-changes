@@ -3,13 +3,29 @@ import os
 import numpy as np
 from tqdm import tqdm
 
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader
+
+
+from transformers import (
+    AutoTokenizer,
+    AutoModel,
+    AutoModelForMaskedLM,
+    AutoConfig,
+    AutoModelForCausalLM,
+)
+
+from transformers.models.bert.configuration_bert import BertConfig
+
 from sklearn.preprocessing import normalize
-from src.utils import validate_input_array
+from src.utils import validate_input_array, sort_sequences, get_available_device
+from src.dataset import ContigDataset
 
 
 def get_embeddings(
     dna_sequences: list[str],
-    batch_size: list[int],
+    batch_sizes: list[int],
     model_name: str,
     model_path: str,
     save_path: str,
@@ -48,22 +64,178 @@ def get_embeddings(
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
     if model_name == "tnf":
-        embeddings = calculate_tnf(dna_sequences, model_path)
+        embeddings = calculate_tnf(dna_sequences)
     elif model_name == "tnf_kernel":
         embeddings = calculate_tnf(dna_sequences, model_path, use_kernel=True)
+    elif model_name == "dna2vec":
+        embeddings = calculate_dna2vec(dna_sequences, model_path)
+    elif model_name in ['dnabert_s','dnabert_2']:
+        
+        #process in 
+        min_sequence_lengths = [min([len(seq) for seq in dna_sequences]) 10000, 20000]
+        max_sequence_lengths = [10000, 20000, max([len(seq) for seq in dna_sequences])]
 
-    print(embeddings.dtype)
+        processed_ids = ([])  # [index in the original list, so if dna_seq is in position 4512, teh index is 4512]
+        processed_embeddings = []
+
+        for sequence_length_min, sequence_length_max, batch_size in zip(
+            min_sequence_lengths, max_sequence_lengths, batch_sizes
+        ):
+
+            indices_filtered, dna_sequences_filtered = zip(
+                *[
+                    (index, seq)
+                    for (index, seq) in enumerate(dna_sequences)
+                    if sequence_length_min <= len(seq) < sequence_length_max
+                ]
+            )
+            print(
+                f"Running {len(dna_sequences_filtered)} sequences with len between {sequence_length_min}-{sequence_length_max}"
+            )
+            if len(dna_sequences_filtered) == 0:
+                continue    
+            indices_filtered = list(indices_filtered)
+            dna_sequences_filtered = list(dna_sequences_filtered)
+
+            embeddings = calculate_llm_embedding(dna_sequences_filtered, batch_size, model_name, model_path)
+            processed_embeddings.append(embeddings)
+            processed_ids.extend(indices_filtered)
+
+        embeddings = np.concatenate(
+            processed_embeddings,
+            axis=0,
+        )
+        embeddings = embeddings[np.argsort(processed_ids)]
+        
+
     if normalize_embeddings:
         embeddings = normalize(embeddings)
-
+        
+    print(f"Embeddings shape: {embeddings.shape}")
     with open(save_path, "wb") as f:
         np.save(f, embeddings)
 
     return embeddings
 
 
+
+def calculate_llm_embedding(
+    dna_sequences: list[str],
+    batch_size: list[int],
+    model_name: str,
+    model_path: str,
+) -> np.array:
+    """Calculates embeddings for DNA sequences using a specified language model (LLM).
+
+    This function uses a pretrained model to generate embeddings for each DNA sequence.
+
+    Args:
+        dna_sequences (list[str]): List of DNA sequences for which embeddings are generated.
+        batch_size (int): Size of batches for processing sequences.
+        model_name (str): Name of the model to use for generating embeddings (e.g., "DNABERT_2", "EVO", "NT", "GROVER").
+        model_path (str): Path to the pretrained model files (e.g. from Huggingface)
+
+    Returns:
+        np.array: Array of embeddings for the input DNA sequences, with shape (num_sequences, embedding_dimension).
+    """
+    
+    sorted_dna_sequences, idx = sort_sequences(dna_sequences) # To reduce Padding overhead
+    dna_sequences = ContigDataset(sorted_dna_sequences)
+
+    device, n_gpu = get_available_device()
+    print(f"Using device: {device}\nwith {n_gpu} GPUs")
+
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_path,
+        padding_side="right",
+        trust_remote_code=True,
+        padding="max_length",
+    )
+    print(f"{model_name} tokenizer max length: {tokenizer.model_max_length}")
+
+    config = BertConfig.from_pretrained(
+        model_path,
+        trust_remote_code=True,
+    )
+    model = AutoModel.from_pretrained(
+        model_path,
+        config=config,
+        trust_remote_code=True,
+    )
+    model = model.to(device)
+    if n_gpu > 1:
+        model = nn.DataParallel(model)
+
+    data_loader = DataLoader(
+        dna_sequences,
+        batch_size=batch_size * n_gpu,
+        shuffle=False,
+        num_workers=2 * n_gpu,
+    )
+    
+    for i, batch in enumerate(tqdm(data_loader)):
+        with torch.no_grad():
+            inputs_tokenized = tokenizer.batch_encode_plus(
+                batch,
+                return_tensors="pt",
+                return_attention_mask=True,
+                padding=True,
+                max_length=tokenizer.model_max_length,
+            )
+            
+            input_ids = inputs_tokenized["input_ids"].to(device)
+            attention_mask = inputs_tokenized["attention_mask"].to(device)
+            
+            model_output = (
+                model.forward(input_ids=input_ids, attention_mask=attention_mask)[0]
+                .detach()
+                .cpu()
+            )
+            attention_mask = attention_mask.unsqueeze(-1).detach().cpu()
+            embedding = torch.sum(model_output * attention_mask, dim=1) / torch.sum(
+                attention_mask, dim=1
+            )  # along the sequence length
+
+            if i == 0:
+                embeddings = embedding
+            else:
+                embeddings = torch.cat(
+                    (embeddings, embedding), dim=0
+                )  # concatenate along the batch dimension
+
+    embeddings = np.array(embeddings.detach().cpu())
+
+    embeddings = embeddings[np.argsort(idx)] #sort back to normal indices
+
+    return embeddings
+
+
+def calculate_dna2vec(dna_sequences: list[str], model_path: str) -> np.array:
+    """
+    Calculates the DNA2Vec embedding for a list of DNA sequences.
+
+    The function then multiplies the TNF embedding with a 4-mer embedding matrix to obtain
+    the DNA2Vec embedding. The 4-mer embedding matrix is pretrained embeddings on the hg38 (human genome) obtained from https://github.com/MAGICS-LAB/DNABERT_S/blob/main/evaluate/helper/4mer_embedding.npy.
+    See more in paper dna2vec https://arxiv.org/abs/1701.06279.
+    Args:
+        dna_sequences (List[str]): A list of DNA sequences, where each sequence is a list
+                                         of nucleotide characters (A, T, C, or G).
+        model_path (str): Path to the model to be used for the embeddings.
+    Returns:
+        np.ndarray: A 2D numpy array representing the DNA2Vec embedding, where each row corresponds
+                    to the embedding of a DNA sequence.
+    """
+
+    tnf_embeddings = calculate_tnf(dna_sequences)
+
+    pretrained_4mer_embedding = np.load(model_path)  # dim (256,100)
+    embeddings = np.dot(tnf_embeddings, pretrained_4mer_embedding)
+
+    return embeddings
+
+
 def calculate_tnf(
-    dna_sequences: list[str], model_path: str, use_kernel: bool = False
+    dna_sequences: list[str], model_path: str = None, use_kernel: bool = False
 ) -> np.ndarray:
     """Calculates tetranucleotide frequencies in a list of DNA sequences.
 
@@ -80,7 +252,6 @@ def calculate_tnf(
               and each row contains the tetranucleotide frequency vector for a sequence.
 
     """
-
     nucleotides = ["A", "T", "C", "G"]
     tetra_nucleotides = [
         a + b + c + d

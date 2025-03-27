@@ -18,6 +18,23 @@ def read_contigs(contigs_file: str) -> list[str]:
     return contigs
 
 
+def sort_sequences(dna_sequences: list[str]) -> tuple[list, np.array]:
+    """Sorting sequences by length and returning sorted sequences and indices
+
+    Args:
+        data (list): List ID, DNA Sequence, Label from loaded CSV
+
+    Returns:
+        tuple[list, list]: Sorted DNA Sequences and corresponding indices
+    """
+    lengths = [len(seq) for seq in dna_sequences]
+    idx_asc = np.argsort(lengths)
+    idx_desc = idx_asc[::-1]
+    dna_sequences = [dna_sequences[i] for i in idx_desc]
+
+    return dna_sequences, idx_desc
+
+
 def get_available_device() -> tuple[torch.device, int]:
     """
     Returns the best available device for PyTorch computations.

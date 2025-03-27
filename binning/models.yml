@@ -6,3 +6,9 @@ tnf_kernel:
 
 dna2vec:
   model_path: "helpers/4mer_embedding.npy"
+
+dnabert_s: model_path = "zhihan1996/DNABERT-S"
+  batch_sizes = [40, 8, 1]
+
+dnabert_2: model_path = "zhihan1996/DNABERT-2-117M"
+  batch_sizes = [40, 8, 1]
