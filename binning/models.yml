@@ -2,7 +2,7 @@ tnf:
   model_path: "tnf"
 
 tnfkernel:
-  model_path: "helpers/tnf_kernel.npz"
+  model_path: "binning/helpers/tnf_kernel.npz"
 
 dna2vec:
   model_path: "helpers/4mer_embedding.npy"
