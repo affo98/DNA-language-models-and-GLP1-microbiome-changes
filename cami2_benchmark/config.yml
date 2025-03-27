@@ -42,7 +42,7 @@ models:
   - name: taxvamb
   - name: comebin
   - name: tnf
-  - name: tnf_kernel
+  - name: tnfkernel
   - name: dna2vec
   - name: dnaberts
   - name: dnabert2

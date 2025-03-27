@@ -114,9 +114,24 @@ elif MODEL in ['tnf'] and not config_nomodelrun:
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output"),
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "tnf"),
     ]
+elif MODEL in ['tnfkernel'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnfkernel_output"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "tnf"),
+    ]
+elif MODEL in ['dna2vec'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dna2vec_output"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "tnf"),
+    ]
 elif MODEL in ['dnaberts'] and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberts"),
+    ]
+elif MODEL in ['dnabert2'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnabert2_output"),
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberts"),
     ]
 
