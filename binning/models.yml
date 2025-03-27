@@ -5,7 +5,7 @@ tnfkernel:
   model_path: "binning/helpers/tnf_kernel.npz"
 
 dna2vec:
-  model_path: "helpers/4mer_embedding.npy"
+  model_path: "binning/helpers/4mer_embedding.npy"
 
 dnaberts:
   model_path: "zhihan1996/DNABERT-S"
