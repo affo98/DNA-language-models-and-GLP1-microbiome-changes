@@ -103,8 +103,10 @@ class Embedder:
         elif self.model_name == "dna2vec":
             embeddings = self.calculate_dna2vec()
         elif self.model_name in ["dnaberts", "dnabert2"]:
-            
-            self.log.append(f"Filtering contigs\nTotal Contigs: {len(self.dna_sequences)}\nContigs after filtering ")
+
+            self.log.append(
+                f"Filtering contigs\nTotal Contigs: {len(self.dna_sequences)}\nContigs after filtering "
+            )
             # process in chunks to with varying batch sizes to increase effeciency
             min_sequence_lengths = [
                 min([len(seq) for seq in self.dna_sequences]),
@@ -131,7 +133,7 @@ class Embedder:
                         (index, seq)
                         for (index, seq) in enumerate(self.dna_sequences)
                         if (sequence_length_min <= len(seq) < sequence_length_max)
-                        and (if len(seq) < LLM_SEQ_MAX_LENGTH) #set max length to avoid OOM errors
+                        # and (if len(seq) < LLM_SEQ_MAX_LENGTH) #set max length to avoid OOM errors
                     ]
                 )
                 self.log.append(
@@ -183,10 +185,6 @@ class Embedder:
         sorted_dna_sequences, idx = sort_sequences(
             self.dna_sequences
         )  # To reduce Padding overhead
-
-        sorted_dna_sequences = [
-            seq for seq in sorted_dna_sequences if len(seq) < LLM_SEQ_MAX_LENGTH
-        ]
 
         dna_sequences = ContigDataset(sorted_dna_sequences)
 
@@ -264,7 +262,6 @@ class Embedder:
 
         return embeddings
 
-
     def calculate_dna2vec(self) -> np.array:
         """
         Calculates the DNA2Vec embedding for a list of DNA sequences.
@@ -287,7 +284,6 @@ class Embedder:
         embeddings = np.dot(tnf_embeddings, pretrained_4mer_embedding)
 
         return embeddings
-
 
     def calculate_tnf(self, use_kernel: bool = False) -> np.ndarray:
         """Calculates tetranucleotide frequencies in a list of DNA sequences.
@@ -321,7 +317,9 @@ class Embedder:
         embeddings = np.zeros((len(self.dna_sequences), len(tetra_nucleotides)))
 
         for j, seq in tqdm(
-            enumerate(self.dna_sequences), total=len(embeddings), desc="Calculating TNFs"
+            enumerate(self.dna_sequences),
+            total=len(embeddings),
+            desc="Calculating TNFs",
         ):
             for i in range(len(seq) - 3):
                 try:

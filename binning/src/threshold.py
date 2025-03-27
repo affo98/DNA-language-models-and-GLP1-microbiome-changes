@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 
 import torch
 
+import skimage.filters as filters
+
 from src.utils import get_available_device
 
 
@@ -45,6 +47,9 @@ class Threshold:
         self.save_path = save_path
 
         self.bin_vector, self.global_min, self.global_max = self.similarity_bin_vector()
+        self.otsu, self.otsu_mul, self.isodata, self.minimum, self.yen = (
+            self.get_threshold()
+        )
 
     def similarity_bin_vector(self) -> float:
         """
@@ -94,53 +99,15 @@ class Threshold:
         np.save(os.path.join(self.save_path, "bin_vector.npy"), bin_vector)
         return bin_vector, global_min.item(), global_max.item()
 
-        NORMALPDF = 0.005 * torch.tensor(
-            [
-                2.43432053e-11,
-                9.13472041e-10,
-                2.66955661e-08,
-                6.07588285e-07,
-                1.07697600e-05,
-                1.48671951e-04,
-                1.59837411e-03,
-                1.33830226e-02,
-                8.72682695e-02,
-                4.43184841e-01,
-                1.75283005e00,
-                5.39909665e00,
-                1.29517596e01,
-                2.41970725e01,
-                3.52065327e01,
-                3.98942280e01,
-                3.52065327e01,
-                2.41970725e01,
-                1.29517596e01,
-                5.39909665e00,
-                1.75283005e00,
-                4.43184841e-01,
-                8.72682695e-02,
-                1.33830226e-02,
-                1.59837411e-03,
-                1.48671951e-04,
-                1.07697600e-05,
-                6.07588285e-07,
-                2.66955661e-08,
-                9.13472041e-10,
-                2.43432053e-11,
-            ],
-            device=self.device,
-        )
-        pdf_len = len(NORMALPDF)
-        densities = torch.zeros(len(bin_vector) + pdf_len - 1, device=self.device)
-        for i in range(len(densities) - pdf_len + 1):
-            densities[i : i + pdf_len] += NORMALPDF * bin_vector[i]
-        densities = densities[15:-15]
-        densities = densities.to("cpu").numpy()
+    def get_threshold(self) -> float:
 
-        return densities, global_min.item(), global_max.item()
+        otsu = filters.threshold_otsu(self.bin_vector[:980])
+        otsu_mul = filters.threshold_multiotsu(self.bin_vector, classes=3)
+        isodata = filters.threshold_isodata(self.bin_vector)
+        minimum = filters.threshold_minimum(self.bin_vector)
+        yen = filters.threshold_yen(self.bin_vector)
 
-    def get_threshold() -> float:
-        pass
+        return otsu, otsu_mul, isodata, minimum, yen
 
     def save_histogram(self) -> None:
         """
@@ -159,6 +126,44 @@ class Threshold:
             linestyle="-",
             linewidth=2,
         )
+
+        plt.axvline(
+            x=np.argmin(np.abs(self.bin_vector - self.otsu)),
+            color="r",
+            linestyle="--",
+            label=f"Otsu (t={self.otsu:.5f})",
+        )
+        plt.axvline(
+            x=np.argmin(np.abs(self.bin_vector - self.otsu_mul[0])),
+            color="indianred",
+            linestyle="--",
+            label=f"MULTIPLE OTSU (t={self.otsu_mul[0]:.5f})",
+        )
+        plt.axvline(
+            x=np.argmin(np.abs(self.bin_vector - self.isodata)),
+            color="b",
+            linestyle="--",
+            label=f"ISODATA  (t={self.isodata:.5f})",
+        )
+        plt.axvline(
+            x=np.argmin(np.abs(self.bin_vector - self.minimum)),
+            color="y",
+            linestyle="--",
+            label=f"MINIMUM (t={self.minimum:.5f})",
+        )
+        plt.axvline(
+            x=np.argmin(np.abs(self.bin_vector - self.yen)),
+            color="slategrey",
+            linestyle="--",
+            label=f"YEN Threshold (t={yen:.5f})",
+        )
+        plt.axvline(
+            x=350 + self.bin_vector[350:700].argmin(),
+            color="k",
+            linestyle="--",
+            label=f"Manual: {self.bin_vector[self.bin_vector[350:700].argmin()]:.5f}",
+        )
+
         plt.xlabel("Similarity Bins")
         plt.ylabel("Frequency")
         plt.title("Similarity Histogram")
@@ -173,3 +178,50 @@ class Threshold:
         plt.savefig(file_path)
         plt.close()
         print(f"Plot saved at: {self.save_path}")
+
+        return
+
+        # NORMALPDF = 0.005 * torch.tensor(
+        #     [
+        #         2.43432053e-11,
+        #         9.13472041e-10,
+        #         2.66955661e-08,
+        #         6.07588285e-07,
+        #         1.07697600e-05,
+        #         1.48671951e-04,
+        #         1.59837411e-03,
+        #         1.33830226e-02,
+        #         8.72682695e-02,
+        #         4.43184841e-01,
+        #         1.75283005e00,
+        #         5.39909665e00,
+        #         1.29517596e01,
+        #         2.41970725e01,
+        #         3.52065327e01,
+        #         3.98942280e01,
+        #         3.52065327e01,
+        #         2.41970725e01,
+        #         1.29517596e01,
+        #         5.39909665e00,
+        #         1.75283005e00,
+        #         4.43184841e-01,
+        #         8.72682695e-02,
+        #         1.33830226e-02,
+        #         1.59837411e-03,
+        #         1.48671951e-04,
+        #         1.07697600e-05,
+        #         6.07588285e-07,
+        #         2.66955661e-08,
+        #         9.13472041e-10,
+        #         2.43432053e-11,
+        #     ],
+        #     device=self.device,
+        # )
+        # pdf_len = len(NORMALPDF)
+        # densities = torch.zeros(len(bin_vector) + pdf_len - 1, device=self.device)
+        # for i in range(len(densities) - pdf_len + 1):
+        #     densities[i : i + pdf_len] += NORMALPDF * bin_vector[i]
+        # densities = densities[15:-15]
+        # densities = densities.to("cpu").numpy()
+
+        # return densities, global_min.item(), global_max.item()
