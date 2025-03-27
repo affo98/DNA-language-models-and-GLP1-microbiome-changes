@@ -77,7 +77,8 @@ class Threshold:
             block_end = min(i + self.block_size, n_samples)
             block_embeddings = self.embeddings[block_start:block_end]
 
-            block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
+            # block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
+            block_sim_matrix = torch.cdist(block_embeddings, self.embeddings)
             local_min = block_sim_matrix.flatten().min()
             local_max = block_sim_matrix.flatten().max()
             global_min = torch.min(global_min, local_min)
@@ -91,7 +92,8 @@ class Threshold:
             block_end = min(i + self.block_size, n_samples)
             block_embeddings = self.embeddings[block_start:block_end]
 
-            block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
+            # block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
+            block_sim_matrix = torch.cdist(block_embeddings, self.embeddings)
 
             block_sim_flatten = block_sim_matrix.flatten()
 
