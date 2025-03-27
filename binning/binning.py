@@ -100,7 +100,7 @@ if __name__ == "__main__":
 
     args = add_arguments()
 
-    log = Logger(args.log_path)
+    log = Logger(args.log)
 
     for arg, value in vars(args).items():
         log.append(f"{arg}: {value}")
