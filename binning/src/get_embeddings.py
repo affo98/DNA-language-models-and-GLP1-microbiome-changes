@@ -163,12 +163,11 @@ def calculate_llm_embedding(
         trust_remote_code=True,
         padding="max_length",
     )
-    tokenizer.model_max_length = 10000
+    tokenizer.model_max_length = 1000
     print(f"{model_name} tokenizer max length: {tokenizer.model_max_length}")
 
     config = BertConfig.from_pretrained(
         model_path,
-        trust_remote_code=True,
     )
     model = AutoModel.from_pretrained(
         model_path,
@@ -205,11 +204,6 @@ def calculate_llm_embedding(
                 .detach()
                 .cpu()
             )
-
-            token_lengths = attention_mask.sum(dim=1)
-            min_token_length = min(min_token_length, token_lengths.min())
-            max_token_length = max(max_token_length, token_lengths.max())
-
             attention_mask = attention_mask.unsqueeze(-1).detach().cpu()
             embedding = torch.sum(model_output * attention_mask, dim=1) / torch.sum(
                 attention_mask, dim=1
@@ -221,6 +215,10 @@ def calculate_llm_embedding(
                 embeddings = torch.cat(
                     (embeddings, embedding), dim=0
                 )  # concatenate along the batch dimension
+
+            token_lengths = attention_mask.sum(dim=1)
+            min_token_length = min(min_token_length, token_lengths.min())
+            max_token_length = max(max_token_length, token_lengths.max())
 
     print(
         f"Min token length: {token_lengths.min()}, Max token length: {token_lengths.max()}"
