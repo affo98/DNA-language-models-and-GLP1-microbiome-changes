@@ -53,9 +53,9 @@ class Threshold:
 
         # self.bin_vector, self.pairsim_vector = self.get_similarity_bin_vector()
 
-        self.knn_threshold, self.pairsim_vector, self.bin_vector = self.knn_threshold(
-            k=200, p=0.7
-        )
+        #self.knn_threshold, self.pairsim_vector, self.bin_vector = self.knn_threshold(
+        #    k=200, p=0.7
+        #)
 
     # self.otsu, self.otsu_mul, self.isodata, self.minimum, self.yen = (
     #    self.get_threshold()
@@ -188,69 +188,74 @@ class Threshold:
         - output_dir: Directory where the plot will be saved.
         """
 
-        plt.figure(figsize=(8, 6))
-        # plt.axvline(
-        #     x=np.argmin(np.abs(self.pairsim_vector - self.otsu)),
-        #     color="r",
-        #     linestyle="--",
-        #     label=f"Otsu (t={self.otsu:.5f})",
-        # )
-        # plt.axvline(
-        #     x=np.argmin(np.abs(self.pairsim_vector - self.otsu_mul[0])),
-        #     color="indianred",
-        #     linestyle="--",
-        #     label=f"MULTIPLE OTSU (t={self.otsu_mul[0]:.5f})",
-        # )
-        # plt.axvline(
-        #     x=np.argmin(np.abs(self.pairsim_vector - self.isodata)),
-        #     color="b",
-        #     linestyle="--",
-        #     label=f"ISODATA  (t={self.isodata:.5f})",
-        # )
-        # plt.axvline(
-        #     x=np.argmin(np.abs(self.pairsim_vector - self.minimum)),
-        #     color="y",
-        #     linestyle="--",
-        #     label=f"MINIMUM (t={self.minimum:.5f})",
-        # )
-        # plt.axvline(
-        #     x=np.argmin(np.abs(self.pairsim_vector - self.yen)),
-        #     color="slategrey",
-        #     linestyle="--",
-        #     label=f"YEN Threshold (t={self.yen:.5f})",
-        # )
-        # plt.axvline(
-        #     x=350 + self.pairsim_vector[350:700].argmin(),
-        #     color="k",
-        #     linestyle="--",
-        #     label=f"Manual: {self.pairsim_vector[self.pairsim_vector[350:700].argmin()]:.5f}",
-        # )
-        plt.axvline(
-            self.knn_threshold, color="g", linestyle="--", label="KNN Threshold"
-        )
+        for k in [100,200,300,400,500,600,700,800,900,1000]
+            self.knn_threshold, self.pairsim_vector, self.bin_vector = self.knn_threshold(
+               k=k, p=0.7
+            )
+            
+            plt.figure(figsize=(8, 6))
+            # plt.axvline(
+            #     x=np.argmin(np.abs(self.pairsim_vector - self.otsu)),
+            #     color="r",
+            #     linestyle="--",
+            #     label=f"Otsu (t={self.otsu:.5f})",
+            # )
+            # plt.axvline(
+            #     x=np.argmin(np.abs(self.pairsim_vector - self.otsu_mul[0])),
+            #     color="indianred",
+            #     linestyle="--",
+            #     label=f"MULTIPLE OTSU (t={self.otsu_mul[0]:.5f})",
+            # )
+            # plt.axvline(
+            #     x=np.argmin(np.abs(self.pairsim_vector - self.isodata)),
+            #     color="b",
+            #     linestyle="--",
+            #     label=f"ISODATA  (t={self.isodata:.5f})",
+            # )
+            # plt.axvline(
+            #     x=np.argmin(np.abs(self.pairsim_vector - self.minimum)),
+            #     color="y",
+            #     linestyle="--",
+            #     label=f"MINIMUM (t={self.minimum:.5f})",
+            # )
+            # plt.axvline(
+            #     x=np.argmin(np.abs(self.pairsim_vector - self.yen)),
+            #     color="slategrey",
+            #     linestyle="--",
+            #     label=f"YEN Threshold (t={self.yen:.5f})",
+            # )
+            # plt.axvline(
+            #     x=350 + self.pairsim_vector[350:700].argmin(),
+            #     color="k",
+            #     linestyle="--",
+            #     label=f"Manual: {self.pairsim_vector[self.pairsim_vector[350:700].argmin()]:.5f}",
+            # )
+            plt.axvline(
+                self.knn_threshold, color="g", linestyle="--", label="KNN Threshold"
+            )
 
-        plt.plot(
-            self.pairsim_vector,
-            self.bin_vector,
-            color="skyblue",
-            linestyle="-",
-            linewidth=2,
-        )
+            plt.plot(
+                self.pairsim_vector,
+                self.bin_vector,
+                color="skyblue",
+                linestyle="-",
+                linewidth=2,
+            )
 
-        # tick_positions = np.linspace(0, len(self.pairsim_vector) - 1, 10, dtype=int)
-        # plt.xticks(ticks=tick_positions)
+            # tick_positions = np.linspace(0, len(self.pairsim_vector) - 1, 10, dtype=int)
+            # plt.xticks(ticks=tick_positions)
 
-        plt.xlabel("Similarity Bins")
-        plt.ylabel("Frequency")
-        plt.title(f"Similarity Histogram {self.model_name}")
+            plt.xlabel("Similarity Bins")
+            plt.ylabel("Frequency")
+            plt.title(f"Similarity Histogram {self.model_name}")
 
-        plt.legend()
+            plt.legend()
 
-        file_path = os.path.join(self.save_path, "similarity_histogram.png")
-        plt.tight_layout()
-        plt.savefig(file_path)
-        plt.close()
-        self.log.append(f"Plot saved at: {self.save_path}")
+            file_path = os.path.join(self.save_path, f"{k}_similarity_histogram.png")
+            plt.tight_layout()
+            plt.savefig(file_path)
+            plt.close()
+            self.log.append(f"Plot saved at: {self.save_path}")
 
         return
 
