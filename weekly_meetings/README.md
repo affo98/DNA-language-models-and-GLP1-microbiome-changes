@@ -21,14 +21,21 @@
 
 ##### What did you achieve?
 
-* Get first results from benchmarked models in metagenomics binning
+* Get first results from benchmarked models in metagenomics binning. Comebin seems too good! We need to talk to Simon's team.
 * Test Bionfinformatics pipeline on full dataset
 * Pre-training our model with hierarchical contrastive loss.
+
+
+![Cami2 Results](images/cami2_benchmark_v1.png)
 
 ##### What did you struggle with?
 
 * What is the best way to empirically define a distance threshold used by the k-medoid algorithm?
-   * Theoretically we want the bottom of the valley of our histogram of pairwise distances, but practically we find it a bit up in the air. VAMB uses some loop and tries to see if numbers increase og decrease compared to some `peak_valley` variable. 
+   * Theoretically we want the bottom of the valley of our histogram of pairwise distances, but practically we find it a bit up in the air. VAMB uses some loop and tries to see if numbers increase og decrease compared to some `peak_valley` variable. See below an example; TNF on Airways Short Cami2 Dataset.
+
+![](images/threshold_v1.png)
+
+
 
 ##### Where do you need help from Veronika?
 
