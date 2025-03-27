@@ -109,7 +109,7 @@ class Threshold:
             .cpu()
             .numpy()
         )
-        print(pairsim_vector)
+        print(global_min.item(), global_max.item())
 
         return bin_vector, pairsim_vector
 
