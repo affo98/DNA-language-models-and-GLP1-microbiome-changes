@@ -27,7 +27,7 @@ def main(args, log):
         args.model_name,
         args.model_path,
         os.path.join(args.save_path, "embeddings", f"{args.model_name}.npy"),
-        normalize_embeddings=False,
+        normalize_embeddings=True,
         log=log,
     )
     try:
