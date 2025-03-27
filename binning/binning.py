@@ -21,16 +21,17 @@ def main(args, log):
     contigs = contigs[0:10000]
     contigs = [contig for contig in contigs if len(contig) < 50000]
 
+    embedder = Embedder(
+        contigs,
+        args.batch_sizes,
+        args.model_name,
+        args.model_path,
+        os.path.join(args.save_path, "embeddings", f"{args.model_name}.npy"),
+        normalize_embeddings=True,
+        log=log,
+    )
     try:
-        embeddings = Embedder(
-            contigs,
-            args.batch_sizes,
-            args.model_name,
-            args.model_path,
-            os.path.join(args.save_path, "embeddings", f"{args.model_name}.npy"),
-            normalize_embeddings=True,
-            log=log,
-        ).get_embeddings()
+        embeddings = embedder.get_embeddings()
     except Exception:
         log.append(
             f"|===========| Error in getting embeddings for {args.model_name}|===========|\n{traceback.format_exc()}"
