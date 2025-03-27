@@ -217,6 +217,8 @@ class Embedder:
             shuffle=False,
             num_workers=2 * n_gpu,
         )
+
+        all_token_lengths = []
         min_token_length = int(10e6)
         max_token_length = 0
         for i, batch in enumerate(tqdm(data_loader)):
@@ -249,14 +251,14 @@ class Embedder:
                         (embeddings, embedding), dim=0
                     )  # concatenate along the batch dimension
 
-                token_lengths = attention_mask.sum(dim=1)
-                print(token_lengths.min().item())
-                print(token_lengths.max().item())
-                min_token_length = min(min_token_length, token_lengths.min().item())
-                max_token_length = max(max_token_length, token_lengths.max().item())
+                token_lengths = attention_mask.sum(dim=1).cpu().numpy()
+                all_token_lengths.extend(token_lengths)
+
+        min_token_length = min(all_token_lengths)
+        max_token_length = max(all_token_lengths)
 
         self.log.append(
-            f"Min token length: {token_lengths.min()}, Max token length: {token_lengths.max()}"
+            f"Min token length: {min_token_length}, Max token length: {max_token_length}"
         )
 
         embeddings = np.array(embeddings.detach().cpu())
