@@ -53,9 +53,9 @@ class Threshold:
 
         # self.bin_vector, self.pairsim_vector = self.get_similarity_bin_vector()
 
-        #self.knn_threshold, self.pairsim_vector, self.bin_vector = self.knn_threshold(
+        # self.knn_threshold, self.pairsim_vector, self.bin_vector = self.knn_threshold(
         #    k=200, p=0.7
-        #)
+        # )
 
     # self.otsu, self.otsu_mul, self.isodata, self.minimum, self.yen = (
     #    self.get_threshold()
@@ -188,11 +188,11 @@ class Threshold:
         - output_dir: Directory where the plot will be saved.
         """
 
-        for k in [100,200,300,400,500,600,700,800,900,1000]
-            self.knn_threshold, self.pairsim_vector, self.bin_vector = self.knn_threshold(
-               k=k, p=0.7
+        for k in [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]:
+            self.knn_threshold, self.pairsim_vector, self.bin_vector = (
+                self.knn_threshold(k=k, p=0.7)
             )
-            
+
             plt.figure(figsize=(8, 6))
             # plt.axvline(
             #     x=np.argmin(np.abs(self.pairsim_vector - self.otsu)),
