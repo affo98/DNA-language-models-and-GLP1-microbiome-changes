@@ -53,9 +53,64 @@ class Threshold:
 
         self.bin_vector, self.pairsim_vector = self.get_similarity_bin_vector()
 
+        self.knn_threshold = self.knn_threshold(k=200, p=0.7)
+
     # self.otsu, self.otsu_mul, self.isodata, self.minimum, self.yen = (
     #    self.get_threshold()
     # )
+
+    def knn_threshold(self, k, p) -> float:
+        n_samples = self.embeddings.shape[0]
+        bin_vector = torch.zeros(self.n_bins, dtype=torch.float32, device=self.device)
+
+        global_min = torch.tensor([1], dtype=torch.float32, device=self.device)
+        global_max = torch.tensor([-1], dtype=torch.float32, device=self.device)
+        for i in tqdm(
+            range(0, n_samples, self.block_size), desc="Calculating global min/max"
+        ):
+            block_start = i
+            block_end = min(i + self.block_size, n_samples)
+            block_embeddings = self.embeddings[block_start:block_end]
+
+            block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
+            top_k_similarities, _ = torch.topk(block_sim_matrix, k, dim=-1)
+            top_k_similarities_flat = top_k_similarities.flatten()
+
+            global_min = torch.min(global_min, top_k_similarities_flat.min())
+            global_max = torch.max(global_max, top_k_similarities_flat.max())
+
+        # loop through again to get histogram
+        for i in tqdm(range(0, n_samples, self.block_size), desc="Calculating knns"):
+            block_start = i
+            block_end = min(i + self.block_size, n_samples)
+            block_embeddings = self.embeddings[block_start:block_end]
+
+            block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
+            top_k_similarities, _ = torch.topk(block_sim_matrix, k, dim=-1)
+            top_k_similarities_flat = top_k_similarities.flatten()
+
+            bin_vector += torch.histc(
+                top_k_similarities_flat,
+                bins=self.n_bins,
+                min=global_min.item(),
+                max=global_max.item(),
+            )
+
+        bin_vector = bin_vector / bin_vector.sum()
+        bin_vector = bin_vector.cpu().numpy()
+
+        pairsim_vector = (
+            torch.linspace(global_min.item(), global_max.item(), self.n_bins)
+            .cpu()
+            .numpy()
+        )
+        print(global_min.item(), global_max.item())
+
+        cumulative_sum = np.cumsum(bin_vector)
+        index = np.argmax(cumulative_sum >= p)
+        threshold = pairsim_vector[index]
+
+        return threshold
 
     def get_similarity_bin_vector(self) -> float:
         """
@@ -65,7 +120,6 @@ class Threshold:
         n_samples = self.embeddings.shape[0]
         bin_vector = torch.zeros(self.n_bins, dtype=torch.float32, device=self.device)
 
-        test_all_similarities = []
         # loop through to get global min/max pairwise similarity
         global_min = torch.tensor([1], dtype=torch.float32, device=self.device)
         global_max = torch.tensor([-1], dtype=torch.float32, device=self.device)
@@ -93,7 +147,6 @@ class Threshold:
             block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
 
             block_sim_flatten = block_sim_matrix.flatten()
-            test_all_similarities.append(block_sim_flatten.cpu())
 
             bin_vector += torch.histc(
                 block_sim_flatten,
@@ -112,7 +165,7 @@ class Threshold:
         )
         print(global_min.item(), global_max.item())
 
-        return test_all_similarities, pairsim_vector
+        return bin_vector, pairsim_vector
 
     def get_threshold(self) -> tuple[float, float, float, float, float]:
 
@@ -170,16 +223,16 @@ class Threshold:
         #     linestyle="--",
         #     label=f"Manual: {self.pairsim_vector[self.pairsim_vector[350:700].argmin()]:.5f}",
         # )
+        plt.axvline(
+            self.knn_threshold, color="g", linestyle="--", label="KNN Threshold"
+        )
 
-        # plt.plot(
-        #     self.pairsim_vector,
-        #     self.bin_vector,
-        #     color="skyblue",
-        #     linestyle="-",
-        #     linewidth=2,
-        # )
-        plt.hist(
-            self.bin_vector, bins=50, color="skyblue", edgecolor="black", alpha=0.7
+        plt.plot(
+            self.pairsim_vector,
+            self.bin_vector,
+            color="skyblue",
+            linestyle="-",
+            linewidth=2,
         )
 
         # tick_positions = np.linspace(0, len(self.pairsim_vector) - 1, 10, dtype=int)
