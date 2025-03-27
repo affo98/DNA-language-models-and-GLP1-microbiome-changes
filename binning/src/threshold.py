@@ -8,7 +8,7 @@ import torch
 
 import skimage.filters as filters
 
-from src.utils import get_available_device
+from src.utils import get_available_device, Logger
 
 
 class Threshold:
@@ -33,18 +33,21 @@ class Threshold:
         save_path: str,
         n_bins: int,
         block_size: int,
+        log: Logger,
     ):
         self.check_params(embeddings, n_bins, block_size)
 
         device, gpu_count = get_available_device()
         embeddings = torch.from_numpy(embeddings).to(device)
-        print(f"Using {device} for Threshold calculations")
 
         self.embeddings = embeddings
         self.n_bins = n_bins
         self.device = device
         self.block_size = block_size
         self.save_path = save_path
+        self.log = log
+
+        self.log.append(f"Using {device} for Threshold calculations")
 
         self.bin_vector, self.global_min, self.global_max = (
             self.get_similarity_bin_vector()
@@ -123,14 +126,6 @@ class Threshold:
         """
 
         plt.figure(figsize=(8, 6))
-        plt.plot(
-            np.arange(len(self.bin_vector)),
-            self.bin_vector,
-            color="skyblue",
-            linestyle="-",
-            linewidth=2,
-        )
-
         plt.axvline(
             x=np.argmin(np.abs(self.bin_vector - self.otsu)),
             color="r",
@@ -168,20 +163,33 @@ class Threshold:
             label=f"Manual: {self.bin_vector[self.bin_vector[350:700].argmin()]:.5f}",
         )
 
-        plt.xlabel("Similarity Bins")
-        plt.ylabel("Frequency")
-        plt.title("Similarity Histogram")
-        tick_positions = np.linspace(self.global_min, self.global_max - 1, 20).astype(
+        plt.plot(
+            np.arange(len(self.bin_vector)),
+            self.bin_vector,
+            color="skyblue",
+            linestyle="-",
+            linewidth=2,
+        )
+
+        tick_positions = np.linspace(0, len(self.bin_vector) - 1, 10).astype(
             int
         )  # 10 evenly spaced positions
-        plt.xticks(tick_positions)
+        tick_labels = [
+            f"{i}" for i in tick_positions
+        ]  # Use indices as tick labels or adjust as necessary
+        plt.xticks(tick_positions, tick_labels)
 
-        # Save the figure
+        plt.xlabel("Similarity Bins")
+        plt.ylabel("Frequency")
+        plt.title(f"Similarity Histogram {self.model_name}")
+
+        plt.legend()
+
         file_path = os.path.join(self.save_path, "similarity_histogram.png")
         plt.tight_layout()
         plt.savefig(file_path)
         plt.close()
-        print(f"Plot saved at: {self.save_path}")
+        self.log.append(f"Plot saved at: {self.save_path}")
 
         return
 
