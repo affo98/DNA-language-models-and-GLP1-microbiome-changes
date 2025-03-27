@@ -28,8 +28,6 @@ warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore", message="Increasing alibi size")
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-TOKENIZER_MAX_LENGTH = 2000
-
 
 def get_embeddings(
     dna_sequences: list[str],
@@ -155,7 +153,7 @@ def calculate_llm_embedding(
         dna_sequences
     )  # To reduce Padding overhead
 
-    sorted_dna_sequences = [seq for seq in sorted_dna_sequences if len(seq) < 100000]
+    sorted_dna_sequences = [seq for seq in sorted_dna_sequences if len(seq) < 50000]
 
     dna_sequences = ContigDataset(sorted_dna_sequences)
 
@@ -168,7 +166,6 @@ def calculate_llm_embedding(
         trust_remote_code=True,
         padding="max_length",
     )
-    print(f"{model_name} tokenizer max length: {TOKENIZER_MAX_LENGTH}")
 
     config = BertConfig.from_pretrained(
         model_path,
@@ -197,7 +194,7 @@ def calculate_llm_embedding(
                 return_tensors="pt",
                 return_attention_mask=True,
                 padding=True,
-                max_length=TOKENIZER_MAX_LENGTH,  # change to avoid OOM erros
+                max_length=tokenizer.model_max_length,  # change to avoid OOM erros
             )
 
             input_ids = inputs_tokenized["input_ids"].to(device)
