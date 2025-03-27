@@ -53,7 +53,9 @@ class Threshold:
 
         # self.bin_vector, self.pairsim_vector = self.get_similarity_bin_vector()
 
-        self.knn_threshold = self.knn_threshold(k=200, p=0.7)
+        self.knn_threshold, self.pairsim_vector, self.bin_vector = self.knn_threshold(
+            k=200, p=0.7
+        )
 
     # self.otsu, self.otsu_mul, self.isodata, self.minimum, self.yen = (
     #    self.get_threshold()
@@ -110,7 +112,7 @@ class Threshold:
         index = np.argmax(cumulative_sum >= p)
         threshold = pairsim_vector[index]
 
-        return threshold
+        return threshold, pairsim_vector, bin_vector
 
     def get_similarity_bin_vector(self) -> float:
         """

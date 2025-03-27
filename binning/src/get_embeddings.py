@@ -219,8 +219,6 @@ class Embedder:
         )
 
         all_token_lengths = []
-        min_token_length = int(10e6)
-        max_token_length = 0
         for i, batch in enumerate(tqdm(data_loader)):
             with torch.no_grad():
                 inputs_tokenized = tokenizer.batch_encode_plus(
