@@ -345,8 +345,7 @@ class Embedder:
             kernel_raw = np.load(self.model_path)
             kernel = validate_input_array(kernel_raw["arr_0"])
 
-            tnf_embeddings += -(1 / 256)
-
+            embeddings += -(1 / 256)
             embeddings = np.dot(embeddings, kernel)
 
         return embeddings
