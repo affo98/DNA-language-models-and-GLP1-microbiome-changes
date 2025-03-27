@@ -217,7 +217,7 @@ class Embedder:
             shuffle=False,
             num_workers=2 * n_gpu,
         )
-        min_token_length = 10e6
+        min_token_length = int(10e6)
         max_token_length = 0
         for i, batch in enumerate(tqdm(data_loader)):
             with torch.no_grad():
@@ -250,8 +250,8 @@ class Embedder:
                     )  # concatenate along the batch dimension
 
                 token_lengths = attention_mask.sum(dim=1)
-                min_token_length = min(min_token_length, token_lengths.min())
-                max_token_length = max(max_token_length, token_lengths.max())
+                min_token_length = min(min_token_length, token_lengths.min().item())
+                max_token_length = max(max_token_length, token_lengths.max().item())
 
         self.log.append(
             f"Min token length: {token_lengths.min()}, Max token length: {token_lengths.max()}"

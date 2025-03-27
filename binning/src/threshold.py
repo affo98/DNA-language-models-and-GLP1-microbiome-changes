@@ -107,8 +107,9 @@ class Threshold:
         pairsim_vector = (
             torch.linspace(global_min.item(), global_max.item(), self.n_bins)
             .cpu()
-            .numpy
+            .numpy()
         )
+        print(pairsim_vector)
 
         return bin_vector, pairsim_vector
 
