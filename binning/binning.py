@@ -18,7 +18,7 @@ from src.utils import read_contigs, Logger
 def main(args, log):
 
     contigs = read_contigs(args.contigs)
-    contigs = contigs[0:1000]
+    contigs = contigs[0:10000]
     contigs = [contig for contig in contigs if len(contig) < 50000]
 
     embedder = Embedder(
