@@ -143,9 +143,7 @@ class Embedder:
                     continue
 
                 dna_sequences_filtered = list(dna_sequences_filtered)
-                embeddings = self.calculate_llm_embedding(
-                    dna_sequences_filtered, batch_size, self.model_name, self.model_path
-                )
+                embeddings = self.calculate_llm_embedding(dna_sequences_filtered)
                 processed_embeddings.append(embeddings)
 
                 indices_filtered = list(indices_filtered)
@@ -167,7 +165,7 @@ class Embedder:
         torch.cuda.empty_cache()
         return embeddings
 
-    def calculate_llm_embedding(self) -> np.array:
+    def calculate_llm_embedding(self, dna_sequences_filtered: list[str]) -> np.array:
         """Calculates embeddings for DNA sequences using a specified language model (LLM).
 
         This function uses a pretrained model to generate embeddings for each DNA sequence.
@@ -183,7 +181,7 @@ class Embedder:
         """
 
         sorted_dna_sequences, idx = sort_sequences(
-            self.dna_sequences
+            dna_sequences_filtered
         )  # To reduce Padding overhead
 
         dna_sequences = ContigDataset(sorted_dna_sequences)
