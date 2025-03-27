@@ -31,10 +31,9 @@ MODEL = config.get("MODEL", None)
 assert MODEL==None or MODEL in ALL_MODELS, f"Error: Selected model '{MODEL}' is not in the available DATASET: {ALL_MODELS}"
 
 MODEL_PATH=None
-BATCH_SIZES=None
 if MODEL in other_model_config.keys():
     MODEL_PATH = other_model_config[MODEL]["model_path"]
-    BATCH_SIZES = other_model_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnabert2'] else None
+    BATCH_SIZES = other_model_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnabert2'] else 0
 
 #processing flow of snakemake 
 config_download = bool(config.get("DOWNLOAD", False))
