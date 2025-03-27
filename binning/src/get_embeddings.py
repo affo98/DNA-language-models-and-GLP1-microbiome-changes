@@ -254,7 +254,7 @@ class Embedder:
                 min_token_length = min(min_token_length, token_lengths.min())
                 max_token_length = max(max_token_length, token_lengths.max())
 
-        self.log(
+        self.log.append(
             f"Min token length: {token_lengths.min()}, Max token length: {token_lengths.max()}"
         )
 
