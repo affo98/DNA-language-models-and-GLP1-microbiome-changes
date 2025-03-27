@@ -69,13 +69,15 @@ def get_embeddings(
         embeddings = calculate_tnf(dna_sequences, model_path, use_kernel=True)
     elif model_name == "dna2vec":
         embeddings = calculate_dna2vec(dna_sequences, model_path)
-    elif model_name in ['dnaberts','dnabert2']:
-        
-        #process in 
-        min_sequence_lengths = [min([len(seq) for seq in dna_sequences]) 10000, 20000]
+    elif model_name in ["dnaberts", "dnabert2"]:
+
+        # process in
+        min_sequence_lengths = [min([len(seq) for seq in dna_sequences]), 10000, 20000]
         max_sequence_lengths = [10000, 20000, max([len(seq) for seq in dna_sequences])]
 
-        processed_ids = ([])  # [index in the original list, so if dna_seq is in position 4512, teh index is 4512]
+        processed_ids = (
+            []
+        )  # [index in the original list, so if dna_seq is in position 4512, teh index is 4512]
         processed_embeddings = []
 
         for sequence_length_min, sequence_length_max, batch_size in zip(
@@ -90,15 +92,18 @@ def get_embeddings(
                 ]
             )
             print(
-                f"Running {len(dna_sequences_filtered)} sequences with len between {sequence_length_min}-{sequence_length_max}"
+                f"Running {len(dna_sequences_filtered)} sequences with len between {sequence_length_min} to {sequence_length_max}"
             )
             if len(dna_sequences_filtered) == 0:
-                continue    
-            indices_filtered = list(indices_filtered)
-            dna_sequences_filtered = list(dna_sequences_filtered)
+                continue
 
-            embeddings = calculate_llm_embedding(dna_sequences_filtered, batch_size, model_name, model_path)
+            dna_sequences_filtered = list(dna_sequences_filtered)
+            embeddings = calculate_llm_embedding(
+                dna_sequences_filtered, batch_size, model_name, model_path
+            )
             processed_embeddings.append(embeddings)
+
+            indices_filtered = list(indices_filtered)
             processed_ids.extend(indices_filtered)
 
         embeddings = np.concatenate(
@@ -106,17 +111,15 @@ def get_embeddings(
             axis=0,
         )
         embeddings = embeddings[np.argsort(processed_ids)]
-        
 
     if normalize_embeddings:
         embeddings = normalize(embeddings)
-        
+
     print(f"Embeddings shape: {embeddings.shape}")
     with open(save_path, "wb") as f:
         np.save(f, embeddings)
 
     return embeddings
-
 
 
 def calculate_llm_embedding(
@@ -138,8 +141,10 @@ def calculate_llm_embedding(
     Returns:
         np.array: Array of embeddings for the input DNA sequences, with shape (num_sequences, embedding_dimension).
     """
-    
-    sorted_dna_sequences, idx = sort_sequences(dna_sequences) # To reduce Padding overhead
+
+    sorted_dna_sequences, idx = sort_sequences(
+        dna_sequences
+    )  # To reduce Padding overhead
     dna_sequences = ContigDataset(sorted_dna_sequences)
 
     device, n_gpu = get_available_device()
@@ -172,7 +177,7 @@ def calculate_llm_embedding(
         shuffle=False,
         num_workers=2 * n_gpu,
     )
-    
+
     for i, batch in enumerate(tqdm(data_loader)):
         with torch.no_grad():
             inputs_tokenized = tokenizer.batch_encode_plus(
@@ -182,10 +187,10 @@ def calculate_llm_embedding(
                 padding=True,
                 max_length=tokenizer.model_max_length,
             )
-            
+
             input_ids = inputs_tokenized["input_ids"].to(device)
             attention_mask = inputs_tokenized["attention_mask"].to(device)
-            
+
             model_output = (
                 model.forward(input_ids=input_ids, attention_mask=attention_mask)[0]
                 .detach()
@@ -205,7 +210,7 @@ def calculate_llm_embedding(
 
     embeddings = np.array(embeddings.detach().cpu())
 
-    embeddings = embeddings[np.argsort(idx)] #sort back to normal indices
+    embeddings = embeddings[np.argsort(idx)]  # sort back to normal indices
 
     return embeddings
 
