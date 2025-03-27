@@ -67,7 +67,7 @@ class Threshold:
 
         # loop through to get global min/max pairwise similarity
         global_min = torch.tensor([1], dtype=torch.float32, device=self.device)
-        global_max = torch.tensor([0], dtype=torch.float32, device=self.device)
+        global_max = torch.tensor([-1], dtype=torch.float32, device=self.device)
         for i in tqdm(
             range(0, n_samples, self.block_size), desc="Calculating global min/max"
         ):

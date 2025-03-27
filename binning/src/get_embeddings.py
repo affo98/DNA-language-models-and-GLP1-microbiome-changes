@@ -250,7 +250,8 @@ class Embedder:
                     )  # concatenate along the batch dimension
 
                 token_lengths = attention_mask.sum(dim=1)
-                print(token_lengths)
+                print(token_lengths.min().item())
+                print(token_lengths.max().item())
                 min_token_length = min(min_token_length, token_lengths.min().item())
                 max_token_length = max(max_token_length, token_lengths.max().item())
 
