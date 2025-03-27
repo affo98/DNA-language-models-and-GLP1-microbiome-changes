@@ -133,42 +133,42 @@ class Threshold:
         """
 
         plt.figure(figsize=(8, 6))
-        plt.axvline(
-            x=np.argmin(np.abs(self.pairsim_vector - self.otsu)),
-            color="r",
-            linestyle="--",
-            label=f"Otsu (t={self.otsu:.5f})",
-        )
-        plt.axvline(
-            x=np.argmin(np.abs(self.pairsim_vector - self.otsu_mul[0])),
-            color="indianred",
-            linestyle="--",
-            label=f"MULTIPLE OTSU (t={self.otsu_mul[0]:.5f})",
-        )
-        plt.axvline(
-            x=np.argmin(np.abs(self.pairsim_vector - self.isodata)),
-            color="b",
-            linestyle="--",
-            label=f"ISODATA  (t={self.isodata:.5f})",
-        )
-        plt.axvline(
-            x=np.argmin(np.abs(self.pairsim_vector - self.minimum)),
-            color="y",
-            linestyle="--",
-            label=f"MINIMUM (t={self.minimum:.5f})",
-        )
-        plt.axvline(
-            x=np.argmin(np.abs(self.pairsim_vector - self.yen)),
-            color="slategrey",
-            linestyle="--",
-            label=f"YEN Threshold (t={self.yen:.5f})",
-        )
-        plt.axvline(
-            x=350 + self.pairsim_vector[350:700].argmin(),
-            color="k",
-            linestyle="--",
-            label=f"Manual: {self.pairsim_vector[self.pairsim_vector[350:700].argmin()]:.5f}",
-        )
+        # plt.axvline(
+        #     x=np.argmin(np.abs(self.pairsim_vector - self.otsu)),
+        #     color="r",
+        #     linestyle="--",
+        #     label=f"Otsu (t={self.otsu:.5f})",
+        # )
+        # plt.axvline(
+        #     x=np.argmin(np.abs(self.pairsim_vector - self.otsu_mul[0])),
+        #     color="indianred",
+        #     linestyle="--",
+        #     label=f"MULTIPLE OTSU (t={self.otsu_mul[0]:.5f})",
+        # )
+        # plt.axvline(
+        #     x=np.argmin(np.abs(self.pairsim_vector - self.isodata)),
+        #     color="b",
+        #     linestyle="--",
+        #     label=f"ISODATA  (t={self.isodata:.5f})",
+        # )
+        # plt.axvline(
+        #     x=np.argmin(np.abs(self.pairsim_vector - self.minimum)),
+        #     color="y",
+        #     linestyle="--",
+        #     label=f"MINIMUM (t={self.minimum:.5f})",
+        # )
+        # plt.axvline(
+        #     x=np.argmin(np.abs(self.pairsim_vector - self.yen)),
+        #     color="slategrey",
+        #     linestyle="--",
+        #     label=f"YEN Threshold (t={self.yen:.5f})",
+        # )
+        # plt.axvline(
+        #     x=350 + self.pairsim_vector[350:700].argmin(),
+        #     color="k",
+        #     linestyle="--",
+        #     label=f"Manual: {self.pairsim_vector[self.pairsim_vector[350:700].argmin()]:.5f}",
+        # )
 
         plt.plot(
             self.pairsim_vector,
