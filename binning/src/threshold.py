@@ -69,7 +69,7 @@ class Threshold:
             block_embeddings = self.embeddings[block_start:block_end]
 
             block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
-            top_k_similarities, _ = torch.topk(block_sim_matrix, k, dim=-1)
+            top_k_similarities, _ = torch.topk(block_sim_matrix, self.knn_k, dim=-1)
             top_k_similarities_flat = top_k_similarities.flatten()
 
             global_min = torch.min(global_min, top_k_similarities_flat.min())
@@ -82,7 +82,7 @@ class Threshold:
             block_embeddings = self.embeddings[block_start:block_end]
 
             block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
-            top_k_similarities, _ = torch.topk(block_sim_matrix, k, dim=-1)
+            top_k_similarities, _ = torch.topk(block_sim_matrix, self.knn_k, dim=-1)
             top_k_similarities_flat = top_k_similarities.flatten()
 
             bin_vector += torch.histc(
