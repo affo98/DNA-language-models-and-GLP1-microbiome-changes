@@ -11,6 +11,7 @@ class KMediod:
     def check_params(
         self,
         embeddings: np.ndarray,
+        contig_names: list[str],
         min_similarity: float,
         min_bin_size: int,
         num_steps: int,
@@ -31,7 +32,7 @@ class KMediod:
             raise ValueError("Matrix must have at least 1 observation.")
         assert len(self.contig_names) == len(
             self.embeddings
-        ), f"Number of embeddings {len(embeddings)} does not match number of contig names {len(self.contig_names)}"
+        ), f"Number of embeddings {len(embeddings)} does not match number of contig names {len(contig_names)}"
 
     def __init__(
         self,
@@ -45,7 +46,9 @@ class KMediod:
         max_iter: int = 1000,
         block_size: int = 1000,
     ):
-        self.check_params(embeddings, min_similarity, min_bin_size, num_steps, max_iter)
+        self.check_params(
+            embeddings, contig_names, min_similarity, min_bin_size, num_steps, max_iter
+        )
 
         device, gpu_count = get_available_device()
         embeddings = torch.from_numpy(embeddings).to(device)
