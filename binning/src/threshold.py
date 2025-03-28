@@ -124,7 +124,7 @@ class Threshold:
                 self.knn_threshold,
                 color="g",
                 linestyle="--",
-                label=f"KNN Threshold: {self.knn_threshold} (k={self.knn_k}, p={self.knn_p})",
+                label=f"KNN Threshold: {self.knn_threshold} (k={self.knn_k}, p={int(self.knn_p*100)})",
             )
 
         plt.plot(
