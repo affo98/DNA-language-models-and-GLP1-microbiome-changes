@@ -102,7 +102,6 @@ class Embedder:
         elif self.model_name == "dna2vec":
             embeddings = self.calculate_dna2vec()
         elif self.model_name in ["dnaberts", "dnabert2"]:
-
             embeddings = self.calculate_llm_embedding()
 
         if self.normalize_embeddings:
@@ -119,14 +118,14 @@ class Embedder:
         """Get llm embeddings. Process dna sequences based on their length to increase efficiency, i.e. use a large batch size"""
 
         min_sequence_lengths = [
-            min([len(seq) for seq in self.dna_sequences]),
+            min([len(seq) for seq in self.dna_sequences]) - 1,
             10000,
             20000,
         ]
         max_sequence_lengths = [
             10000,
             20000,
-            max([len(seq) for seq in self.dna_sequences]),
+            max([len(seq) for seq in self.dna_sequences]) + 1,
         ]
 
         original_ids = (
