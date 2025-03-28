@@ -103,7 +103,7 @@ class Threshold:
         print(global_min.item(), global_max.item())
 
         cumulative_sum = np.cumsum(bin_vector)
-        index = np.argmax(cumulative_sum >= p)
+        index = np.argmax(cumulative_sum >= self.knn_p)
         knn_threshold = pairsim_vector[index]
 
         self.knn_threshold, self.pairsim_vector, self.bin_vector = (
