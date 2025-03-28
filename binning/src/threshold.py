@@ -100,7 +100,6 @@ class Threshold:
             .cpu()
             .numpy()
         )
-        print(global_min.item(), global_max.item())
 
         cumulative_sum = np.cumsum(bin_vector)
         index = np.argmax(cumulative_sum >= self.knn_p)
@@ -143,7 +142,6 @@ class Threshold:
 
         file_path = os.path.join(
             self.save_path,
-            "histograms",
             f"k{self.knn_k}_p{int(self.knn_p*100)}_similarity_histogram.png",
         )
         plt.tight_layout()
