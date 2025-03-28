@@ -29,37 +29,40 @@ class KMediod:
             raise ValueError("Maximum iterations must be at least 1")
         if len(embeddings) < 1:
             raise ValueError("Matrix must have at least 1 observation.")
-        assert len(self.contig_names) == len(self.embeddings), f'Number of embeddings {len(embeddings)} does not match number of contig names {len(self.contig_names)}'
-        
+        assert len(self.contig_names) == len(
+            self.embeddings
+        ), f"Number of embeddings {len(embeddings)} does not match number of contig names {len(self.contig_names)}"
 
     def __init__(
         self,
         embeddings: np.ndarray,
+        contig_names: list[str],
+        save_path: str,
+        log: Logger,
         min_similarity: float = 0.8,
         min_bin_size: int = 10,
         num_steps: int = 3,
         max_iter: int = 1000,
         block_size: int = 1000,
-        save_path: str,
-        log: Logger,
-        contig_names: list[str]
     ):
         self.check_params(embeddings, min_similarity, min_bin_size, num_steps, max_iter)
 
         device, gpu_count = get_available_device()
         embeddings = torch.from_numpy(embeddings).to(device)
-        self.log.append(f"Using {device} for k-mediod clustering")
+        self.log.append(
+            f"Using {device} and threshold {self.min_similarity} for k-mediod clustering"
+        )
 
         self.embeddings = embeddings
+        self.contig_names = contig_names
+        self.save_path = save_path
+        self.log = log
         self.min_similarity = min_similarity
         self.min_bin_size = min_bin_size
         self.num_steps = num_steps
         self.max_iter = max_iter
         self.device = device
         self.block_size = block_size
-        self.save_path = save_path
-        self.log = log
-        self.contig_names = contig_names
 
     def fit(
         self,
@@ -146,30 +149,23 @@ class KMediod:
             self.log.append(f"Cluster {label}: {count} points")
 
         predictions = predictions.cpu().numpy()
-        
+
         self.predictions = predictions
-        assert len(self.predictions) == len(self.embeddings) == len(self.contig_names), f"Len of predictions {len(self.predictions)} does not match embeddings {len(self.embeddings)} and contig_names {len(self.contig_names)}"
-        
+        assert (
+            len(self.predictions) == len(self.embeddings) == len(self.contig_names)
+        ), f"Len of predictions {len(self.predictions)} does not match embeddings {len(self.embeddings)} and contig_names {len(self.contig_names)}"
+
         self.save_output()
-        
+
         return predictions
-    
-    def save_output(self)->None:
+
+    def save_output(self) -> None:
         """save predictions in save_path in format: clustername \\t contigname"""
-        
+
         with open("output.tsv", "w") as file:
-            file.write("clustername\tcontigname\n") #header
+            file.write("clustername\tcontigname\n")  # header
 
         for cluster, contig in zip(self.predictions, self.contig_names):
             file.write(f"{cluster}\t{contig}\n")
 
-        self.log.append(f"Predictions file written successfully to {self.save_path}!")        
-          
-        
-    
-    
-    
-    
-    
-    
-    
+        self.log.append(f"Predictions file written successfully to {self.save_path}!")
