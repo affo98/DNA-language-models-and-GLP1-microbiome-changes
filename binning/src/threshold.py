@@ -50,13 +50,12 @@ class Threshold:
         self.device = device
 
         self.log.append(f"Using {device} for Threshold calculations")
-        
-        
+
     def get_knn_threshold(self, knn_k, knn_p) -> float:
-        
+
         self.knn_k = knn_k
         self.knn_p = knn_p
-        
+
         n_samples = self.embeddings.shape[0]
         bin_vector = torch.zeros(self.n_bins, dtype=torch.float32, device=self.device)
 
@@ -106,20 +105,26 @@ class Threshold:
         cumulative_sum = np.cumsum(bin_vector)
         index = np.argmax(cumulative_sum >= p)
         knn_threshold = pairsim_vector[index]
-        
-        self.knn_threshold, self.pairsim_vector, self.bin_vector = knn_threshold, pairsim_vector, bin_vector
+
+        self.knn_threshold, self.pairsim_vector, self.bin_vector = (
+            knn_threshold,
+            pairsim_vector,
+            bin_vector,
+        )
 
         return knn_threshold, pairsim_vector, bin_vector
 
-
-     def save_histogram(self,knn=True) -> None:
+    def save_histogram(self, knn=True) -> None:
         """Plots and saves the histogram of similarities from the provided bin_vector."""
-            
+
         plt.figure(figsize=(8, 6))
-        
+
         if knn:
             plt.axvline(
-                self.knn_threshold, color="g", linestyle="--", label=f"KNN Threshold: {self.knn_threshold} (k={self.knn_k}, p={self.knn_p})"
+                self.knn_threshold,
+                color="g",
+                linestyle="--",
+                label=f"KNN Threshold: {self.knn_threshold} (k={self.knn_k}, p={self.knn_p})",
             )
 
         plt.plot(
@@ -136,16 +141,17 @@ class Threshold:
 
         plt.legend()
 
-        file_path = os.path.join(self.save_path, 'histograms', f"k{self.knn_k}_p{self.knn_p}_similarity_histogram.png")
+        file_path = os.path.join(
+            self.save_path,
+            "histograms",
+            f"k{self.knn_k}_p{self.knn_p}_similarity_histogram.png",
+        )
         plt.tight_layout()
         plt.savefig(file_path)
         plt.close()
         self.log.append(f"Plot saved at: {file_path}")
 
         return
-
-
-
 
     #         def get_similarity_bin_vector(self) -> float:
     #     """
@@ -211,84 +217,84 @@ class Threshold:
     #     yen = filters.threshold_yen(self.bin_vector)
 
     #     return (otsu, otsu_mul, isodata, minimum, yen)
-        # plt.axvline(
-        #     x=np.argmin(np.abs(self.pairsim_vector - self.otsu)),
-        #     color="r",
-        #     linestyle="--",
-        #     label=f"Otsu (t={self.otsu:.5f})",
-        # )
-        # plt.axvline(
-        #     x=np.argmin(np.abs(self.pairsim_vector - self.otsu_mul[0])),
-        #     color="indianred",
-        #     linestyle="--",
-        #     label=f"MULTIPLE OTSU (t={self.otsu_mul[0]:.5f})",
-        # )
-        # plt.axvline(
-        #     x=np.argmin(np.abs(self.pairsim_vector - self.isodata)),
-        #     color="b",
-        #     linestyle="--",
-        #     label=f"ISODATA  (t={self.isodata:.5f})",
-        # )
-        # plt.axvline(
-        #     x=np.argmin(np.abs(self.pairsim_vector - self.minimum)),
-        #     color="y",
-        #     linestyle="--",
-        #     label=f"MINIMUM (t={self.minimum:.5f})",
-        # )
-        # plt.axvline(
-        #     x=np.argmin(np.abs(self.pairsim_vector - self.yen)),
-        #     color="slategrey",
-        #     linestyle="--",
-        #     label=f"YEN Threshold (t={self.yen:.5f})",
-        # )
-        # plt.axvline(
-        #     x=350 + self.pairsim_vector[350:700].argmin(),
-        #     color="k",
-        #     linestyle="--",
-        #     label=f"Manual: {self.pairsim_vector[self.pairsim_vector[350:700].argmin()]:.5f}",
-        # )
+    # plt.axvline(
+    #     x=np.argmin(np.abs(self.pairsim_vector - self.otsu)),
+    #     color="r",
+    #     linestyle="--",
+    #     label=f"Otsu (t={self.otsu:.5f})",
+    # )
+    # plt.axvline(
+    #     x=np.argmin(np.abs(self.pairsim_vector - self.otsu_mul[0])),
+    #     color="indianred",
+    #     linestyle="--",
+    #     label=f"MULTIPLE OTSU (t={self.otsu_mul[0]:.5f})",
+    # )
+    # plt.axvline(
+    #     x=np.argmin(np.abs(self.pairsim_vector - self.isodata)),
+    #     color="b",
+    #     linestyle="--",
+    #     label=f"ISODATA  (t={self.isodata:.5f})",
+    # )
+    # plt.axvline(
+    #     x=np.argmin(np.abs(self.pairsim_vector - self.minimum)),
+    #     color="y",
+    #     linestyle="--",
+    #     label=f"MINIMUM (t={self.minimum:.5f})",
+    # )
+    # plt.axvline(
+    #     x=np.argmin(np.abs(self.pairsim_vector - self.yen)),
+    #     color="slategrey",
+    #     linestyle="--",
+    #     label=f"YEN Threshold (t={self.yen:.5f})",
+    # )
+    # plt.axvline(
+    #     x=350 + self.pairsim_vector[350:700].argmin(),
+    #     color="k",
+    #     linestyle="--",
+    #     label=f"Manual: {self.pairsim_vector[self.pairsim_vector[350:700].argmin()]:.5f}",
+    # )
 
-        # NORMALPDF = 0.005 * torch.tensor(
-        #     [
-        #         2.43432053e-11,
-        #         9.13472041e-10,
-        #         2.66955661e-08,
-        #         6.07588285e-07,
-        #         1.07697600e-05,
-        #         1.48671951e-04,
-        #         1.59837411e-03,
-        #         1.33830226e-02,
-        #         8.72682695e-02,
-        #         4.43184841e-01,
-        #         1.75283005e00,
-        #         5.39909665e00,
-        #         1.29517596e01,
-        #         2.41970725e01,
-        #         3.52065327e01,
-        #         3.98942280e01,
-        #         3.52065327e01,
-        #         2.41970725e01,
-        #         1.29517596e01,
-        #         5.39909665e00,
-        #         1.75283005e00,
-        #         4.43184841e-01,
-        #         8.72682695e-02,
-        #         1.33830226e-02,
-        #         1.59837411e-03,
-        #         1.48671951e-04,
-        #         1.07697600e-05,
-        #         6.07588285e-07,
-        #         2.66955661e-08,
-        #         9.13472041e-10,
-        #         2.43432053e-11,
-        #     ],
-        #     device=self.device,
-        # )
-        # pdf_len = len(NORMALPDF)
-        # densities = torch.zeros(len(bin_vector) + pdf_len - 1, device=self.device)
-        # for i in range(len(densities) - pdf_len + 1):
-        #     densities[i : i + pdf_len] += NORMALPDF * bin_vector[i]
-        # densities = densities[15:-15]
-        # densities = densities.to("cpu").numpy()
+    # NORMALPDF = 0.005 * torch.tensor(
+    #     [
+    #         2.43432053e-11,
+    #         9.13472041e-10,
+    #         2.66955661e-08,
+    #         6.07588285e-07,
+    #         1.07697600e-05,
+    #         1.48671951e-04,
+    #         1.59837411e-03,
+    #         1.33830226e-02,
+    #         8.72682695e-02,
+    #         4.43184841e-01,
+    #         1.75283005e00,
+    #         5.39909665e00,
+    #         1.29517596e01,
+    #         2.41970725e01,
+    #         3.52065327e01,
+    #         3.98942280e01,
+    #         3.52065327e01,
+    #         2.41970725e01,
+    #         1.29517596e01,
+    #         5.39909665e00,
+    #         1.75283005e00,
+    #         4.43184841e-01,
+    #         8.72682695e-02,
+    #         1.33830226e-02,
+    #         1.59837411e-03,
+    #         1.48671951e-04,
+    #         1.07697600e-05,
+    #         6.07588285e-07,
+    #         2.66955661e-08,
+    #         9.13472041e-10,
+    #         2.43432053e-11,
+    #     ],
+    #     device=self.device,
+    # )
+    # pdf_len = len(NORMALPDF)
+    # densities = torch.zeros(len(bin_vector) + pdf_len - 1, device=self.device)
+    # for i in range(len(densities) - pdf_len + 1):
+    #     densities[i : i + pdf_len] += NORMALPDF * bin_vector[i]
+    # densities = densities[15:-15]
+    # densities = densities.to("cpu").numpy()
 
-        # return densities, global_min.item(), global_max.item()
+    # return densities, global_min.item(), global_max.item()
