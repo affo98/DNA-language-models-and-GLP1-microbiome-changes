@@ -124,7 +124,7 @@ class Threshold:
                 self.knn_threshold,
                 color="g",
                 linestyle="--",
-                label=f"KNN Threshold: {self.knn_threshold} (k={self.knn_k}, p={int(self.knn_p*100)})",
+                label=f"KNN Threshold: {self.knn_threshold} (k={self.knn_k}, p={self.knn_p})",
             )
 
         plt.plot(
@@ -144,7 +144,7 @@ class Threshold:
         file_path = os.path.join(
             self.save_path,
             "histograms",
-            f"k{self.knn_k}_p{self.knn_p}_similarity_histogram.png",
+            f"k{self.knn_k}_p{int(self.knn_p*100)}_similarity_histogram.png",
         )
         plt.tight_layout()
         plt.savefig(file_path)
