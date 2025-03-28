@@ -7,9 +7,12 @@ import torch
 
 csv.field_size_limit(2**30)
 
+from src.utils import Logger
 
-def read_contigs(contigs_file: str) -> list[str]:
-    """Read in contigs from a fasta file. Either Gzip or normal file."""
+
+def read_contigs(contigs_file: str, filter_len: int, log: Logger) -> list[str]:
+    """Read in contigs from a fasta file. Either Gzip or normal file.
+    Filters contigs larger than filter_len"""
 
     contigs = []
     try:
@@ -20,6 +23,12 @@ def read_contigs(contigs_file: str) -> list[str]:
         with open(contigs_file, "r") as handle:
             for record in SeqIO.parse(handle, "fasta"):
                 contigs.append(str(record.seq))
+
+    log.append(
+        f"Removing contigs above {filter_len} base-pairs\nTotal Contigs before filtering: {len(contigs)}"
+    )
+    contigs = [c for c in contigs if len(c) < filter_len]
+    log.append(f"Total Contigs after filtering: {len(contigs)}")
     return contigs
 
 

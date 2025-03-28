@@ -103,58 +103,7 @@ class Embedder:
             embeddings = self.calculate_dna2vec()
         elif self.model_name in ["dnaberts", "dnabert2"]:
 
-            self.log.append(
-                f"Filtering contigs\nTotal Contigs: {len(self.dna_sequences)}\nContigs after filtering "
-            )
-            # process in chunks to with varying batch sizes to increase effeciency
-            min_sequence_lengths = [
-                min([len(seq) for seq in self.dna_sequences]),
-                10000,
-                20000,
-            ]
-            max_sequence_lengths = [
-                10000,
-                20000,
-                max([len(seq) for seq in self.dna_sequences]),
-            ]
-
-            original_ids = (
-                []
-            )  # [index in the original list, so if dna_seq is in position 4512, teh index is 4512]
-            processed_embeddings = []
-
-            for sequence_length_min, sequence_length_max, batch_size in zip(
-                min_sequence_lengths, max_sequence_lengths, self.batch_sizes
-            ):
-
-                indices_filtered, dna_sequences_filtered = zip(
-                    *[
-                        (index, seq)
-                        for (index, seq) in enumerate(self.dna_sequences)
-                        if (sequence_length_min <= len(seq) < sequence_length_max)
-                        # and (if len(seq) < LLM_SEQ_MAX_LENGTH) #set max length to avoid OOM errors
-                    ]
-                )
-                self.log.append(
-                    f"Running {len(dna_sequences_filtered)} sequences with len between {sequence_length_min} to {sequence_length_max}"
-                )
-                if len(dna_sequences_filtered) == 0:
-                    continue
-
-                dna_sequences_filtered = list(dna_sequences_filtered)
-                embeddings = self.calculate_llm_embedding(
-                    dna_sequences_filtered, batch_size
-                )
-                processed_embeddings.append(embeddings)
-
-                indices_filtered = list(indices_filtered)
-                original_ids.extend(indices_filtered)
-
-            embeddings = np.concatenate(
-                processed_embeddings,
-                axis=0,
-            )
-            embeddings = embeddings[np.argsort(original_ids)]
+            embeddings = self.calculate_llm_embedding()
 
         if self.normalize_embeddings:
             embeddings = normalize(embeddings)
@@ -166,7 +115,59 @@ class Embedder:
         torch.cuda.empty_cache()
         return embeddings
 
-    def calculate_llm_embedding(
+    def calculate_llm_embedding(self) -> np.array:
+        """Get llm embeddings. Process dna sequences based on their length to increase efficiency, i.e. use a large batch size"""
+
+        min_sequence_lengths = [
+            min([len(seq) for seq in self.dna_sequences]),
+            10000,
+            20000,
+        ]
+        max_sequence_lengths = [
+            10000,
+            20000,
+            max([len(seq) for seq in self.dna_sequences]),
+        ]
+
+        original_ids = (
+            []
+        )  # [index in the original list, so if dna_seq is in position 4512, teh index is 4512]
+        processed_embeddings = []
+
+        for sequence_length_min, sequence_length_max, batch_size in zip(
+            min_sequence_lengths, max_sequence_lengths, self.batch_sizes
+        ):
+
+            indices_filtered, dna_sequences_filtered = zip(
+                *[
+                    (index, seq)
+                    for (index, seq) in enumerate(self.dna_sequences)
+                    if (sequence_length_min <= len(seq) < sequence_length_max)
+                    # and (if len(seq) < LLM_SEQ_MAX_LENGTH) #set max length to avoid OOM errors. Already handles in utils.py.
+                ]
+            )
+            self.log.append(
+                f"Running {len(dna_sequences_filtered)} sequences with len between {sequence_length_min} to {sequence_length_max}"
+            )
+            if len(dna_sequences_filtered) == 0:
+                continue
+
+            dna_sequences_filtered = list(dna_sequences_filtered)
+            embeddings = self.llm_inference(dna_sequences_filtered, batch_size)
+            processed_embeddings.append(embeddings)
+
+            indices_filtered = list(indices_filtered)
+            original_ids.extend(indices_filtered)
+
+        embeddings = np.concatenate(
+            processed_embeddings,
+            axis=0,
+        )
+        embeddings = embeddings[np.argsort(original_ids)]
+
+        return embeddings
+
+    def llm_inference(
         self, dna_sequences_filtered: list[str], batch_size: int
     ) -> np.array:
         """Calculates embeddings for DNA sequences using a specified language model (LLM).

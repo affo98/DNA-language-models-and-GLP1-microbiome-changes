@@ -1,25 +1,22 @@
-import csv
 import os
 from argparse import ArgumentParser
 
 import traceback
 
-import numpy as np
-
-
-import torch
+from time import time
 
 from src.clustering import KMediod
 from src.get_embeddings import Embedder
 from src.threshold import Threshold
 from src.utils import read_contigs, Logger
 
+MAX_CONTIG_LENGTH = 60000
+
 
 def main(args, log):
 
-    contigs = read_contigs(args.contigs)
+    contigs = read_contigs(args.contigs, filter_len=MAX_CONTIG_LENGTH, log=log)
     contigs = contigs[0:10000]
-    contigs = [contig for contig in contigs if len(contig) < 50000]
 
     embedder = Embedder(
         contigs,
@@ -37,7 +34,7 @@ def main(args, log):
             f"|===========| Error in getting embeddings for {args.model_name}|===========|\n{traceback.format_exc()}"
         )
 
-    thres = Threshold(
+    thresholder = Threshold(
         embeddings,
         n_bins=1000,
         block_size=10000,
@@ -45,7 +42,7 @@ def main(args, log):
         model_name=args.model_name,
         log=log,
     )
-    thres.save_histogram()
+    thresholder.save_histogram()
 
     # kmediod = KMediod(
     #     embeddings,
@@ -101,6 +98,7 @@ def add_arguments() -> ArgumentParser:
 
 if __name__ == "__main__":
 
+    start_time = time()
     args = add_arguments()
 
     log = Logger(args.log)
@@ -109,6 +107,10 @@ if __name__ == "__main__":
         log.append(f"{arg}: {value}")
 
     main(args, log)
+
+    end_time = time()
+    elapsed_time = end_time - start_time
+    log.append(f"Binning of {args.model_name} ran in {elapsed_time:.2f} Seconds")
 
 
 # def setup_paths() -> None:
