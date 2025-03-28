@@ -50,18 +50,13 @@ class Threshold:
         self.device = device
 
         self.log.append(f"Using {device} for Threshold calculations")
-
-        # self.bin_vector, self.pairsim_vector = self.get_similarity_bin_vector()
-
-        # self.knn_threshold, self.pairsim_vector, self.bin_vector = self.knn_threshold(
-        #    k=200, p=0.7
-        # )
-
-    # self.otsu, self.otsu_mul, self.isodata, self.minimum, self.yen = (
-    #    self.get_threshold()
-    # )
-
-    def knn_threshold(self, k, p) -> float:
+        
+        
+    def get_knn_threshold(self, knn_k, knn_p) -> float:
+        
+        self.knn_k = knn_k
+        self.knn_p = knn_p
+        
         n_samples = self.embeddings.shape[0]
         bin_vector = torch.zeros(self.n_bins, dtype=torch.float32, device=self.device)
 
@@ -110,120 +105,112 @@ class Threshold:
 
         cumulative_sum = np.cumsum(bin_vector)
         index = np.argmax(cumulative_sum >= p)
-        threshold = pairsim_vector[index]
+        knn_threshold = pairsim_vector[index]
+        
+        self.knn_threshold, self.pairsim_vector, self.bin_vector = knn_threshold, pairsim_vector, bin_vector
 
-        return threshold, pairsim_vector, bin_vector
+        return knn_threshold, pairsim_vector, bin_vector
 
-    def get_similarity_bin_vector(self) -> float:
-        """
-        Calculates pairwise similarities of embeddings and returns a histogram of similarities.
-        """
 
-        n_samples = self.embeddings.shape[0]
-        bin_vector = torch.zeros(self.n_bins, dtype=torch.float32, device=self.device)
-
-        # loop through to get global min/max pairwise similarity
-        global_min = torch.tensor([1], dtype=torch.float32, device=self.device)
-        global_max = torch.tensor([-1], dtype=torch.float32, device=self.device)
-        for i in tqdm(
-            range(0, n_samples, self.block_size), desc="Calculating global min/max"
-        ):
-            block_start = i
-            block_end = min(i + self.block_size, n_samples)
-            block_embeddings = self.embeddings[block_start:block_end]
-
-            block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
-            local_min = block_sim_matrix.flatten().min()
-            local_max = block_sim_matrix.flatten().max()
-            global_min = torch.min(global_min, local_min)
-            global_max = torch.max(global_max, local_max)
-
-        # loop through again to get histogram
-        for i in tqdm(
-            range(0, n_samples, self.block_size), desc="Calculating histogram"
-        ):
-            block_start = i
-            block_end = min(i + self.block_size, n_samples)
-            block_embeddings = self.embeddings[block_start:block_end]
-
-            block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
-
-            block_sim_flatten = block_sim_matrix.flatten()
-
-            bin_vector += torch.histc(
-                block_sim_flatten,
-                bins=self.n_bins,
-                min=global_min.item(),
-                max=global_max.item(),
-            )
-
-        bin_vector = bin_vector / bin_vector.sum()
-        bin_vector = bin_vector.cpu().numpy()
-
-        pairsim_vector = (
-            torch.linspace(global_min.item(), global_max.item(), self.n_bins)
-            .cpu()
-            .numpy()
-        )
-        print(global_min.item(), global_max.item())
-
-        return bin_vector, pairsim_vector
-
-    def get_threshold(self) -> tuple[float, float, float, float, float]:
-
-        otsu = filters.threshold_otsu(self.bin_vector[:980])
-        otsu_mul = filters.threshold_multiotsu(self.bin_vector, classes=3)
-        isodata = filters.threshold_isodata(self.bin_vector)
-        minimum = filters.threshold_minimum(self.bin_vector)
-        yen = filters.threshold_yen(self.bin_vector)
-
-        return (otsu, otsu_mul, isodata, minimum, yen)
-
-    def save_histogram(self) -> None:
-        """
-        Plots and saves the histogram of similarities from the provided bin_vector.
-
-        Parameters:
-        - bin_vector: The normalized histogram values from similarity calculations.
-        - output_dir: Directory where the plot will be saved.
-        """
-
-        for k in [100, 200, 300, 400, 500, 600, 700, 800]:
-            self.threshold, self.pairsim_vector, self.bin_vector = self.knn_threshold(
-                k, p=0.7
-            )
-
-            plt.figure(figsize=(8, 6))
-
+     def save_histogram(self,knn=True) -> None:
+        """Plots and saves the histogram of similarities from the provided bin_vector."""
+            
+        plt.figure(figsize=(8, 6))
+        
+        if knn:
             plt.axvline(
-                self.threshold, color="g", linestyle="--", label="KNN Threshold"
+                self.knn_threshold, color="g", linestyle="--", label=f"KNN Threshold: {self.knn_threshold} (k={self.knn_k}, p={self.knn_p})"
             )
 
-            plt.plot(
-                self.pairsim_vector,
-                self.bin_vector,
-                color="skyblue",
-                linestyle="-",
-                linewidth=2,
-            )
+        plt.plot(
+            self.pairsim_vector,
+            self.bin_vector,
+            color="skyblue",
+            linestyle="-",
+            linewidth=2,
+        )
 
-            # tick_positions = np.linspace(0, len(self.pairsim_vector) - 1, 10, dtype=int)
-            # plt.xticks(ticks=tick_positions)
+        plt.xlabel("Similarity Bins")
+        plt.ylabel("Frequency")
+        plt.title(f"Similarity Histogram {self.model_name}")
 
-            plt.xlabel("Similarity Bins")
-            plt.ylabel("Frequency")
-            plt.title(f"Similarity Histogram {self.model_name}")
+        plt.legend()
 
-            plt.legend()
-
-            file_path = os.path.join(self.save_path, f"{k}_similarity_histogram.png")
-            plt.tight_layout()
-            plt.savefig(file_path)
-            plt.close()
-            self.log.append(f"Plot saved at: {self.save_path}")
+        file_path = os.path.join(self.save_path, f"{k}_similarity_histogram.png")
+        plt.tight_layout()
+        plt.savefig(file_path)
+        plt.close()
+        self.log.append(f"Plot saved at: {self.save_path}")
 
         return
 
+
+
+
+    #         def get_similarity_bin_vector(self) -> float:
+    #     """
+    #     Calculates pairwise similarities of embeddings and returns a histogram of similarities.
+    #     """
+
+    #     n_samples = self.embeddings.shape[0]
+    #     bin_vector = torch.zeros(self.n_bins, dtype=torch.float32, device=self.device)
+
+    #     # loop through to get global min/max pairwise similarity
+    #     global_min = torch.tensor([1], dtype=torch.float32, device=self.device)
+    #     global_max = torch.tensor([-1], dtype=torch.float32, device=self.device)
+    #     for i in tqdm(
+    #         range(0, n_samples, self.block_size), desc="Calculating global min/max"
+    #     ):
+    #         block_start = i
+    #         block_end = min(i + self.block_size, n_samples)
+    #         block_embeddings = self.embeddings[block_start:block_end]
+
+    #         block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
+    #         local_min = block_sim_matrix.flatten().min()
+    #         local_max = block_sim_matrix.flatten().max()
+    #         global_min = torch.min(global_min, local_min)
+    #         global_max = torch.max(global_max, local_max)
+
+    #     # loop through again to get histogram
+    #     for i in tqdm(
+    #         range(0, n_samples, self.block_size), desc="Calculating histogram"
+    #     ):
+    #         block_start = i
+    #         block_end = min(i + self.block_size, n_samples)
+    #         block_embeddings = self.embeddings[block_start:block_end]
+
+    #         block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
+
+    #         block_sim_flatten = block_sim_matrix.flatten()
+
+    #         bin_vector += torch.histc(
+    #             block_sim_flatten,
+    #             bins=self.n_bins,
+    #             min=global_min.item(),
+    #             max=global_max.item(),
+    #         )
+
+    #     bin_vector = bin_vector / bin_vector.sum()
+    #     bin_vector = bin_vector.cpu().numpy()
+
+    #     pairsim_vector = (
+    #         torch.linspace(global_min.item(), global_max.item(), self.n_bins)
+    #         .cpu()
+    #         .numpy()
+    #     )
+    #     print(global_min.item(), global_max.item())
+
+    #     return bin_vector, pairsim_vector
+
+    # def get_threshold(self) -> tuple[float, float, float, float, float]:
+
+    #     otsu = filters.threshold_otsu(self.bin_vector[:980])
+    #     otsu_mul = filters.threshold_multiotsu(self.bin_vector, classes=3)
+    #     isodata = filters.threshold_isodata(self.bin_vector)
+    #     minimum = filters.threshold_minimum(self.bin_vector)
+    #     yen = filters.threshold_yen(self.bin_vector)
+
+    #     return (otsu, otsu_mul, isodata, minimum, yen)
         # plt.axvline(
         #     x=np.argmin(np.abs(self.pairsim_vector - self.otsu)),
         #     color="r",
