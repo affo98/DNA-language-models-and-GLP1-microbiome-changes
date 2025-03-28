@@ -28,6 +28,7 @@ def main(args, log):
         args.contigs, filter_len=MAX_CONTIG_LENGTH, log=log
     )
     contigs = contigs[0:2000]
+    contig_names = contig_names[0:2000]
 
     embedder = Embedder(
         contigs,
