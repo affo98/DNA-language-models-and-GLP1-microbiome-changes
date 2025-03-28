@@ -64,7 +64,7 @@ class KMediod:
     def fit(
         self,
     ) -> np.array:
-        """Runs the Iterative k-mediod algorithm."""
+        """Runs the Iterative k-mediod algorithm, and saves the output predictions."""
 
         n_samples = self.embeddings.shape[0]
 
