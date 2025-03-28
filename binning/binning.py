@@ -29,6 +29,7 @@ def main(args, log):
     )
     contigs = contigs[0:2000]
     contig_names = contig_names[0:2000]
+    print(f"{len(contigs)} NAMES{len(contig_names)}")
 
     embedder = Embedder(
         contigs,
