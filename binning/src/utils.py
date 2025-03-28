@@ -7,8 +7,6 @@ import torch
 
 csv.field_size_limit(2**30)
 
-from src.utils import Logger
-
 
 def read_contigs(
     contigs_file: str, filter_len: int, log: Logger
