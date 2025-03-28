@@ -10,26 +10,32 @@ csv.field_size_limit(2**30)
 from src.utils import Logger
 
 
-def read_contigs(contigs_file: str, filter_len: int, log: Logger) -> list[str]:
+def read_contigs(
+    contigs_file: str, filter_len: int, log: Logger
+) -> tuple[list[str], list[str]]:
     """Read in contigs from a fasta file. Either Gzip or normal file.
     Filters contigs larger than filter_len"""
 
     contigs = []
+    contig_names = []
     try:
         with gzip.open(contigs_file, "rt") as handle:
             for record in SeqIO.parse(handle, "fasta"):
                 contigs.append(str(record.seq))
+                contig_names.append(str(record.id))
     except Exception:
         with open(contigs_file, "r") as handle:
             for record in SeqIO.parse(handle, "fasta"):
                 contigs.append(str(record.seq))
+                contig_names.append(str(record.id))
 
     log.append(
         f"Removing contigs above {filter_len} base-pairs\nTotal Contigs before filtering: {len(contigs)}"
     )
     contigs = [c for c in contigs if len(c) < filter_len]
     log.append(f"Total Contigs after filtering: {len(contigs)}")
-    return contigs
+
+    return contigs, contig_names
 
 
 def sort_sequences(dna_sequences: list[str]) -> tuple[list, np.array]:

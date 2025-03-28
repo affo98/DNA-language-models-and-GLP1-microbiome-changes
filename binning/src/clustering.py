@@ -2,9 +2,8 @@ import torch
 import numpy as np
 from tqdm import tqdm
 
-from sklearn.preprocessing import normalize
 
-from src.utils import get_available_device
+from src.utils import get_available_device, Logger
 
 
 class KMediod:
@@ -16,7 +15,6 @@ class KMediod:
         min_bin_size: int,
         num_steps: int,
         max_iter: int,
-        block_size: int = 1000,
     ):
         if embeddings.dtype != np.float64:
             embeddings = embeddings.astype(np.float64)
@@ -31,6 +29,8 @@ class KMediod:
             raise ValueError("Maximum iterations must be at least 1")
         if len(embeddings) < 1:
             raise ValueError("Matrix must have at least 1 observation.")
+        assert len(self.contig_names) == len(self.embeddings), f'Number of embeddings {len(embeddings)} does not match number of contig names {len(self.contig_names)}'
+        
 
     def __init__(
         self,
@@ -40,12 +40,15 @@ class KMediod:
         num_steps: int = 3,
         max_iter: int = 1000,
         block_size: int = 1000,
+        save_path: str,
+        log: Logger,
+        contig_names: list[str]
     ):
         self.check_params(embeddings, min_similarity, min_bin_size, num_steps, max_iter)
 
         device, gpu_count = get_available_device()
         embeddings = torch.from_numpy(embeddings).to(device)
-        print(f"Using {device} for k-mediod clustering")
+        self.log.append(f"Using {device} for k-mediod clustering")
 
         self.embeddings = embeddings
         self.min_similarity = min_similarity
@@ -54,10 +57,14 @@ class KMediod:
         self.max_iter = max_iter
         self.device = device
         self.block_size = block_size
+        self.save_path = save_path
+        self.log = log
+        self.contig_names = contig_names
 
     def fit(
         self,
     ) -> np.array:
+        """Runs the Iterative k-mediod algorithm."""
 
         n_samples = self.embeddings.shape[0]
 
@@ -84,9 +91,9 @@ class KMediod:
         predictions = torch.full((n_samples,), -1, dtype=torch.long, device=self.device)
         cluster_id = 0
 
-        print("=========================================\n")
-        print(f"Running KMedoid on {n_samples} contigs\n")
-        print("=========================================\n")
+        self.log.append("=========================================\n")
+        self.log.append(f"Running KMedoid on {n_samples} contigs\n")
+        self.log.append("=========================================\n")
 
         progress_bar = tqdm(total=self.max_iter, desc="Clusters created K-mediod")
 
@@ -125,7 +132,7 @@ class KMediod:
 
             progress_bar.update(1)
             if cluster_id % 20 == 0:
-                print(f"KMediod Step {cluster_id} completed.")
+                self.log.append(f"KMediod Step {cluster_id} completed.")
 
         # Filter small clusters
         labels, counts = torch.unique(predictions, return_counts=True)
@@ -136,6 +143,33 @@ class KMediod:
 
         labels, counts = torch.unique(predictions, return_counts=True)
         for label, count in zip(labels.cpu(), counts.cpu()):
-            print(f"Cluster {label}: {count} points")
+            self.log.append(f"Cluster {label}: {count} points")
 
-        return predictions.cpu().numpy()
+        predictions = predictions.cpu().numpy()
+        
+        self.predictions = predictions
+        assert len(self.predictions) == len(self.embeddings) == len(self.contig_names), f"Len of predictions {len(self.predictions)} does not match embeddings {len(self.embeddings)} and contig_names {len(self.contig_names)}"
+        
+        self.save_output()
+        
+        return predictions
+    
+    def save_output(self)->None:
+        """save predictions in save_path in format: clustername \\t contigname"""
+        
+        with open("output.tsv", "w") as file:
+            file.write("clustername\tcontigname\n") #header
+
+        for cluster, contig in zip(self.predictions, self.contig_names):
+            file.write(f"{cluster}\t{contig}\n")
+
+        self.log.append(f"Predictions file written successfully to {self.save_path}!")        
+          
+        
+    
+    
+    
+    
+    
+    
+    

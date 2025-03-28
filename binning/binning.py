@@ -10,13 +10,24 @@ from src.get_embeddings import Embedder
 from src.threshold import Threshold
 from src.utils import read_contigs, Logger
 
+# data
 MAX_CONTIG_LENGTH = 60000
+
+# threshold
+N_BINS = 1000
+BLOCK_SIZE = 1000
+
+# knn
+KNN_K = 200
+KNN_P = 0.7
 
 
 def main(args, log):
 
-    contigs = read_contigs(args.contigs, filter_len=MAX_CONTIG_LENGTH, log=log)
-    contigs = contigs[0:10000]
+    contigs, contig_names = read_contigs(
+        args.contigs, filter_len=MAX_CONTIG_LENGTH, log=log
+    )
+    # contigs = contigs[0:10000]
 
     embedder = Embedder(
         contigs,
@@ -36,24 +47,28 @@ def main(args, log):
 
     thresholder = Threshold(
         embeddings,
-        n_bins=1000,
-        block_size=10000,
-        save_path=os.path.join(args.save_path),
+        n_bins=N_BINS,
+        block_size=BLOCK_SIZE,
+        save_path=args.save_path,
         model_name=args.model_name,
         log=log,
     )
-    thresholder.save_histogram()
+    threshold = thresholder.get_knn_threshold(KNN_K, KNN_P)
+    thresholder.save_histogram(knn=True)
 
-    # kmediod = KMediod(
-    #     embeddings,
-    #     min_similarity=0.008,  # 0.0075
-    #     min_bin_size=10,
-    #     num_steps=3,
-    #     max_iter=1000,
-    #     normalized=True,
-    # )
-    # predictions = kmediod.fit()
-    # print(predictions)
+    kmediod = KMediod(
+        embeddings,
+        min_similarity=threshold,
+        min_bin_size=10,
+        num_steps=3,
+        max_iter=1000,
+        block_size=BLOCK_SIZE,
+        save_path=args.save_path,
+        log=log,
+        contig_names=contig_names,
+    )
+
+    predictions = kmediod.fit()
 
 
 def add_arguments() -> ArgumentParser:

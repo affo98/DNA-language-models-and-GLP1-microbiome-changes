@@ -136,11 +136,11 @@ class Threshold:
 
         plt.legend()
 
-        file_path = os.path.join(self.save_path, f"{k}_similarity_histogram.png")
+        file_path = os.path.join(self.save_path, 'histograms', f"k{self.knn_k}_p{self.knn_p}_similarity_histogram.png")
         plt.tight_layout()
         plt.savefig(file_path)
         plt.close()
-        self.log.append(f"Plot saved at: {self.save_path}")
+        self.log.append(f"Plot saved at: {file_path}")
 
         return
 
