@@ -52,9 +52,6 @@ class KMediod:
 
         device, gpu_count = get_available_device()
         embeddings = torch.from_numpy(embeddings).to(device)
-        self.log.append(
-            f"Using {device} and threshold {self.min_similarity} for k-mediod clustering"
-        )
 
         self.embeddings = embeddings
         self.contig_names = contig_names
@@ -66,6 +63,10 @@ class KMediod:
         self.max_iter = max_iter
         self.device = device
         self.block_size = block_size
+
+        self.log.append(
+            f"Using {device} and threshold {self.min_similarity} for k-mediod clustering"
+        )
 
     def fit(
         self,
