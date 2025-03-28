@@ -111,7 +111,7 @@ class Threshold:
             bin_vector,
         )
 
-        return knn_threshold, pairsim_vector, bin_vector
+        return knn_threshold
 
     def save_histogram(self, knn=True) -> None:
         """Plots and saves the histogram of similarities from the provided bin_vector."""
