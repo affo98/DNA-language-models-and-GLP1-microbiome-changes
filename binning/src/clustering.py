@@ -169,7 +169,7 @@ class KMediod:
         with open("output.tsv", "w") as file:
             file.write("clustername\tcontigname\n")  # header
 
-        for cluster, contig in zip(self.predictions, self.contig_names):
-            file.write(f"{cluster}\t{contig}\n")
+            for cluster, contig in zip(self.predictions, self.contig_names):
+                file.write(f"{cluster}\t{contig}\n")
 
         self.log.append(f"Predictions file written successfully to {self.save_path}!")
