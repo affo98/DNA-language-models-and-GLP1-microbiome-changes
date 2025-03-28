@@ -34,24 +34,27 @@ def read_contigs(
     """Read in contigs from a fasta file. Either Gzip or normal file.
     Filters contigs larger than filter_len"""
 
-    contigs = []
-    contig_names = []
+    contigs, contig_names = [], []
     try:
         with gzip.open(contigs_file, "rt") as handle:
             for record in SeqIO.parse(handle, "fasta"):
-                contigs.append(str(record.seq))
-                contig_names.append(str(record.id))
+                if len(record.seq) < filter_len:
+                    contigs.append(str(record.seq))
+                    contig_names.append(str(record.id))
     except Exception:
         with open(contigs_file, "r") as handle:
             for record in SeqIO.parse(handle, "fasta"):
-                contigs.append(str(record.seq))
-                contig_names.append(str(record.id))
+                if len(record.seq) < filter_len:
+                    contigs.append(str(record.seq))
+                    contig_names.append(str(record.id))
 
     log.append(
         f"Removing contigs above {filter_len} base-pairs\nTotal Contigs before filtering: {len(contigs)}"
     )
-    contigs = [c for c in contigs if len(c) < filter_len]
     log.append(f"Total Contigs after filtering: {len(contigs)}")
+    assert len(contigs) == len(
+        contig_names
+    ), f"Len of contigs {len(contigs)} and contig names {len(contig_names)} dont match."
 
     return contigs, contig_names
 
