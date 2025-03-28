@@ -30,8 +30,8 @@ class KMediod:
             raise ValueError("Maximum iterations must be at least 1")
         if len(embeddings) < 1:
             raise ValueError("Matrix must have at least 1 observation.")
-        assert len(self.contig_names) == len(
-            self.embeddings
+        assert len(contig_names) == len(
+            embeddings
         ), f"Number of embeddings {len(embeddings)} does not match number of contig names {len(contig_names)}"
 
     def __init__(
