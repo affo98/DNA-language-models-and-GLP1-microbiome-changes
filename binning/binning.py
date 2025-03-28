@@ -58,14 +58,14 @@ def main(args, log):
 
     kmediod = KMediod(
         embeddings,
+        contig_names,
+        args.save_path,
+        log,
         min_similarity=threshold,
         min_bin_size=10,
         num_steps=3,
         max_iter=1000,
         block_size=BLOCK_SIZE,
-        save_path=args.save_path,
-        log=log,
-        contig_names=contig_names,
     )
 
     predictions = kmediod.fit()
