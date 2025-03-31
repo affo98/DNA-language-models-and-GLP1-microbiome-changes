@@ -1,7 +1,23 @@
 name: checkm2
 channels:
-  - bioconda
   - conda-forge
+  - bioconda
+  - defaults
 dependencies:
+  - python>3.12
+  - scikit-learn=1.6.1
+  - numpy
+  - diamond=2.1.11
   - tensorflow=2.17
-  - checkm2
+  - lightgbm
+  - pandas
+  - numpy
+  - scipy
+  - prodigal=2.6.3
+  - setuptools
+  - requests
+  - packaging
+  - tqdm
+  - pip
+  - pip:
+      - CheckM2
