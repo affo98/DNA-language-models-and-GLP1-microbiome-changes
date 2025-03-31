@@ -27,8 +27,8 @@ def main(args, log):
     contigs, contig_names = read_contigs(
         args.contigs, filter_len=MAX_CONTIG_LENGTH, log=log
     )
-    contigs = contigs[0:4000]
-    contig_names = contig_names[0:4000]
+    # contigs = contigs[0:4000]
+    # contig_names = contig_names[0:4000]
 
     embedder = Embedder(
         contigs,
@@ -69,7 +69,7 @@ def main(args, log):
         block_size=BLOCK_SIZE,
     )
 
-    predictions, contig_names = kmediod.fit()
+    predictions, contig_names_post = kmediod.fit()
 
 
 def add_arguments() -> ArgumentParser:
