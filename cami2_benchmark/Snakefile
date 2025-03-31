@@ -147,9 +147,7 @@ if config_checkm2:
 
 rule all:
     input: input_files
-ruleorder: concatenate > download_metahit
-
-print(input_files)
+ruleorder: process_metahit > concatenate
 
 #TNF
 rule other_model:
