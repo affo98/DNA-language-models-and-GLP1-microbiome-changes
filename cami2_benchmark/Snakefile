@@ -43,7 +43,7 @@ config_alignment = bool(config.get("ALIGNMENT", False))
 config_checkm2 = bool(config.get("CHECKM2", False))
 config_nomodelrun = bool(config.get("NOMODELRUN", False))
 
-MINSIZE_BINS=250000
+MINSIZE_BINS=0 #CHANGE
 MINSIZE_CONTIGS=2000
 
 
@@ -220,7 +220,6 @@ rule process_metahit:
         """
         python {SRC_DIR}/process_metahit.py -i {input.contigs_raw} -o {output.contigs_processed} --log {log} -m {params.min_length}
         """
-
 
 
 rule download_cami2:

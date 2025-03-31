@@ -46,16 +46,17 @@ def main(args, log):
             f"|===========| Error in getting embeddings for {args.model_name}|===========|\n{traceback.format_exc()}"
         )
 
-    thresholder = Threshold(
-        embeddings,
-        n_bins=N_BINS,
-        block_size=BLOCK_SIZE,
-        save_path=args.save_path,
-        model_name=args.model_name,
-        log=log,
-    )
-    threshold = thresholder.get_knn_threshold(KNN_K, KNN_P)
-    thresholder.save_histogram(knn=True)
+    # thresholder = Threshold(
+    #     embeddings,
+    #     n_bins=N_BINS,
+    #     block_size=BLOCK_SIZE,
+    #     save_path=args.save_path,
+    #     model_name=args.model_name,
+    #     log=log,
+    # )
+    # threshold = thresholder.get_knn_threshold(KNN_K, KNN_P)
+    # thresholder.save_histogram(knn=True)
+    threshold = 0.72
 
     kmediod = KMediod(
         embeddings,
