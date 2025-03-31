@@ -36,6 +36,8 @@ datasets:
         "19",
         "20",
       ]
+  - name: metahit
+    samples: ["0"]
 
 models:
   - name: vamb

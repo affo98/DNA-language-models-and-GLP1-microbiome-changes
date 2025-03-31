@@ -62,13 +62,18 @@ print(f"  - No model run:        {config_nomodelrun}")
 
 input_files = []
 if config_download:
-    input_filens += expand(
-        os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"),
-        sample=SAMPLES.get(DATASET, [])
-    )
-    input_files += expand(
-        os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"),
-        sample=SAMPLES.get(DATASET, [])
+    if DATASET != 'metahit':
+        input_files += expand(
+            os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"),
+            sample=SAMPLES.get(DATASET, [])
+        )
+        input_files += expand(
+            os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"),
+            sample=SAMPLES.get(DATASET, [])
+        )
+    elif DATASET == 'metahit':
+    input_files.append(
+        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
     )
 
 if config_concatenate:
@@ -184,7 +189,7 @@ rule create_fasta_bins_other_model:
 
 
 
-rule download:
+rule download_cami2:
     output:
         contigs=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, [])),
         reads=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), sample=SAMPLES.get(DATASET, []))
@@ -193,6 +198,18 @@ rule download:
     shell:
         """
         python {SRC_DIR}/get_cami2_data.py {DATASET} {sample_str}
+        """
+
+rule download_metahiterrorfree:
+    output:
+        contigs=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+    params:
+        url = "https://figshare.com/ndownloader/files/50894283"
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        wget {params.url} -O {output.contigs}
         """
 
 
