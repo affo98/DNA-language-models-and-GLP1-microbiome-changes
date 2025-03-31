@@ -1,4 +1,4 @@
-"""Removes contigs shorter than min_length in metahit"""
+"""Removes contigs shorter than minlength in metahit"""
 
 import argparse
 import gzip
@@ -19,16 +19,16 @@ def compute_summary_stats(lengths):
 
 
 def process_contigs(
-    inpath: str, outpath: str, min_length: int
+    inpath: str, outpath: str, minlength: int
 ) -> tuple[list[int], list[int]]:
     """
     Reads contigs from 'inpath', calculates their lengths, filters out contigs
-    shorter than min_length, overwrites the file with the filtered contigs, and returns
+    shorter than minlength, overwrites the file with the filtered contigs, and returns
     both the original and filtered contig lengths.
 
     Args:
         inpath (str): Path to the input FASTA file (can be gzipped).
-        min_length (int): Minimum length a contig must have to be kept.
+        minlength (int): Minimum length a contig must have to be kept.
         log: Logger object for logging messages.
 
     Returns:
@@ -45,7 +45,7 @@ def process_contigs(
     # Compute lengths of all contigs before filtering
     contig_lengths_before = [len(record.seq) for record in records]
 
-    filtered_records = [record for record in records if len(record.seq) >= min_length]
+    filtered_records = [record for record in records if len(record.seq) >= minlength]
     contig_lengths_after = [len(record.seq) for record in filtered_records]
 
     out_mode = "wt" if inpath.endswith(".gz") else "w"
@@ -74,7 +74,7 @@ def main():
     args = parser.parse_args()
 
     contig_lengths_before, contig_lengths_after = process_contigs(
-        args.inpath, args.outpath, args.min_length
+        args.inpath, args.outpath, args.minlength
     )
 
     stats_before = compute_summary_stats(contig_lengths_before)
