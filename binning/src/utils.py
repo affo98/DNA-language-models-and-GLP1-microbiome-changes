@@ -39,7 +39,7 @@ def read_contigs(
     try:
         with gzip.open(contigs_file, "rt") as handle:
             for record in SeqIO.parse(handle, "fasta"):
-                total += 1
+                total_contigs += 1
                 if len(record.seq) < filter_len:
                     contigs.append(str(record.seq))
                     contig_names.append(str(record.id))
@@ -47,7 +47,7 @@ def read_contigs(
     except Exception:
         with open(contigs_file, "r") as handle:
             for record in SeqIO.parse(handle, "fasta"):
-                total += 1
+                total_contigs += 1
                 if len(record.seq) < filter_len:
                     contigs.append(str(record.seq))
                     contig_names.append(str(record.id))
