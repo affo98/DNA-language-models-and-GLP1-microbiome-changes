@@ -3,4 +3,5 @@ channels:
   - bioconda
   - conda-forge
 dependencies:
+  - tensorflow=2.17
   - checkm2
