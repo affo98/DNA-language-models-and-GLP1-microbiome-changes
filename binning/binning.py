@@ -56,7 +56,7 @@ def main(args, log):
     # )
     # threshold = thresholder.get_knn_threshold(KNN_K, KNN_P)
     # thresholder.save_histogram(knn=True)
-    threshold = 0.72
+    threshold = 0.90
 
     kmediod = KMediod(
         embeddings,
