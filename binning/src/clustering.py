@@ -164,7 +164,7 @@ class KMediod:
         self.predictions, self.contig_names = self.remove_unassigned_sequences()
         self.save_output()
 
-        return predictions
+        return self.predictions, self.contig_names
 
     def remove_unassigned_sequences(self) -> np.array:
         idx_to_keep = np.where(self.predictions != -1)[0]
