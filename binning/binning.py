@@ -15,7 +15,7 @@ MAX_CONTIG_LENGTH = 60000  # try 70.000
 
 # threshold calculation
 N_BINS = 1000
-BLOCK_SIZE = 1000
+BLOCK_SIZE = 100  # oom with 1000 in metahit threshold 0.72
 
 # knn
 KNN_K = 200
