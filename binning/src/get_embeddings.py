@@ -12,9 +12,6 @@ from torch.utils.data import DataLoader
 from transformers import (
     AutoTokenizer,
     AutoModel,
-    AutoModelForMaskedLM,
-    AutoConfig,
-    AutoModelForCausalLM,
 )
 
 from transformers.models.bert.configuration_bert import BertConfig
@@ -101,7 +98,7 @@ class Embedder:
             embeddings = self.calculate_tnf(use_kernel=True)
         elif self.model_name == "dna2vec":
             embeddings = self.calculate_dna2vec()
-        elif self.model_name in ["dnaberts", "dnabert2"]:
+        elif self.model_name in ["dnaberts", "dnabert2", "dnabert2random"]:
             embeddings = self.calculate_llm_embedding()
 
         if self.normalize_embeddings:
