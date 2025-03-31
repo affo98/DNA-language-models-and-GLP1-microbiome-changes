@@ -126,7 +126,7 @@ elif MODEL in ['dna2vec'] and not config_nomodelrun:
 elif MODEL in ['dnaberts'] and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberts"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberts"),
     ]
 elif MODEL in ['dnabert2'] and not config_nomodelrun:
     input_files += [
@@ -176,7 +176,7 @@ rule create_fasta_bins_other_model:
         "envs/vamb.yml"
     shell:
         """
-        python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results}/tnf_output_clusters.tsv {params.minsize_bins} {output.dirs} \
+        python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results}/clusters.tsv {params.minsize_bins} {output.dirs} \
         --log {log.log_file}
         """
 #END TNF

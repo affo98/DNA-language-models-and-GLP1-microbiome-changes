@@ -1,3 +1,5 @@
+import os
+
 import torch
 import numpy as np
 from tqdm import tqdm
@@ -159,14 +161,24 @@ class KMediod:
             len(self.predictions) == len(self.embeddings) == len(self.contig_names)
         ), f"Len of predictions {len(self.predictions)} does not match embeddings {len(self.embeddings)} and contig_names {len(self.contig_names)}"
 
+        self.predictions, self.contig_names = self.remove_unassigned_sequences()
         self.save_output()
 
         return predictions
 
+    def remove_unassigned_sequences(self) -> np.array:
+        idx_to_keep = np.where(self.predictions != -1)[0]
+
+        self.predictions = self.predictions[idx_to_keep]
+        self.contig_names = [self.contig_names[i] for i in idx_to_keep]
+
+        return self.predictions, self.contig_names
+
     def save_output(self) -> None:
         """save predictions in save_path in format: clustername \\t contigname"""
 
-        with open("output.tsv", "w") as file:
+        output_file = os.path.join(self.save_path, "clusters.tsv")
+        with open(output_file, "w") as file:
             file.write("clustername\tcontigname\n")  # header
 
             for cluster, contig in zip(self.predictions, self.contig_names):
