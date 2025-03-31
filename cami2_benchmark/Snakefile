@@ -145,7 +145,7 @@ if config_checkm2:
 
 rule all:
     input: input_files
-
+ruleorder: concatenate > download_metahiterrorfree
 
 
 #TNF
