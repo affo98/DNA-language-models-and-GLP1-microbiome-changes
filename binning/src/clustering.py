@@ -130,14 +130,22 @@ class KMediod:
 
             predictions[candidates] = cluster_id
 
-            # Update density vector
-            cluster_embs = self.embeddings[candidates]
-            cluster_sims = torch.mm(self.embeddings, cluster_embs.T)
-            cluster_sims = torch.where(
-                cluster_sims >= self.min_similarity, cluster_sims, 0.0
-            )
-            density_vector -= torch.sum(cluster_sims, dim=1)
-            density_vector[candidates] = -100  # exclude seed from density vector
+            # Update density vector in blocks
+            for i in range(0, n_samples, self.block_size):
+                block_start = i
+                block_end = min(i + self.block_size, n_samples)
+                block_embs = self.embeddings[block_start:block_end]
+
+                cluster_sims = torch.mm(block_embs, self.embeddings[candidates].T)
+                cluster_sims = torch.where(
+                    cluster_sims >= self.min_similarity, cluster_sims, 0.0
+                )
+
+                density_vector[block_start:block_end] -= torch.sum(cluster_sims, dim=1)
+
+            density_vector[candidates] = (
+                -100
+            )  # exclude selected points from further selection
 
             progress_bar.update(1)
             if cluster_id % 20 == 0:
