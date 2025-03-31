@@ -73,10 +73,10 @@ if config_download:
             sample=SAMPLES.get(DATASET, [])
         )
     elif DATASET == 'metahit':
-        input_files.append(
+        input_files += [
             os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue_raw.fna.gz"),
             os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
-        )
+        ]
 
 if config_concatenate:
     input_files.append(
