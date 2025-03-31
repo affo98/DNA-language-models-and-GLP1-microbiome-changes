@@ -1,3 +1,5 @@
+"""Removes contigs shorter than min_length in metahit"""
+
 import argparse
 import gzip
 import numpy as np
@@ -16,22 +18,42 @@ def compute_summary_stats(lengths):
     )
 
 
-def get_contig_lengths(path):
-    """Get contig lengths from one or more FASTA files, handling .gz files."""
-    contig_lengths = []
-    if path.endswith(".gz"):  # Check if the file is gzipped
-        with gzip.open(path, "rt") as handle:  # Open gzipped file in text mode
-            for record in SeqIO.parse(handle, "fasta"):
-                contig_lengths.append(len(record.seq))
-    else:  # For regular text files
-        with open(path, "r") as handle:
-            for record in SeqIO.parse(handle, "fasta"):
-                contig_lengths.append(len(record.seq))
-    return contig_lengths
+def process_contigs(inpath: str, min_length: int, log) -> tuple[list[int], list[int]]:
+    """
+    Reads contigs from 'inpath', calculates their lengths, filters out contigs
+    shorter than min_length, overwrites the file with the filtered contigs, and returns
+    both the original and filtered contig lengths.
+
+    Args:
+        inpath (str): Path to the input FASTA file (can be gzipped).
+        min_length (int): Minimum length a contig must have to be kept.
+        log: Logger object for logging messages.
+
+    Returns:
+        tuple: (original_lengths, filtered_lengths)
+            original_lengths: List[int] of contig lengths before filtering.
+            filtered_lengths: List[int] of contig lengths after filtering.
+    """
+
+    open_func = gzip.open if inpath.endswith(".gz") else open
+
+    with open_func(inpath, "rt") as handle:
+        records = list(SeqIO.parse(handle, "fasta"))
+
+    # Compute lengths of all contigs before filtering
+    contig_lengths_before = [len(record.seq) for record in records]
+
+    filtered_records = [record for record in records if len(record.seq) >= min_length]
+    contig_lengths_after = [len(record.seq) for record in filtered_records]
+
+    out_mode = "wt" if inpath.endswith(".gz") else "w"
+    with open_func(inpath, out_mode) as out_handle:
+        SeqIO.write(filtered_records, out_handle, "fasta")
+
+    return contig_lengths_before, contig_lengths_after
 
 
 def main():
-    # Argument parsing
     parser = argparse.ArgumentParser(
         description="Contig length statistics and logging script."
     )
@@ -48,7 +70,9 @@ def main():
     )
     args = parser.parse_args()
 
-    contig_lengths_before = get_contig_lengths(args.inpaths)
+    contig_lengths_before, contig_lengths_after = process_contigs(
+        args.inpath, args.min_length
+    )
 
     stats_before = compute_summary_stats(contig_lengths_before)
     stats_after = compute_summary_stats(contig_lengths_after)

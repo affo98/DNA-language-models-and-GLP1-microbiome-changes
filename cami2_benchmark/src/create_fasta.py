@@ -27,7 +27,7 @@ args = parser.parse_args()
 lens: dict[str, int] = dict()
 with vamb.vambtools.Reader(args.fastapath) as file:
     for record in vamb.vambtools.byte_iterfasta(
-        file
+        file, None
     ):  # changed this line from vamb github code, otherwise causes error
         lens[record.identifier] = len(record)
 
