@@ -199,7 +199,7 @@ rule download_metahit:
     shell:
         """
         wget {params.url} -O {output.contigs_raw}
-        """'
+        """
 
 rule process_metahit:
     input:
