@@ -206,7 +206,7 @@ rule process_metahit:
     output:
         contigs_processed=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
     log:
-        os.path.join(LOGS, DATASET, "concatenate.log")
+        os.path.join(LOGS, DATASET, "process_metahit.log")
     params:
         min_length=MINSIZE_CONTIGS
     conda:

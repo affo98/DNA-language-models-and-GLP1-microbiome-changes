@@ -59,8 +59,8 @@ def main():
     parser = argparse.ArgumentParser(
         description="Contig length statistics and logging script."
     )
-    parser.add_argument("-i", "inpath", help="Path to input FASTA")
-    parser.add_argument("-o", "outpath", help="Path to output FASTA")
+    parser.add_argument("-i", "--inpath", help="Path to input FASTA")
+    parser.add_argument("-o", "--outpath", help="Path to output FASTA")
     parser.add_argument(
         "--log", help="Path to log file", required=True
     )  # Fixed the logfile argument
