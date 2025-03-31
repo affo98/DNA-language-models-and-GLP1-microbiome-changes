@@ -149,6 +149,7 @@ rule all:
     input: input_files
 ruleorder: concatenate > download_metahit
 
+print(input_files)
 
 #TNF
 rule other_model:
