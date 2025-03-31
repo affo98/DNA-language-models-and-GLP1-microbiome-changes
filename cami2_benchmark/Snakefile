@@ -73,6 +73,7 @@ if config_download:
         )
     elif DATASET == 'metahit':
         input_files.append(
+            os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue_raw.fna.gz"),
             os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
         )
 
@@ -188,6 +189,35 @@ rule create_fasta_bins_other_model:
 
 
 
+rule download_metahit:
+    output:
+        contigs_raw=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue_raw.fna.gz")
+    params:
+        url = "https://figshare.com/ndownloader/files/50894283"
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        wget {params.url} -O {output.contigs_raw}
+        """'
+
+rule process_metahit:
+    input:
+        contigs_raw=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue_raw.fna.gz")
+    output:
+        contigs_processed=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+    log:
+        os.path.join(LOGS, DATASET, "concatenate.log")
+    params:
+        min_length=MINSIZE_CONTIGS
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        python {SRC_DIR}/process_metahit.py -i {input.contigs_raw} -o {output.contigs_processed} --log {log} -m {params.min_length}
+        """
+
+
 
 rule download_cami2:
     output:
@@ -200,17 +230,6 @@ rule download_cami2:
         python {SRC_DIR}/get_cami2_data.py {DATASET} {sample_str}
         """
 
-rule download_metahiterrorfree:
-    output:
-        contigs=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
-    params:
-        url = "https://figshare.com/ndownloader/files/50894283"
-    conda:
-        "envs/cami2_processing.yml"
-    shell:
-        """
-        wget {params.url} -O {output.contigs}
-        """
 
 
 rule concatenate:

@@ -18,7 +18,9 @@ def compute_summary_stats(lengths):
     )
 
 
-def process_contigs(inpath: str, min_length: int, log) -> tuple[list[int], list[int]]:
+def process_contigs(
+    inpath: str, outpath: str, min_length: int
+) -> tuple[list[int], list[int]]:
     """
     Reads contigs from 'inpath', calculates their lengths, filters out contigs
     shorter than min_length, overwrites the file with the filtered contigs, and returns
@@ -47,7 +49,7 @@ def process_contigs(inpath: str, min_length: int, log) -> tuple[list[int], list[
     contig_lengths_after = [len(record.seq) for record in filtered_records]
 
     out_mode = "wt" if inpath.endswith(".gz") else "w"
-    with open_func(inpath, out_mode) as out_handle:
+    with open_func(outpath, out_mode) as out_handle:
         SeqIO.write(filtered_records, out_handle, "fasta")
 
     return contig_lengths_before, contig_lengths_after
@@ -57,7 +59,8 @@ def main():
     parser = argparse.ArgumentParser(
         description="Contig length statistics and logging script."
     )
-    parser.add_argument("-i", "inpath", help="Path to output FASTA")
+    parser.add_argument("-i", "inpath", help="Path to input FASTA")
+    parser.add_argument("-o", "outpath", help="Path to output FASTA")
     parser.add_argument(
         "--log", help="Path to log file", required=True
     )  # Fixed the logfile argument
@@ -71,7 +74,7 @@ def main():
     args = parser.parse_args()
 
     contig_lengths_before, contig_lengths_after = process_contigs(
-        args.inpath, args.min_length
+        args.inpath, args.outpath, args.min_length
     )
 
     stats_before = compute_summary_stats(contig_lengths_before)

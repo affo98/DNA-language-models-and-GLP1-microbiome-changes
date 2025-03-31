@@ -11,9 +11,9 @@ from src.threshold import Threshold
 from src.utils import read_contigs, Logger
 
 # data
-MAX_CONTIG_LENGTH = 60000
+MAX_CONTIG_LENGTH = 70000  # try 70.000
 
-# threshold
+# threshold calculation
 N_BINS = 1000
 BLOCK_SIZE = 1000
 
