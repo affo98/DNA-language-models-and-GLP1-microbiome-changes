@@ -48,4 +48,5 @@ models:
   - name: dna2vec
   - name: dnaberts
   - name: dnabert2
+  - name: dnabert2random
   #- name: semibin2

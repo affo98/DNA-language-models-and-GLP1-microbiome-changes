@@ -202,11 +202,18 @@ class Embedder:
         config = BertConfig.from_pretrained(
             self.model_path,
         )
-        model = AutoModel.from_pretrained(
-            self.model_path,
-            config=config,
-            trust_remote_code=True,
-        )
+
+        if self.model_name != "dnabert2random":
+            model = AutoModel.from_pretrained(
+                self.model_path,
+                config=config,
+                trust_remote_code=True,
+            )
+        elif self.model_name == "dnabert2random":
+            model = AutoModel.from_config(
+                config, trust_remote_code=True
+            )  # no pretrained weights
+
         model = model.to(device)
         if n_gpu > 1:
             model = nn.DataParallel(model)

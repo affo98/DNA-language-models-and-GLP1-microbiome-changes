@@ -14,3 +14,7 @@ dnaberts:
 dnabert2:
   model_path: "zhihan1996/DNABERT-2-117M"
   batch_sizes: [40, 8, 1]
+
+dnabert2random:
+  model_path: "zhihan1996/DNABERT-2-117M"
+  batch_sizes: [40, 8, 1]

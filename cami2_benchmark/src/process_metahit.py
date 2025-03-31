@@ -42,12 +42,12 @@ def process_contigs(
     with open_func(inpath, "rt") as handle:
         records = list(SeqIO.parse(handle, "fasta"))
 
-    # Compute lengths of all contigs before filtering
     contig_lengths_before = [len(record.seq) for record in records]
 
     filtered_records = [record for record in records if len(record.seq) >= minlength]
     contig_lengths_after = [len(record.seq) for record in filtered_records]
 
+    print(f"Writing processed contigs:")
     out_mode = "wt" if inpath.endswith(".gz") else "w"
     with open_func(outpath, out_mode) as out_handle:
         SeqIO.write(filtered_records, out_handle, "fasta")
