@@ -2,6 +2,7 @@
 
 import argparse
 import gzip
+import re
 import numpy as np
 from Bio import SeqIO
 
@@ -16,6 +17,13 @@ def compute_summary_stats(lengths):
         np.percentile(lengths, 25),
         np.percentile(lengths, 75),
     )
+
+
+def sanitize_fasta_header(header: str) -> str:
+    """Sanitizes a FASTA header by replacing [ and ] with |"""
+    sanitized = re.sub(r"\[", "|", header)  # Replace '[' with '|'
+    sanitized = re.sub(r"\]", "|", sanitized)  # Replace ']' with '|'
+    return sanitized
 
 
 def process_contigs(
@@ -41,6 +49,10 @@ def process_contigs(
 
     with open_func(inpath, "rt") as handle:
         records = list(SeqIO.parse(handle, "fasta"))
+
+    for record in records:
+        record.id = sanitize_fasta_header(record.id)
+        record.description = sanitize_fasta_header(record.description)
 
     contig_lengths_before = [len(record.seq) for record in records]
 
