@@ -59,7 +59,7 @@ class KMediod:
         self.device = device
         self.block_size = block_size
 
-    def fit(self, min_similarity: float = 0.8, knn_k:int, knn_p:float) -> np.array:
+    def fit(self, min_similarity: float, knn_k: int, knn_p: float) -> np.array:
         """Runs the Iterative k-mediod algorithm, and saves the output predictions."""
 
         if not 0 < min_similarity < 1:
