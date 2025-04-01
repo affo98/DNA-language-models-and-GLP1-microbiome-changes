@@ -175,7 +175,7 @@ class KMediod:
         ), f"Mismatch between predictions {len(predictions)} and contig names {len(contig_names)} after removing unassigned seqs."
         return predictions, contig_names
 
-    def save_output(self, predictions, contig_names, knn_k, knn_p) -> None:
+    def save_output(self, knn_k, knn_p, predictions, contig_names) -> None:
         """save predictions in save_path in format: clustername \\t contigname"""
 
         output_file = os.path.join(self.save_path, f"clusters_k{knn_k}_p{knn_p}.tsv")
@@ -185,4 +185,4 @@ class KMediod:
             for cluster, contig in zip(predictions, contig_names):
                 file.write(f"{cluster}\t{contig}\n")
 
-        self.log.append(f"Predictions file written successfully to {self.save_path}!")
+        self.log.append(f"Predictions file written successfully to {self.save_path}")
