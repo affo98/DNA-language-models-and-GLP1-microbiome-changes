@@ -216,7 +216,10 @@ rule other_model_val:
     input:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
     output:
-        validation_dir=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation")),
+        validation_dirs=expand(
+            os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation", "k{knn_k}_p{knn_p}"),
+            knn_k=KNN_K, knn_p=KNN_P, MODEL=[MODEL]
+        ),
         clusters=expand(
             os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation", "cluster_results", "clusters_k{knn_k}_p{knn_p}.tsv"),
             knn_k=KNN_K, knn_p=KNN_P, MODEL=[MODEL]
@@ -230,7 +233,7 @@ rule other_model_val:
         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
         pip uninstall -y triton
         python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
-        -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {output.validation_dir} -l {log} -m val
+        -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {output.validation_dirs} -l {log} -m val
         """
 
 
