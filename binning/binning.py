@@ -130,7 +130,7 @@ def add_arguments() -> ArgumentParser:
         "--knnp",
         "-p",
         nargs="+",
-        type=int,
+        type=float,
         help="List of p-values to search",
     )
     parser.add_argument(
