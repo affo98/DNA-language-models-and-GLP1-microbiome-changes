@@ -38,13 +38,16 @@ def main(args, log):
 
     if args.mode == "val":
         log.append(
-            f"{'='*20}\n"
+            f"{'='*60}\n"
             f"=== Start hyperparameter search for KNN ===\n"
             f"=== K: {args.knnk} ===\n"
             f"=== P: {args.knnp} ===\n"
-            f"{'='*20}"
+            f"{'='*60}"
         )
-
+        histogram_dir = os.path.join(args.save_path, "threshold_histograms")
+        results_dir = os.path.join(args.save_path, "cluster_results")
+        os.makedirs(histogram_dir)
+        os.makedirs(results_dir)
         embedder_val = Embedder(
             contigs_val,
             args.batch_sizes,
@@ -60,15 +63,15 @@ def main(args, log):
             embeddings_val,
             N_BINS,
             BLOCK_SIZE,
-            os.path.join(args.save_path, "threshold_histograms"),
+            histogram_dir,
             args.model_name,
             log,
         )
 
-        kmediod = KMediod(
+        kmediod_val = KMediod(
             embeddings_val,
             contig_names_val,
-            os.path.join(args.save_path, "cluster_results"),
+            results_dir,
             log,
             MIN_BIN_SIZE,
             NUM_STEPS,
@@ -76,12 +79,13 @@ def main(args, log):
             BLOCK_SIZE,
         )
 
-        for knn_k in args.knnk:
-            for knn_p in args.knnp:
-                threshold = thresholder_val.get_knn_threshold(knn_k, knn_p)
+        for knnk in args.knnk:
+            for knnp in args.knnp:
+                log.append(f"Running k:{knnk} p:{knnp}")
+                threshold = thresholder_val.get_knn_threshold(knnk, knnp)
                 thresholder_val.save_histogram(knn=True)
 
-                _, _ = kmediod.fit(min_similarity=threshold)
+                _, _ = kmediod_val.fit(min_similarity=threshold)
 
     elif args.mode == "test":
         knnk = args.knnk[0]
@@ -93,6 +97,41 @@ def main(args, log):
             f"=== P: {knnp} ===\n"
             f"{'='*20}"
         )
+
+        embedder_test = Embedder(
+            contigs_test,
+            args.batch_sizes,
+            args.model_name,
+            args.model_path,
+            os.path.join(args.save_path, "embeddings", f"{args.model_name}.npy"),
+            normalize_embeddings=True,
+            log=log,
+        )
+        embeddings_test = embedder_test.get_embeddings()
+
+        thresholder_test = Threshold(
+            embeddings_test,
+            N_BINS,
+            BLOCK_SIZE,
+            args.save_path,
+            args.model_name,
+            log,
+        )
+
+        kmediod_test = KMediod(
+            embeddings_test,
+            contig_names_test,
+            args.save_path,
+            log,
+            MIN_BIN_SIZE,
+            NUM_STEPS,
+            MAX_ITER,
+            BLOCK_SIZE,
+        )
+
+        threshold = thresholder_test.get_knn_threshold(knnk, knnp)
+        thresholder_test.save_histogram(knn=True)
+        _, _ = kmediod_test.fit(min_similarity=threshold)
 
 
 def add_arguments() -> ArgumentParser:

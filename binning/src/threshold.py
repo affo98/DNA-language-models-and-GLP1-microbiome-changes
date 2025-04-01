@@ -77,16 +77,13 @@ class Threshold:
             top_k_embeddings = self.embeddings[
                 top_k_indices
             ]  # shape: (block_size, knn_k, embedding_dim)
-            print(top_k_embeddings.shape)
             centroids = top_k_embeddings.mean(
                 dim=1, keepdim=True
             )  # shape: (block_size, 1, embedding_dim)
-            print(centroids.shape)
 
             centroids = centroids.transpose(
                 1, 2
             )  # Shape: (block_size, embedding_dim, 1)
-            print(centroids.shape)
 
             centroid_similarities = torch.bmm(top_k_embeddings, centroids).squeeze(-1)
             centroid_similarities_flat = centroid_similarities.flatten()

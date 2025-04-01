@@ -176,7 +176,7 @@ rule other_model_val:
     output:
         dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation"))
     log:
-        os.path.join(LOGS, DATASET, "{MODEL}_binning.log")
+        os.path.join(LOGS, DATASET, "{MODEL}_val_binning.log")
     conda:
         "envs/llm.yml"
     shell:
@@ -188,29 +188,23 @@ rule other_model_val:
         """
 
 
-# rule create_fasta_bins_other_model_val:
-#     input:
-#         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
-#         cluster_results=expand(
-#             os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation", "cluster_results", "clusters_k{knn_k}_p{knn_p}.tsv"),
-#             knn_k=KNN_K,
-#             knn_p=KNN_P
-#         )
-#     output:
-#         dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{MODEL}"))
-#     log:
-#         log_file=os.path.join(LOGS, DATASET, "{MODEL}_bin_postprocessing.log")
-#     params:
-#         minsize_bins=MINSIZE_BINS
-#     conda: 
-#         "envs/vamb.yml"
-#     shell:
-#         """
-#         for cluster_file in {input.cluster_results}; do
-#             python {SRC_DIR}/create_fasta.py {input.catalogue} $cluster_file {params.minsize_bins} {output.dirs} \
-#             --log {log.log_file}
-#         done
-#         """
+rule create_fasta_bins_other_model_val:
+    input:
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation", "cluster_results", "clusters_k{knn_k}_p{knn_p}.tsv")
+    output:
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{MODEL}", "k{knn_k}_p{knn_p}"))
+    log:
+        log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "{MODEL}_val_bin_postprocessing_k{knn_k}_p{knn_p}.log")
+    params:
+        minsize_bins=MINSIZE_BINS
+    conda: 
+        "envs/vamb.yml"
+    shell:
+        """
+        python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results} {params.minsize_bins} {output.dirs} \
+        --log {log.log_file}
+        """
 
 
 # rule checkm2_val:
@@ -240,7 +234,7 @@ rule other_model_test:
     output:
         dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output"))
     log:
-        os.path.join(LOGS, DATASET, "{MODEL}_binning.log")
+        os.path.join(LOGS, DATASET, "{MODEL}_test_binning.log")
     conda:
         "envs/llm.yml"
     shell:
@@ -258,7 +252,7 @@ rule create_fasta_bins_other_model_test:
     output:
         dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{MODEL}"))
     log:
-        log_file=os.path.join(LOGS, DATASET, "{MODEL}_bin_postprocessing.log")
+        log_file=os.path.join(LOGS, DATASET, "{MODEL}_test_bin_postprocessing.log")
     params:
         minsize_bins = MINSIZE_BINS
     conda: 
