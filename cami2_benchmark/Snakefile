@@ -127,12 +127,12 @@ elif MODEL == 'comebin' and not config_nomodelrun:
 
 elif MODEL in ['tnf'] and not config_nomodelrun:
     input_files += [
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "validation"),
-        #expand(
-        #    os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "tnf_validation", "k{knn_k}_p{knn_p}"),
-        #    knn_k=KNN_K,
-        #    knn_p=KNN_P
-        #)
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation"),
+        expand(
+            os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins_val", "{MODEL}", "k{knn_k}_p{knn_p}"),
+            knn_k=KNN_K,
+            knn_p=KNN_P
+        )
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output"),
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "tnf"),
     ]
@@ -200,7 +200,7 @@ rule create_fasta_bins_other_model_val:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
         cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation", "cluster_results", "clusters_k{knn_k}_p{knn_p}.tsv")
     output:
-        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{MODEL}_validation", "k{knn_k}_p{knn_p}"))
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins_val", "{MODEL}", "k{knn_k}_p{knn_p}"))
     log:
         log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "bin_postprocessing_k{knn_k}_p{knn_p}.log")
     params:
