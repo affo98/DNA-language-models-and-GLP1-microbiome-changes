@@ -139,8 +139,8 @@ class KMediod:
             )  # exclude selected points from further selection
 
             progress_bar.update(1)
-            if cluster_id % 20 == 0:
-                self.log.append(f"KMediod Step {cluster_id} completed.")
+            # if cluster_id % 200 == 0:
+            #    self.log.append(f"KMediod Step {cluster_id} completed.")
 
         # Filter small clusters
         labels, counts = torch.unique(predictions, return_counts=True)
