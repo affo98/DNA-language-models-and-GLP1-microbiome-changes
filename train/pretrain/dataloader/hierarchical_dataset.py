@@ -29,8 +29,8 @@ class GenomeHierarchihcalDataset(Dataset):
 
         self.tokenizer = AutoTokenizer.from_pretrained("zhihan1996/DNABERT-2-117M", trust_remote_code=True)
         self.id = [i for i in range(len(data[1:]))]
-        self.seq1 = [d[11] for d in range(len(data[1:]))]
-        self.seq2 = [d[12] for d in range(len(data[1:]))]
+        self.seq1 = [d[11] for d in data[1:]]
+        self.seq2 = [d[12] for d in data[1:]]
         self.species = [int(d[3]) for d in data[1:]]
         self.genus = [int(d[4]) for d in data[1:]]
         self.family = [int(d[5]) for d in data[1:]]

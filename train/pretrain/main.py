@@ -67,7 +67,7 @@ def main_worker(gpu, ngpus_per_node, args):
         dist.destroy_process_group()
         # Then run validation on a single GPU
         print("Running validation on a single GPU...")
-        trainer.val()
+        trainer.run_validation()
     else:
         # Other GPUs just exit DDP
         dist.destroy_process_group()

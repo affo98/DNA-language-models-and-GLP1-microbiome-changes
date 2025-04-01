@@ -198,6 +198,94 @@ class Trainer(nn.Module):
         
         return None
 
+    def run_validation(self):
+        """
+        Validation method to run on a single GPU after exiting DDP mode
+        """
+        print("Start Validation... ")
+        self.model.eval()
+        best_checkpoint = 0
+        best_val_loss = 10000
+        
+        # Determine the range of training steps to evaluate
+        max_steps = self.args.logging_step * self.args.logging_num
+        
+        for step in range(self.args.logging_step, max_steps + 1, self.args.logging_step):
+            load_dir = os.path.join(self.args.resPath, str(step))
+            if not os.path.exists(load_dir):
+                print(f"Checkpoint directory {load_dir} does not exist, skipping.")
+                continue
+            
+            try:
+                # Load model weights
+                if hasattr(self.model, 'module'):
+                    self.model.module.dnabert2.load_state_dict(torch.load(load_dir+'/pytorch_model.bin'))
+                    self.model.module.contrast_head.load_state_dict(torch.load(load_dir+'/con_weights.ckpt'))
+                else:
+                    self.model.dnabert2.load_state_dict(torch.load(load_dir+'/pytorch_model.bin'))
+                    self.model.contrast_head.load_state_dict(torch.load(load_dir+'/con_weights.ckpt'))
+                    
+                print(f"Successfully loaded checkpoint from {load_dir}")
+            except Exception as e:
+                print(f"Error loading checkpoint from {load_dir}: {e}")
+                continue
+            
+            # Set validation sampler epoch
+            self.val_sampler.set_epoch(1)
+
+            batch_time = AverageMeter('Time', ':6.3f')
+            data_time = AverageMeter('Data', ':6.3f')
+            losses = AverageMeter('Loss', ':.4e')
+
+            end = time.time()
+
+            progress = ProgressMeter(len(self.val_loader),
+                    [batch_time, data_time, losses],
+                    prefix="Step: [{}]".format(step))
+            
+            val_loss = torch.tensor(0.0).cuda(self.args.gpu)
+            
+            for idx, (sequences, labels) in enumerate(self.val_loader):
+                data_time.update(time.time() - end)
+                with torch.no_grad():
+                    labels = labels.squeeze()
+                    labels = labels.squeeze().cuda(self.args.gpu, non_blocking=True)
+                    bsz = labels.shape[0]
+                    input_ids, attention_mask = self.prepare_pairwise_input(sequences)
+                    input_ids = input_ids.cuda(self.args.gpu, non_blocking=True)
+                    attention_mask = attention_mask.cuda(self.args.gpu, non_blocking=True)
+                    
+                    with torch.autocast(device_type="cuda"):
+                        # Forward pass through the model
+                        if hasattr(self.model, 'module'):
+                            feat1, feat2, _, _ = self.model(input_ids, attention_mask)
+                        else:
+                            feat1, feat2, _, _ = self.model(input_ids, attention_mask)
+                            
+                        features = torch.cat([feat1.unsqueeze(1), feat2.unsqueeze(1)], dim=1)
+                        loss = self.criterion(features, labels)
+                        val_loss += loss["instdisc_loss"]
+
+                        losses.update(loss["instdisc_loss"].item(), bsz)
+                        batch_time.update(time.time() - end)
+                        end = time.time()
+
+                        if idx % self.args.print_freq == 0:
+                            progress.display(idx)
+
+            val_loss = val_loss.item()/(idx+1)
+            self.logger.log_value('val_loss', losses.avg, step)            
+            if val_loss < best_val_loss:
+                best_val_loss = val_loss
+                best_checkpoint = step
+                self.save_model(save_best=True)
+            
+            print(f"Finish Step: {step}, Val Loss: {val_loss:.6f}")
+
+        print("Best Checkpoint at Step: ", best_checkpoint)
+        
+        return None
+
 class AverageMeter(object):
     """Computes and stores the average and current value"""
     def __init__(self, name, fmt=':f'):
