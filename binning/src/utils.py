@@ -64,6 +64,50 @@ def read_contigs(
     return contigs, contig_names
 
 
+def split_contigs_valtest(
+    contigs: list[str], contig_names: list[str], log: Logger, proportion: int = 0.1
+) -> tuple[list[str], list[str], list[str], list[str]]:
+
+    assert len(contigs) == len(
+        contig_names
+    ), f"Len of contigs {len(contigs)} and contig names {len(contig_names)} dont match."
+
+    n_total = len(contigs)
+    n_val = int(proportion * n_total)
+
+    rng = np.random.default_rng(seed=42)
+    val_indices = rng.choice(n_total, size=n_val, replace=False)
+
+    mask = np.ones(n_total, dtype=bool)
+    mask[val_indices] = False
+
+    contigs_test = [contigs[i] for i in range(n_total) if mask[i]]
+    contigs_val = [contigs[i] for i in val_indices]
+
+    contigs_names_test = [contig_names[i] for i in range(n_total) if mask[i]]
+    contigs_names_val = [contig_names[i] for i in val_indices]
+
+    # Verify splits
+    assert (
+        len(contigs_test) + len(contigs_val)
+        == len(contigs_names_test) + len(contigs_names_val)
+        == n_total
+    ), "Mismatch between total counts"
+    assert (
+        len(contigs_test) == len(contigs_names_test) == (n_total - n_val)
+    ), "Mismatch between test counts"
+    assert (
+        len(contigs_val) == len(contigs_names_val) == n_val
+    ), "Mismatch between validation counts"
+
+    log.append(
+        f"Splitting into validation/test using proportion={proportion}\n"
+        f"N total: {n_total}, N val: {n_val}, N test: {n_total - n_val}"
+    )
+
+    return contigs_test, contigs_val, contigs_names_test, contigs_names_val
+
+
 def sort_sequences(dna_sequences: list[str]) -> tuple[list, np.array]:
     """Sorting sequences by length and returning sorted sequences and indices
 

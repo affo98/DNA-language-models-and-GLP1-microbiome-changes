@@ -14,7 +14,6 @@ class KMediod:
         self,
         embeddings: np.ndarray,
         contig_names: list[str],
-        min_similarity: float,
         min_bin_size: int,
         num_steps: int,
         max_iter: int,
@@ -22,8 +21,6 @@ class KMediod:
         if embeddings.dtype != np.float64:
             embeddings = embeddings.astype(np.float64)
             print("Embeddings changed to dtype float64")
-        if not 0 < min_similarity < 1:
-            raise (ValueError("Minimum similarity must be between 0 and 1"))
         if min_bin_size < 1:
             raise ValueError("Minimum bin size must be at least 1")
         if num_steps < 1:
@@ -42,15 +39,12 @@ class KMediod:
         contig_names: list[str],
         save_path: str,
         log: Logger,
-        min_similarity: float = 0.8,
         min_bin_size: int = 10,
         num_steps: int = 3,
         max_iter: int = 1000,
         block_size: int = 1000,
     ):
-        self.check_params(
-            embeddings, contig_names, min_similarity, min_bin_size, num_steps, max_iter
-        )
+        self.check_params(embeddings, contig_names, min_bin_size, num_steps, max_iter)
 
         device, gpu_count = get_available_device()
         embeddings = torch.from_numpy(embeddings).to(device)
@@ -59,21 +53,20 @@ class KMediod:
         self.contig_names = contig_names
         self.save_path = save_path
         self.log = log
-        self.min_similarity = min_similarity
         self.min_bin_size = min_bin_size
         self.num_steps = num_steps
         self.max_iter = max_iter
         self.device = device
         self.block_size = block_size
 
-        self.log.append(
-            f"Using {device} and threshold {self.min_similarity} for k-mediod clustering"
-        )
-
-    def fit(
-        self,
-    ) -> np.array:
+    def fit(self, min_similarity: float = 0.8, knn_k:int, knn_p:float) -> np.array:
         """Runs the Iterative k-mediod algorithm, and saves the output predictions."""
+
+        if not 0 < min_similarity < 1:
+            raise (ValueError("Minimum similarity must be between 0 and 1"))
+        self.log.append(
+            f"Using {self.device} and threshold {min_similarity} for k-mediod clustering"
+        )
 
         n_samples = self.embeddings.shape[0]
 
@@ -89,9 +82,7 @@ class KMediod:
             )  # Shape: (block_size, n) - sim of block to all other data points
 
             block_density = torch.sum(
-                torch.where(
-                    block_sim_matrix >= self.min_similarity, block_sim_matrix, 0.0
-                ),
+                torch.where(block_sim_matrix >= min_similarity, block_sim_matrix, 0.0),
                 dim=1,
             )
 
@@ -120,7 +111,7 @@ class KMediod:
 
             for _ in range(self.num_steps):
                 similarities = torch.mv(self.embeddings, seed)
-                candidate_mask = (similarities >= self.min_similarity) & available_mask
+                candidate_mask = (similarities >= min_similarity) & available_mask
                 candidates = torch.where(candidate_mask)[0]
 
                 if len(candidates) == 0:
@@ -138,7 +129,7 @@ class KMediod:
 
                 cluster_sims = torch.mm(block_embs, self.embeddings[candidates].T)
                 cluster_sims = torch.where(
-                    cluster_sims >= self.min_similarity, cluster_sims, 0.0
+                    cluster_sims >= min_similarity, cluster_sims, 0.0
                 )
 
                 density_vector[block_start:block_end] -= torch.sum(cluster_sims, dim=1)
@@ -170,7 +161,7 @@ class KMediod:
         ), f"Len of predictions {len(self.predictions)} does not match embeddings {len(self.embeddings)} and contig_names {len(self.contig_names)}"
 
         self.predictions, self.contig_names = self.remove_unassigned_sequences()
-        self.save_output()
+        self.save_output(knn_k, knn_p)
 
         return self.predictions, self.contig_names
 
@@ -182,10 +173,10 @@ class KMediod:
 
         return self.predictions, self.contig_names
 
-    def save_output(self) -> None:
+    def save_output(self, knn_k, knn_p) -> None:
         """save predictions in save_path in format: clustername \\t contigname"""
 
-        output_file = os.path.join(self.save_path, "clusters.tsv")
+        output_file = os.path.join(self.save_path, f"clusters_k{knn_k}_p{knn_p}.tsv")
         with open(output_file, "w") as file:
             file.write("clustername\tcontigname\n")  # header
 

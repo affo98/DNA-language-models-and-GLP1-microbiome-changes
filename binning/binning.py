@@ -8,18 +8,20 @@ from time import time
 from src.clustering import KMediod
 from src.get_embeddings import Embedder
 from src.threshold import Threshold
-from src.utils import read_contigs, Logger
+from src.utils import read_contigs, Logger, split_contigs_valtest
 
 # data
 MAX_CONTIG_LENGTH = 60000  # oom with 70.000
+VAL_PROPORTION = 0.1
 
 # threshold calculation
 N_BINS = 1000
-BLOCK_SIZE = 200  #
+BLOCK_SIZE = 200
 
-# knn
-KNN_K = 200
-KNN_P = 0.7
+# kmediod
+MIN_BIN_SIZE = 10  # a bit unnecessary when using MIN_CLUSTER_SIZE=250.000
+NUM_STEPS = 3
+MAX_ITER = 2000  # increased from 1000
 
 
 def main(args, log):
@@ -30,47 +32,67 @@ def main(args, log):
     # contigs = contigs[0:4000]
     # contig_names = contig_names[0:4000]
 
-    embedder = Embedder(
-        contigs,
-        args.batch_sizes,
-        args.model_name,
-        args.model_path,
-        os.path.join(args.save_path, "embeddings", f"{args.model_name}.npy"),
-        normalize_embeddings=True,
-        log=log,
+    contigs_test, contigs_val, contig_names_test, contig_names_val = (
+        split_contigs_valtest(contigs, contig_names, log, VAL_PROPORTION)
     )
-    try:
-        embeddings = embedder.get_embeddings()
-    except Exception:
+
+    if args.mode == "val":
         log.append(
-            f"|===========| Error in getting embeddings for {args.model_name}|===========|\n{traceback.format_exc()}"
+            f"{'='*20}\n"
+            f"=== Start hyperparameter search for KNN ===\n"
+            f"=== K: {args.knnk} ===\n"
+            f"=== P: {args.knnp} ===\n"
+            f"{'='*20}"
         )
 
-    thresholder = Threshold(
-        embeddings,
-        n_bins=N_BINS,
-        block_size=BLOCK_SIZE,
-        save_path=args.save_path,
-        model_name=args.model_name,
-        log=log,
-    )
-    threshold = thresholder.get_knn_threshold(KNN_K, KNN_P)
-    thresholder.save_histogram(knn=True)
-    # threshold = 0.72
+        embedder_val = Embedder(
+            contigs_val,
+            args.batch_sizes,
+            args.model_name,
+            args.model_path,
+            os.path.join(args.save_path, "embeddings", f"{args.model_name}.npy"),
+            normalize_embeddings=True,
+            log=log,
+        )
+        embeddings_val = embedder_val.get_embeddings()
 
-    kmediod = KMediod(
-        embeddings,
-        contig_names,
-        args.save_path,
-        log,
-        min_similarity=threshold,
-        min_bin_size=10,  # maybe remove?
-        num_steps=3,
-        max_iter=1000,  # maybe increase to 2000?
-        block_size=BLOCK_SIZE,
-    )
+        thresholder_val = Threshold(
+            embeddings_val,
+            N_BINS,
+            BLOCK_SIZE,
+            os.path.join(args.save_path, "threshold_histograms"),
+            args.model_name,
+            log,
+        )
 
-    predictions, contig_names_post = kmediod.fit()
+        kmediod = KMediod(
+            embeddings_val,
+            contig_names_val,
+            os.path.join(args.save_path, "cluster_results"),
+            log,
+            MIN_BIN_SIZE,
+            NUM_STEPS,
+            MAX_ITER,
+            BLOCK_SIZE,
+        )
+
+        for knn_k in args.knnk:
+            for knn_p in args.knnp:
+                threshold = thresholder_val.get_knn_threshold(knn_k, knn_p)
+                thresholder_val.save_histogram(knn=True)
+
+                _, _ = kmediod.fit(min_similarity=threshold)
+
+    elif args.mode == "test":
+        knnk = args.knnk[0]
+        knnp = args.knnp[0]
+        log.append(
+            f"{'='*20}\n"
+            f"=== Start hyperparameter search for KNN ===\n"
+            f"=== K: {knnk} ===\n"
+            f"=== P: {knnp} ===\n"
+            f"{'='*20}"
+        )
 
 
 def add_arguments() -> ArgumentParser:
@@ -82,7 +104,7 @@ def add_arguments() -> ArgumentParser:
     )
     parser.add_argument(
         "--model_name",
-        "-m",
+        "-mn",
         help="Name of the model to use for embedding generation",
     )
     parser.add_argument(
@@ -98,6 +120,20 @@ def add_arguments() -> ArgumentParser:
         help="batch sizes for embeddings",
     )
     parser.add_argument(
+        "--knnk",
+        "-k",
+        nargs="+",
+        type=int,
+        help="List of k-values to search",
+    )
+    parser.add_argument(
+        "--knnp",
+        "-p",
+        nargs="+",
+        type=int,
+        help="List of p-values to search",
+    )
+    parser.add_argument(
         "--save_path",
         "-s",
         help="Path to save the computed embeddings or to load existing ones",
@@ -106,6 +142,13 @@ def add_arguments() -> ArgumentParser:
         "--log",
         "-l",
         help="Path to save logfile",
+    )
+    parser.add_argument(
+        "--mode",
+        "-m",
+        choices=["val", "test"],
+        required=True,
+        help="Choose whether to run in validation ('val') or test ('test') mode.",
     )
 
     args = parser.parse_args()

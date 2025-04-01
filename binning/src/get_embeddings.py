@@ -31,9 +31,6 @@ warnings.filterwarnings("ignore", message="Increasing alibi size")
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
-LLM_SEQ_MAX_LENGTH = 50000
-
-
 class Embedder:
     def check_params():
         pass
