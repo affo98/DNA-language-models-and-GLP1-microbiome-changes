@@ -16,7 +16,7 @@ VAL_PROPORTION = 0.1
 
 # threshold calculation
 N_BINS = 1000
-BLOCK_SIZE = 200
+BLOCK_SIZE = 1000
 
 # kmediod
 MIN_BIN_SIZE = 10  # a bit unnecessary when using MIN_CLUSTER_SIZE=250.000
