@@ -110,7 +110,7 @@ class Trainer(nn.Module):
                 end = time.time()
                 sys.stdout.flush()
                 if self.gstep % self.args.print_freq == 0:
-                    progress.display(self.gstep)
+                    progress.display(self.gstep%len(self.train_loader))
                 if self.gstep%self.args.logging_step==0:
                     self.logger.log_value('loss', losses.avg, self.gstep)
                     self.save_model(step=self.gstep)
@@ -128,22 +128,34 @@ class Trainer(nn.Module):
         self.model.eval()
         best_checkpoint = 0
         best_val_loss = 10000
+        
+        # Initialize validation loss tracker
+        val_loss = torch.tensor(0.0).cuda(self.args.gpu, non_blocking=True)
+        
         for step in range(self.args.logging_step, np.min([self.all_iter, self.args.logging_step*self.args.logging_num+1]), self.args.logging_step):
             load_dir = os.path.join(self.args.resPath, str(step))
-            self.model.module.dnabert2.load_state_dict(torch.load(load_dir+'/pytorch_model.bin'))
-            self.model.module.contrast_head.load_state_dict(torch.load(load_dir+'/con_weights.ckpt'))
+            
+            # Unwrap model from DDP if needed
+            if hasattr(self.model, 'module'):
+                self.model.module.dnabert2.load_state_dict(torch.load(load_dir+'/pytorch_model.bin'))
+                self.model.module.contrast_head.load_state_dict(torch.load(load_dir+'/con_weights.ckpt'))
+            else:
+                self.model.dnabert2.load_state_dict(torch.load(load_dir+'/pytorch_model.bin'))
+                self.model.contrast_head.load_state_dict(torch.load(load_dir+'/con_weights.ckpt'))
+                
             self.val_sampler.set_epoch(1)
 
-            
             batch_time = AverageMeter('Time', ':6.3f')
             data_time = AverageMeter('Data', ':6.3f')
             losses = AverageMeter('Loss', ':.4e')
 
             end = time.time()
 
-            progress = ProgressMeter(len(self.train_loader),
+            progress = ProgressMeter(len(self.val_loader),
                     [batch_time, data_time, losses],
                     prefix="Step: [{}]".format(step))
+            
+            val_loss = torch.tensor(0.0).cuda(self.args.gpu)
             
             for idx, (sequences, labels) in enumerate(self.val_loader):
                 data_time.update(time.time() - end)
@@ -156,15 +168,19 @@ class Trainer(nn.Module):
                     attention_mask = attention_mask.cuda(self.args.gpu, non_blocking=True)
                     
                     with torch.autocast(device_type="cuda"):
-                        feat1, feat2, _, _ = self.model(input_ids, attention_mask)
+                        # Access model correctly based on whether it's still wrapped in DDP
+                        if hasattr(self.model, 'module'):
+                            feat1, feat2, _, _ = self.model(input_ids, attention_mask)
+                        else:
+                            feat1, feat2, _, _ = self.model(input_ids, attention_mask)
+                            
                         features = torch.cat([feat1.unsqueeze(1), feat2.unsqueeze(1)], dim=1)
                         loss = self.criterion(features, labels)
                         val_loss += loss["instdisc_loss"]
 
-                        losses.update(loss.item(), bsz)
+                        losses.update(loss["instdisc_loss"].item(), bsz)
                         batch_time.update(time.time() - end)
                         end = time.time()
-                        sys.stdout.flush()
 
                         if idx % self.args.print_freq == 0:
                             progress.display(idx)
@@ -176,9 +192,7 @@ class Trainer(nn.Module):
                 best_checkpoint = step
                 self.save_model(save_best=True)
                 
-
             print("Finish Step: ", step)
-            dist.barrier()
 
         print("Best Checkpoint at Step: ", best_checkpoint)
         

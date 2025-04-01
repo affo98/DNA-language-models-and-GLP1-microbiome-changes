@@ -47,7 +47,7 @@ def main_worker(gpu, ngpus_per_node, args):
         builtins.print = print_pass
 
     dist.init_process_group(backend="nccl", init_method="env://",
-                            world_size=ngpus_per_node, rank=args.gpu, timeout=timedelta(minutes=5))
+                            world_size=ngpus_per_node, rank=args.gpu, timeout=timedelta(minutes=15))
     dist.barrier()
     model, criterion = set_model(ngpus_per_node, args)
     dist.barrier()
@@ -60,8 +60,17 @@ def main_worker(gpu, ngpus_per_node, args):
 
     trainer = Trainer(model, tokenizer, criterion, optimizer, dataloaders_dict, sampler, logger, args)
     trainer.train()
-    trainer.val()
-    dist.destroy_process_group()
+    
+    # Only run validation on the main GPU (0)
+    if args.gpu == 0:
+        # First destroy the process group to exit DDP mode
+        dist.destroy_process_group()
+        # Then run validation on a single GPU
+        print("Running validation on a single GPU...")
+        trainer.val()
+    else:
+        # Other GPUs just exit DDP
+        dist.destroy_process_group()
 
         
             
@@ -92,7 +101,7 @@ def get_args(argv):
     parser.add_argument('--train_dataname', type=str, default='train_2m.csv', help="Name of the data used for training")
     parser.add_argument('--val_dataname', type=str, default='val_48k.csv', help="Name of the data used for validating")
     # Training parameters
-    parser.add_argument('--max_length', type=int, default=512, help="Max length of tokens")
+    parser.add_argument('--max_length', type=int, default=2000, help="Max length of tokens")
     parser.add_argument('--batch_size', type=int, default=48, help="Batch size used for training/validating dataset")
     parser.add_argument('--lr', type=float, default=3e-06, help="Learning rate")
     parser.add_argument('--lr_scale', type=int, default=100, help="")

@@ -28,9 +28,9 @@ class GenomeHierarchihcalDataset(Dataset):
                 data = list(csv.reader(tsvfile, delimiter="\t"))
 
         self.tokenizer = AutoTokenizer.from_pretrained("zhihan1996/DNABERT-2-117M", trust_remote_code=True)
-        self.id = [d[0] for d in data[1:]]
-        self.seq1 = [d[11] for d in data[1:]]
-        self.seq2 = [d[12] for d in data[1:]]
+        self.id = [i for i in range(len(data[1:]))]
+        self.seq1 = [d[11] for d in range(len(data[1:]))]
+        self.seq2 = [d[12] for d in range(len(data[1:]))]
         self.species = [int(d[3]) for d in data[1:]]
         self.genus = [int(d[4]) for d in data[1:]]
         self.family = [int(d[5]) for d in data[1:]]
@@ -198,14 +198,14 @@ class HierarchicalBatchSampler(Sampler):
             # Create hierarchical path with corresponding label dictionaries
             hierarchy_path = [
                 (superkingdom, self.dataset.labels),
-                (kingdom, self.dataset.labels[superkingdom]),
-                (phylum, self.dataset.labels[superkingdom][kingdom]),
-                (class_, self.dataset.labels[superkingdom][kingdom][phylum]),
+            #    (kingdom, self.dataset.labels[superkingdom]),
+            #    (phylum, self.dataset.labels[superkingdom][kingdom]),
+            #    (class_, self.dataset.labels[superkingdom][kingdom][phylum]),
                 (order, self.dataset.labels[superkingdom][kingdom][phylum][class_]),
-                (family, self.dataset.labels[superkingdom][kingdom][phylum][class_][order]),
-                (genus, self.dataset.labels[superkingdom][kingdom][phylum][class_][order][family]),
+            #    (family, self.dataset.labels[superkingdom][kingdom][phylum][class_][order]),
+            #    (genus, self.dataset.labels[superkingdom][kingdom][phylum][class_][order][family]),
                 (species, self.dataset.labels[superkingdom][kingdom][phylum][class_][order][family][genus]),
-                (id, self.dataset.labels[superkingdom][kingdom][phylum][class_][order][family][genus][species])
+            #    (id, self.dataset.labels[superkingdom][kingdom][phylum][class_][order][family][genus][species])
             ]
             
             # Sample one index for each level in the hierarchical path
