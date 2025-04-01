@@ -85,7 +85,7 @@ def main(args, log):
                 threshold = thresholder_val.get_knn_threshold(knnk, knnp)
                 thresholder_val.save_histogram(knn=True)
 
-                _, _ = kmediod_val.fit(min_similarity=threshold)
+                _, _ = kmediod_val.fit(min_similarity=threshold, knnp, knnk)
 
     elif args.mode == "test":
         knnk = args.knnk[0]
@@ -131,7 +131,7 @@ def main(args, log):
 
         threshold = thresholder_test.get_knn_threshold(knnk, knnp)
         thresholder_test.save_histogram(knn=True)
-        _, _ = kmediod_test.fit(min_similarity=threshold)
+        _, _ = kmediod_test.fit(min_similarity=threshold, knnp, knnk)
 
 
 def add_arguments() -> ArgumentParser:
