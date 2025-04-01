@@ -188,29 +188,29 @@ rule other_model_val:
         """
 
 
-rule create_fasta_bins_other_model_val:
-    input:
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
-        cluster_results=expand(
-            os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation", "cluster_results", "clusters_k{knn_k}_p{knn_p}.tsv"),
-            knn_k=KNN_K,
-            knn_p=KNN_P
-        )
-    output:
-        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{MODEL}"))
-    log:
-        log_file=os.path.join(LOGS, DATASET, "{MODEL}_bin_postprocessing.log")
-    params:
-        minsize_bins=MINSIZE_BINS
-    conda: 
-        "envs/vamb.yml"
-    shell:
-        """
-        for cluster_file in {input.cluster_results}; do
-            python {SRC_DIR}/create_fasta.py {input.catalogue} $cluster_file {params.minsize_bins} {output.dirs} \
-            --log {log.log_file}
-        done
-        """
+# rule create_fasta_bins_other_model_val:
+#     input:
+#         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+#         cluster_results=expand(
+#             os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation", "cluster_results", "clusters_k{knn_k}_p{knn_p}.tsv"),
+#             knn_k=KNN_K,
+#             knn_p=KNN_P
+#         )
+#     output:
+#         dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{MODEL}"))
+#     log:
+#         log_file=os.path.join(LOGS, DATASET, "{MODEL}_bin_postprocessing.log")
+#     params:
+#         minsize_bins=MINSIZE_BINS
+#     conda: 
+#         "envs/vamb.yml"
+#     shell:
+#         """
+#         for cluster_file in {input.cluster_results}; do
+#             python {SRC_DIR}/create_fasta.py {input.catalogue} $cluster_file {params.minsize_bins} {output.dirs} \
+#             --log {log.log_file}
+#         done
+#         """
 
 
 # rule checkm2_val:
