@@ -129,10 +129,9 @@ elif MODEL in ['tnf'] and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation"),
         expand(
-            os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins_val", "{model}", "k{knn_k}_p{knn_p}"),
+            os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins_val", "{MODEL}", "k{knn_k}_p{knn_p}"),
             knn_k=KNN_K,
-            knn_p=KNN_P,
-            model=MODEL
+            knn_p=KNN_P
         )
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output"),
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "tnf"),
