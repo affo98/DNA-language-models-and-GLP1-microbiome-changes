@@ -155,32 +155,34 @@ class KMediod:
 
         predictions = predictions.cpu().numpy()
 
-        self.predictions = predictions
         assert (
-            len(self.predictions) == len(self.embeddings) == len(self.contig_names)
-        ), f"Len of predictions {len(self.predictions)} does not match embeddings {len(self.embeddings)} and contig_names {len(self.contig_names)}"
+            len(predictions) == len(self.embeddings) == len(self.contig_names)
+        ), f"Len of predictions {len(predictions)} does not match embeddings {len(self.embeddings)} and contig_names {len(self.contig_names)}"
 
-        self.predictions, self.contig_names = self.remove_unassigned_sequences()
-        self.save_output(knn_k, knn_p)
+        predictions, contig_names = self.remove_unassigned_sequences(predictions)
+        self.save_output(knn_k, knn_p, predictions, contig_names)
 
-        return self.predictions, self.contig_names
+        return predictions, contig_names
 
-    def remove_unassigned_sequences(self) -> np.array:
-        idx_to_keep = np.where(self.predictions != -1)[0]
+    def remove_unassigned_sequences(self, predictions) -> np.array:
+        idx_to_keep = np.where(predictions != -1)[0]
 
-        self.predictions = self.predictions[idx_to_keep]
-        self.contig_names = [self.contig_names[i] for i in idx_to_keep]
+        predictions = predictions[idx_to_keep]
+        contig_names = [self.contig_names[i] for i in idx_to_keep]
 
-        return self.predictions, self.contig_names
+        assert len(predictions) == len(
+            contig_names
+        ), f"Mismatch between predictions {len(predictions)} and contig names {len(contig_names)} after removing unassigned seqs."
+        return predictions, contig_names
 
-    def save_output(self, knn_k, knn_p) -> None:
+    def save_output(self, predictions, contig_names, knn_k, knn_p) -> None:
         """save predictions in save_path in format: clustername \\t contigname"""
 
         output_file = os.path.join(self.save_path, f"clusters_k{knn_k}_p{knn_p}.tsv")
         with open(output_file, "w") as file:
             file.write("clustername\tcontigname\n")  # header
 
-            for cluster, contig in zip(self.predictions, self.contig_names):
+            for cluster, contig in zip(predictions, contig_names):
                 file.write(f"{cluster}\t{contig}\n")
 
         self.log.append(f"Predictions file written successfully to {self.save_path}!")
