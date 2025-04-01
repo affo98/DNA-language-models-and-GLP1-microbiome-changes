@@ -85,7 +85,7 @@ def main(args, log):
                 threshold = thresholder_val.get_knn_threshold(knnk, knnp)
                 thresholder_val.save_histogram(knn=True)
 
-                _, _ = kmediod_val.fit(min_similarity=threshold, knnp, knnk)
+                _, _ = kmediod_val.fit(threshold, knnp, knnk)
 
     elif args.mode == "test":
         knnk = args.knnk[0]
