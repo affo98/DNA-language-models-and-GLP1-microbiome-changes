@@ -63,11 +63,15 @@ def main_worker(gpu, ngpus_per_node, args):
     
     # Only run validation on the main GPU (0)
     if args.gpu == 0:
+        # Unwrap the model from DDP before destroying the process group
+        unwrapped_model = model.module
+        
         # First destroy the process group to exit DDP mode
         dist.destroy_process_group()
-        # Then run validation on a single GPU
+        
+        # Then run validation on a single GPU with the unwrapped model
         print("Running validation on a single GPU...")
-        trainer.run_validation()
+        trainer.run_validation(unwrapped_model)
     else:
         # Other GPUs just exit DDP
         dist.destroy_process_group()

@@ -198,11 +198,23 @@ class Trainer(nn.Module):
         
         return None
 
-    def run_validation(self):
+    def run_validation(self, unwrapped_model=None):
         """
         Validation method to run on a single GPU after exiting DDP mode
+        
+        Args:
+            unwrapped_model: The model unwrapped from DDP, if provided
         """
         print("Start Validation... ")
+        
+        # Use the provided unwrapped model if available
+        if unwrapped_model is not None:
+            # Replace the DDP-wrapped model with the unwrapped one
+            self.model = unwrapped_model
+        elif hasattr(self.model, 'module'):
+            # Unwrap the model if it's still wrapped in DDP
+            self.model = self.model.module
+        
         self.model.eval()
         best_checkpoint = 0
         best_val_loss = 10000
@@ -217,14 +229,9 @@ class Trainer(nn.Module):
                 continue
             
             try:
-                # Load model weights
-                if hasattr(self.model, 'module'):
-                    self.model.module.dnabert2.load_state_dict(torch.load(load_dir+'/pytorch_model.bin'))
-                    self.model.module.contrast_head.load_state_dict(torch.load(load_dir+'/con_weights.ckpt'))
-                else:
-                    self.model.dnabert2.load_state_dict(torch.load(load_dir+'/pytorch_model.bin'))
-                    self.model.contrast_head.load_state_dict(torch.load(load_dir+'/con_weights.ckpt'))
-                    
+                # Load model weights directly to the unwrapped model
+                self.model.dnabert2.load_state_dict(torch.load(load_dir+'/pytorch_model.bin'))
+                self.model.contrast_head.load_state_dict(torch.load(load_dir+'/con_weights.ckpt'))
                 print(f"Successfully loaded checkpoint from {load_dir}")
             except Exception as e:
                 print(f"Error loading checkpoint from {load_dir}: {e}")
@@ -256,12 +263,8 @@ class Trainer(nn.Module):
                     attention_mask = attention_mask.cuda(self.args.gpu, non_blocking=True)
                     
                     with torch.autocast(device_type="cuda"):
-                        # Forward pass through the model
-                        if hasattr(self.model, 'module'):
-                            feat1, feat2, _, _ = self.model(input_ids, attention_mask)
-                        else:
-                            feat1, feat2, _, _ = self.model(input_ids, attention_mask)
-                            
+                        # Forward pass through the unwrapped model
+                        feat1, feat2, _, _ = self.model(input_ids, attention_mask)
                         features = torch.cat([feat1.unsqueeze(1), feat2.unsqueeze(1)], dim=1)
                         loss = self.criterion(features, labels)
                         val_loss += loss["instdisc_loss"]
