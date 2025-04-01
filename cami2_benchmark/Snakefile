@@ -195,7 +195,7 @@ rule create_fasta_bins_other_model_val:
     output:
         dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{MODEL}", "k{knn_k}_p{knn_p}"))
     log:
-        log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "{MODEL}_val_bin_postprocessing_k{knn_k}_p{knn_p}.log")
+        log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "bin_postprocessing_k{knn_k}_p{knn_p}.log")
     params:
         minsize_bins=MINSIZE_BINS
     conda: 
@@ -242,7 +242,7 @@ rule other_model_test:
         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
         pip uninstall -y triton
         python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
-        -b {BATCH_SIZES} -knnk {PLACE} -knnp {PLACE} -s {output.dirs} -l {log} -m test
+        -b {BATCH_SIZES} -knnk {KNN_K} -knnp {KNN_P} -s {output.dirs} -l {log} -m test
         """
 
 rule create_fasta_bins_other_model_test:
