@@ -50,7 +50,7 @@ MINSIZE_CONTIGS=2000
 
 #knn params
 #KNN_K = [100,200,300,400,500,600,700,800,900,1000]
-#KNN_P = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]
+#KNN_P = [10,20,30,40,50,60,70,80,90]
 KNN_K = [500, 600]
 KNN_P = [50,60]
 
@@ -125,6 +125,7 @@ elif MODEL == 'comebin' and not config_nomodelrun:
     ]
 
 
+
 elif MODEL in ['tnf'] and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "validation"),
@@ -136,6 +137,7 @@ elif MODEL in ['tnf'] and not config_nomodelrun:
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output"),
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "tnf"),
     ]
+
 
 elif MODEL in ['tnfkernel'] and not config_nomodelrun:
     input_files += [
@@ -177,11 +179,32 @@ ruleorder: process_metahit > concatenate
 
 
 #OTHER MODEL VAL
+# rule other_model_val:
+#     input:
+#         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+#     output:
+#         dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation"))
+#     log:
+#         os.path.join(LOGS, DATASET, "{MODEL}_val_binning.log")
+#     conda:
+#         "envs/llm.yml"
+#     shell:
+#         """
+#         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
+#         pip uninstall -y triton
+#         python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
+#         -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {output.dirs} -l {log} -m val
+#         """
+
 rule other_model_val:
     input:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
     output:
-        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation"))
+        validation_dir=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation")),
+        clusters=expand(
+            os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation", "cluster_results", "clusters_k{knn_k}_p{knn_p}.tsv"),
+            knn_k=KNN_K, knn_p=KNN_P
+        )
     log:
         os.path.join(LOGS, DATASET, "{MODEL}_val_binning.log")
     conda:
@@ -191,13 +214,13 @@ rule other_model_val:
         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
         pip uninstall -y triton
         python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
-        -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {output.dirs} -l {log} -m val
+        -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {output.validation_dir} -l {log} -m val
         """
 
 
 rule create_fasta_bins_other_model_val:
     input:
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),                                          
         cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation", "cluster_results", "clusters_k{knn_k}_p{knn_p}.tsv")
     output:
         dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins_val", "{MODEL}", "k{knn_k}_p{knn_p}"))
