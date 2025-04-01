@@ -129,6 +129,7 @@ elif MODEL == 'comebin' and not config_nomodelrun:
 elif MODEL in ['tnf'] and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "validation"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins_val"),
         #expand(
         #    os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins_val", "{MODEL}", "k{knn_k}_p{knn_p}"),
         #    knn_k=KNN_K,
@@ -215,6 +216,13 @@ rule create_fasta_bins_other_model_val:
         python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results} {params.minsize_bins} {output.dirs} \
         --log {log.log_file}
         """
+
+
+
+
+
+
+
 
 
 # rule checkm2_val: 
