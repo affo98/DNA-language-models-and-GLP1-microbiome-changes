@@ -35,6 +35,7 @@ def main(args, log):
     contigs_test, contigs_val, contig_names_test, contig_names_val = (
         split_contigs_valtest(contigs, contig_names, log, VAL_PROPORTION)
     )
+    print("NUMBER OF CONTIGS VAL", len(contig_names_val))
 
     if args.mode == "val":
         log.append(
@@ -81,7 +82,7 @@ def main(args, log):
 
         for knnk in args.knnk:
             for knnp in args.knnp:
-                log.append(f"Running k:{knnk} p:{knnp}")
+                log.append(f"\nRunning k:{knnk} p:{knnp}")
                 threshold = thresholder_val.get_knn_threshold(knnk, knnp)
                 thresholder_val.save_histogram(knn=True)
 
