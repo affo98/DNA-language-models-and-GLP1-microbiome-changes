@@ -202,8 +202,8 @@ rule other_model_val:
     output:
         validation_dir=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation")),
         clusters=expand(
-            os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation", "cluster_results", "clusters_k{knn_k}_p{knn_p}.tsv"),
-            knn_k=KNN_K, knn_p=KNN_P
+            os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{model}_output", "validation", "cluster_results", "clusters_k{knn_k}_p{knn_p}.tsv"),
+            knn_k=KNN_K, knn_p=KNN_P, model=MODEL
         )
     log:
         os.path.join(LOGS, DATASET, "{MODEL}_val_binning.log")
