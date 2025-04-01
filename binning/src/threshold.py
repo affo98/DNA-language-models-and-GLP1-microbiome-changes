@@ -132,7 +132,7 @@ class Threshold:
         )
 
         cumulative_sum = np.cumsum(bin_vector)
-        index = np.argmax(cumulative_sum >= self.knn_p)
+        index = np.argmax(cumulative_sum >= (self.knn_p / 100))
         knn_threshold = pairsim_vector[index]
 
         self.knn_threshold, self.pairsim_vector, self.bin_vector = (
@@ -172,7 +172,7 @@ class Threshold:
 
         file_path = os.path.join(
             self.save_path,
-            f"k{self.knn_k}_p{int(self.knn_p*100)}_similarity_histogram.png",
+            f"k{self.knn_k}_p{self.knn_p}_similarity_histogram.png",
         )
         plt.tight_layout()
         plt.savefig(file_path)

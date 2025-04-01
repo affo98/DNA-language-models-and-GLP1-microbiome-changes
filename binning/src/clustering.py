@@ -179,7 +179,7 @@ class KMediod:
         """save predictions in save_path in format: clustername \\t contigname"""
 
         output_file = os.path.join(
-            self.save_path, f"clusters_k{knn_k}_p{int(self.knn_p*100)}.tsv"
+            self.save_path, f"clusters_k{knn_k}_p{self.knn_p}.tsv"
         )
         with open(output_file, "w") as file:
             file.write("clustername\tcontigname\n")  # header
