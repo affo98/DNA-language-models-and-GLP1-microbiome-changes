@@ -19,6 +19,9 @@ import torch.backends.cudnn as cudnn
 from dataloader.hierarchical_dataset import load_deep_genome_hierarchical
 import tensorboard_logger as tb_logger
 from datetime import timedelta
+from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch.optim.lr_scheduler import LinearLR
+from torch.optim.lr_scheduler import SequentialLR
 
 def run(args):
     args.resPath = setup_path(args)
@@ -53,12 +56,33 @@ def main_worker(gpu, ngpus_per_node, args):
     dist.barrier()
     tokenizer = AutoTokenizer.from_pretrained("zhihan1996/DNABERT-2-117M", trust_remote_code=True)
     optimizer = get_optimizer(model, args)
-    #cudnn.benchmark = True
- 
+    
+    # Create warmup scheduler
+    warmup_scheduler = LinearLR(
+        optimizer, 
+        start_factor=0.1,
+        end_factor=1.0, 
+        total_iters=args.warmup_epochs * len(dataloaders_dict['train'])
+    )
+
+    # Create cosine annealing scheduler
+    cosine_scheduler = CosineAnnealingLR(
+        optimizer,
+        T_max=(args.epochs - args.warmup_epochs) * len(dataloaders_dict['train']),
+        eta_min=args.min_lr
+    )
+
+    # Combine them
+    scheduler = SequentialLR(
+        optimizer,
+        schedulers=[warmup_scheduler, cosine_scheduler],
+        milestones=[args.warmup_epochs * len(dataloaders_dict['train'])]
+    )
+    
     dataloaders_dict, sampler = load_deep_genome_hierarchical(args)
     dist.barrier()
 
-    trainer = Trainer(model, tokenizer, criterion, optimizer, dataloaders_dict, sampler, logger, args)
+    trainer = Trainer(model, tokenizer, criterion, optimizer, dataloaders_dict, sampler, logger, args, scheduler)
     trainer.train()
     
     # Only run validation on the main GPU (0)
@@ -109,6 +133,8 @@ def get_args(argv):
     parser.add_argument('--batch_size', type=int, default=48, help="Batch size used for training/validating dataset")
     parser.add_argument('--lr', type=float, default=3e-06, help="Learning rate")
     parser.add_argument('--lr_scale', type=int, default=100, help="")
+    parser.add_argument('--min_lr', type=float, default=0.0, help='Minimum learning rate for cosine scheduler')
+    parser.add_argument('--warmup_epochs', type=int, default=1, help='Number of warmup epochs for learning rate')
     parser.add_argument('--epochs', type=int, default=3)
     parser.add_argument('--print-freq', '-p', default=100, type=int, metavar='N', help='print frequency (default: 10)')
     #parser.add_argument('--train_batch_size', type=int, default=48, help="Batch size used for training dataset")

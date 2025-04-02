@@ -198,14 +198,13 @@ class HierarchicalBatchSampler(Sampler):
             # Create hierarchical path with corresponding label dictionaries
             hierarchy_path = [
                 (superkingdom, self.dataset.labels),
-            #    (kingdom, self.dataset.labels[superkingdom]),
-            #    (phylum, self.dataset.labels[superkingdom][kingdom]),
-            #    (class_, self.dataset.labels[superkingdom][kingdom][phylum]),
+                (kingdom, self.dataset.labels[superkingdom]),
+                (phylum, self.dataset.labels[superkingdom][kingdom]),
+                (class_, self.dataset.labels[superkingdom][kingdom][phylum]),
                 (order, self.dataset.labels[superkingdom][kingdom][phylum][class_]),
-            #    (family, self.dataset.labels[superkingdom][kingdom][phylum][class_][order]),
-            #    (genus, self.dataset.labels[superkingdom][kingdom][phylum][class_][order][family]),
+                (family, self.dataset.labels[superkingdom][kingdom][phylum][class_][order]),
+                (genus, self.dataset.labels[superkingdom][kingdom][phylum][class_][order][family]),
                 (species, self.dataset.labels[superkingdom][kingdom][phylum][class_][order][family][genus]),
-            #    (id, self.dataset.labels[superkingdom][kingdom][phylum][class_][order][family][genus][species])
             ]
             
             # Sample one index for each level in the hierarchical path

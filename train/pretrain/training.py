@@ -8,12 +8,13 @@ from tqdm import tqdm
 import time
 
 class Trainer(nn.Module):
-    def __init__(self, model, tokenizer, criterion, optimizer, dataloaders_dict, sampler, logger, args):
+    def __init__(self, model, tokenizer, criterion, optimizer, dataloaders_dict, sampler, logger, args, scheduler=None):
         super(Trainer, self).__init__()
         self.args = args
         self.model = model
         self.tokenizer = tokenizer
         self.optimizer = optimizer
+        self.scheduler = scheduler
         self.train_loader = dataloaders_dict['train']
         self.val_loader = dataloaders_dict['val']
         self.train_sampler = sampler['train']
@@ -77,6 +78,13 @@ class Trainer(nn.Module):
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+        
+        if self.scheduler is not None:
+            self.scheduler.step()
+            
+            if self.gstep % self.args.print_freq == 0:
+                current_lr = self.scheduler.get_last_lr()[0]
+                self.logger.log_value('learning_rate', current_lr, self.gstep)
         
         return losses, bsz
     
