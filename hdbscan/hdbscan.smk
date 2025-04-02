@@ -23,11 +23,13 @@ rule write_fasta:
         "clusters.tsv"
     output:
         "tmp/{bin}.fasta"
+    params:
+        contig_catalogue = "catalogue.fna.gz"
     shell:
         """
         mkdir -p tmp
 
-        python create_fasta.py "catalogue.fna.gz" clusters.tsv 250000 tmp
+        python create_fasta.py {params.contig_catalogue} clusters.tsv 250000 tmp
         """
 
 
