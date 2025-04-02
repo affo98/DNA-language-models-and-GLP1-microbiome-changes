@@ -212,38 +212,3 @@ if __name__ == "__main__":
     end_time = time()
     elapsed_time = end_time - start_time
     log.append(f"Binning of {args.model_name} ran in {elapsed_time:.2f} Seconds")
-
-
-# def setup_paths() -> None:
-#     """Check if the required folders exist, create them if they don't, and set environment variables."""
-#     paths = {
-#         "DATA_PATH": os.path.join(os.getcwd(), "data"),
-#         "LOG_PATH": os.path.join(os.getcwd(), "logs"),
-#         "CONFIG_PATH": os.path.join(os.getcwd(), "config"),
-#         "CAMI2_OUTPUT_PATH": os.path.join(os.getcwd(), "data", "cami2"),
-#         "EMBEDDINGS_PATH": os.path.join(os.getcwd(), "embeddings"),
-#     }
-
-#     for var_name, path in paths.items():
-#         if not os.path.exists(path):
-#             os.makedirs(path)
-#             print(f"Created directory: {path}")
-#         os.environ[var_name] = path
-
-#     return
-
-
-# def read_configs() -> tuple[dict, list]:
-#     model_config_path = os.path.join(os.environ["CONFIG_PATH"], "models.yml")
-#     models_config = {}
-#     with open(model_config_path, "r") as handle:
-#         models_config = yaml.safe_load(handle)
-
-#     cami2_config_path = os.path.join(os.environ["CONFIG_PATH"], "cami2_processing.yml")
-#     read_cami2_datasets = []
-#     with open(cami2_config_path, "r") as file:
-#         data = yaml.safe_load(file)
-#         for dataset in data["datasets"]:
-#             read_cami2_datasets.append(dataset["name"])
-
-#     return models_config, read_cami2_datasets
