@@ -129,7 +129,7 @@ elif MODEL == 'comebin' and not config_nomodelrun:
 elif MODEL in ['tnf'] and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "validation"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "validation"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "fasta_bins_validation"),
         #expand(
         #    os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins_val", "{MODEL}", "k{knn_k}_p{knn_p}"),
         #    knn_k=KNN_K,
@@ -222,7 +222,7 @@ rule create_fasta_bins_other_model_val:
     input:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")                                         
     output:
-        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation"))
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_validation"))
     log:
         log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "bin_postprocessing.log")
     params:
@@ -232,9 +232,9 @@ rule create_fasta_bins_other_model_val:
         "envs/vamb.yml"
     shell:
         """
-        mkdir -p {output.dirs}
 
         for cluster_file in {params.cluster_results_dir}/clusters_k*_p*.tsv; do
+            echo $clusterfile
             k_p=$(basename "$cluster_file" .tsv | sed 's/clusters_k//; s/_p/_p/')
             output_dir={output.dirs}/fasta_bins_val/$k_p
             log_file={log.log_file}_$k_p.log
@@ -245,8 +245,6 @@ rule create_fasta_bins_other_model_val:
             --log "$log_file"
         done
         """
-
-
 
 
 
