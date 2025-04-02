@@ -8,8 +8,11 @@ channels:
 dependencies:
   - snakemake
   - python=3.12.0
-  - rapids=25.02
+  - cuml=25.02
   - 'cuda-version>=12.0,<=12.8'
+  - prodigal>=2.6.3
+  - checkm2
+  - pip
 
   - pip:
     - kneaddata

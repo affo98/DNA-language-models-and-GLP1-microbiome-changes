@@ -1,19 +1,14 @@
 """HDBSCAN snakemake pipeline"""
 
-import os
-import glob
-configfile: "config/config.yaml"
-
-
 
 rule cluster:
     input:
-        embeddings = "path to embedddings",
-        contig_catalouge = "path to contig catalogue"
+        embeddings = "dnaberts.npy",
+        contig_catalouge = "catalogue.fna.gz"
     output:
         "clusters.tsv"
     threads:
-        -48
+        48
     shell:
     """
     
@@ -33,3 +28,36 @@ rule write_fasta:
 
     python create_fasta.py "catalogue.fna.gz" clusters.tsv 250000 tmp
     """
+
+
+rule checkm2:
+    input:
+        "tmp/{sample}.fasta",
+    output:
+        directory("checkm2_results"),
+    params:
+        db = "db/checkm2_database"
+    threads:
+        48
+    shell:
+    """
+    if [ ! -d "{params.db}" ]; then
+            checkm2 database --download --path {params.db}
+    fi
+        checkm2 predict\ 
+            --threads {threads}\
+            --input {input}\
+            --output-directory {output}\
+            --database_path {params.db}/CheckM2_database/uniref100.KO.1.dmnd
+    """
+
+rule parse_checkm2_results:
+    input:
+        "checkm2_results",
+    output:
+        "checkm2_validation_results",
+    shell:
+        """
+        mkdir -p {output}
+        python parse_checkm2_val.py -i {input} -o {output}
+        """
