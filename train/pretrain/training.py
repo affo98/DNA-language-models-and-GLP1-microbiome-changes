@@ -163,8 +163,6 @@ class Trainer(nn.Module):
                     [batch_time, data_time, losses],
                     prefix="Step: [{}]".format(step))
             
-            val_loss = torch.tensor(0.0).cuda(self.args.gpu)
-            
             for idx, (sequences, labels) in enumerate(self.val_loader):
                 data_time.update(time.time() - end)
                 with torch.no_grad():
@@ -184,7 +182,6 @@ class Trainer(nn.Module):
                             
                         features = torch.cat([feat1.unsqueeze(1), feat2.unsqueeze(1)], dim=1)
                         loss = self.criterion(features, labels)
-                        val_loss += loss["instdisc_loss"]
 
                         losses.update(loss["instdisc_loss"].item(), bsz)
                         batch_time.update(time.time() - end)
@@ -193,10 +190,9 @@ class Trainer(nn.Module):
                         if idx % self.args.print_freq == 0:
                             progress.display(idx)
 
-            val_loss = val_loss.item()/(idx+1)
             self.logger.log_value('val_loss', losses.avg, step)            
-            if val_loss < best_val_loss:
-                best_val_loss = val_loss
+            if losses.avg < best_val_loss:
+                best_val_loss = losses.avg
                 best_checkpoint = step
                 self.save_model(save_best=True)
                 

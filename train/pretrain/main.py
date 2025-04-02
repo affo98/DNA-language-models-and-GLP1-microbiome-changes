@@ -56,6 +56,9 @@ def main_worker(gpu, ngpus_per_node, args):
     dist.barrier()
     tokenizer = AutoTokenizer.from_pretrained("zhihan1996/DNABERT-2-117M", trust_remote_code=True)
     optimizer = get_optimizer(model, args)
+
+    dataloaders_dict, sampler = load_deep_genome_hierarchical(args)
+    dist.barrier()
     
     # Create warmup scheduler
     warmup_scheduler = LinearLR(
@@ -78,9 +81,6 @@ def main_worker(gpu, ngpus_per_node, args):
         schedulers=[warmup_scheduler, cosine_scheduler],
         milestones=[args.warmup_epochs * len(dataloaders_dict['train'])]
     )
-    
-    dataloaders_dict, sampler = load_deep_genome_hierarchical(args)
-    dist.barrier()
 
     trainer = Trainer(model, tokenizer, criterion, optimizer, dataloaders_dict, sampler, logger, args, scheduler)
     trainer.train()
