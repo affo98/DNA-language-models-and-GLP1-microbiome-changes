@@ -1,6 +1,9 @@
 """HDBSCAN snakemake pipeline"""
 
 
+rule all:
+    "checkm2_validation_results"
+
 rule cluster:
     input:
         embeddings = "dnaberts.npy",
@@ -19,7 +22,7 @@ rule write_fasta:
     input:
         "clusters.tsv"
     output:
-        "tmp/{sample}.fasta"
+        "tmp/{bin}.fasta"
     shell:
         """
         mkdir -p tmp
@@ -30,7 +33,7 @@ rule write_fasta:
 
 rule checkm2:
     input:
-        "tmp/{sample}.fasta",
+        "tmp/{bin}.fasta",
     output:
         directory("checkm2_results"),
     params:

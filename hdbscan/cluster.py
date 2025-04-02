@@ -29,7 +29,7 @@ def cluster(path_to_embeds: str, threads: int) -> np.array:
         f.write("\n" * 2)
         f.write(f"\t\tmin_cluster_size: {min_cluster_size}")
         f.write("\n" * 2)
-        f.write("#" * 100)
+        f.write("#" * 100 + "\n")
 
         f.write(f"Number of Clusters: {num_clusters},\n")
         f.write(f"Noicy Contigs i.e. -1: {num_noicy_contigs},\n")
