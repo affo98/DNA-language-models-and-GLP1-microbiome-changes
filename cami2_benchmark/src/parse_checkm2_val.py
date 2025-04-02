@@ -63,7 +63,7 @@ def select_best_combination(data) -> dict:
 
 def plot_results(data, output_dir) -> None:
     plt.figure(figsize=(8, 6))
-    df = pd.DataFrame(data).T  # Transpose to align k values on y-axis
+    df = pd.DataFrame(data)
 
     sns.heatmap(df, annot=True, fmt="d", cmap="Oranges", linewidths=0.5)
 
