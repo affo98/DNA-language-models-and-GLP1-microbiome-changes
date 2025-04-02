@@ -1,4 +1,5 @@
 name: hdbscan
+
 channels:
   - conda-forge
   - rapidsai
@@ -7,11 +8,9 @@ channels:
   - defaults
 dependencies:
   - snakemake
-  - python=3.12.0
-  - cuml=25.02
+  - checkm2=1.1.0
+  - python>=3.12.0
   - 'cuda-version>=12.0,<=12.8'
-  - prodigal>=2.6.3
-  - checkm2
   - pip
 
   - pip:
@@ -20,3 +19,4 @@ dependencies:
     - numpy
     - biopython
     - scikit-learn
+    - cuml-cu12==25.2.* --extra-index-url https://pypi.nvidia.com
