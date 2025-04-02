@@ -98,7 +98,7 @@ def main(args):
         # save it there is an actual max value
         print(f"Using contamination: {contamination}")
         best_combination["contamination"] = contamination
-        with open(os.path.join(args.out_dir, "best_combination.json"), "w") as f:
+        with open(os.path.join(args.output_dir, "best_combination.json"), "w") as f:
             json.dump(best_combination, f, indent=4)
 
         plot_results(data, args.output_dir)
