@@ -15,7 +15,6 @@ dependencies:
   - pip
 
   - pip:
-    - kneaddata
     - vamb
     - numpy
     - biopython
