@@ -12,7 +12,7 @@ CONTAMINATION_THRESHOLD = 50
 def parse_quality_report(file_path) -> pd.DataFrame:
     """Parses a CheckM2 quality report and extracts completeness & contamination."""
     df = pd.read_csv(file_path, sep="\t")
-    df = df[df["Contamination"] < 5]
+    df = df[df["Contamination"] < CONTAMINATION_THRESHOLD]
     return df["Completeness"].values
 
 
