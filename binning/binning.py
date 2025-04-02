@@ -19,7 +19,7 @@ N_BINS = 1000
 BLOCK_SIZE = 1000
 
 # kmediod
-MIN_BIN_SIZE = 10  # a bit unnecessary when using MIN_CLUSTER_SIZE=250.000
+MIN_BIN_SIZE = 2  # changed from 10 to 2, because bins less than MINSIZE_BINS (250000) will be removed in postprocessing.
 NUM_STEPS = 3
 MAX_ITER = 2000  # increased from 1000
 
