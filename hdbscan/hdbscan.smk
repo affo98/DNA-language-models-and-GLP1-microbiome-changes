@@ -3,7 +3,7 @@
 
 rule all:
     input:
-        "tmp/{bin}.fasta"
+        "tmp"
 
 rule cluster:
     input:
@@ -23,7 +23,7 @@ rule write_fasta:
     input:
         "clusters.tsv"
     output:
-        "tmp/{bin}.fasta"
+       directory("tmp")
     params:
         contig_catalogue = "catalogue.fna.gz"
     shell:
