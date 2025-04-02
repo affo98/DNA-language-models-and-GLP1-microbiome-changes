@@ -174,16 +174,15 @@ if config_checkm2:
 rule all:
     input: input_files
 
-
-ruleorder = []
+ruleorder_list = []
 if DATASET == 'metahit':
-    ruleorder.append("process_metahit > concatenate")
+    ruleorder_list.append("process_metahit > concatenate")
 
 if MODEL in ['tnf', 'tnfkernel', 'dnaberts', 'dnabert2', 'dnabert2random']:
-    ruleorder.append("other_model_val > create_fasta_bins_other_model_val > checkm2_val > parse_checkm2_val > other_model_test > create_fasta_bins_other_model_test")
+    ruleorder_list.append("other_model_val > create_fasta_bins_other_model_val > checkm2_val > parse_checkm2_val > other_model_test > create_fasta_bins_other_model_test")
 
 ruleorder: 
-    {" > ".join(ruleorder)}
+    {" > ".join(ruleorder_list)}
     
 
 
