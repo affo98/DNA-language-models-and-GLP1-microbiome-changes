@@ -2,7 +2,7 @@
 
 
 rule all:
-    "checkm2_validation_results"
+    "tmp/{bin}.fasta"
 
 rule cluster:
     input:
