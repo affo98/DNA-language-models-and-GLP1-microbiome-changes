@@ -100,8 +100,8 @@ def main(args):
         best_combination["contamination"] = contamination
         with open(os.path.join(args.output_dir, "best_combination.json"), "w") as f:
             json.dump(best_combination, f, indent=4)
-
         plot_results(data, args.output_dir)
+        break
 
 
 def add_arguments() -> ArgumentParser:
