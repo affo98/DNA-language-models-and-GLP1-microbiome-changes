@@ -1,4 +1,4 @@
-### Cami2 Benchmark
+## Cami2 Benchmark
 
 The code in this folder is used to benchmark models on Cami2 datasets. The datasets in CAMI2 are designed to mimic realistic microbiome environments and include a vast array of both new and known genomes. CAMI2 datasets are often used to benchmark metagenomic binners: https://cami-challenge.org/.
 
@@ -13,9 +13,7 @@ The following steps are performed:
 5. CheckM2 is used to evaluate the performance of the model.
 
 
-#### Setup
-
-#### Datasets
+### Datasets
 
 The list of datasets are specified in the file `config.yml`. All datasets are **short-read**. They include:
 
@@ -29,7 +27,7 @@ The list of datasets are specified in the file `config.yml`. All datasets are **
 * [**MetaHIT "Error Free**](https://figshare.com/articles/dataset/MetaHIT_error-free_contigs_from_MetaBAT/27933807?file=50894283). 
 
 
-#### Models
+### Models
 
 The list of models are specified in the file `config.yml`. They include:
 
@@ -45,9 +43,9 @@ The list of models are specified in the file `config.yml`. They include:
 
 
 
-#### Output
+### Output
 
-The output of the workflow is Checkm2 quality results for the bins. These are found in folder `model_results/DATASET/checkm2`.
+The output (results) of the workflow is Checkm2 quality results for the bins. These are found in folder `model_results/DATASET_NAME/checkm2`.
 
 
 ### Usage
@@ -65,11 +63,13 @@ conda activate cami2_processing
 The Snakemake file controls the workflow. It takes the following args:
 
 * `DATASET` Choose a dataset from the `config.yml`. Only one dataset can be used at a time.
-* `MODEL` Optional. Choose a model frmo the `contif.yml`. Only one model can be used at a time.
+* `MODEL` Optional. Choose a model from the `contif.yml`. Only one model can be used at a time.
 * `DOWNLOAD` Optional. Set to `True` to download the dataset.
 * `CONCATENATE` Optional. Set to `True` to run `concatenate.py` from vamb on sample-contigs.
 * `ALIGNMENT` Optional. Set to `True` to run `strobealign`.
 * `CHECKM2` Optional. Set to `True` to run Checkm2 on the model output.
+
+
 
 
 #### Example Runs
@@ -77,12 +77,16 @@ The Snakemake file controls the workflow. It takes the following args:
 Run the following command to download, concatenate and align the airways short dataset:
 
 ```bash
-snakemake --snakefile cami2_benchmark/Snakefile --config DATASET=airways_short DOWNLOAD=True CONCATENATE=True ALIGNMENT=True --use-conda
+snakemake --snakefile cami2_benchmark/Snakefile \
+  --config DATASET=airways_short DOWNLOAD=True CONCATENATE=True ALIGNMENT=True \
+  --use-conda
 ```
 
 Run the following command to run vamb and benchmark results with checkm2:
 ```bash
-snakemake --snakefile cami2_benchmark/Snakefile --config DATASET=airways_short MODEL=vamb CHECKM2=True --use-conda
+snakemake --snakefile cami2_benchmark/Snakefile \
+   --config DATASET=airways_short MODEL=vamb CHECKM2=True \
+   --use-conda
 ```
 
 

@@ -191,7 +191,7 @@ rule other_model_val:
     log:
         os.path.join(LOGS, DATASET, "{MODEL}_val", "{MODEL}_val_binning.log")
     conda:
-        "envs/llm.yml"
+        "{BINNING_DIR}/envs/binning.yml"
     shell:
         """
         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
@@ -262,7 +262,7 @@ rule parse_checkm2_val:
     output:
         path=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results"))
     conda:
-        "envs/llm.yml"
+        "{BINNING_DIR}/envs/binning.yml"
     shell:
         """
         mkdir -p {output.path}
@@ -279,10 +279,8 @@ rule other_model_test:
         dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "test"))
     log:
         os.path.join(LOGS, DATASET, "{MODEL}_test_binning.log")
-    #params:
-    #    best_kp_path=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results")
     conda:
-        "envs/llm.yml"
+        "{BINNING_DIR}/envs/binning.yml"
     shell:
         """
         best_combination_file="{input.best_kp_path}/best_combination.json"
@@ -310,8 +308,7 @@ rule create_fasta_bins_other_model_test:
         python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results}/clusters.tsv {params.minsize_bins} {output.dirs} \
         --log {log.log_file}
         """
-#END OTHER MODEL TEST
-
+#END OTHER MODEL
 
 
 
@@ -633,8 +630,6 @@ rule checkm2:
 #         """
 
 
-
-
 # rule concatenate_process_semibin:
 #     input:
 #         os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
@@ -662,10 +657,6 @@ rule checkm2:
 #         samtools reheader - {input.bam} > {output.modified_bam}
 #         """
 
-#rule_all
-    #input:
-        #os.path.join(OUTDIR, DATASET, "semibin/catalogue_semibin.fna")
-        #expand(os.path.join(OUTDIR, DATASET, "semibin/{sample}_sorted_semibin.bam"), sample=[sample for sample in SAMPLES.get(DATASET, [])])
 
 
 
