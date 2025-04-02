@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 COMPLETENESS_BINS = [90, 80, 70, 60, 50]
-CONTAMINATION_THRESHOLD = 50
+CONTAMINATION_THRESHOLD = 10
 
 
 def parse_quality_report(file_path) -> pd.DataFrame:
