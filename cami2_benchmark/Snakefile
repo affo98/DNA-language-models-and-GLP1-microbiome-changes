@@ -49,11 +49,11 @@ MINSIZE_BINS=250000
 MINSIZE_CONTIGS=2000
 
 #knn params
-#KNN_K = [100,200,300,400,500,600,700,800,900,1000]
-#KNN_P = [10,30,50,70,90]
+KNN_K = [100,200,300,400,500,600,700,800,900,1000]
+KNN_P = [10,30,50,70,90]
 
-KNN_K = [200,300]
-KNN_P = [50,70]
+#KNN_K = [200,300]
+#KNN_P = [50,70]
 
 
 
@@ -288,7 +288,7 @@ rule other_model_test:
         best_combination_file="{input.best_kp_path}/best_combination.json"
         best_k=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_k"])' $best_combination_file)
         best_p=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_p"])' $best_combination_file)
-        
+
         python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
         -b {BATCH_SIZES} -k $best_k -p $best_p -s {output.dirs} -l {log} -m test
         """
