@@ -15,8 +15,6 @@ The following steps are performed:
 
 #### Setup
 
-
-
 #### Datasets
 
 The list of datasets are specified in the file `config.yml`. All datasets are **short-read**. They include:
