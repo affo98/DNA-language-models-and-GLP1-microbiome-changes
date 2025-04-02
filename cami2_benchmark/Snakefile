@@ -129,7 +129,7 @@ elif MODEL == 'comebin' and not config_nomodelrun:
 elif MODEL in ['tnf'] and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "validation"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins_val"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_val"),
         #expand(
         #    os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins_val", "{MODEL}", "k{knn_k}_p{knn_p}"),
         #    knn_k=KNN_K,
@@ -199,26 +199,52 @@ rule other_model_val:
         """
 
 
+# rule create_fasta_bins_other_model_val:
+#     input:
+#         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),                                          
+#         #cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation", "cluster_results", "clusters_k{knn_k}_p{knn_p}.tsv")
+#     output:
+#         dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_val"))
+#     log:
+#         log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "bin_postprocessing_k{knn_k}_p{knn_p}.log")
+#     params:
+#         minsize_bins=MINSIZE_BINS
+#     conda: 
+#         "envs/vamb.yml"
+#     shell:
+#         """
+#         python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results} {params.minsize_bins} {output.dirs} \
+#         --log {log.log_file}
+#         """
+
+
 rule create_fasta_bins_other_model_val:
     input:
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),                                          
-        cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation", "clusters_k{knn_k}_p{knn_p}.tsv")
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")                                         
     output:
-        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins_val", "{MODEL}", "k{knn_k}_p{knn_p}"))
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_val"))
     log:
-        log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "bin_postprocessing_k{knn_k}_p{knn_p}.log")
+        log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "bin_postprocessing.log")
     params:
+        cluster_results_dir=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation", "cluster_results"),
         minsize_bins=MINSIZE_BINS
     conda: 
         "envs/vamb.yml"
     shell:
         """
-        python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results} {params.minsize_bins} {output.dirs} \
-        --log {log.log_file}
+        mkdir -p {output.dirs}
+
+        for cluster_file in {params.cluster_results_dir}/clusters_k*_p*.tsv; do
+            k_p=$(basename "$cluster_file" .tsv | sed 's/clusters_k//; s/_p/_p/')
+            output_dir={output.dirs}/$k_p
+            log_file={log.log_file}_$k_p.log
+
+            mkdir -p "$output_dir"
+
+            python {SRC_DIR}/create_fasta.py {input.catalogue} "$cluster_file" {params.minsize_bins} "$output_dir" \
+            --log "$log_file"
+        done
         """
-
-
-
 
 
 
