@@ -35,7 +35,6 @@ def main(args, log):
     contigs_test, contigs_val, contig_names_test, contig_names_val = (
         split_contigs_valtest(contigs, contig_names, log, VAL_PROPORTION)
     )
-    log.append("NUMBER OF CONTIGS VAL", len(contig_names_val))
 
     if args.mode == "val":
         log.append(
