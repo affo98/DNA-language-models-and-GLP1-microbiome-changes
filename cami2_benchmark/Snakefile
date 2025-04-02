@@ -130,12 +130,6 @@ elif MODEL in ['tnf'] and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "validation"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "fasta_bins_validation"),
-        #expand(
-        #    os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins_val", "{MODEL}", "k{knn_k}_p{knn_p}"),
-        #    knn_k=KNN_K,
-        #    knn_p=KNN_P,
-        #    MODEL = [MODEL]
-        #)
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output"),
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "tnf"),
     ]
@@ -232,11 +226,10 @@ rule create_fasta_bins_other_model_val:
         "envs/vamb.yml"
     shell:
         """
-
         for cluster_file in {params.cluster_results_dir}/clusters_k*_p*.tsv; do
             echo $clusterfile
             k_p=$(basename "$cluster_file" .tsv | sed 's/clusters_k//; s/_p/_p/')
-            output_dir={output.dirs}/fasta_bins_val/$k_p
+            output_dir={output.dirs}/fasta_bins_validation/$k_p
             log_file={log.log_file}_$k_p.log
 
             mkdir -p "$output_dir"
@@ -245,8 +238,6 @@ rule create_fasta_bins_other_model_val:
             --log "$log_file"
         done
         """
-
-
 
 
 # rule checkm2_val: 
