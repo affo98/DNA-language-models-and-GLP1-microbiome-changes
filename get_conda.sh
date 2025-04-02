@@ -40,6 +40,12 @@ else
     conda init bash
     source ~/.bashrc || source ~/.zshrc
 
+    #get mamba
+    conda install -n base -c conda-forge mamba
+
+    #ensure that flexible channels are used
+    conda config --set channel_priority flexible
+
     echo "Conda is now available. Restart your terminal or run:"
     echo "  source ~/.bashrc  (or source ~/.zshrc for zsh users)"
 fi

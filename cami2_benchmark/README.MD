@@ -13,6 +13,10 @@ The following steps are performed:
 5. CheckM2 is used to evaluate the performance of the model.
 
 
+#### Setup
+
+
+
 #### Datasets
 
 The list of datasets are specified in the file `config.yml`. All datasets are **short-read**. They include:
@@ -48,9 +52,19 @@ The list of models are specified in the file `config.yml`. They include:
 The output of the workflow is Checkm2 quality results for the bins. These are found in folder `model_results/DATASET/checkm2`.
 
 
-#### How to run
+### Usage
 
-The Snakemake file specifies the workflow. It takes the following args:
+#### Setup
+
+Create the environment for Snakemake and activate it.
+```bash
+conda env create -f cami2_benchmark/envs/cami2_processing.yml
+conda activate cami2_processing
+```
+
+#### Arguments
+
+The Snakemake file controls the workflow. It takes the following args:
 
 * `DATASET` Choose a dataset from the `config.yml`. Only one dataset can be used at a time.
 * `MODEL` Optional. Choose a model frmo the `contif.yml`. Only one model can be used at a time.
@@ -82,12 +96,12 @@ To run multiple datasets/models, see folder `sweeps` that contains
 
 **Example run to download and process airways_short and gastro_short datasets**
 ```bash
-cami2_benchmark/sweeps/process_data.sh aiwways_short gastro_short
+bash cami2_benchmark/sweeps/process_data.sh aiwways_short gastro_short
 ```
 
 **Example run with LLM models on metahit dataset**
 ```bash
-cami2_benchmark/sweeps/run_models.sh metahit dnaberts dnabert2 dnabert2random
+bash cami2_benchmark/sweeps/run_models.sh metahit dnaberts dnabert2 dnabert2random
 ```
 
 
