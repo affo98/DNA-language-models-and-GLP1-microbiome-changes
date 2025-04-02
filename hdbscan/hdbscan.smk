@@ -3,7 +3,7 @@
 
 rule all:
     input:
-        "tmp"
+        "checkm2_results"
 
 rule cluster:
     input:
@@ -23,7 +23,7 @@ rule write_fasta:
     input:
         "clusters.tsv"
     output:
-       directory("tmp")
+       "tmp/{bin}.fna"
     params:
         contig_catalogue = "catalogue.fna.gz"
     shell:
@@ -36,7 +36,7 @@ rule write_fasta:
 
 rule checkm2:
     input:
-        "tmp/{bin}.fasta",
+        "tmp/{bin}.fna",
     output:
         directory("checkm2_results"),
     params:
