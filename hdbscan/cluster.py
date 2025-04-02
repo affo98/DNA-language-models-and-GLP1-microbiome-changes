@@ -6,12 +6,12 @@ from Bio import SeqIO
 import sys
 
 
-def cluster(path_to_embeds: str) -> np.array:
+def cluster(path_to_embeds: str, threads: int) -> np.array:
     dnabert_metahit_embeds = np.load(path_to_embeds)
 
     min_cluster_size = 20
 
-    hdb = HDBSCAN(min_cluster_size=min_cluster_size)
+    hdb = HDBSCAN(min_cluster_size=min_cluster_size, n_jobs=threads)
 
     hdb.fit(dnabert_metahit_embeds)
 
@@ -62,8 +62,9 @@ def save_output(contig_names, predictions) -> None:
 if __name__ == "__main__":
     embeddings_path = sys.argv[1]
     contig_catalogue_path = sys.argv[2]
+    threads = sys.argv[3]
 
-    clusters = cluster(embeddings_path)
+    clusters = cluster(embeddings_path, threads)
     contig_names = get_contig_names(contig_catalogue_path)
 
     save_output(contig_names, clusters)
