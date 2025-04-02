@@ -23,7 +23,7 @@ rule write_fasta:
     input:
         "clusters.tsv"
     output:
-       "tmp/{bin}.fna"
+       directory("tmp")
     params:
         contig_catalogue = "catalogue.fna.gz"
     shell:
@@ -36,7 +36,7 @@ rule write_fasta:
 
 rule checkm2:
     input:
-        "tmp/{bin}.fna",
+        "tmp,
     output:
         directory("checkm2_results"),
     params:
