@@ -200,7 +200,7 @@ rule other_model_val:
 
 rule create_fasta_bins_other_model_val:
     input:
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
         cluster_results = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation")                                         
     output:
         dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_validation"))
