@@ -30,7 +30,7 @@ rule write_fasta:
         """
         mkdir -p tmp
 
-        python create_fasta.py {params.contig_catalogue} clusters.tsv 250000 tmp
+        python create_fasta.py {params.contig_catalogue} clusters.tsv 250000 tmp --log fasta_logs
         """
 
 
