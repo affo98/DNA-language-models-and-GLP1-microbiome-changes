@@ -50,9 +50,10 @@ MINSIZE_CONTIGS=2000
 
 #knn params
 #KNN_K = [100,200,300,400,500,600,700,800,900,1000]
-#KNN_P = [10,20,30,40,50,60,70,80,90]
-KNN_K = [500, 600]
-KNN_P = [50,60]
+#KNN_P = [10,30,50,70,90]
+
+KNN_K = [200,300]
+KNN_P = [50,70]
 
 
 
@@ -131,9 +132,9 @@ elif MODEL in ['tnf'] and not config_nomodelrun:
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "validation"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "fasta_bins_validation"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "checkm2_validation"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "checkm2_validation_results")
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "tnf"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "checkm2_validation_results"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "tnf"),
     ]
 
 
@@ -176,7 +177,8 @@ ruleorder: other_model_val > create_fasta_bins_other_model_val > process_metahit
 
 
 
-#OTHER MODEL VAL
+
+#OTHER MODEL 
 rule other_model_val:
     input:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
@@ -193,7 +195,6 @@ rule other_model_val:
         python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
         -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {output.dirs} -l {log} -m val
         """
-
 
 rule create_fasta_bins_other_model_val:
     input:
@@ -220,7 +221,6 @@ rule create_fasta_bins_other_model_val:
             --log "$log_file"
         done
         """
-
 
 rule checkm2_val: 
     input:
@@ -251,7 +251,6 @@ rule checkm2_val:
         done
         """
 
-
 rule parse_checkm2_val:
     input:
         checkm2_reports=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation")
@@ -264,36 +263,36 @@ rule parse_checkm2_val:
         mkdir -p {output.path}
         python {SRC_DIR}/parse_checkm2_val.py -i {input.checkm2_reports} -o {output.path}
         """
+#-end val
 
-
-
-
-#END OTHER MODEL VAL
-
-
-
-#OTHER MODEL TEST
+#start test
 rule other_model_test:
     input:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
     output:
-        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output"))
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "test"))
     log:
         os.path.join(LOGS, DATASET, "{MODEL}_test_binning.log")
+    params:
+        best_kp_path=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results")
     conda:
         "envs/llm.yml"
     shell:
         """
-        mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
-        pip uninstall -y triton
+        # Read the best combination values from the JSON file
+        best_combination_file="{params.best_kp_path}/best_combination.json"
+        best_k=$(python -c 'import json; print(json.load(open("$best_combination_file"))["best_k"])')
+        best_p=$(python -c 'import json; print(json.load(open("$best_combination_file"))["best_p"])')
+
+        # Run the binning script with the extracted values
         python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
-        -b {BATCH_SIZES} -knnk {KNN_K} -knnp {KNN_P} -s {output.dirs} -l {log} -m test
+        -b {BATCH_SIZES} -knnk $best_k -knnp $best_p -s {output.dirs} -l {log} -m test
         """
 
 rule create_fasta_bins_other_model_test:
     input:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
-        cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output")
+        cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "test")
     output:
         dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{MODEL}"))
     log:
