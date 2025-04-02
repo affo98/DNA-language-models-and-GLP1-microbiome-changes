@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 
+import json
+
 COMPLETENESS_BINS = [90, 80, 70, 60, 50]
 CONTAMINATION_THRESHOLD = 20
 
@@ -44,9 +46,8 @@ def process_all_reports(results_dir) -> dict:
     return data
 
 
-def select_best_combination(data) -> tuple[int, int]:
-    """Find the highest value and its corresponding (k, p) combination."""
-    print("sim")
+def select_best_combination(data, output_dir) -> dict:
+    """Find the highest value and its corresponding (k, p) combination, then store it in a dictionary and save it to a file."""
     max_value = -1
     best_k, best_p = None, None
 
@@ -56,7 +57,12 @@ def select_best_combination(data) -> tuple[int, int]:
                 max_value = value
                 best_k, best_p = k, p
 
-    return best_k, best_p, max_value
+    result = {"best_k": best_k, "best_p": best_p, "max_value": max_value}
+
+    with open(os.path.join(output_dir, "best_combination.json"), "w") as f:
+        json.dump(result, f, indent=4)
+
+    return result
 
 
 def plot_results(data, output_dir) -> None:
@@ -85,8 +91,8 @@ def main(args):
     data = process_all_reports(args.input_dir)
     print(data)
 
-    best_k, best_p, max_value = select_best_combination(data)
-    print(best_k, best_p, max_value)
+    best_combination = select_best_combination(data, args.output_dir)
+    print(best_combination)
 
     plot_results(data, args.output_dir)
 
