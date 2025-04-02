@@ -42,7 +42,7 @@ rule checkm2:
         if [ ! -d "{params.db}" ]; then
                 checkm2 database --download --path {params.db}
         fi
-            checkm2 predict\ 
+            checkm2 predict\
                 --threads {threads}\
                 --input {input}\
                 --output-directory {output}\
