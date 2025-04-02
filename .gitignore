@@ -1,28 +1,19 @@
 
-#get phenotype reads
-/get_phenotype_reads/data/studies_fastq_list/*
-/get_phenotype_reads/data/sample_labels_raw/metaml/PRJEB1786_sample_labels.txt
-/get_phenotype_reads/data/sample_labels_raw/metaml/PRJEB4336_sample_labels.txt
+#cami2_benchmarks
+/cami2_benchmark/model_results/*
 
-
-#get cami2 data
-/get_cami2_data/data/*/
-
-#data
-/data/phenotype/reads/*.csv
-/data/phenotype/sample_labels/*
-/data/cami2/*
-!data/cami2/.gitkeep
-
+#notebook
 play.ipynb
 
 #Pycache
-src/__pycache__
+*__pycache__
 
 
 #/npz files
 *.npz
-!helper/*.npz
+!binning/helpers/*
 
 #Snakemake
-.snakemake/
+.snakemake
+
+
