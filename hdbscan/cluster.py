@@ -62,7 +62,7 @@ def save_output(contig_names, predictions) -> None:
 if __name__ == "__main__":
     embeddings_path = sys.argv[1]
     contig_catalogue_path = sys.argv[2]
-    threads = sys.argv[3]
+    threads = int(sys.argv[3])
 
     clusters = cluster(embeddings_path, threads)
     contig_names = get_contig_names(contig_catalogue_path)
