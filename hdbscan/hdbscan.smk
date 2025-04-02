@@ -10,11 +10,9 @@ rule cluster:
     threads:
         48
     shell:
-    """
-    
-    python -m cuml.accel cluster.py {input.embeddings} {input.contig_catalogue}
-   
-    """
+        """
+        python -m cuml.accel cluster.py {input.embeddings} {input.contig_catalogue}
+        """
 
 
 rule write_fasta:
@@ -23,11 +21,11 @@ rule write_fasta:
     output:
         "tmp/{sample}.fasta"
     shell:
-    """
-    mkdir -p tmp
+        """
+        mkdir -p tmp
 
-    python create_fasta.py "catalogue.fna.gz" clusters.tsv 250000 tmp
-    """
+        python create_fasta.py "catalogue.fna.gz" clusters.tsv 250000 tmp
+        """
 
 
 rule checkm2:
@@ -40,16 +38,16 @@ rule checkm2:
     threads:
         48
     shell:
-    """
-    if [ ! -d "{params.db}" ]; then
-            checkm2 database --download --path {params.db}
-    fi
-        checkm2 predict\ 
-            --threads {threads}\
-            --input {input}\
-            --output-directory {output}\
-            --database_path {params.db}/CheckM2_database/uniref100.KO.1.dmnd
-    """
+        """
+        if [ ! -d "{params.db}" ]; then
+                checkm2 database --download --path {params.db}
+        fi
+            checkm2 predict\ 
+                --threads {threads}\
+                --input {input}\
+                --output-directory {output}\
+                --database_path {params.db}/CheckM2_database/uniref100.KO.1.dmnd
+        """
 
 rule parse_checkm2_results:
     input:
