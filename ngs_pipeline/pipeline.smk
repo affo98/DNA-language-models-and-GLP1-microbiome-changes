@@ -230,7 +230,7 @@ rule concatenate:
     params:
         concatenate = os.path.join(PY_SCRIPTS, "concatenate.py")
     threads:
-        1
+        48
     shell:
         """
         python {params.concatenate} {output} {input} -m 94
