@@ -44,6 +44,21 @@ def process_all_reports(results_dir) -> dict:
     return data
 
 
+def select_best_combination(data) -> tuple[int, int]:
+    """Find the highest value and its corresponding (k, p) combination."""
+    print("sim")
+    max_value = -1
+    best_k, best_p = None, None
+
+    for k, p_values in data.items():
+        for p, value in p_values.items():
+            if value > max_value:
+                max_value = value
+                best_k, best_p = k, p
+
+    return best_k, best_p, max_value
+
+
 def plot_results(data, output_dir) -> None:
     plt.figure(figsize=(8, 6))
     df = pd.DataFrame(data).T  # Transpose to align k values on y-axis
@@ -51,16 +66,15 @@ def plot_results(data, output_dir) -> None:
     sns.heatmap(df, annot=True, fmt="d", cmap="Oranges", linewidths=0.5)
 
     # Labels
-    plt.xlabel("p values")
-    plt.ylabel("k values")
-    plt.title("Heatmap of k*p Combinations")
+    plt.xlabel("P values")
+    plt.ylabel("K values")
 
     file_path = os.path.join(
         output_dir,
         f"heatmap.png",
     )
     plt.tight_layout()
-    plt.savefig(file_path)
+    plt.savefig(file_path, dpi=300)
     plt.close()
 
     return
@@ -70,6 +84,10 @@ def main(args):
 
     data = process_all_reports(args.input_dir)
     print(data)
+
+    best_k, best_p, max_value = select_best_combination(data)
+    print(best_k, best_p, max_value)
+
     plot_results(data, args.output_dir)
 
 
