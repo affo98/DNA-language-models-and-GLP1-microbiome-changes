@@ -55,9 +55,9 @@ def select_best_combination(data, output_dir) -> dict:
         for p, value in p_values.items():
             if value > max_value:
                 max_value = value
-                best_k, best_p = k, p
+                best_k, best_p = (k,)
 
-    result = {"best_k": best_k, "best_p": best_p, "max_value": max_value}
+    result = {"best_k": int(best_k), "best_p": int(best_p), "max_value": int(max_value)}
 
     with open(os.path.join(output_dir, "best_combination.json"), "w") as f:
         json.dump(result, f, indent=4)
