@@ -95,12 +95,12 @@ To run multiple datasets/models, see folder `sweeps` that contains
 * `process_data.sh`: Runs `DOWNLOAD`, `CONCATENATE`, and `ALIGNMENT` on one or more datasets.
 *  `run_models.sh`: Runs binning and `CHECKM2` for one or more models on a dataset.
 
-**Example run to download and process airways_short and gastro_short datasets**
+**Example run to download and process ``airways_short`` and ``gastro_short`` datasets**
 ```bash
 bash cami2_benchmark/sweeps/process_data.sh airways_short gastro_short
 ```
 
-**Example run with LLM models on metahit dataset**
+**Example run with LLM models on ``metahit`` dataset**
 ```bash
 bash cami2_benchmark/sweeps/run_models.sh metahit dnaberts dnabert2 dnabert2random
 ```

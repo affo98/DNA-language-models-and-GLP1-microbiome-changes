@@ -34,11 +34,8 @@ The list of models are specified in the file `models.yml`. They include:
 ### Output
 
 * Cluster Results: Stored in <save_path>/cluster_results/.
-
 * Embeddings: Saved in <save_path>/embeddings/.
-
 * Threshold Histograms: Saved in <save_path>/threshold_histograms/.
-
 * Log File: Saved in <save_path> Tracks execution details and errors.
 
 
