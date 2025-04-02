@@ -36,7 +36,7 @@ rule write_fasta:
 
 rule checkm2:
     input:
-        "tmp,
+        "tmp"
     output:
         directory("checkm2_results"),
     params:
