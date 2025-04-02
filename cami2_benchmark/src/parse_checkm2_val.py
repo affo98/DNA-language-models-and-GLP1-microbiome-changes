@@ -3,6 +3,7 @@ from argparse import ArgumentParser
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 import numpy as np
 
 COMPLETENESS_BINS = [90, 80, 70, 60, 50]
@@ -17,7 +18,7 @@ def parse_quality_report(file_path) -> pd.DataFrame:
 
 
 def process_all_reports(results_dir) -> dict:
-    """Walks through the RESULTS_DIR to collect all results."""
+    """Walks through the results directory and structures data for heatmap plotting."""
     data = {}
 
     for k_p_combination in os.listdir(results_dir):
@@ -25,47 +26,51 @@ def process_all_reports(results_dir) -> dict:
         if not os.path.isfile(report_path):
             continue
 
+        try:
+            k_value, p_value = k_p_combination.split("_")
+            k_value = k_value[1:]
+            p_value = p_value[1:]
+        except ValueError:
+            continue
+
         completeness_values = parse_quality_report(report_path)
         bin_counts = [np.sum(completeness_values >= b) for b in COMPLETENESS_BINS]
 
-        data[k_p_combination] = bin_counts[-1]
+        if k_value not in data:
+            data[k_value] = {}
+
+        data[k_value][p_value] = bin_counts[-1]  # Store highest completeness count
 
     return data
 
 
-# def plot_results(data) -> None:
-#     plt.figure(figsize=(8, 6))
+def plot_results(data, output_dir) -> None:
+    plt.figure(figsize=(8, 6))
+    df = pd.DataFrame(data).T  # Transpose to align k values on y-axis
 
-#     plt.plot(
-#         self.pairsim_vector,
-#         self.bin_vector,
-#         color="skyblue",
-#         linestyle="-",
-#         linewidth=2,
-#     )
+    sns.heatmap(df, annot=True, fmt="d", cmap="Oranges", linewidths=0.5)
 
-#     plt.xlabel("Similarity Bins")
-#     plt.ylabel("Frequency")
-#     plt.title(f"Similarity Histogram {self.model_name}")
+    # Labels
+    plt.xlabel("p values")
+    plt.ylabel("k values")
+    plt.title("Heatmap of k*p Combinations")
 
-#     plt.legend()
+    file_path = os.path.join(
+        output_dir,
+        f"heatmap.png",
+    )
+    plt.tight_layout()
+    plt.savefig(file_path)
+    plt.close()
 
-#     file_path = os.path.join(
-#         self.save_path,
-#         f"k{self.knn_k}_p{self.knn_p}_similarity_histogram.png",
-#     )
-#     plt.tight_layout()
-#     plt.savefig(file_path)
-#     plt.close()
-#     self.log.append(f"Plot saved at: {file_path}")
-
-#     return
+    return
 
 
 def main(args):
 
     data = process_all_reports(args.input_dir)
     print(data)
+    plot_results(data, args.output_dir)
 
 
 def add_arguments() -> ArgumentParser:

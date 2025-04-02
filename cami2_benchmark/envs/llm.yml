@@ -15,5 +15,6 @@ dependencies:
       - transformers
       - einops
       - matplotlib
+      - seaborn
       - pandas
       - scikit-image
