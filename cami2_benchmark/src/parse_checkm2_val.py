@@ -87,8 +87,6 @@ def main(args):
     for contamination in CONTAMINATION_THRESHOLDS:
 
         data = process_all_reports(args.input_dir, contamination)
-        print(data)
-
         best_combination = select_best_combination(data)
         print(best_combination)
 
