@@ -2,7 +2,8 @@
 
 
 rule all:
-    "tmp/{bin}.fasta"
+    input:
+        "tmp/{bin}.fasta"
 
 rule cluster:
     input:
