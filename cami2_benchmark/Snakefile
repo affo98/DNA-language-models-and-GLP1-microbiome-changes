@@ -175,13 +175,7 @@ rule all:
     input: input_files
 
 
-ruleorder: other_model_val > create_fasta_bins_other_model_val > 
-
-if DATASET == 'metahit':
-    process_metahit > concatenate
-
 ruleorder: 
-
     process_metahit > concatenate if DATASET == 'metahit' else ""
 
     if MODEL in ['tnf', 'tnfkernel', 'dnaberts', 'dnabert2', 'dnabert2random']:
