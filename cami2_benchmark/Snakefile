@@ -256,13 +256,13 @@ rule parse_checkm2_val:
     input:
         checkm2_reports=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation")
     output:
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results")
+        path=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results"))
     conda:
         "envs/llm.yml"
     shell:
         """
-        mkdir -p {output}
-        python {SRC_DIR}/parse_checkm2_val.py -i {input.checkm2_reports} -o {output}
+        mkdir -p {output.path}
+        python {SRC_DIR}/parse_checkm2_val.py -i {input.checkm2_reports} -o {output.path}
         """
 
 
