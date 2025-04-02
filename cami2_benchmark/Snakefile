@@ -175,7 +175,7 @@ rule all:
     input: input_files
 
 ruleorder_list = []
-if DATASET == 'metahit':
+if DATASET == 'metahit' and config_download:
     ruleorder_list.append("process_metahit > concatenate")
 
 if MODEL in ['tnf', 'tnfkernel', 'dnaberts', 'dnabert2', 'dnabert2random']:
