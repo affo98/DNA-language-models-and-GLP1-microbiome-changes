@@ -129,7 +129,7 @@ elif MODEL == 'comebin' and not config_nomodelrun:
 elif MODEL in ['tnf'] and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "validation"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_val"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "fasta_bins_val"),
         #expand(
         #    os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins_val", "{MODEL}", "k{knn_k}_p{knn_p}"),
         #    knn_k=KNN_K,
