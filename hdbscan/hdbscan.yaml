@@ -1,0 +1,19 @@
+name: hdbscan
+channels:
+  - conda-forge
+  - rapidsai
+  - nvidia
+  - bioconda
+  - defaults
+dependencies:
+  - snakemake
+  - python=3.12.0
+  - rapids=25.02
+  - 'cuda-version>=12.0,<=12.8'
+
+  - pip:
+    - kneaddata
+    - vamb
+    - numpy
+    - biopython
+    - scikit-learn
