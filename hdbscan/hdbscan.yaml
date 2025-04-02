@@ -19,4 +19,7 @@ dependencies:
     - numpy
     - biopython
     - scikit-learn
+    - matplotlib
+    - pandas
+    - seaborn
     # - cuml-cu12==25.2.* --extra-index-url https://pypi.nvidia.com
