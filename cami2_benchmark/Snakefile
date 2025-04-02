@@ -285,14 +285,15 @@ rule other_model_test:
         "envs/llm.yml"
     shell:
         """
-        # Read the best combination values from the JSON file
         best_combination_file="{input.best_kp_path}/best_combination.json"
         best_k=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_k"])' $best_combination_file)
         best_p=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_p"])' $best_combination_file)
 
-        # Run the binning script with the extracted values
+        echo "$best_k"
+        echo "$best_p"
+
         python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
-        -b {BATCH_SIZES} -knnk $best_k -knnp $best_p -s {output.dirs} -l {log} -m test
+        -b {BATCH_SIZES} -k $best_k -p $best_p -s {output.dirs} -l {log} -m test
         """
 
 rule create_fasta_bins_other_model_test:
