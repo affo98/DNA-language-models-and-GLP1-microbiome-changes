@@ -143,6 +143,7 @@ elif MODEL in ['tnfkernel'] and not config_nomodelrun:
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnfkernel_output"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "tnfkernel"),
     ]
+
 elif MODEL in ['dna2vec'] and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dna2vec_output"),
@@ -191,7 +192,7 @@ rule other_model_val:
     log:
         os.path.join(LOGS, DATASET, "{MODEL}_val", "{MODEL}_val_binning.log")
     conda:
-        "{BINNING_DIR}/envs/binning.yml"
+        "BINNING_DIR/envs/binning.yml"
     shell:
         """
         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
@@ -280,7 +281,7 @@ rule other_model_test:
     log:
         os.path.join(LOGS, DATASET, "{MODEL}_test_binning.log")
     conda:
-        "{BINNING_DIR}/envs/binning.yml"
+        "BINNING_DIR/envs/binning.yml"
     shell:
         """
         best_combination_file="{input.best_kp_path}/best_combination.json"
