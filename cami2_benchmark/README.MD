@@ -94,7 +94,7 @@ To run multiple datasets/models, see folder `sweeps` that contains
 
 **Example run to download and process airways_short and gastro_short datasets**
 ```bash
-bash cami2_benchmark/sweeps/process_data.sh aiwways_short gastro_short
+bash cami2_benchmark/sweeps/process_data.sh airways_short gastro_short
 ```
 
 **Example run with LLM models on metahit dataset**
