@@ -13,7 +13,7 @@ def cluster(path_to_embeds: str, threads: int) -> np.array:
 
     hdb = HDBSCAN(min_cluster_size=min_cluster_size, n_jobs=threads)
 
-    hdb.fit(dnabert_metahit_embeds[:, 10000, :])
+    hdb.fit(dnabert_metahit_embeds[:10000, :])
 
     cluster_labels = hdb.labels_
 
