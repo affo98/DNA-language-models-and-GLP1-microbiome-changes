@@ -39,6 +39,7 @@ class KMediod:
         contig_names: list[str],
         save_path: str,
         log: Logger,
+        log_verbose: bool,
         min_bin_size: int = 10,
         num_steps: int = 3,
         max_iter: int = 1000,
@@ -53,6 +54,7 @@ class KMediod:
         self.contig_names = contig_names
         self.save_path = save_path
         self.log = log
+        self.log_verbose = log_verbose
         self.min_bin_size = min_bin_size
         self.num_steps = num_steps
         self.max_iter = max_iter
@@ -150,8 +152,9 @@ class KMediod:
             predictions[predictions == label] = -1
 
         labels, counts = torch.unique(predictions, return_counts=True)
-        for label, count in zip(labels.cpu(), counts.cpu()):
-            self.log.append(f"Cluster {label}: {count} points")
+        if self.log_verbose:
+            for label, count in zip(labels.cpu(), counts.cpu()):
+                self.log.append(f"Cluster {label}: {count} points")
 
         predictions = predictions.cpu().numpy()
 
