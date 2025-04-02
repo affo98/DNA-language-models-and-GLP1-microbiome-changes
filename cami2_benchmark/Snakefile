@@ -130,7 +130,8 @@ elif MODEL in ['tnf'] and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "validation"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "fasta_bins_validation"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "checkm2_validation")
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "checkm2_validation"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "checkm2_validation_results")
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output"),
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "tnf"),
     ]
@@ -247,9 +248,24 @@ rule checkm2_val:
                             --input "$bin_dir" \
                             --output-directory "$output_subdir" \
                             --database_path {OUTDIR_MODEL_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
-            
         done
         """
+
+
+rule parse_checkm2_val:
+    input:
+        checkm2_reports=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation")
+    output:
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results")
+    conda:
+        "envs/llm.yml"
+    shell:
+        """
+        python {SRC_DIR}/parse_checkm2_val.py -i {input.checkm2_reports} -o {output}
+        """
+
+
+
 
 #END OTHER MODEL VAL
 
