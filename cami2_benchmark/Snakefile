@@ -176,7 +176,7 @@ if config_checkm2:
 
 rule all:
     input: input_files
-ruleorder: process_metahit > concatenate
+ruleorder: other_model_val > create_fasta_bins_other_model_val > process_metahit > concatenate
 
 
 
