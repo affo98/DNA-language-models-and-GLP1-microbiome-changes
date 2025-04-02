@@ -63,12 +63,11 @@ conda activate cami2_processing
 The Snakemake file controls the workflow. It takes the following args:
 
 * `DATASET` Choose a dataset from the `config.yml`. Only one dataset can be used at a time.
-* `MODEL` Optional. Choose a model from the `contif.yml`. Only one model can be used at a time.
+* `MODEL` Optional. Choose a model from the `contig.yml`. Only one model can be used at a time.
 * `DOWNLOAD` Optional. Set to `True` to download the dataset.
 * `CONCATENATE` Optional. Set to `True` to run `concatenate.py` from vamb on sample-contigs.
 * `ALIGNMENT` Optional. Set to `True` to run `strobealign`.
 * `CHECKM2` Optional. Set to `True` to run Checkm2 on the model output.
-
 
 
 

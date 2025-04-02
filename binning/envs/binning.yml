@@ -1,4 +1,4 @@
-name: llm
+name: binning
 channels:
   - conda-forge
   - bioconda
