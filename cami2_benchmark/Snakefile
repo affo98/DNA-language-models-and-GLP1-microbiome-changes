@@ -263,7 +263,7 @@ rule parse_checkm2_val:
     output:
         path=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results"))
     conda:
-        "{BINNING_DIR}/envs/binning.yml"
+        "BINNING_DIR/envs/binning.yml"
     shell:
         """
         mkdir -p {output.path}
