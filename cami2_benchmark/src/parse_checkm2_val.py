@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 COMPLETENESS_BINS = [90, 80, 70, 60, 50]
-CONTAMINATION_THRESHOLD = 10
+CONTAMINATION_THRESHOLD = 20
 
 
 def parse_quality_report(file_path) -> pd.DataFrame:
@@ -28,46 +28,38 @@ def process_all_reports(results_dir) -> dict:
         completeness_values = parse_quality_report(report_path)
         bin_counts = [np.sum(completeness_values >= b) for b in COMPLETENESS_BINS]
 
-        data[k_p_combination] = bin_counts
+        data[k_p_combination] = bin_counts[-1]
 
     return data
 
 
-# def plot_results(data)->None:
-#             plt.figure(figsize=(8, 6))
+# def plot_results(data) -> None:
+#     plt.figure(figsize=(8, 6))
 
-#         if knn:
-#             plt.axvline(
-#                 self.knn_threshold,
-#                 color="g",
-#                 linestyle="--",
-#                 label=f"KNN Threshold: {self.knn_threshold} (k={self.knn_k}, p={self.knn_p})",
-#             )
+#     plt.plot(
+#         self.pairsim_vector,
+#         self.bin_vector,
+#         color="skyblue",
+#         linestyle="-",
+#         linewidth=2,
+#     )
 
-#         plt.plot(
-#             self.pairsim_vector,
-#             self.bin_vector,
-#             color="skyblue",
-#             linestyle="-",
-#             linewidth=2,
-#         )
+#     plt.xlabel("Similarity Bins")
+#     plt.ylabel("Frequency")
+#     plt.title(f"Similarity Histogram {self.model_name}")
 
-#         plt.xlabel("Similarity Bins")
-#         plt.ylabel("Frequency")
-#         plt.title(f"Similarity Histogram {self.model_name}")
+#     plt.legend()
 
-#         plt.legend()
+#     file_path = os.path.join(
+#         self.save_path,
+#         f"k{self.knn_k}_p{self.knn_p}_similarity_histogram.png",
+#     )
+#     plt.tight_layout()
+#     plt.savefig(file_path)
+#     plt.close()
+#     self.log.append(f"Plot saved at: {file_path}")
 
-#         file_path = os.path.join(
-#             self.save_path,
-#             f"k{self.knn_k}_p{self.knn_p}_similarity_histogram.png",
-#         )
-#         plt.tight_layout()
-#         plt.savefig(file_path)
-#         plt.close()
-#         self.log.append(f"Plot saved at: {file_path}")
-
-#         return
+#     return
 
 
 def main(args):
