@@ -56,7 +56,7 @@ class KMediod:
         self.save_path = save_path
         self.log = log
         self.log_verbose = log_verbose
-        self.mode = (mode,)
+        self.mode = mode
         self.min_bin_size = min_bin_size
         self.num_steps = num_steps
         self.max_iter = max_iter
@@ -189,6 +189,7 @@ class KMediod:
             )
         elif self.mode == "test":
             output_file = os.path.join(self.save_path, f"clusters.tsv")
+
         with open(output_file, "w") as file:
             file.write("clustername\tcontigname\n")  # header
 
