@@ -6,12 +6,18 @@ if [ "$#" -lt 1 ]; then
     exit 1
 fi
 
-# Convert datasets into a comma-separated list for Snakemake
-DATASETS=$(IFS=,; echo "$*")
+# Loop over each dataset
+for dataset in "$@"; do
+    echo "Processing dataset: $dataset"
+    
+    snakemake --snakefile cami2_benchmark/Snakefile \
+              --config DATASET="$dataset" DOWNLOAD=True CONCATENATE=True ALIGNMENT=True \
+              --use-conda
 
-# Run Snakemake for all datasets in one command
-snakemake --snakefile cami2_benchmark/Snakefile \
-          --config DATASET="$DATASETS" DOWNLOAD=True CONCATENATE=True ALIGNMENT=True \
-          --use-conda
+    # Check if Snakemake was successful
+    if [ $? -ne 0 ]; then
+        echo "Snakemake failed for dataset: $dataset"
+        exit 1
+    fi
+done
 
-echo "All datasets processed successfully!"

@@ -27,5 +27,3 @@ for model in "${models[@]}"; do
         exit 1
     fi
 done
-
-echo "All models processed successfully for dataset: $dataset!"
