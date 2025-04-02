@@ -3,6 +3,7 @@ from sklearn.cluster import HDBSCAN
 import gzip
 import os
 from Bio import SeqIO
+import sys
 
 
 def cluster(path_to_embeds: str) -> np.array:
@@ -59,6 +60,10 @@ def save_output(contig_names, predictions) -> None:
 
 
 if __name__ == "__main__":
-    clusters = cluster("${embeddings}")
-    contig_names = get_contig_names("${contig_catalogue}")
+    embeddings_path = sys.argv[1]
+    contig_catalogue_path = sys.argv[2]
+
+    clusters = cluster(embeddings_path)
+    contig_names = get_contig_names(contig_catalogue_path)
+
     save_output(contig_names, clusters)
