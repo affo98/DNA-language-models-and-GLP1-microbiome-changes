@@ -20,7 +20,7 @@ mv bowtie2-index src/databases/bowtie2-index/
 
 5) Activate the created env: `conda activate snakemake-global`
 
-6) Run the pipeline with: `python run_pipeline.py --snakemake-args --jobs 2 --use-conda`
+6) Run the pipeline with: `python run_pipeline.py --snakemake-args --jobs 192 --use-conda --rerun-triggers mtime`
 
 
 # Get Phenotype Reads
