@@ -261,6 +261,7 @@ rule parse_checkm2_val:
         "envs/llm.yml"
     shell:
         """
+        mkdir -p {output}
         python {SRC_DIR}/parse_checkm2_val.py -i {input.checkm2_reports} -o {output}
         """
 
