@@ -227,7 +227,6 @@ rule create_fasta_bins_other_model_val:
     shell:
         """
         for cluster_file in {params.cluster_results_dir}/clusters_k*_p*.tsv; do
-            echo $clusterfile
             k_p=$(basename "$cluster_file" .tsv | sed 's/clusters_k//; s/_p/_p/')
             output_dir={output.dirs}/fasta_bins_validation/$k_p
             log_file={log.log_file}_$k_p.log
