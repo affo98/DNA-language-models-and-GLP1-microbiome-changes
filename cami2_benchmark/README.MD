@@ -2,27 +2,29 @@
 
 The code in this folder is used to benchmark models on Cami2 datasets. The datasets in CAMI2 are designed to mimic realistic microbiome environments and include a vast array of both new and known genomes. CAMI2 datasets are often used to benchmark metagenomic binners: https://cami-challenge.org/.
 
+We also include the MetaHIT "error free" dataset from [metabat](https://figshare.com/articles/dataset/MetaHIT_error-free_contigs_from_MetaBAT/27933807?file=50894283).
 
 The following steps are performed: 
 
 1. Download the Cami2 Datasets: sample-reads and sample-contigs. Each sample is assembled individually. These files are found on the Cami2 website.
 2. All sample-contigs are concatenated into a contig catalogue, using the script `concatenate.py` from VAMB.
 3. Sample reads are aligned to the contig catalogue, producing a bam-file for each sample, following the "multi-split" workflow. 
-4. A model take as input the contig catalogue and the bam-files, and outputs bins. 
+4. Models *Vamb*, *Taxvamb*, and *Comebin* take as input the contig catalogue and the bam-files, and outputs bins. Models *tnf*, *tnfkernel*, *dna2vec* *dnaberts*, *dnabert2*, and *dnabert2random* take only contig catalogue as input.
 5. CheckM2 is used to evaluate the performance of the model.
 
 
 #### Datasets
 
-The list of datasets are specified in the file `config.yml`. They include:
+The list of datasets are specified in the file `config.yml`. All datasets are **short-read**. They include:
 
-* [**marine**](https://cami-challenge.org/datasets/Marine/) `short` (Gold standard assembly from Illumina HiSeq simulation).
-* [**plant**](https://cami-challenge.org/datasets/Plant-associated/) `short` (From Illumina HiSeq data simulation).
-* [**human**](https://cami-challenge.org/datasets/Toy%20Human%20Microbiome%20Project/) **airways** `short`.
-* [**human**](https://cami-challenge.org/datasets/Toy%20Human%20Microbiome%20Project/) **gastro** `short`.
-* [**human**](https://cami-challenge.org/datasets/Toy%20Human%20Microbiome%20Project/) **oral** `short`.
-* [**human**](https://cami-challenge.org/datasets/Toy%20Human%20Microbiome%20Project/) **skin** `short`.
-* [**human**](https://cami-challenge.org/datasets/Toy%20Human%20Microbiome%20Project/) **urogenital** `short`.
+* [**marine**](https://cami-challenge.org/datasets/Marine/)  (Simulated Illumina HiSeq metagenome data).
+* [**plant**](https://cami-challenge.org/datasets/Plant-associated/)  (Illumina HiSeq metagenome data). 
+* [**human**](https://cami-challenge.org/datasets/Toy%20Human%20Microbiome%20Project/) **airways**.
+* [**human**](https://cami-challenge.org/datasets/Toy%20Human%20Microbiome%20Project/) **gastro**.
+* [**human**](https://cami-challenge.org/datasets/Toy%20Human%20Microbiome%20Project/) **oral**.
+* [**human**](https://cami-challenge.org/datasets/Toy%20Human%20Microbiome%20Project/) **skin**.
+* [**human**](https://cami-challenge.org/datasets/Toy%20Human%20Microbiome%20Project/) **urogenital**.
+* [**MetaHIT "Error Free**](https://figshare.com/articles/dataset/MetaHIT_error-free_contigs_from_MetaBAT/27933807?file=50894283). 
 
 
 #### Models
@@ -32,10 +34,18 @@ The list of models are specified in the file `config.yml`. They include:
 * **VAMB** [github](https://github.com/RasmussenLab/vamb).
 * **TaxVAMB** [github](https://github.com/RasmussenLab/vamb).
 * **Comebin** [github](https://github.com/ziyewang/COMEBin).
+* **TNF** Simple tetranucleotide frequencies with dim=256
+* **TNFKERNEL** TNFs downprojected by a kernel to dim=103 [github](https://github.com/RasmussenLab/vamb/blob/master/src/create_kernel.py)
+* **DNA2VEC** [github](https://github.com/pnpnpn/dna2vec).
+* **DNABERT-S**: [github](https://github.com/MAGICS-LAB/DNABERT_S)
+* **DNABERT-2**: [github](https://github.com/MAGICS-LAB/DNABERT_2)
+* **DNABERT-2 Random** DNABERT-2 with randomly initialized weights. 
 
-### Output
 
-The output of the workflow is Checkm2 results for the bins. These are found in folder `model_results/DATASET/checkm2`.
+
+#### Output
+
+The output of the workflow is Checkm2 quality results for the bins. These are found in folder `model_results/DATASET/checkm2`.
 
 
 #### How to run
@@ -50,7 +60,7 @@ The Snakemake file specifies the workflow. It takes the following args:
 * `CHECKM2` Optional. Set to `True` to run Checkm2 on the model output.
 
 
-#### Examples
+#### Example Runs
 
 Run the following command to download, concatenate and align the airways short dataset:
 
@@ -62,6 +72,28 @@ Run the following command to run vamb and benchmark results with checkm2:
 ```bash
 snakemake --snakefile cami2_benchmark/Snakefile --config DATASET=airways_short MODEL=vamb CHECKM2=True --use-conda
 ```
+
+
+#### Sweeps
+
+To run multiple datasets/models, see folder `sweeps` that contains 
+* `process_data.sh`: Runs `DOWNLOAD`, `CONCATENATE`, and `ALIGNMENT` on one or more datasets.
+*  `run_models.sh`: Runs binning and `CHECKM2` for one or more models on a dataset.
+
+**Example run to download and process airways_short and gastro_short datasets**
+```bash
+cami2_benchmark/sweeps/process_data.sh aiwways_short gastro_short
+```
+
+**Example run with LLM models on metahit dataset**
+```bash
+cami2_benchmark/sweeps/run_models.sh metahit dnaberts dnabert2 dnabert2random
+```
+
+
+
+
+
 
 
 
