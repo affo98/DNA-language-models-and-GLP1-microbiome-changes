@@ -9,17 +9,17 @@ import numpy as np
 import json
 
 COMPLETENESS_BINS = [90, 80, 70, 60, 50]
-CONTAMINATION_THRESHOLD = 10
+CONTAMINATION_THRESHOLDS = [5, 10, 15, 20, 20, 30, 35, 50]
 
 
-def parse_quality_report(file_path) -> pd.DataFrame:
+def parse_quality_report(file_path, contamination) -> pd.DataFrame:
     """Parses a CheckM2 quality report and extracts completeness & contamination."""
     df = pd.read_csv(file_path, sep="\t")
-    df = df[df["Contamination"] < CONTAMINATION_THRESHOLD]
+    df = df[df["Contamination"] < contamination]
     return df["Completeness"].values
 
 
-def process_all_reports(results_dir) -> dict:
+def process_all_reports(results_dir, contamination) -> dict:
     """Walks through the results directory and structures data for heatmap plotting."""
     data = {}
 
@@ -35,7 +35,7 @@ def process_all_reports(results_dir) -> dict:
         except ValueError:
             continue
 
-        completeness_values = parse_quality_report(report_path)
+        completeness_values = parse_quality_report(report_path, contamination)
         bin_counts = [np.sum(completeness_values >= b) for b in COMPLETENESS_BINS]
 
         if k_value not in data:
@@ -46,7 +46,7 @@ def process_all_reports(results_dir) -> dict:
     return data
 
 
-def select_best_combination(data, output_dir) -> dict:
+def select_best_combination(data) -> dict:
     """Find the highest value and its corresponding (k, p) combination, then store it in a dictionary and save it to a file."""
     max_value = -1
     best_k, best_p = None, None
@@ -58,10 +58,6 @@ def select_best_combination(data, output_dir) -> dict:
                 best_k, best_p = k, p
 
     result = {"best_k": int(best_k), "best_p": int(best_p), "max_value": int(max_value)}
-
-    with open(os.path.join(output_dir, "best_combination.json"), "w") as f:
-        json.dump(result, f, indent=4)
-
     return result
 
 
@@ -88,13 +84,24 @@ def plot_results(data, output_dir) -> None:
 
 def main(args):
 
-    data = process_all_reports(args.input_dir)
-    print(data)
+    for contamination in CONTAMINATION_THRESHOLDS:
 
-    best_combination = select_best_combination(data, args.output_dir)
-    print(best_combination)
+        data = process_all_reports(args.input_dir, contamination)
+        print(data)
 
-    plot_results(data, args.output_dir)
+        best_combination = select_best_combination(data)
+        print(best_combination)
+
+        if best_combination["max_value"] == 0:
+            continue
+
+        # save it there is an actual max value
+        print(f"Using contamination: {contamination}")
+        best_combination["contamination"] = contamination
+        with open(os.path.join(args.out_dir, "best_combination.json"), "w") as f:
+            json.dump(best_combination, f, indent=4)
+
+        plot_results(data, args.output_dir)
 
 
 def add_arguments() -> ArgumentParser:
