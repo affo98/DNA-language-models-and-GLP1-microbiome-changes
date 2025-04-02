@@ -40,6 +40,7 @@ class KMediod:
         save_path: str,
         log: Logger,
         log_verbose: bool,
+        mode: str,
         min_bin_size: int = 10,
         num_steps: int = 3,
         max_iter: int = 1000,
@@ -55,6 +56,7 @@ class KMediod:
         self.save_path = save_path
         self.log = log
         self.log_verbose = log_verbose
+        self.mode = (mode,)
         self.min_bin_size = min_bin_size
         self.num_steps = num_steps
         self.max_iter = max_iter
@@ -181,7 +183,12 @@ class KMediod:
     def save_output(self, knn_k, knn_p, predictions, contig_names) -> None:
         """save predictions in save_path in format: clustername \\t contigname"""
 
-        output_file = os.path.join(self.save_path, f"clusters_k{knn_k}_p{knn_p}.tsv")
+        if self.mode == "val":
+            output_file = os.path.join(
+                self.save_path, f"clusters_k{knn_k}_p{knn_p}.tsv"
+            )
+        elif self.mode == "test":
+            output_file = os.path.join(self.save_path, f"clusters.tsv")
         with open(output_file, "w") as file:
             file.write("clustername\tcontigname\n")  # header
 

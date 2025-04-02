@@ -35,7 +35,7 @@ def main(args, log):
     contigs_test, contigs_val, contig_names_test, contig_names_val = (
         split_contigs_valtest(contigs, contig_names, log, VAL_PROPORTION)
     )
-    print("NUMBER OF CONTIGS VAL", len(contig_names_val))
+    log.append("NUMBER OF CONTIGS VAL", len(contig_names_val))
 
     if args.mode == "val":
         log.append(
@@ -75,6 +75,7 @@ def main(args, log):
             results_dir,
             log,
             False,
+            "val",
             MIN_BIN_SIZE,
             NUM_STEPS,
             MAX_ITER,
@@ -93,11 +94,9 @@ def main(args, log):
         knnk = args.knnk[0]
         knnp = args.knnp[0]
         log.append(
-            f"{'='*20}\n"
-            f"=== Start hyperparameter search for KNN ===\n"
-            f"=== K: {knnk} ===\n"
-            f"=== P: {knnp} ===\n"
-            f"{'='*20}"
+            f"{'='*60}\n"
+            f"=== Running Binning Test with K: {knnk} P: {knnp} ===\n"
+            f"{'='*60}"
         )
 
         embedder_test = Embedder(
@@ -126,6 +125,7 @@ def main(args, log):
             args.save_path,
             log,
             True,
+            "test",
             MIN_BIN_SIZE,
             NUM_STEPS,
             MAX_ITER,
