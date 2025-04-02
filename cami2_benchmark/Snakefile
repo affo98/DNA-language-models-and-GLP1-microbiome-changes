@@ -126,7 +126,7 @@ elif MODEL == 'comebin' and not config_nomodelrun:
     ]
 
 
-
+#OTHER MODELS
 elif MODEL in ['tnf'] and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "validation"),
@@ -167,6 +167,8 @@ elif MODEL in ['dnabert2random'] and not config_nomodelrun:
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnabert2random_output"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnabert2random"),
     ]
+
+
 if config_checkm2:
     input_files += [os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", f"{MODEL}_results")]
 
@@ -268,25 +270,25 @@ rule parse_checkm2_val:
         """
 #-end val
 
-#start test
+#-start test
 rule other_model_test:
     input:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
-        best_kp=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results")
+        best_kp_path=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results")
     output:
         dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "test"))
     log:
         os.path.join(LOGS, DATASET, "{MODEL}_test_binning.log")
-    params:
-        best_kp_path=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results")
+    #params:
+    #    best_kp_path=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results")
     conda:
         "envs/llm.yml"
     shell:
         """
         # Read the best combination values from the JSON file
-        best_combination_file="{params.best_kp_path}/best_combination.json"
-        best_k=$(python -c 'import json; print(json.load(open("$best_combination_file"))["best_k"])')
-        best_p=$(python -c 'import json; print(json.load(open("$best_combination_file"))["best_p"])')
+        best_combination_file="{input.best_kp_path}/best_combination.json"
+        best_k=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_k"])' $best_combination_file)
+        best_p=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_p"])' $best_combination_file)
 
         # Run the binning script with the extracted values
         python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
@@ -631,9 +633,6 @@ rule checkm2:
 #         """
         
 #         """
-
-
-
 
 
 
