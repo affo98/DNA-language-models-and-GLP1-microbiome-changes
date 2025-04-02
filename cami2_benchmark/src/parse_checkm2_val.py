@@ -9,7 +9,7 @@ import numpy as np
 import json
 
 COMPLETENESS_BINS = [90, 80, 70, 60, 50]
-CONTAMINATION_THRESHOLD = 20
+CONTAMINATION_THRESHOLD = 10
 
 
 def parse_quality_report(file_path) -> pd.DataFrame:
