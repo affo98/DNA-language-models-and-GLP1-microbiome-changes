@@ -3,7 +3,7 @@
 
 rule all:
     input:
-        "checkm2_results"
+        "checkm2_validation_results"
 
 rule cluster:
     input:
