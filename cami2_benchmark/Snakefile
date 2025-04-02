@@ -253,37 +253,6 @@ rule checkm2_val:
 
 #END OTHER MODEL VAL
 
-rule checkm2_val: 
-    input:
-        fasta_bins=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_validation")
-    output:
-        output=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation")),
-        summary=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation", "quality_report.tsv")
-    conda:
-        "envs/checkm2.yml"
-    threads:
-        128
-    shell:
-        """
-        
-        for bin_dir in {input.fasta_bins}/*; do
-            k_p=$(basename "$bin_dir")
-            output_subdir={output.output}/$k_p
-            
-            mkdir -p "$output_subdir"
-            
-            echo "FOP FLOOP: Processing $k_p with CheckM2..."
-            checkm2 predict --threads {threads} \
-                            --input "$bin_dir" \
-                            --output-directory "$output_subdir" \
-                            --database_path {OUTDIR_MODEL_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
-            
-        done
-        
-        """
-
-
-
 
 
 #OTHER MODEL TEST
