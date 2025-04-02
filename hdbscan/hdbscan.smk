@@ -4,7 +4,7 @@
 rule cluster:
     input:
         embeddings = "dnaberts.npy",
-        contig_catalouge = "catalogue.fna.gz"
+        contig_catalogue = "catalogue.fna.gz"
     output:
         "clusters.tsv"
     threads:
