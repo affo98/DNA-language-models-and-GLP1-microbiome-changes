@@ -36,6 +36,7 @@ def cluster(path_to_embeds: str, threads: int) -> np.array:
         f.write(f"Numbr of unassigned Contigs: {unassigned_contigs},\n")
         f.write("\n" * 2)
         f.write(f"Elapsed time fitting HDBSCAN: {elapsed_time:.2f} seconds\n")
+        # TODO filter out -1 clusters
     return cluster_labels
 
 
