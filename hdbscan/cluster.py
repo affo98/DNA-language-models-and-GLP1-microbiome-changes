@@ -27,7 +27,7 @@ def cluster(path_to_embeds: str, threads: int) -> np.array:
         f.write(f"Numbr of unassigned Contigs: {unassigned_contigs},\n")
 
         f.write("#" * 100 + "\n" * 2)
-        f.write("#" * 30 + "\t" * 2, "HDBSCAN PARAMETERS" + "\t" * 2 + "#" * 30)
+        f.write("#" * 30 + "\t" * 2 + "HDBSCAN PARAMETERS" + "\t" * 2 + "#" * 30)
         f.write("\n" * 2)
         f.write(f"min_cluster_size: {min_cluster_size}")
         f.write("\n" * 2)
