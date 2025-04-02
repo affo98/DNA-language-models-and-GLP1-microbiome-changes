@@ -198,7 +198,7 @@ rule metaspades:
         os.path.join(BENCHMARKS, "assembly", "{sample}.txt"),
     params:
         k="auto", #k-mer size
-        m="36", #memory 100gb vamb
+        m="38", #memory 100gb vamb
         tmp_dir = os.path.join(OUTDIR, "spades/asm_{sample}/tmp"),
     log:
         os.path.join(LOGS, "metaspades/{sample}.log")
