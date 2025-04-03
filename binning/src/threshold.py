@@ -149,7 +149,7 @@ class Threshold:
         """Saves the knn_threshold, pairsim_vector, and bin_vector to a JSON file."""
 
         data = {
-            "knn_threshold": int(self.knn_threshold),
+            "knn_threshold": float(self.knn_threshold),
             "pairsim_vector": self.pairsim_vector.tolist(),  # Convert numpy arrays to lists
             "bin_vector": self.bin_vector.tolist(),
         }
