@@ -100,7 +100,7 @@ def select_best_combination(data) -> dict:
     result = {
         "best_k": int(best_k),
         "best_p": int(best_p),
-        "max_weighted_sum": int(max_value),
+        "max_weighted_sum": float(max_value),
     }
     return result
 
