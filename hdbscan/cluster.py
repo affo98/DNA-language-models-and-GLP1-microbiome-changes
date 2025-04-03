@@ -1,61 +1,58 @@
 import numpy as np
 
-# from sklearn.cluster import HDBSCAN
-from cuml.cluster import HDBSCAN
+from sklearn.cluster import HDBSCAN
+
+# from cuml.cluster import HDBSCAN
 import gzip
 import os
 from Bio import SeqIO
 import sys
 import time
-from sklearn.preprocessing import normalize
 
 
-def cluster(path_to_embeds: str) -> np.array:
+def cluster(path_to_embeds: str, threads: int) -> np.array:
     dnabert_metahit_embeds = np.load(path_to_embeds)
     # dnabert_metahit_embeds = normalize(dnabert_metahit_embeds, norm="l2")
     min_cluster_size = 20
     # epsilons = [1, 2, 3, 4, 5]
-    min_samples = [1, 20, 40, 60, 70, 200]
+    # min_samples = [1, 20, 40, 60, 70, 200]
     with open("hdbscan_log.txt", "w") as f:
         # for epsi in epsilons:
-        for min_sample in min_samples:
-            hdb = HDBSCAN(
-                min_cluster_size=300,
-                min_samples=min_sample,
-                metric="euclidean",
-                # alpha=0.8,
-            )
-            start = time.time()
-            fmt = time.gmtime(start)
-            current_time = time.strftime("%D %T", fmt)
-            f.write(f"STARTED AT {current_time} with minimum epsilon {min_sample} \n")
-            hdb.fit(dnabert_metahit_embeds)
-            end = time.time()
-            elapsed_time = end - start
-            cluster_labels = hdb.labels_
+        # for min_sample in min_samples:
+        hdb = HDBSCAN(
+            min_cluster_size=200,
+            metric="cosine",
+            n_jobs=threads,
+        )
+        start = time.time()
+        fmt = time.gmtime(start)
+        current_time = time.strftime("%D %T", fmt)
+        f.write(f"STARTED AT {current_time} with minimum epsilon {min_sample} \n")
+        hdb.fit(dnabert_metahit_embeds)
+        end = time.time()
+        elapsed_time = end - start
+        cluster_labels = hdb.labels_
 
-            num_clusters = len(np.unique(cluster_labels).tolist())
-            num_noicy_contigs = (cluster_labels == -1).sum()
-            unassigned_contigs = (cluster_labels < 0).sum()
+        num_clusters = len(np.unique(cluster_labels).tolist())
+        num_noicy_contigs = (cluster_labels == -1).sum()
+        unassigned_contigs = (cluster_labels < 0).sum()
 
-            # f.write("#" * 100 + "\n" * 2)
-            # f.write(
-            #     "#" * 30 + "\t" * 2 + "HDBSCAN PARAMETERS" + "\t" * 2 + "#" * 30
-            # )
-            # f.write("\n" * 2)
-            # f.write(f"\t\tmin_cluster_size: {min_cluster_size}\n")
-            # f.write(f"\t\tClustered contigs = {len(list(cluster_labels))}\n")
-            # f.write("\n" * 2)
-            f.write("#" * 100 + "\n")
+        f.write("#" * 100 + "\n" * 2)
+        f.write("#" * 30 + "\t" * 2 + "HDBSCAN PARAMETERS" + "\t" * 2 + "#" * 30)
+        f.write("\n" * 2)
+        f.write(f"\t\tmin_cluster_size: {min_cluster_size}\n")
+        f.write(f"\t\tClustered contigs = {len(list(cluster_labels))}\n")
+        f.write("\n" * 2)
+        f.write("#" * 100 + "\n")
 
-            f.write(
-                f"Number of Clusters: {num_clusters}, with cluster labels {np.unique(cluster_labels).tolist()}: \n"
-            )
-            f.write(f"Noicy Contigs i.e. -1: {num_noicy_contigs},\n")
-            # f.write(f"Numbr of unassigned Contigs: {unassigned_contigs},\n")
-            # f.write(f"Cluster labels found: {np.unique(cluster_labels).tolist()}")
-            f.write("\n" * 2)
-            # f.write(f"Elapsed time fitting HDBSCAN: {elapsed_time:.2f} seconds\n")
+        f.write(
+            f"Number of Clusters: {num_clusters}, with cluster labels {np.unique(cluster_labels).tolist()}: \n"
+        )
+        f.write(f"Noicy Contigs i.e. -1: {num_noicy_contigs},\n")
+        f.write(f"Numbr of unassigned Contigs: {unassigned_contigs},\n")
+        f.write(f"Cluster labels found: {np.unique(cluster_labels).tolist()}")
+        f.write("\n" * 2)
+        f.write(f"Elapsed time fitting HDBSCAN: {elapsed_time:.2f} seconds\n")
         # TODO filter out -1 clusters
     return cluster_labels
 
@@ -86,8 +83,9 @@ def save_output(contig_names, predictions) -> None:
 if __name__ == "__main__":
     embeddings_path = sys.argv[1]
     contig_catalogue_path = sys.argv[2]
+    threads = int(sys.argv[3])
 
-    clusters = cluster(embeddings_path)
+    clusters = cluster(embeddings_path, threads)
     contig_names = get_contig_names(contig_catalogue_path)
 
     save_output(contig_names, clusters)
