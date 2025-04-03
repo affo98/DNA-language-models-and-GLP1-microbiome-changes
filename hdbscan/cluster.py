@@ -32,7 +32,8 @@ def cluster(path_to_embeds: str) -> np.array:
         f.write("#" * 100 + "\n" * 2)
         f.write("#" * 30 + "\t" * 2 + "HDBSCAN PARAMETERS" + "\t" * 2 + "#" * 30)
         f.write("\n" * 2)
-        f.write(f"\t\tmin_cluster_size: {min_cluster_size}")
+        f.write(f"\t\tmin_cluster_size: {min_cluster_size}\n")
+        f.write(f"Clustered contigs = {len(list(cluster_labels))}")
         f.write("\n" * 2)
         f.write("#" * 100 + "\n")
 
