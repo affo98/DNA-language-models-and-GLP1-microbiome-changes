@@ -15,7 +15,7 @@ def cluster(path_to_embeds: str) -> np.array:
     # dnabert_metahit_embeds = normalize(dnabert_metahit_embeds, norm="l2")
     min_cluster_size = 20
     # epsilons = [0.1, 0.2, 0.3, 0.4, 0.5, 0.7, 0.8, 0.9, 1]
-    min_cluster_sizes = [1, 5, 10, 30, 50]
+    min_cluster_sizes = [1, 2, 3, 4]
     with open("hdbscan_log.txt", "w") as f:
         # for epsi in epsilons:
         for cluster_size in min_cluster_sizes:
