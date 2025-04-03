@@ -27,7 +27,7 @@ def plot_results(data, output_dir) -> None:
     sns.heatmap(
         df.values,
         annot=True,
-        fmt="d",
+        fmt=".2f"
         cmap="Oranges",
         linewidths=0.5,
         xticklabels=df.columns,
