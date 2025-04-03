@@ -157,7 +157,7 @@ elif MODEL in ['dnaberts'] and not config_nomodelrun:
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output", "validation"),
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output", "fasta_bins_validation"),
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output", "checkm2_validation"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output", "checkm2_validation_results"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output", "checkm2_validation_results"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output", "test"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberts"),
     ]
@@ -188,96 +188,96 @@ ruleorder: other_model_val > create_fasta_bins_other_model_val > checkm2_val > p
 
 
 #OTHER MODEL 
-rule other_model_val:
-    input:
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
-    output:
-        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation"))
-    log:
-        os.path.join(LOGS, DATASET, "{MODEL}_val", "{MODEL}_val_binning.log")
-    conda:
-        os.path.join(BINNING_DIR, "envs/binning.yml")
-    shell:
-        """
-        mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
-        pip uninstall -y triton
-        python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
-        -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {output.dirs} -l {log} -m val
-        """
+# rule other_model_val:
+#     input:
+#         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+#     output:
+#         dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation"))
+#     log:
+#         os.path.join(LOGS, DATASET, "{MODEL}_val", "{MODEL}_val_binning.log")
+#     conda:
+#         os.path.join(BINNING_DIR, "envs/binning.yml")
+#     shell:
+#         """
+#         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
+#         pip uninstall -y triton
+#         python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
+#         -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {output.dirs} -l {log} -m val
+#         """
 
-rule create_fasta_bins_other_model_val:
-    input:
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
-        cluster_results = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation")                                         
-    output:
-        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_validation"))
-    log:
-        log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "bin_postprocessing.log")
-    params:
-        cluster_results_dir=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation", "cluster_results"),
-        minsize_bins=MINSIZE_BINS
-    conda: 
-        "envs/vamb.yml"
-    shell:
-        """
-        for cluster_file in {params.cluster_results_dir}/clusters_k*_p*.tsv; do
-            k_p=$(basename "$cluster_file" .tsv | sed 's/clusters_//')
-            output_dir={output.dirs}/$k_p
-            log_file={log.log_file}_$k_p.log
+# rule create_fasta_bins_other_model_val:
+#     input:
+#         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+#         cluster_results = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation")                                         
+#     output:
+#         dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_validation"))
+#     log:
+#         log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "bin_postprocessing.log")
+#     params:
+#         cluster_results_dir=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation", "cluster_results"),
+#         minsize_bins=MINSIZE_BINS
+#     conda: 
+#         "envs/vamb.yml"
+#     shell:
+#         """
+#         for cluster_file in {params.cluster_results_dir}/clusters_k*_p*.tsv; do
+#             k_p=$(basename "$cluster_file" .tsv | sed 's/clusters_//')
+#             output_dir={output.dirs}/$k_p
+#             log_file={log.log_file}_$k_p.log
 
-            mkdir -p "$output_dir"
+#             mkdir -p "$output_dir"
 
-            python {SRC_DIR}/create_fasta.py {input.catalogue} "$cluster_file" {params.minsize_bins} "$output_dir" \
-            --log "$log_file"
-        done
-        """
+#             python {SRC_DIR}/create_fasta.py {input.catalogue} "$cluster_file" {params.minsize_bins} "$output_dir" \
+#             --log "$log_file"
+#         done
+#         """
 
-rule checkm2_val: 
-    input:
-        fasta_bins=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_validation")
-    output:
-        output=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation"))
-    conda:
-        "envs/checkm2.yml"
-    threads:
-        128
-    shell:
-        """
-        if [ ! -d "{OUTDIR_MODEL_RESULTS}/checkm2_database" ]; then
-            checkm2 database --download --path {OUTDIR_MODEL_RESULTS}/checkm2_database
-        fi
+# rule checkm2_val: 
+#     input:
+#         fasta_bins=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_validation")
+#     output:
+#         output=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation"))
+#     conda:
+#         "envs/checkm2.yml"
+#     threads:
+#         128
+#     shell:
+#         """
+#         if [ ! -d "{OUTDIR_MODEL_RESULTS}/checkm2_database" ]; then
+#             checkm2 database --download --path {OUTDIR_MODEL_RESULTS}/checkm2_database
+#         fi
 
-        for bin_dir in {input.fasta_bins}/*; do
-            k_p=$(basename "$bin_dir")
-            output_subdir={output.output}/$k_p
+#         for bin_dir in {input.fasta_bins}/*; do
+#             k_p=$(basename "$bin_dir")
+#             output_subdir={output.output}/$k_p
             
-            mkdir -p "$output_subdir"
+#             mkdir -p "$output_subdir"
             
-            echo "FOP FLOOP: Processing $k_p with CheckM2..."
-            checkm2 predict --threads {threads} \
-                            --input "$bin_dir" \
-                            --output-directory "$output_subdir" \
-                            --database_path {OUTDIR_MODEL_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
-        done
-        """
+#             echo "FOP FLOOP: Processing $k_p with CheckM2..."
+#             checkm2 predict --threads {threads} \
+#                             --input "$bin_dir" \
+#                             --output-directory "$output_subdir" \
+#                             --database_path {OUTDIR_MODEL_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
+#         done
+#         """
 
-rule parse_checkm2_val:
-    input:
-        checkm2_reports=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation")
-    output:
-        path=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results"))
-    conda:
-        os.path.join(BINNING_DIR, "envs/binning.yml")
-    shell:
-        """
-        mkdir -p {output.path}
-        python {SRC_DIR}/parse_checkm2_val.py -i {input.checkm2_reports} -o {output.path}
-        """
+# rule parse_checkm2_val:
+#     input:
+#         checkm2_reports=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation")
+#     output:
+#         path=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results"))
+#     conda:
+#         os.path.join(BINNING_DIR, "envs/binning.yml")
+#     shell:
+#         """
+#         mkdir -p {output.path}
+#         python {SRC_DIR}/parse_checkm2_val.py -i {input.checkm2_reports} -o {output.path}
+#         """
 #-end val
 
 #-start test
 rule other_model_test:
-    input:
+    input:  
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
         best_kp_path=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results")
     output:
