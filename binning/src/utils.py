@@ -1,6 +1,8 @@
 import gzip
 from Bio import SeqIO
 import csv
+import json
+import os
 
 import numpy as np
 import torch
@@ -65,7 +67,11 @@ def read_contigs(
 
 
 def split_contigs_valtest(
-    contigs: list[str], contig_names: list[str], log: Logger, proportion: int = 0.1
+    contigs: list[str],
+    contig_names: list[str],
+    log: Logger,
+    save_path=None,
+    proportion: int = 0.1,
 ) -> tuple[list[str], list[str], list[str], list[str]]:
 
     assert len(contigs) == len(
@@ -104,6 +110,10 @@ def split_contigs_valtest(
         f"Splitting into validation/test using proportion={proportion}\n"
         f"N total: {n_total}, N val: {n_val}, N test: {n_total - n_val}"
     )
+    if save_path:
+        save_dict = {"n_total": n_total, "n_val": n_val, "n_test": {n_total - n_val}}
+        with open(os.path.join(save_path, "n_total_val_test.json"), "w") as f:
+            json.dump(save_dict, f, indent=4)
 
     return contigs_test, contigs_val, contigs_names_test, contigs_names_val
 
