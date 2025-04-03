@@ -14,7 +14,7 @@ def cluster(path_to_embeds: str, threads: int) -> np.array:
 
     hdb = HDBSCAN(min_cluster_size=min_cluster_size, n_jobs=threads)
     start = time.time()
-    hdb.fit(dnabert_metahit_embeds[:10000, :])
+    hdb.fit(dnabert_metahit_embeds)
     end = time.time()
     elapsed_time = end - start
     cluster_labels = hdb.labels_
