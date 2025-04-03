@@ -118,7 +118,6 @@ def main(args):
     for weighted_bin_count in np.arange(MAX_BINS, 0, BIN_COUNT_STEP):
         print(weighted_bin_count)
         best_combination = select_best_combination(weighted_count_dict)
-        print(best_combination)
 
         if best_combination["max_weighted_sum"] < weighted_bin_count:
             continue
