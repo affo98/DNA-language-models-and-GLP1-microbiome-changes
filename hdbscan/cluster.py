@@ -14,15 +14,14 @@ def cluster(path_to_embeds: str) -> np.array:
     dnabert_metahit_embeds = np.load(path_to_embeds)
     # dnabert_metahit_embeds = normalize(dnabert_metahit_embeds, norm="l2")
     min_cluster_size = 20
-    epsilons = [1, 2, 3, 4, 5]
-    min_cluster_sizes = [3]
+    # epsilons = [1, 2, 3, 4, 5]
+    min_samples = [1, 20, 40, 60, 70, 200]
     with open("hdbscan_log.txt", "w") as f:
         # for epsi in epsilons:
-        for epsi in epsilons:
+        for min_sample in min_samples:
             hdb = HDBSCAN(
                 min_cluster_size=300,
-                min_samples=3,
-                cluster_selection_epsilon=epsi,
+                min_samples=min_sample,
                 metric="euclidean",
                 # alpha=0.8,
             )
