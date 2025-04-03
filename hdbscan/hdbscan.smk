@@ -59,9 +59,9 @@ rule parse_checkm2_results:
     input:
         "checkm2_results",
     output:
-        "checkm2_validation_results",
+        "hdbscan_results.txt",
     shell:
         """
         mkdir -p {output}
-        python parse_checkm2_val.py -i {input} -o {output}
+        python parse_checkm2_val.py -i {input}/quality_report.tsv
         """
