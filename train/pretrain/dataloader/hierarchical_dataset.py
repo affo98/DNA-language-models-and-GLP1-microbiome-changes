@@ -230,6 +230,34 @@ class HierarchicalBatchSampler(Sampler):
     def __len__(self) -> int:
         return self.num_samples // self.batch_size
     
+class ValidationBatchSampler(Sampler):
+    def __init__(self, batch_size: int,
+        drop_last: bool, dataset: GenomeHierarchihcalDataset,
+        ) -> None:
+
+        super().__init__(dataset)
+        self.batch_size = batch_size
+        self.dataset = dataset
+        self.drop_last = drop_last
+        # If the dataset length is evenly divisible by # of batches, then there
+        # is no need to drop any data, since the dataset will be split equally.
+        if self.drop_last and len(self.dataset) % self.batch_size != 0:  # type: ignore
+            self.num_samples = (len(self.dataset) // self.batch_size) * self.batch_size
+        else:
+            self.num_samples = len(self.dataset)
+
+    def __iter__(self):
+        indices = list(range(self.num_samples))
+
+        # Define a fixed number of batches per epoch
+        num_batches = self.__len__()
+        for i in range(num_batches):
+            batch = indices[i * self.batch_size:(i + 1) * self.batch_size]
+            yield batch
+
+    def __len__(self) -> int:
+        return self.num_samples // self.batch_size
+    
 def load_deep_genome_hierarchical(args):
     train_dataset = GenomeHierarchihcalDataset(args, load_train=True)
     val_dataset = GenomeHierarchihcalDataset(args, load_train=False)
@@ -240,7 +268,7 @@ def load_deep_genome_hierarchical(args):
     train_sampler = HierarchicalBatchSampler(batch_size=args.batch_size,
                                        drop_last=True,
                                        dataset=train_dataset)
-    val_sampler = HierarchicalBatchSampler(batch_size=args.batch_size,
+    val_sampler = ValidationBatchSampler(batch_size=args.batch_size,
                                            drop_last=True,
                                            dataset=val_dataset)
     sampler = {'train': train_sampler,
