@@ -15,7 +15,7 @@ rule cluster:
         48
     shell:
         """
-        python -m cuml.accel cluster.py {input.embeddings} {input.contig_catalogue} {threads}
+        python -m cluster.py {input.embeddings} {input.contig_catalogue}
         """
 
 

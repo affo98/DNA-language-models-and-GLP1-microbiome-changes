@@ -9,7 +9,7 @@ import sys
 import time
 
 
-def cluster(path_to_embeds: str, threads: int) -> np.array:
+def cluster(path_to_embeds: str) -> np.array:
     dnabert_metahit_embeds = np.load(path_to_embeds)
 
     min_cluster_size = 20
@@ -71,9 +71,8 @@ def save_output(contig_names, predictions) -> None:
 if __name__ == "__main__":
     embeddings_path = sys.argv[1]
     contig_catalogue_path = sys.argv[2]
-    threads = int(sys.argv[3])
 
-    clusters = cluster(embeddings_path, threads)
+    clusters = cluster(embeddings_path)
     contig_names = get_contig_names(contig_catalogue_path)
 
     save_output(contig_names, clusters)
