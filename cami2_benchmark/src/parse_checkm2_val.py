@@ -12,7 +12,7 @@ COMPLETENESS_BINS = [90, 80, 70, 60, 50]
 CONTAMINATION_THRESHOLDS = [5, 10, 15, 20]
 WEIGHTS = [1, 1 / 2, 1 / 4, 1 / 8]
 
-MAX_BINS = 100
+MAX_BINS = 20
 BIN_COUNT_STEP = -0.1
 
 
@@ -111,7 +111,6 @@ def main(args):
 
         weighted_count_dict = {}
         for contamination, weight in zip(CONTAMINATION_THRESHOLDS, WEIGHTS):
-            print(contamination, weight)
             weighted_count_dict = process_all_reports(
                 args.input_dir, contamination, weight, weighted_count_dict
             )
