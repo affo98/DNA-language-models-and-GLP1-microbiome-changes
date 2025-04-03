@@ -19,7 +19,7 @@ def cluster(path_to_embeds: str) -> np.array:
         start = time.time()
         fmt = time.gmtime(start)
         current_time = time.strftime("%D %T", fmt)
-        f.write("STARTED AT {current_time}")
+        f.write(f"STARTED AT {current_time}")
         hdb.fit(dnabert_metahit_embeds)
         end = time.time()
         elapsed_time = end - start
