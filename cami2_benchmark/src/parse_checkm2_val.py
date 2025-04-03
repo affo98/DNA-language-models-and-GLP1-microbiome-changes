@@ -115,7 +115,7 @@ def main(args):
             weighted_count_dict = process_all_reports(
                 args.input_dir, contamination, weight, weighted_count_dict
             )
-            print(weighted_count_dict)
+            # print(weighted_count_dict)
 
         best_combination = select_best_combination(weighted_count_dict)
         print(best_combination)
