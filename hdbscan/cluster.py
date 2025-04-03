@@ -20,7 +20,7 @@ def cluster(path_to_embeds: str) -> np.array:
             for cluster_size in min_cluster_sizes:
                 hdb = HDBSCAN(
                     min_cluster_size=cluster_size,
-                    # min_samples=100,
+                    min_samples=20,
                     cluster_selection_epsilon=epsi,
                     # alpha=0.8,
                 )
@@ -52,7 +52,7 @@ def cluster(path_to_embeds: str) -> np.array:
                 f.write(
                     f"Number of Clusters: {num_clusters}, with cluster labels {np.unique(cluster_labels).tolist()}: \n"
                 )
-                # f.write(f"Noicy Contigs i.e. -1: {num_noicy_contigs},\n")
+                f.write(f"Noicy Contigs i.e. -1: {num_noicy_contigs},\n")
                 # f.write(f"Numbr of unassigned Contigs: {unassigned_contigs},\n")
                 # f.write(f"Cluster labels found: {np.unique(cluster_labels).tolist()}")
                 f.write("\n" * 2)
