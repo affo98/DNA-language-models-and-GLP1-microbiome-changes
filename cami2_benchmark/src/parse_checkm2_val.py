@@ -106,7 +106,7 @@ def select_best_combination(data) -> dict:
 
 def main(args):
 
-    for weighted_bin_count in np.arange(100, 0, BIN_COUNT_STEP):
+    for weighted_bin_count in np.arange(MAX_BINS, 0, BIN_COUNT_STEP):
         print(weighted_bin_count)
 
         weighted_count_dict = {}
