@@ -132,7 +132,6 @@ def main(args):
     with open(os.path.join(args.output_dir, "best_combination.json"), "w") as f:
         json.dump(best_combination, f, indent=4)
     plot_results(weighted_count_dict, args.output_dir)
-    break
 
 
 def add_arguments() -> ArgumentParser:
