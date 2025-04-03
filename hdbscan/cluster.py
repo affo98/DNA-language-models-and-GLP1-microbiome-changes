@@ -15,11 +15,11 @@ def cluster(path_to_embeds: str) -> np.array:
     min_cluster_size = 20
     with open("hdbscan_log.txt", "w") as f:
         hdb = HDBSCAN(min_cluster_size=min_cluster_size, verbose=True)
-        f.write(f"TYPE of hdbscan: {type(hdb)}")
+        f.write(f"TYPE of hdbscan: {type(hdb)}\n")
         start = time.time()
         fmt = time.gmtime(start)
         current_time = time.strftime("%D %T", fmt)
-        f.write(f"STARTED AT {current_time}")
+        f.write(f"STARTED AT {current_time}\n")
         hdb.fit(dnabert_metahit_embeds)
         end = time.time()
         elapsed_time = end - start
