@@ -154,9 +154,12 @@ elif MODEL in ['dna2vec'] and not config_nomodelrun:
 
 elif MODEL in ['dnaberts'] and not config_nomodelrun:
     input_files += [
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output", "validation")
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberts"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output", "validation"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output", "fasta_bins_validation"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output", "checkm2_validation"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output", "checkm2_validation_results"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberts"),
     ]
 
 elif MODEL in ['dnabert2'] and not config_nomodelrun:
