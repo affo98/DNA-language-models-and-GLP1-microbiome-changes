@@ -3,7 +3,7 @@
 
 rule all:
     input:
-        "checkm2_results"
+        "clusters.tsv"
 
 rule cluster:
     input:

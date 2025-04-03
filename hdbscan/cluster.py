@@ -14,7 +14,7 @@ def cluster(path_to_embeds: str) -> np.array:
 
     min_cluster_size = 20
     with open("hdbscan_log.txt", "w") as f:
-        hdb = HDBSCAN(min_cluster_size=min_cluster_size, verbose=True)
+        hdb = HDBSCAN()
         f.write(f"TYPE of hdbscan: {type(hdb)}\n")
         start = time.time()
         fmt = time.gmtime(start)
