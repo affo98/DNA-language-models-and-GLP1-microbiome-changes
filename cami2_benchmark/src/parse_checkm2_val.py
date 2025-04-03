@@ -115,12 +115,12 @@ def main(args):
         )
     print(weighted_count_dict)
 
-    for weighted_bin_count in np.arange(MAX_BINS, 0, BIN_COUNT_STEP):
-        print(weighted_bin_count)
-        best_combination = select_best_combination(weighted_count_dict)
+    # for weighted_bin_count in np.arange(MAX_BINS, 0, BIN_COUNT_STEP):
+    # print(weighted_bin_count)
+    best_combination = select_best_combination(weighted_count_dict)
 
-        if best_combination["max_weighted_sum"] < weighted_bin_count:
-            continue
+    # if best_combination["max_weighted_sum"] < weighted_bin_count:
+    # continue
 
     # result found
     with open(os.path.join(args.output_dir, "heatmap_data.json"), "w") as f:
