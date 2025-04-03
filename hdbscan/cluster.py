@@ -7,11 +7,12 @@ import os
 from Bio import SeqIO
 import sys
 import time
+from sklearn.preprocessing import normalize
 
 
 def cluster(path_to_embeds: str) -> np.array:
     dnabert_metahit_embeds = np.load(path_to_embeds)
-
+    dnabert_metahit_embeds = normalize(dnabert_metahit_embeds, norm="l2")
     min_cluster_size = 20
     epsilons = [0.1, 0.2, 0.3, 0.4, 0.5, 0.7, 0.8, 0.9, 1]
     # min_cluster_sizes = [100, 200, 300, 400, 1000, 5000]
