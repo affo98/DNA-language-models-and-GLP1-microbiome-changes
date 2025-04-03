@@ -10,7 +10,8 @@ import json
 
 COMPLETENESS_BINS = [90, 80, 70, 60, 50]
 CONTAMINATION_THRESHOLDS = [5, 10, 15, 20]
-WEIGHTS = [1, 1 / 2, 1 / 4, 1 / 8]
+# WEIGHTS = [1, 1 / 2, 1 / 4, 1 / 8]
+WEIGHTS = [1, 0.9, 0.8, 0.7]
 
 MAX_BINS = 3
 BIN_COUNT_STEP = -0.1
@@ -79,7 +80,9 @@ def process_all_reports(
         if k_value not in weighted_count_dict:
             weighted_count_dict[k_value] = {}
 
-        weighted_count_dict[k_value][p_value] = int(bin_counts[-1])  # n bins above 50
+        weighted_count_dict[k_value][p_value] = (
+            int(bin_counts[-1]) * weight
+        )  # n bins above 50
 
     return weighted_count_dict
 
