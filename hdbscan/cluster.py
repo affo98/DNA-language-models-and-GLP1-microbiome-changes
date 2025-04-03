@@ -14,24 +14,22 @@ def cluster(path_to_embeds: str) -> np.array:
     dnabert_metahit_embeds = np.load(path_to_embeds)
     # dnabert_metahit_embeds = normalize(dnabert_metahit_embeds, norm="l2")
     min_cluster_size = 20
-    # epsilons = [0.1, 0.2, 0.3, 0.4, 0.5, 0.7, 0.8, 0.9, 1]
-    min_cluster_sizes = [5, 6, 7, 8, 9, 10]
+    epsilons = [0.02, 0.04, 0.06, 0.08, 0.1, 0.5]
+    min_cluster_sizes = [3]
     with open("hdbscan_log.txt", "w") as f:
         # for epsi in epsilons:
-        for cluster_size in min_cluster_sizes:
+        for epsi in epsilons:
             hdb = HDBSCAN(
-                min_cluster_size=400,
-                min_samples=cluster_size,
-                # cluster_selection_epsilon=epsi,
+                min_cluster_size=300,
+                min_samples=3,
+                cluster_selection_epsilon=epsi,
                 metric="euclidean",
                 # alpha=0.8,
             )
             start = time.time()
             fmt = time.gmtime(start)
             current_time = time.strftime("%D %T", fmt)
-            f.write(
-                f"STARTED AT {current_time} with minimum cluster size {cluster_size} \n"
-            )
+            f.write(f"STARTED AT {current_time} with minimum epsilon {epsi} \n")
             hdb.fit(dnabert_metahit_embeds)
             end = time.time()
             elapsed_time = end - start
