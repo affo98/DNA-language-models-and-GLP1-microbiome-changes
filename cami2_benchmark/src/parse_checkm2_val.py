@@ -103,7 +103,6 @@ def select_best_combination(data) -> dict:
 
 def main(args):
 
-
     weighted_count_dict = {}
     for contamination, weight in zip(CONTAMINATION_THRESHOLDS[:4], WEIGHTS[:4]):
         weighted_count_dict = process_all_reports(
@@ -111,10 +110,10 @@ def main(args):
         )
     print(weighted_count_dict)
     best_combination = select_best_combination(weighted_count_dict)
-    best_combination['contamination_values'] = CONTAMINATION_THRESHOLDS[:4]
+    best_combination["contamination_values"] = CONTAMINATION_THRESHOLDS[:4]
 
-     #if no results are found with contamination < 20, then try all contamination values.
-     if best_combination["max_weighted_sum"] <= 0:
+    # if no results are found with contamination < 20, then try all contamination values.
+    if best_combination["max_weighted_sum"] <= 0:
         print("No valid combination found in the first pass, trying with full list.")
         weighted_count_dict = {}
 
@@ -124,8 +123,7 @@ def main(args):
             )
         print(weighted_count_dict)
         best_combination = select_best_combination(weighted_count_dict)
-        best_combination['contamination_values'] = CONTAMINATION_THRESHOLDS
-
+        best_combination["contamination_values"] = CONTAMINATION_THRESHOLDS
 
     # result found
     with open(os.path.join(args.output_dir, "heatmap_data.json"), "w") as f:
