@@ -50,28 +50,30 @@ def main_worker(gpu, ngpus_per_node, args):
         builtins.print = print_pass
 
     dist.init_process_group(backend="nccl", init_method="env://",
-                            world_size=ngpus_per_node, rank=args.gpu, timeout=timedelta(minutes=15))
+                            world_size=ngpus_per_node, rank=args.gpu, timeout=timedelta(hours=24))
     dist.barrier()
+
     model, criterion = set_model(ngpus_per_node, args)
-    dist.barrier()
     tokenizer = AutoTokenizer.from_pretrained("zhihan1996/DNABERT-2-117M", trust_remote_code=True)
-    optimizer = get_optimizer(model, args)
+    dist.barrier()
 
     dataloaders_dict, sampler = load_deep_genome_hierarchical(args)
     dist.barrier()
+
+    optimizer = get_optimizer(model, args)
     
     # Create warmup scheduler
     warmup_scheduler = LinearLR(
         optimizer, 
         start_factor=0.1,
         end_factor=1.0, 
-        total_iters=args.warmup_epochs * len(dataloaders_dict['train'])
+        total_iters=int(args.warmup_epochs * len(dataloaders_dict['train']))
     )
 
     # Create cosine annealing scheduler
     cosine_scheduler = CosineAnnealingLR(
         optimizer,
-        T_max=(args.epochs - args.warmup_epochs) * len(dataloaders_dict['train']),
+        T_max=int((args.epochs - args.warmup_epochs) * len(dataloaders_dict['train'])),
         eta_min=args.min_lr
     )
 
@@ -79,7 +81,7 @@ def main_worker(gpu, ngpus_per_node, args):
     scheduler = SequentialLR(
         optimizer,
         schedulers=[warmup_scheduler, cosine_scheduler],
-        milestones=[args.warmup_epochs * len(dataloaders_dict['train'])]
+        milestones=[int(args.warmup_epochs * len(dataloaders_dict['train']))]
     )
 
     trainer = Trainer(model, tokenizer, criterion, optimizer, dataloaders_dict, sampler, logger, args, scheduler)
@@ -129,12 +131,12 @@ def get_args(argv):
     parser.add_argument('--train_dataname', type=str, default='train_2m.csv', help="Name of the data used for training")
     parser.add_argument('--val_dataname', type=str, default='val_48k.csv', help="Name of the data used for validating")
     # Training parameters
-    parser.add_argument('--max_length', type=int, default=2000, help="Max length of tokens")
-    parser.add_argument('--batch_size', type=int, default=48, help="Batch size used for training/validating dataset")
-    parser.add_argument('--lr', type=float, default=3e-06, help="Learning rate")
+    parser.add_argument('--max_length', type=int, default=512, help="Max length of tokens")
+    parser.add_argument('--batch_size', type=int, default=36, help="Batch size used for training/validating dataset")
+    parser.add_argument('--lr', type=float, default=1e-05, help="Learning rate")
     parser.add_argument('--lr_scale', type=int, default=100, help="")
     parser.add_argument('--min_lr', type=float, default=0.0, help='Minimum learning rate for cosine scheduler')
-    parser.add_argument('--warmup_epochs', type=int, default=1, help='Number of warmup epochs for learning rate')
+    parser.add_argument('--warmup_epochs', type=float, default=0.3, help='Number of warmup epochs for learning rate')
     parser.add_argument('--epochs', type=int, default=3)
     parser.add_argument('--print-freq', '-p', default=100, type=int, metavar='N', help='print frequency (default: 10)')
     #parser.add_argument('--train_batch_size', type=int, default=48, help="Batch size used for training dataset")

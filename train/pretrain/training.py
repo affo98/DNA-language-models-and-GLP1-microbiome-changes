@@ -46,14 +46,14 @@ class Trainer(nn.Module):
         return input_ids, attention_mask
 
     def save_model(self, step=None, save_best=False):
-        if dist.get_rank() == 0:
+        if self.args.gpu == 0:
             if save_best:
                 save_dir = os.path.join(self.args.resPath, 'best')
                 if not os.path.exists(save_dir):
                     os.makedirs(save_dir)
-                self.model.module.dnabert2.save_pretrained(save_dir)
+                self.model.dnabert2.save_pretrained(save_dir)
                 self.tokenizer.save_pretrained(save_dir)
-                torch.save(self.model.module.contrast_head.state_dict(), save_dir+"/con_weights.ckpt")
+                torch.save(self.model.contrast_head.state_dict(), save_dir+"/con_weights.ckpt")
             else:
                 save_dir = os.path.join(self.args.resPath, str(step))
                 self.last_saved_step = step
@@ -131,77 +131,6 @@ class Trainer(nn.Module):
         
         return None
     
-    def val(self):
-        print("Start Validation... ")
-        self.model.eval()
-        best_checkpoint = 0
-        best_val_loss = 10000
-        
-        # Initialize validation loss tracker
-        val_loss = torch.tensor(0.0).cuda(self.args.gpu, non_blocking=True)
-        
-        for step in range(self.args.logging_step, np.min([self.all_iter, self.args.logging_step*self.args.logging_num+1]), self.args.logging_step):
-            load_dir = os.path.join(self.args.resPath, str(step))
-            
-            # Unwrap model from DDP if needed
-            if hasattr(self.model, 'module'):
-                self.model.module.dnabert2.load_state_dict(torch.load(load_dir+'/pytorch_model.bin'))
-                self.model.module.contrast_head.load_state_dict(torch.load(load_dir+'/con_weights.ckpt'))
-            else:
-                self.model.dnabert2.load_state_dict(torch.load(load_dir+'/pytorch_model.bin'))
-                self.model.contrast_head.load_state_dict(torch.load(load_dir+'/con_weights.ckpt'))
-                
-            self.val_sampler.set_epoch(1)
-
-            batch_time = AverageMeter('Time', ':6.3f')
-            data_time = AverageMeter('Data', ':6.3f')
-            losses = AverageMeter('Loss', ':.4e')
-
-            end = time.time()
-
-            progress = ProgressMeter(len(self.val_loader),
-                    [batch_time, data_time, losses],
-                    prefix="Step: [{}]".format(step))
-            
-            for idx, (sequences, labels) in enumerate(self.val_loader):
-                data_time.update(time.time() - end)
-                with torch.no_grad():
-                    labels = labels.squeeze()
-                    labels = labels.squeeze().cuda(self.args.gpu, non_blocking=True)
-                    bsz = labels.shape[0]
-                    input_ids, attention_mask = self.prepare_pairwise_input(sequences)
-                    input_ids = input_ids.cuda(self.args.gpu, non_blocking=True)
-                    attention_mask = attention_mask.cuda(self.args.gpu, non_blocking=True)
-                    
-                    with torch.autocast(device_type="cuda"):
-                        # Access model correctly based on whether it's still wrapped in DDP
-                        if hasattr(self.model, 'module'):
-                            feat1, feat2, _, _ = self.model(input_ids, attention_mask)
-                        else:
-                            feat1, feat2, _, _ = self.model(input_ids, attention_mask)
-                            
-                        features = torch.cat([feat1.unsqueeze(1), feat2.unsqueeze(1)], dim=1)
-                        loss = self.criterion(features, labels)
-
-                        losses.update(loss["instdisc_loss"].item(), bsz)
-                        batch_time.update(time.time() - end)
-                        end = time.time()
-
-                        if idx % self.args.print_freq == 0:
-                            progress.display(idx)
-
-            self.logger.log_value('val_loss', losses.avg, step)            
-            if losses.avg < best_val_loss:
-                best_val_loss = losses.avg
-                best_checkpoint = step
-                self.save_model(save_best=True)
-                
-            print("Finish Step: ", step)
-
-        print("Best Checkpoint at Step: ", best_checkpoint)
-        
-        return None
-
     def run_validation(self, unwrapped_model=None):
         """
         Validation method to run on a single GPU after exiting DDP mode
@@ -254,8 +183,6 @@ class Trainer(nn.Module):
                     [batch_time, data_time, losses],
                     prefix="Step: [{}]".format(step))
             
-            val_loss = torch.tensor(0.0).cuda(self.args.gpu)
-            
             for idx, (sequences, labels) in enumerate(self.val_loader):
                 data_time.update(time.time() - end)
                 with torch.no_grad():
@@ -271,7 +198,6 @@ class Trainer(nn.Module):
                         feat1, feat2, _, _ = self.model(input_ids, attention_mask)
                         features = torch.cat([feat1.unsqueeze(1), feat2.unsqueeze(1)], dim=1)
                         loss = self.criterion(features, labels)
-                        val_loss += loss["instdisc_loss"]
 
                         losses.update(loss["instdisc_loss"].item(), bsz)
                         batch_time.update(time.time() - end)
@@ -280,14 +206,13 @@ class Trainer(nn.Module):
                         if idx % self.args.print_freq == 0:
                             progress.display(idx)
 
-            val_loss = val_loss.item()/(idx+1)
             self.logger.log_value('val_loss', losses.avg, step)            
-            if val_loss < best_val_loss:
-                best_val_loss = val_loss
+            if losses.avg < best_val_loss:
+                best_val_loss = losses.avg
                 best_checkpoint = step
                 self.save_model(save_best=True)
             
-            print(f"Finish Step: {step}, Val Loss: {val_loss:.6f}")
+            print(f"Finish Step: {step}, Val Loss: {losses.avg:.6f}")
 
         print("Best Checkpoint at Step: ", best_checkpoint)
         
