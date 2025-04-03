@@ -38,12 +38,11 @@ def process_all_reports(results_dir, contamination) -> dict:
 
         completeness_values = parse_quality_report(report_path, contamination)
         bin_counts = [np.sum(completeness_values >= b) for b in COMPLETENESS_BINS]
-        bin_counts = bin_counts.tolist()
 
         if k_value not in data:
             data[k_value] = {}
 
-        data[k_value][p_value] = bin_counts[-1]  # Store highest completeness count
+        data[k_value][p_value] = int(bin_counts[-1])  # Store highest completeness count
 
     return data
 
