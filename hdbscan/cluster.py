@@ -33,13 +33,14 @@ def cluster(path_to_embeds: str) -> np.array:
         f.write("#" * 30 + "\t" * 2 + "HDBSCAN PARAMETERS" + "\t" * 2 + "#" * 30)
         f.write("\n" * 2)
         f.write(f"\t\tmin_cluster_size: {min_cluster_size}\n")
-        f.write(f"Clustered contigs = {len(list(cluster_labels))}")
+        f.write(f"Clustered contigs = {len(list(cluster_labels))}\n")
         f.write("\n" * 2)
         f.write("#" * 100 + "\n")
 
         f.write(f"Number of Clusters: {num_clusters},\n")
         f.write(f"Noicy Contigs i.e. -1: {num_noicy_contigs},\n")
         f.write(f"Numbr of unassigned Contigs: {unassigned_contigs},\n")
+        f.write(f"Cluster labels found: {np.unique(cluster_labels).tolist()}")
         f.write("\n" * 2)
         f.write(f"Elapsed time fitting HDBSCAN: {elapsed_time:.2f} seconds\n")
         # TODO filter out -1 clusters
