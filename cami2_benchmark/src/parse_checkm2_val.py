@@ -1,12 +1,14 @@
 import os
 from argparse import ArgumentParser
+import json
 
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 
-import json
+import math
+
 
 COMPLETENESS_BINS = [90, 80, 70, 60, 50]
 
@@ -102,7 +104,7 @@ def select_best_combination(data, N=15000) -> dict:
     # If there's a tie, select the closest (k, p) to N
     if len(candidates) > 1:
         print(candidates)
-        best_k, best_p = min(candidates, key=lambda kp: abs(int(kp[0]) - N))
+        best_k, best_p = min(candidates, key=lambda kp: abs(int(kp[0]) - math.sqrt(N)))
     else:
         best_k, best_p = candidates[0]
 
