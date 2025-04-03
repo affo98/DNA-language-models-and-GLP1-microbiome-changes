@@ -13,7 +13,7 @@ CONTAMINATION_THRESHOLDS = [5, 10, 15, 20]
 # WEIGHTS = [1, 1 / 2, 1 / 4, 1 / 8]
 WEIGHTS = [1, 0.9, 0.8, 0.7]
 
-MAX_BINS = 3
+MAX_BINS = 10
 BIN_COUNT_STEP = -0.1
 
 
@@ -127,8 +127,7 @@ def main(args):
         with open(os.path.join(args.output_dir, "heatmap_data.json"), "w") as f:
             json.dump(weighted_count_dict, f, indent=4)
 
-        print(f"Using contamination: {contamination}")
-        best_combination["contamination"] = contamination
+        # best_combination["contamination"] = contamination
 
         with open(os.path.join(args.output_dir, "best_combination.json"), "w") as f:
             json.dump(best_combination, f, indent=4)
