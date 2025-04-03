@@ -15,7 +15,7 @@ rule cluster:
         48
     shell:
         """
-        python -m cluster.py {input.embeddings} {input.contig_catalogue}
+        python cluster.py {input.embeddings} {input.contig_catalogue}
         """
 
 
