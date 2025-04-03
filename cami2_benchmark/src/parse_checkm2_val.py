@@ -107,32 +107,32 @@ def select_best_combination(data) -> dict:
 
 def main(args):
 
+    # bin count weighted by contamination level
+    weighted_count_dict = {}
+    for contamination, weight in zip(CONTAMINATION_THRESHOLDS, WEIGHTS):
+        weighted_count_dict = process_all_reports(
+            args.input_dir, contamination, weight, weighted_count_dict
+        )
+    print(weighted_count_dict)
+
     for weighted_bin_count in np.arange(MAX_BINS, 0, BIN_COUNT_STEP):
         print(weighted_bin_count)
-
-        weighted_count_dict = {}
-        for contamination, weight in zip(CONTAMINATION_THRESHOLDS, WEIGHTS):
-            weighted_count_dict = process_all_reports(
-                args.input_dir, contamination, weight, weighted_count_dict
-            )
-            print(weighted_count_dict)
-
         best_combination = select_best_combination(weighted_count_dict)
         print(best_combination)
 
         if best_combination["max_weighted_sum"] < weighted_bin_count:
             continue
 
-        # result found
-        with open(os.path.join(args.output_dir, "heatmap_data.json"), "w") as f:
-            json.dump(weighted_count_dict, f, indent=4)
+    # result found
+    with open(os.path.join(args.output_dir, "heatmap_data.json"), "w") as f:
+        json.dump(weighted_count_dict, f, indent=4)
 
-        # best_combination["contamination"] = contamination
+    # best_combination["contamination"] = contamination
 
-        with open(os.path.join(args.output_dir, "best_combination.json"), "w") as f:
-            json.dump(best_combination, f, indent=4)
-        plot_results(weighted_count_dict, args.output_dir)
-        break
+    with open(os.path.join(args.output_dir, "best_combination.json"), "w") as f:
+        json.dump(best_combination, f, indent=4)
+    plot_results(weighted_count_dict, args.output_dir)
+    break
 
 
 def add_arguments() -> ArgumentParser:
