@@ -3,12 +3,55 @@
 [Overleaf report](https://www.overleaf.com/project/679796b5a02b660e4f96beff)
 
 #### Meeting Outline
+* [03 April 2025](#date-30-january-2025)
 * [27 March 2025](#date-30-january-2025)
 * [20 March 2025](#date-30-january-2025)
 * [11 March 2025](#date-30-january-2025)
 * [27 February 2025](#date-30-january-2025)
 * [20 February 2025](#date-30-january-2025)
 * [06 February 2025](#date-30-january-2025)
+
+
+#### Date: 27 March 2025
+
+##### Who did you help this week?
+
+
+##### Who helped you this week?
+Inna from the HPC.
+
+##### What did you achieve?
+
+* Get more results from benchmarked models, e.g. Dnabert-s and TNF, in metagenomics binning.
+* Tested params for training, e.g. learning rate and scheduler params. 
+
+
+##### What did you struggle with?
+
+
+
+
+
+##### Where do you need help from Veronika?
+
+1. Selection of threshold for Kmediod. We found that the Otsu did not work, because of the histogram shapes not being two peaks. New method: Obtain threshold from KNN: for each datapoint, sample top k neighbours, calculate centroid, and calculate all similarities to centroid within the neighbourhood. Use percentile p as of histogram as threshold - similar to research project. But how to select good k and p? We have set aside 10% as validation data and searched through K=[100,200,300,...,1000] and P = [10,30,50,70,90] by using CheckM2 do determine performance. This takes a long time to run (e.g. 3 hours for one model). We get similar results as when using the threshold determined in the research project (see histogram below).
+   1. Question 1: The best combination of k/p is currently the one that finds 1 good bin with less than 5/10 % contamination. See image below. This is a bit greedy since another combination could end up being better when relaxing the contamination constraint.  
+   
+Results on Metahit: Generally much worse results than Vamb and Taxvamb. 
+{'dnaberts0_researchprojectthreshold_results': [1, 8, 11, 16, 22],
+ 'dnaberts250000_researchprojectthreshold_results': [1, 8, 11, 16, 22],
+ 'dnaberts_knn_results': [0, 3, 8, 15, 19],
+ 'tnf_researchprojectthreshold_results': [0, 1, 1, 1, 2],
+ 'tnf_results': [0, 0, 0, 1, 5]}
+
+![Threshold](images/validation_heatmap.png)
+![Hist](images/knn_Threshold_histogram.png)
+
+
+1. Potential clustering algorithm instead of Kmediod: HDBSCAN. What do you think about that?
+
+
+
 
 
 #### Date: 27 March 2025
