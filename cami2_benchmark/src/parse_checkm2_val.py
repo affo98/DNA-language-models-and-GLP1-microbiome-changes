@@ -63,7 +63,7 @@ def select_best_combination(data) -> dict:
 
 
 def plot_results(data, output_dir) -> None:
-    plt.figure(figsize=(8, 4))
+    plt.figure(figsize=(8, 3))
 
     df = pd.DataFrame(data)
     df.index = df.index.astype(int)
