@@ -23,7 +23,7 @@ def cluster(path_to_embeds: str) -> np.array:
                 min_cluster_size=100,
                 min_samples=20,
                 cluster_selection_epsilon=epsi,
-                metric="cosine",
+                metric="euclidean",
                 # alpha=0.8,
             )
             start = time.time()
