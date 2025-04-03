@@ -111,6 +111,7 @@ def split_contigs_valtest(
         f"N total: {n_total}, N val: {n_val}, N test: {n_total - n_val}"
     )
     if save_path:
+        print(save_path)
         save_dict = {"n_total": n_total, "n_val": n_val, "n_test": {n_total - n_val}}
         with open(os.path.join(save_path, "n_total_val_test.json"), "w") as f:
             json.dump(save_dict, f, indent=4)
