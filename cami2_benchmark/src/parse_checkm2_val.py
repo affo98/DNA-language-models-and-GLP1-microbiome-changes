@@ -9,57 +9,11 @@ import numpy as np
 import json
 
 COMPLETENESS_BINS = [90, 80, 70, 60, 50]
-CONTAMINATION_THRESHOLDS = [5, 10, 15, 20, 20, 30, 35, 50]
-STOP_CRITERION = 2
+CONTAMINATION_THRESHOLDS = [5, 10, 15, 20]
+WEIGHTS = [1, 1 / 2, 1 / 4, 1 / 8]
 
-
-def parse_quality_report(file_path, contamination) -> pd.DataFrame:
-    """Parses a CheckM2 quality report and extracts completeness & contamination."""
-    df = pd.read_csv(file_path, sep="\t")
-    df = df[df["Contamination"] < contamination]
-    return df["Completeness"].values
-
-
-def process_all_reports(results_dir, contamination) -> dict:
-    """Walks through the results directory and structures data for heatmap plotting."""
-    data = {}
-
-    for k_p_combination in os.listdir(results_dir):
-        report_path = os.path.join(results_dir, k_p_combination, "quality_report.tsv")
-        if not os.path.isfile(report_path):
-            continue
-
-        try:
-            k_value, p_value = k_p_combination.split("_")
-            k_value = k_value[1:]
-            p_value = p_value[1:]
-        except ValueError:
-            continue
-
-        completeness_values = parse_quality_report(report_path, contamination)
-        bin_counts = [np.sum(completeness_values >= b) for b in COMPLETENESS_BINS]
-
-        if k_value not in data:
-            data[k_value] = {}
-
-        data[k_value][p_value] = int(bin_counts[-1])  # Store highest completeness count
-
-    return data
-
-
-def select_best_combination(data) -> dict:
-    """Find the highest value and its corresponding (k, p) combination, then store it in a dictionary and save it to a file."""
-    max_value = -1
-    best_k, best_p = None, None
-
-    for k, p_values in data.items():
-        for p, value in p_values.items():
-            if value > max_value:
-                max_value = value
-                best_k, best_p = k, p
-
-    result = {"best_k": int(best_k), "best_p": int(best_p), "max_value": int(max_value)}
-    return result
+MAX_BINS = 100
+BIN_COUNT_STEP = 0.1
 
 
 def plot_results(data, output_dir) -> None:
@@ -95,25 +49,89 @@ def plot_results(data, output_dir) -> None:
     return
 
 
+def parse_quality_report(file_path, contamination) -> pd.DataFrame:
+    """Parses a CheckM2 quality report and extracts completeness & contamination."""
+    df = pd.read_csv(file_path, sep="\t")
+    df = df[df["Contamination"] < contamination]
+    return df["Completeness"].values
+
+
+def process_all_reports(
+    results_dir, contamination, weight, weighted_count_dict: dict
+) -> dict:
+    """Walks through the results directory and structures data for heatmap plotting."""
+
+    for k_p_combination in os.listdir(results_dir):
+        report_path = os.path.join(results_dir, k_p_combination, "quality_report.tsv")
+        if not os.path.isfile(report_path):
+            continue
+
+        try:
+            k_value, p_value = k_p_combination.split("_")
+            k_value = k_value[1:]
+            p_value = p_value[1:]
+        except ValueError:
+            continue
+
+        completeness_values = parse_quality_report(report_path, contamination)
+        bin_counts = [np.sum(completeness_values >= b) for b in COMPLETENESS_BINS]
+
+        if k_value not in data:
+            weighted_count_dict[k_value] = {}
+
+        weighted_count_dict[k_value][p_value] = (
+            int(bin_counts[-1]) * weight
+        )  # n bins above 50
+
+    return weighted_count_dict
+
+
+def select_best_combination(data) -> dict:
+    """Find the highest value and its corresponding (k, p) combination, then store it in a dictionary and save it to a file."""
+    max_value = -1
+    best_k, best_p = None, None
+
+    for k, p_values in data.items():
+        for p, value in p_values.items():
+            if value > max_value:
+                max_value = value
+                best_k, best_p = k, p
+    result = {
+        "best_k": int(best_k),
+        "best_p": int(best_p),
+        "max_weighted_sum": int(max_value),
+    }
+    return result
+
+
 def main(args):
+    for weighted_bin_count in np.arange(100, 0, BIN_COUNT_STEP):
+        print(weighted_bin_count)
 
-    for contamination in CONTAMINATION_THRESHOLDS:
+        weighted_count_dict = {}
+        for contamination, weight in zip(CONTAMINATION_THRESHOLDS, WEIGHTS):
+            print(contamination, weight)
+            weighted_count_dict = process_all_reports(
+                args.input_dir, contamination, weight, weighted_count_dict
+            )
+            print(weighted_count_dict)
 
-        data = process_all_reports(args.input_dir, contamination)
-        with open(os.path.join(args.output_dir, "heatmap_data.json"), "w") as f:
-            json.dump(data, f, indent=4)
-
-        best_combination = select_best_combination(data)
+        best_combination = select_best_combination(weighted_count_dict)
         print(best_combination)
 
-        if best_combination["max_value"] < STOP_CRITERION:
+        if best_combination["max_weighted_sum"] < weighted_bin_count:
             continue
+
+        # result found
+        with open(os.path.join(args.output_dir, "heatmap_data.json"), "w") as f:
+            json.dump(weighted_count_dict, f, indent=4)
 
         print(f"Using contamination: {contamination}")
         best_combination["contamination"] = contamination
+
         with open(os.path.join(args.output_dir, "best_combination.json"), "w") as f:
             json.dump(best_combination, f, indent=4)
-        plot_results(data, args.output_dir)
+        plot_results(weighted_count_dict, args.output_dir)
         break
 
 
