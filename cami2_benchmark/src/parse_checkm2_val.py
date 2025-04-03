@@ -83,16 +83,28 @@ def process_all_reports(
     return weighted_count_dict
 
 
-def select_best_combination(data) -> dict:
-    """Find the highest value and its corresponding (k, p) combination, then store it in a dictionary and save it to a file."""
+def select_best_combination(data, N=500) -> dict:
+    """Find the highest value and its corresponding (k, p) combination.
+    If there is a tie, select the combination closest to N.
+    """
     max_value = -1
     best_k, best_p = None, None
+    candidates = []
 
     for k, p_values in data.items():
         for p, value in p_values.items():
             if value > max_value:
                 max_value = value
-                best_k, best_p = k, p
+                candidates = [(k, p)]
+            elif value == max_value:
+                candidates.append((k, p))
+
+    # If there's a tie, select the closest (k, p) to N
+    if len(candidates) > 1:
+        best_k, best_p = min(candidates, key=lambda kp: abs(int(kp[0]) - N))
+    else:
+        best_k, best_p = candidates[0]
+
     result = {
         "best_k": int(best_k),
         "best_p": int(best_p),
