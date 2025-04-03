@@ -142,11 +142,10 @@ class Threshold:
 
         self.save_histogram(knn=True)
         self.save_to_json()
-        
+
         return knn_threshold
-    
-    
-      def save_to_json(self)->None:
+
+    def save_to_json(self) -> None:
         """Saves the knn_threshold, pairsim_vector, and bin_vector to a JSON file."""
 
         data = {
@@ -155,13 +154,15 @@ class Threshold:
             "bin_vector": self.bin_vector.tolist(),
         }
 
-        file_path = os.path.join(self.save_path, f"k{self.knn_k}_p{self.knn_p}_similarity_histogram.json")
+        file_path = os.path.join(
+            self.save_path, f"k{self.knn_k}_p{self.knn_p}_similarity_histogram.json"
+        )
 
         with open(file_path, "w") as json_file:
             json.dump(data, json_file, indent=4)
 
         self.log.append(f"Threshold data saved to: {file_path}")
-        
+
         return
 
     def save_histogram(self, knn=True) -> None:
