@@ -247,6 +247,8 @@ rule alignment:
         os.path.join(BENCHMARKS, "alignment", "{sample}.txt")
     threads:
         48
+    resources:
+        mem_gb=35
     conda:
         os.path.join(CONDA_ENVS, "strobealign.yaml")
     shell:
