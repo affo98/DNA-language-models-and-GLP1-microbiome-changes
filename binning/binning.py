@@ -29,11 +29,13 @@ def main(args, log):
     contigs, contig_names = read_contigs(
         args.contigs, filter_len=MAX_CONTIG_LENGTH, log=log
     )
-    # contigs = contigs[0:4000]
-    # contig_names = contig_names[0:4000]
+    contigs = contigs[0:4000]
+    contig_names = contig_names[0:4000]
 
     contigs_test, contigs_val, contig_names_test, contig_names_val = (
-        split_contigs_valtest(contigs, contig_names, log, VAL_PROPORTION)
+        split_contigs_valtest(
+            contigs, contig_names, log, args.save_path, VAL_PROPORTION
+        )
     )
 
     if args.mode == "val":
