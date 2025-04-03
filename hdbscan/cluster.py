@@ -17,10 +17,10 @@ def cluster(path_to_embeds: str) -> np.array:
     with open("hdbscan_log.txt", "w") as f:
         for epsi in epsilons:
             hdb = HDBSCAN(
-                min_cluster_size=1000,
-                min_samples=100,
+                # min_cluster_size=1000,
+                # min_samples=100,
                 cluster_selection_epsilon=epsi,
-                alpha=0.8,
+                # alpha=0.8,
             )
             start = time.time()
             fmt = time.gmtime(start)
