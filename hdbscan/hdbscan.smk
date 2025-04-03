@@ -14,7 +14,7 @@ rule cluster:
     threads:
         48
     resources:
-        mem_gb=36
+        mem_gb=200
     shell:
         """
         python -m cuml.accel cluster.py {input.embeddings} {input.contig_catalogue} {threads}
