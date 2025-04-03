@@ -1,5 +1,7 @@
 import numpy as np
-from sklearn.cluster import HDBSCAN
+
+# from sklearn.cluster import HDBSCAN
+from cuml.cluster import HDBSCAN
 import gzip
 import os
 from Bio import SeqIO
@@ -11,19 +13,22 @@ def cluster(path_to_embeds: str, threads: int) -> np.array:
     dnabert_metahit_embeds = np.load(path_to_embeds)
 
     min_cluster_size = 20
-
-    hdb = HDBSCAN(min_cluster_size=min_cluster_size, n_jobs=threads)
-    start = time.time()
-    hdb.fit(dnabert_metahit_embeds)
-    end = time.time()
-    elapsed_time = end - start
-    cluster_labels = hdb.labels_
-
-    num_clusters = len(np.unique(cluster_labels).tolist())
-    num_noicy_contigs = (cluster_labels == -1).sum()
-    unassigned_contigs = (cluster_labels < 0).sum()
-
     with open("hdbscan_log.txt", "w") as f:
+        hdb = HDBSCAN(min_cluster_size=min_cluster_size, verbose=True)
+        f.write(f"TYPE of hdbscan: {type(hdb)}")
+        start = time.time()
+        fmt = time.gmtime(start)
+        current_time = time.strftime("%D %T", fmt)
+        f.write("STARTED AT {current_time}")
+        hdb.fit(dnabert_metahit_embeds)
+        end = time.time()
+        elapsed_time = end - start
+        cluster_labels = hdb.labels_
+
+        num_clusters = len(np.unique(cluster_labels).tolist())
+        num_noicy_contigs = (cluster_labels == -1).sum()
+        unassigned_contigs = (cluster_labels < 0).sum()
+
         f.write("#" * 100 + "\n" * 2)
         f.write("#" * 30 + "\t" * 2 + "HDBSCAN PARAMETERS" + "\t" * 2 + "#" * 30)
         f.write("\n" * 2)
