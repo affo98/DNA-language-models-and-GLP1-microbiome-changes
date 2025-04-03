@@ -21,7 +21,7 @@ def cluster(path_to_embeds: str) -> np.array:
         for cluster_size in min_cluster_sizes:
             hdb = HDBSCAN(
                 min_cluster_size=300,
-                min_samples=min_cluster_sizes,
+                min_samples=cluster_size,
                 # cluster_selection_epsilon=epsi,
                 metric="euclidean",
                 # alpha=0.8,
