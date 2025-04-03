@@ -13,41 +13,42 @@ def cluster(path_to_embeds: str) -> np.array:
     dnabert_metahit_embeds = np.load(path_to_embeds)
 
     min_cluster_size = 20
+    epsilons = [0.1, 0.2, 0.3, 0.4, 0.5, 0.7, 0.8, 0.9, 1]
     with open("hdbscan_log.txt", "w") as f:
-        hdb = HDBSCAN(
-            min_cluster_size=1000,
-            min_samples=100,
-            cluster_selection_epsilon=0.2,
-            alpha=0.8,
-        )
-        f.write(f"TYPE of hdbscan: {type(hdb)}\n")
-        start = time.time()
-        fmt = time.gmtime(start)
-        current_time = time.strftime("%D %T", fmt)
-        f.write(f"STARTED AT {current_time}\n")
-        hdb.fit(dnabert_metahit_embeds)
-        end = time.time()
-        elapsed_time = end - start
-        cluster_labels = hdb.labels_
+        for epsi in epsilons:
+            hdb = HDBSCAN(
+                min_cluster_size=1000,
+                min_samples=100,
+                cluster_selection_epsilon=epsi,
+                alpha=0.8,
+            )
+            start = time.time()
+            fmt = time.gmtime(start)
+            current_time = time.strftime("%D %T", fmt)
+            f.write(f"STARTED AT {current_time} with epsilon {epsi}\n")
+            hdb.fit(dnabert_metahit_embeds)
+            end = time.time()
+            elapsed_time = end - start
+            cluster_labels = hdb.labels_
 
-        num_clusters = len(np.unique(cluster_labels).tolist())
-        num_noicy_contigs = (cluster_labels == -1).sum()
-        unassigned_contigs = (cluster_labels < 0).sum()
+            num_clusters = len(np.unique(cluster_labels).tolist())
+            num_noicy_contigs = (cluster_labels == -1).sum()
+            unassigned_contigs = (cluster_labels < 0).sum()
 
-        f.write("#" * 100 + "\n" * 2)
-        f.write("#" * 30 + "\t" * 2 + "HDBSCAN PARAMETERS" + "\t" * 2 + "#" * 30)
-        f.write("\n" * 2)
-        f.write(f"\t\tmin_cluster_size: {min_cluster_size}\n")
-        f.write(f"Clustered contigs = {len(list(cluster_labels))}\n")
-        f.write("\n" * 2)
-        f.write("#" * 100 + "\n")
+            f.write("#" * 100 + "\n" * 2)
+            f.write("#" * 30 + "\t" * 2 + "HDBSCAN PARAMETERS" + "\t" * 2 + "#" * 30)
+            f.write("\n" * 2)
+            f.write(f"\t\tmin_cluster_size: {min_cluster_size}\n")
+            f.write(f"\t\tClustered contigs = {len(list(cluster_labels))}\n")
+            f.write("\n" * 2)
+            f.write("#" * 100 + "\n")
 
-        f.write(f"Number of Clusters: {num_clusters},\n")
-        f.write(f"Noicy Contigs i.e. -1: {num_noicy_contigs},\n")
-        f.write(f"Numbr of unassigned Contigs: {unassigned_contigs},\n")
-        f.write(f"Cluster labels found: {np.unique(cluster_labels).tolist()}")
-        f.write("\n" * 2)
-        f.write(f"Elapsed time fitting HDBSCAN: {elapsed_time:.2f} seconds\n")
+            f.write(f"Number of Clusters: {num_clusters},\n")
+            f.write(f"Noicy Contigs i.e. -1: {num_noicy_contigs},\n")
+            f.write(f"Numbr of unassigned Contigs: {unassigned_contigs},\n")
+            f.write(f"Cluster labels found: {np.unique(cluster_labels).tolist()}")
+            f.write("\n" * 2)
+            f.write(f"Elapsed time fitting HDBSCAN: {elapsed_time:.2f} seconds\n")
         # TODO filter out -1 clusters
     return cluster_labels
 
