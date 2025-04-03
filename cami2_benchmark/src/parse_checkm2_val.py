@@ -13,7 +13,7 @@ CONTAMINATION_THRESHOLDS = [5, 10, 15, 20]
 WEIGHTS = [1, 1 / 2, 1 / 4, 1 / 8]
 
 MAX_BINS = 100
-BIN_COUNT_STEP = 0.1
+BIN_COUNT_STEP = -0.1
 
 
 def plot_results(data, output_dir) -> None:
@@ -105,7 +105,7 @@ def select_best_combination(data) -> dict:
 
 
 def main(args):
-    print("start")
+
     for weighted_bin_count in np.arange(100, 0, BIN_COUNT_STEP):
         print(weighted_bin_count)
 
