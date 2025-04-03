@@ -21,8 +21,6 @@ def plot_results(data, output_dir) -> None:
     plt.figure(figsize=(8, 3))
 
     df = pd.DataFrame(data)
-    df.index = df.index.astype(int)
-    df.columns = df.columns.astype(int)
     df = df.sort_index(axis=0, ascending=False)
     df = df.sort_index(axis=1)
 
