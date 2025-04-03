@@ -85,8 +85,6 @@ def main(args, log):
             for knnp in args.knnp:
                 log.append(f"\nRunning k:{knnk} p:{knnp}")
                 threshold = thresholder_val.get_knn_threshold(knnk, knnp)
-                thresholder_val.save_histogram(knn=True)
-
                 _, _ = kmediod_val.fit(threshold, knnk, knnp)
 
     elif args.mode == "test":
@@ -132,7 +130,6 @@ def main(args, log):
         )
 
         threshold = thresholder_test.get_knn_threshold(knnk, knnp)
-        thresholder_test.save_histogram(knn=True)
         _, _ = kmediod_test.fit(threshold, knnp, knnk)
 
 

@@ -10,6 +10,7 @@ import json
 
 COMPLETENESS_BINS = [90, 80, 70, 60, 50]
 CONTAMINATION_THRESHOLDS = [5, 10, 15, 20, 20, 30, 35, 50]
+STOP_CRITERION = 2
 
 
 def parse_quality_report(file_path, contamination) -> pd.DataFrame:
@@ -62,14 +63,26 @@ def select_best_combination(data) -> dict:
 
 
 def plot_results(data, output_dir) -> None:
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=(8, 4))
+
     df = pd.DataFrame(data)
+    df.index = df.index.astype(int)
+    df.columns = df.columns.astype(int)
+    df = df.sort_index(axis=0, ascending=False)
+    df = df.sort_index(axis=1)
 
-    sns.heatmap(df, annot=True, fmt="d", cmap="Oranges", linewidths=0.5)
+    sns.heatmap(
+        df.values,
+        annot=True,
+        fmt="d",
+        cmap="Oranges",
+        linewidths=0.5,
+        xticklabels=df.columns,
+        yticklabels=df.index,
+    )
 
-    # Labels
-    plt.xlabel("P values")
-    plt.ylabel("K values")
+    plt.xlabel("K values")
+    plt.ylabel("P values")
 
     file_path = os.path.join(
         output_dir,
@@ -87,13 +100,15 @@ def main(args):
     for contamination in CONTAMINATION_THRESHOLDS:
 
         data = process_all_reports(args.input_dir, contamination)
+        with open(os.path.join(args.output_dir, "heatmap_data.json"), "w") as f:
+            json.dump(data, f, indent=4)
+
         best_combination = select_best_combination(data)
         print(best_combination)
 
-        if best_combination["max_value"] == 0:
+        if best_combination["max_value"] < STOP_CRITERION:
             continue
 
-        # save it there is an actual max value
         print(f"Using contamination: {contamination}")
         best_combination["contamination"] = contamination
         with open(os.path.join(args.output_dir, "best_combination.json"), "w") as f:

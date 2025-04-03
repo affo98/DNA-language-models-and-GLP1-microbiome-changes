@@ -1,12 +1,11 @@
 import os
+import json
 
 import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 import torch
-
-import skimage.filters as filters
 
 from src.utils import get_available_device, Logger
 
@@ -141,7 +140,29 @@ class Threshold:
             bin_vector,
         )
 
+        self.save_histogram(knn=True)
+        self.save_to_json()
+        
         return knn_threshold
+    
+    
+      def save_to_json(self)->None:
+        """Saves the knn_threshold, pairsim_vector, and bin_vector to a JSON file."""
+
+        data = {
+            "knn_threshold": self.knn_threshold,
+            "pairsim_vector": self.pairsim_vector.tolist(),  # Convert numpy arrays to lists
+            "bin_vector": self.bin_vector.tolist(),
+        }
+
+        file_path = os.path.join(self.save_path, f"k{self.knn_k}_p{self.knn_p}_similarity_histogram.json")
+
+        with open(file_path, "w") as json_file:
+            json.dump(data, json_file, indent=4)
+
+        self.log.append(f"Threshold data saved to: {file_path}")
+        
+        return
 
     def save_histogram(self, knn=True) -> None:
         """Plots and saves the histogram of similarities from the provided bin_vector."""
