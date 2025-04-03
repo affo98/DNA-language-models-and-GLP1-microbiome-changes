@@ -87,7 +87,7 @@ def process_all_reports(
     return weighted_count_dict
 
 
-def select_best_combination(data, N=15000) -> dict:
+def select_best_combination(data, n_val: int) -> dict:
     """Find the highest value and its corresponding (k, p) combination.
     If there is a tie, select the combination closest to N.
     """
@@ -106,7 +106,9 @@ def select_best_combination(data, N=15000) -> dict:
     # If there's a tie, select the closest (k, p) to N
     if len(candidates) > 1:
         print(candidates)
-        best_k, best_p = min(candidates, key=lambda kp: abs(int(kp[0]) - math.sqrt(N)))
+        best_k, best_p = min(
+            candidates, key=lambda kp: abs(int(kp[0]) - math.sqrt(n_val))
+        )
     else:
         best_k, best_p = candidates[0]
 
@@ -126,7 +128,7 @@ def main(args):
             args.input_dir, contamination, weight, weighted_count_dict
         )
     print(weighted_count_dict)
-    best_combination = select_best_combination(weighted_count_dict)
+    best_combination = select_best_combination(weighted_count_dict, args.n_val)
     best_combination["contamination_values"] = CONTAMINATION_THRESHOLDS[:4]
 
     # if no results are found with contamination < 20, then try all contamination values.
@@ -139,7 +141,7 @@ def main(args):
                 args.input_dir, contamination, weight, weighted_count_dict
             )
         print(weighted_count_dict)
-        best_combination = select_best_combination(weighted_count_dict)
+        best_combination = select_best_combination(weighted_count_dict, args.n_val)
         best_combination["contamination_values"] = CONTAMINATION_THRESHOLDS
 
     # result found
@@ -162,6 +164,12 @@ def add_arguments() -> ArgumentParser:
         "--output_dir",
         "-o",
         help="Output dir for best model",
+    )
+    parser.add_argument(
+        "--n_val",
+        "-n",
+        type=int,
+        help="Number of validation contigs",
     )
 
     args = parser.parse_args()
