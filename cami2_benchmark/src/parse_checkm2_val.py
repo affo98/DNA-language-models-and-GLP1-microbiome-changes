@@ -83,7 +83,7 @@ def process_all_reports(
     return weighted_count_dict
 
 
-def select_best_combination(data, N=500) -> dict:
+def select_best_combination(data, N=15000) -> dict:
     """Find the highest value and its corresponding (k, p) combination.
     If there is a tie, select the combination closest to N.
     """
@@ -101,6 +101,7 @@ def select_best_combination(data, N=500) -> dict:
 
     # If there's a tie, select the closest (k, p) to N
     if len(candidates) > 1:
+        print(candidates)
         best_k, best_p = min(candidates, key=lambda kp: abs(int(kp[0]) - N))
     else:
         best_k, best_p = candidates[0]
