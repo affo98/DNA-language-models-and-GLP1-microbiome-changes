@@ -76,7 +76,7 @@ def process_all_reports(
         completeness_values = parse_quality_report(report_path, contamination)
         bin_counts = [np.sum(completeness_values >= b) for b in COMPLETENESS_BINS]
 
-        if k_value not in data:
+        if k_value not in weighted_count_dict:
             weighted_count_dict[k_value] = {}
 
         weighted_count_dict[k_value][p_value] = (
