@@ -9,8 +9,8 @@ CONDA_ENVS = config['CONDA_ENVS']
 DB = config['DB']
 FASTQC_PATH = config['FASTQC_PATH']
 
-STUDY_ID = config["studies"][3].get("id")
-STUDY_NAME = config["studies"][3].get("name")
+STUDY_ID = config["studies"][4].get("id")
+STUDY_NAME = config["studies"][4].get("name")
 
 
 OUTDIR = f"{STUDY_NAME}_{STUDY_ID}"
