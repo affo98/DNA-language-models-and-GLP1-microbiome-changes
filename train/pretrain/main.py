@@ -136,6 +136,7 @@ def get_args(argv):
     parser.add_argument('--lr', type=float, default=1e-05, help="Learning rate")
     parser.add_argument('--lr_scale', type=int, default=100, help="")
     parser.add_argument('--min_lr', type=float, default=0.0, help='Minimum learning rate for cosine scheduler')
+    parser.add_argument('--weight_decay', type=float, default=1e-03, help="Weight decay for AdamW")
     parser.add_argument('--warmup_epochs', type=float, default=0.3, help='Number of warmup epochs for learning rate')
     parser.add_argument('--epochs', type=int, default=3)
     parser.add_argument('--print-freq', '-p', default=100, type=int, metavar='N', help='print frequency (default: 10)')
@@ -146,12 +147,6 @@ def get_args(argv):
     parser.add_argument('--feat_dim', type=int, default=128, help="Dimension of the projected features for instance discrimination loss")
     parser.add_argument('--temp', type=float, default=0.07, help="Temperature required by contrastive loss")
     parser.add_argument('--loss', type=str, default='hmce', help='loss type', choices=['hmc', 'hce', 'hmce'])
-    #parser.add_argument('--con_method', type=str, default='same_species', help="Which data augmentation method used, include dropout, double_strand, mutate, same_species")
-    #parser.add_argument('--mix', action="store_true", help="Whether use i-Mix method")
-    #parser.add_argument('--dnabert2_mix_dict', type=str, default="./DNABERT-2-117M-MIX", help="Dictionary of the modified code for DNABert-2 to perform i-Mix")
-    #parser.add_argument('--mix_alpha', type=float, default=1.0, help="Value of alpha to generate i-Mix coefficient")
-   # parser.add_argument('--mix_layer_num', type=int, default=-1, help="Which layer to perform i-Mix, if the value is -1, it means manifold i-Mix")
-   # parser.add_argument('--curriculum', action="store_true", help="Whether use curriculum learning")
     
     
     args = parser.parse_args(argv)
