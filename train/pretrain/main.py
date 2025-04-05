@@ -136,7 +136,7 @@ def get_args(argv):
     parser.add_argument('--lr', type=float, default=1e-05, help="Learning rate")
     parser.add_argument('--lr_scale', type=int, default=100, help="")
     parser.add_argument('--min_lr', type=float, default=0.0, help='Minimum learning rate for cosine scheduler')
-    parser.add_argument('--weight_decay', type=float, default=1e-03, help="Weight decay for AdamW")
+    #parser.add_argument('--weight_decay', type=float, default=1e-03, help="Weight decay for AdamW")
     parser.add_argument('--warmup_epochs', type=float, default=0.3, help='Number of warmup epochs for learning rate')
     parser.add_argument('--epochs', type=int, default=3)
     parser.add_argument('--print-freq', '-p', default=100, type=int, metavar='N', help='print frequency (default: 10)')
