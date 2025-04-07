@@ -12,7 +12,7 @@ dependencies:
   - tqdm
   - pip:
       - torch
-      - transformers
+      - transformers==4.50.3
       - einops
       - matplotlib
       - seaborn
