@@ -9,6 +9,8 @@ import numpy as np
 
 import math
 
+from binning.src.utils import Logger
+
 
 COMPLETENESS_BINS = [90, 80, 70, 60, 50]
 
@@ -105,9 +107,11 @@ def select_best_combination(data, n_val: int) -> dict:
 
     # If there's a tie, select the closest (k, p) to N
     if len(candidates) > 1:
-        print(candidates)
         best_k, best_p = min(
             candidates, key=lambda kp: abs(int(kp[0]) - math.sqrt(n_val))
+        )
+        log.append(
+            f"Tie between {candidates}\nSelecting {best_k, best_p} using n_val {n_val}"
         )
     else:
         best_k, best_p = candidates[0]
@@ -133,7 +137,9 @@ def main(args):
 
     # if no results are found with contamination < 20, then try all contamination values.
     if best_combination["max_weighted_sum"] <= 0:
-        print("No valid combination found in the first pass, trying with full list.")
+        log.append(
+            "No valid combination found in the first pass, trying with full list."
+        )
         weighted_count_dict = {}
 
         for contamination, weight in zip(CONTAMINATION_THRESHOLDS, WEIGHTS):
@@ -171,6 +177,11 @@ def add_arguments() -> ArgumentParser:
         type=int,
         help="Number of validation contigs",
     )
+    parser.add_argument(
+        "--log",
+        "-l",
+        help="Path to save logfile",
+    )
 
     args = parser.parse_args()
 
@@ -180,5 +191,9 @@ def add_arguments() -> ArgumentParser:
 if __name__ == "__main__":
 
     args = add_arguments()
+    log = Logger(args.log)
 
-    main(args)
+    for arg, value in vars(args).items():
+        log.append(f"{arg}: {value}")
+
+    main(args, log)

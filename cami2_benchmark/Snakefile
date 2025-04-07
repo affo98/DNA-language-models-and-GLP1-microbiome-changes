@@ -265,14 +265,15 @@ rule parse_checkm2_val:
         val_count=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation")
     output:
         path=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results"))
-    
+    log:
+        log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "checkm2_validation.log")
     conda:
         os.path.join(BINNING_DIR, "envs/binning.yml")
     shell:
         """
         mkdir -p {output.path}
         n_val=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["n_val"])' "{input.val_count}/n_total_val_test.json")
-        python {SRC_DIR}/parse_checkm2_val.py -i {input.checkm2_reports} -o {output.path} -n $n_val
+        python {SRC_DIR}/parse_checkm2_val.py -i {input.checkm2_reports} -o {output.path} -n $n_val -l {log.log_file}
         """
 #-end val
 
