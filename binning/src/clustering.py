@@ -155,10 +155,10 @@ class KMediod:
 
         labels, counts = torch.unique(predictions, return_counts=True)
         if self.log_verbose:
-            for label, count, i in enumerate(zip(labels.cpu(), counts.cpu())):
-                self.log.append(f"Cluster {label}: {count} points")
-                if i == 50:
-                    break
+        for i, (label, count) in enumerate(zip(labels.cpu(), counts.cpu())):
+            self.log.append(f"Cluster {label}: {count} points")
+            if i == 50:
+                break
 
         predictions = predictions.cpu().numpy()
 
