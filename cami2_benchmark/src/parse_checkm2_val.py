@@ -129,7 +129,7 @@ def main(args, log):
         weighted_count_dict = process_all_reports(
             args.input_dir, contamination, weight, weighted_count_dict
         )
-    print(weighted_count_dict)
+    log.append(weighted_count_dict)
     best_combination = select_best_combination(weighted_count_dict, args.n_val, log)
     best_combination["contamination_values"] = CONTAMINATION_THRESHOLDS[:4]
 
@@ -144,7 +144,7 @@ def main(args, log):
             weighted_count_dict = process_all_reports(
                 args.input_dir, contamination, weight, weighted_count_dict
             )
-        print(weighted_count_dict)
+        log.append(weighted_count_dict)
         best_combination = select_best_combination(weighted_count_dict, args.n_val, log)
         best_combination["contamination_values"] = CONTAMINATION_THRESHOLDS
 
