@@ -43,11 +43,6 @@ The list of models are specified in the file `config.yml`. They include:
 
 
 
-### Output
-
-The output (results) of the workflow is Checkm2 quality results for the bins. These are found in folder `model_results/DATASET_NAME/checkm2`.
-
-
 ### Usage
 
 #### Setup
@@ -57,6 +52,17 @@ Create the environment for Snakemake and activate it.
 conda env create -f cami2_benchmark/envs/cami2_processing.yml
 conda activate cami2_processing
 ```
+
+#### Output
+
+1. Contig catalogues and BAM-files are saved in `processed_data/<DATASET_NAME>`
+2. The output (results) of the workflow is Checkm2 quality results for the bins. These are found in folder `model_results/<DATASET_NAME>/checkm2`. Run the command below to parse checkm2 results for all datasets and models. The parsed results are saved in `model_results/<DATASET_NAME>/parsed_checkm2_results.json`
+
+```bash
+python cami2_benchmark/src/parse_checkm2_test.py
+```
+
+
 
 #### Arguments
 
