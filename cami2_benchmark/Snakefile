@@ -194,10 +194,10 @@ rule other_model_val:
     shell:
         """
         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
-        #pip uninstall -y triton
         python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
         -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {output.dirs} -l {log} -m val
         """
+        ##pip uninstall -y triton
 
 rule create_fasta_bins_other_model_val:
     input:
