@@ -9,8 +9,6 @@ import numpy as np
 
 import math
 
-from binning.src.utils import Logger
-
 
 COMPLETENESS_BINS = [90, 80, 70, 60, 50]
 
@@ -186,6 +184,26 @@ def add_arguments() -> ArgumentParser:
     args = parser.parse_args()
 
     return args
+
+
+class Logger:
+    def __init__(self, log_path: str):
+        """Initialize the Logger with a path to the log file.
+
+        Args:
+            log_path (str): The path to the log file.
+        """
+        self.log_path = log_path
+
+    def append(self, message: str) -> None:
+        """Print and append a log message to the log file.
+
+        Args:
+            message (str): The message to log.
+        """
+        print(message)
+        with open(self.log_path, "a") as log_file:
+            log_file.write(message + "\n")
 
 
 if __name__ == "__main__":
