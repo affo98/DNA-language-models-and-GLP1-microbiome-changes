@@ -87,7 +87,7 @@ def process_all_reports(
     return weighted_count_dict
 
 
-def select_best_combination(data, n_val: int) -> dict:
+def select_best_combination(data, n_val: int, log) -> dict:
     """Find the highest value and its corresponding (k, p) combination.
     If there is a tie, select the combination closest to N.
     """
@@ -109,7 +109,7 @@ def select_best_combination(data, n_val: int) -> dict:
             candidates, key=lambda kp: abs(int(kp[0]) - math.sqrt(n_val))
         )
         log.append(
-            f"Tie between {candidates}\nSelecting {best_k, best_p} using n_val {n_val}"
+            f"Tie between {candidates}\nSelecting {best_k, best_p} using n_val {n_val}; sqrt: {math.sqrt(n_val)}"
         )
     else:
         best_k, best_p = candidates[0]
@@ -122,7 +122,7 @@ def select_best_combination(data, n_val: int) -> dict:
     return result
 
 
-def main(args):
+def main(args, log):
 
     weighted_count_dict = {}
     for contamination, weight in zip(CONTAMINATION_THRESHOLDS[:4], WEIGHTS[:4]):
@@ -130,7 +130,7 @@ def main(args):
             args.input_dir, contamination, weight, weighted_count_dict
         )
     print(weighted_count_dict)
-    best_combination = select_best_combination(weighted_count_dict, args.n_val)
+    best_combination = select_best_combination(weighted_count_dict, args.n_val, log)
     best_combination["contamination_values"] = CONTAMINATION_THRESHOLDS[:4]
 
     # if no results are found with contamination < 20, then try all contamination values.
@@ -145,7 +145,7 @@ def main(args):
                 args.input_dir, contamination, weight, weighted_count_dict
             )
         print(weighted_count_dict)
-        best_combination = select_best_combination(weighted_count_dict, args.n_val)
+        best_combination = select_best_combination(weighted_count_dict, args.n_val, log)
         best_combination["contamination_values"] = CONTAMINATION_THRESHOLDS
 
     # result found
