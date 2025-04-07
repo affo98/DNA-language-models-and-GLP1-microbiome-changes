@@ -139,13 +139,13 @@ elif MODEL in ['tnf'] and not config_nomodelrun:
 
 elif MODEL in ['tnfkernel'] and not config_nomodelrun:
     input_files += [
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnfkernel_output"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnfkernel_output", "test"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "tnfkernel"),
     ]
 
 elif MODEL in ['dna2vec'] and not config_nomodelrun:
     input_files += [
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dna2vec_output"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dna2vec_output"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dna2vec"),
     ]
 
