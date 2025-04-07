@@ -29,8 +29,8 @@ def main(args, log):
     contigs, contig_names = read_contigs(
         args.contigs, filter_len=MAX_CONTIG_LENGTH, log=log
     )
-    contigs = contigs[0:50000]
-    contig_names = contig_names[0:50000]
+    # contigs = contigs[0:50000]
+    # contig_names = contig_names[0:50000]
 
     contigs_test, contigs_val, contig_names_test, contig_names_val = (
         split_contigs_valtest(
