@@ -23,7 +23,6 @@ If conda is not installed, run the following code to install it:
 chmod +x get_conda.sh
 bash get_conda.sh
 source ~/.bashrc
-conda --version
 ```
 
 
