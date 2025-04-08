@@ -75,6 +75,8 @@ class KMediod:
         n_samples = self.embeddings.shape[0]
 
         density_vector = torch.zeros(n_samples, device=self.device)
+        seeds = []
+        seed_labels = []
 
         for i in range(0, n_samples, self.block_size):
             block_start = i
@@ -111,6 +113,8 @@ class KMediod:
             density_vector[medoid_idx] = -100  # exclude seed from density vector
 
             seed = self.embeddings[medoid_idx]
+            seeds.append(seed.detach().cpu().numpy())
+            seed_labels.append(cluster_id)
             available_mask = predictions == -1  # points that are still available
 
             for _ in range(self.num_steps):
@@ -138,21 +142,19 @@ class KMediod:
 
                 density_vector[block_start:block_end] -= torch.sum(cluster_sims, dim=1)
 
-            density_vector[candidates] = (
-                -100
-            )  # exclude selected points from further selection
+            density_vector[candidates] = -100
 
             progress_bar.update(1)
-            # if cluster_id % 200 == 0:
-            #    self.log.append(f"KMediod Step {cluster_id} completed.")
 
         # Filter small clusters
         labels, counts = torch.unique(predictions, return_counts=True)
+
         for label, count in zip(labels.cpu(), counts.cpu()):
             if label == -1 or count >= self.min_bin_size:
                 continue
             predictions[predictions == label] = -1
 
+        # print cluster sizes
         labels, counts = torch.unique(predictions, return_counts=True)
         if self.log_verbose:
             for i, (label, count) in enumerate(zip(labels.cpu(), counts.cpu())):
@@ -183,7 +185,7 @@ class KMediod:
         return predictions, contig_names
 
     def save_output(self, knn_k, knn_p, predictions, contig_names) -> None:
-        """save predictions in save_path in format: clustername \\t contigname"""
+        """save predictions in save_path in format: clustername \\t contigname, and cluster-seeds in a separate file."""
 
         if self.mode == "val":
             output_file = os.path.join(

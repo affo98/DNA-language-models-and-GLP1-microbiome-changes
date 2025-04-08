@@ -31,7 +31,9 @@ def process_all_reports(results_dir):
                 continue
 
             completeness_values = parse_quality_report(report_path)
-            bin_counts = [np.sum(completeness_values >= b) for b in COMPLETENESS_BINS]
+            bin_counts = [
+                int(np.sum(completeness_values >= b)) for b in COMPLETENESS_BINS
+            ]
 
             if dataset not in data:
                 data[dataset] = {}
