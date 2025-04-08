@@ -1,4 +1,5 @@
 import os
+import json
 
 import torch
 import numpy as np
@@ -113,8 +114,6 @@ class KMediod:
             density_vector[medoid_idx] = -100  # exclude seed from density vector
 
             seed = self.embeddings[medoid_idx]
-            seeds.append(seed.detach().cpu().numpy())
-            seed_labels.append(cluster_id)
             available_mask = predictions == -1  # points that are still available
 
             for _ in range(self.num_steps):
@@ -128,6 +127,8 @@ class KMediod:
                 seed = torch.mean(self.embeddings[candidates], dim=0)  # update seed
 
             predictions[candidates] = cluster_id
+            seeds.append(seed.detach().cpu().numpy())
+            seed_labels.append(cluster_id)
 
             # Update density vector in blocks
             for i in range(0, n_samples, self.block_size):
@@ -146,9 +147,17 @@ class KMediod:
 
             progress_bar.update(1)
 
+        # seeds_dict = {
+        #    "seed_labels": seed_labels,
+        #    "seeds": [s.tolist() for s in seeds],
+        # }
+        seeds_dict = {
+            str(label): seed.tolist() for label, seed in zip(seed_labels, seeds)
+        }
+        self.save_seeds(seeds_dict)
+
         # Filter small clusters
         labels, counts = torch.unique(predictions, return_counts=True)
-
         for label, count in zip(labels.cpu(), counts.cpu()):
             if label == -1 or count >= self.min_bin_size:
                 continue
@@ -169,7 +178,7 @@ class KMediod:
         ), f"Len of predictions {len(predictions)} does not match embeddings {len(self.embeddings)} and contig_names {len(self.contig_names)}"
 
         predictions, contig_names = self.remove_unassigned_sequences(predictions)
-        self.save_output(knn_k, knn_p, predictions, contig_names)
+        self.save_clusters(knn_k, knn_p, predictions, contig_names)
 
         return predictions, contig_names
 
@@ -184,7 +193,7 @@ class KMediod:
         ), f"Mismatch between predictions {len(predictions)} and contig names {len(contig_names)} after removing unassigned seqs."
         return predictions, contig_names
 
-    def save_output(self, knn_k, knn_p, predictions, contig_names) -> None:
+    def save_clusters(self, knn_k, knn_p, predictions, contig_names) -> None:
         """save predictions in save_path in format: clustername \\t contigname, and cluster-seeds in a separate file."""
 
         if self.mode == "val":
@@ -201,3 +210,15 @@ class KMediod:
                 file.write(f"{cluster}\t{contig}\n")
 
         self.log.append(f"Predictions file written successfully to {self.save_path}")
+        return
+
+    def save_seeds(self, seeds_dict) -> None:
+        """save seeds in save_path in json. Only saved in test-mode"""
+
+        if self.mode == "val":
+            return
+        elif self.mode == "test":
+            output_file = os.path.join(self.save_path, f"seeds.json")
+            with open(output_file, "w") as json_file:
+                json.dump(seeds_dict, json_file, indent=4)
+            return

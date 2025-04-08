@@ -49,8 +49,11 @@ MINSIZE_BINS=250000
 MINSIZE_CONTIGS=2000
 
 #knn params
-KNN_K = [100,200,300,400,500,600,700,800,900,1000]
-KNN_P = [25,50,75]
+#KNN_K = [100,200,300,400,500,600,700,800,900,1000]
+#KNN_P = [25,50,75]
+
+KNN_K = [100]
+KNN_P = [25]
 
 
 
@@ -300,7 +303,8 @@ rule create_fasta_bins_other_model_test:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
         cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "test")
     output:
-        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{MODEL}"))
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{MODEL}")),
+        clusters_filtered = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "test", "clusters_filtered.tsv")
     log:
         log_file=os.path.join(LOGS, DATASET, "{MODEL}_test_bin_postprocessing.log")
     params:
@@ -310,7 +314,7 @@ rule create_fasta_bins_other_model_test:
     shell:
         """
         python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results}/clusters.tsv {params.minsize_bins} {output.dirs} \
-        --log {log.log_file}
+        --log {log.log_file} --outtsv {output.clusters_filtered}
         """
 #END OTHER MODEL
 

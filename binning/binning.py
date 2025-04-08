@@ -104,35 +104,35 @@ def main(args, log):
             args.model_name,
             args.model_path,
             os.path.join(args.save_path, "embeddings", f"{args.model_name}.npy"),
-            normalize_embeddings=False,  # CHANGE BACK!!!
+            normalize_embeddings=True,
             log=log,
         )
         embeddings_test = embedder_test.get_embeddings()
 
-        thresholder_test = Threshold(
-            embeddings_test,
-            N_BINS,
-            BLOCK_SIZE,
-            args.save_path,
-            args.model_name,
-            log,
-        )
+        # thresholder_test = Threshold(
+        #     embeddings_test,
+        #     N_BINS,
+        #     BLOCK_SIZE,
+        #     args.save_path,
+        #     args.model_name,
+        #     log,
+        # )
 
-        kmediod_test = KMediod(
-            embeddings_test,
-            contig_names_test,
-            args.save_path,
-            log,
-            True,
-            "test",
-            MIN_BIN_SIZE,
-            NUM_STEPS,
-            MAX_ITER,
-            BLOCK_SIZE,
-        )
+        # kmediod_test = KMediod(
+        #     embeddings_test,
+        #     contig_names_test,
+        #     args.save_path,
+        #     log,
+        #     True,
+        #     "test",
+        #     MIN_BIN_SIZE,
+        #     NUM_STEPS,
+        #     MAX_ITER,
+        #     BLOCK_SIZE,
+        # )
 
-        threshold = thresholder_test.get_knn_threshold(knnk, knnp)
-        _, _ = kmediod_test.fit(threshold, knnp, knnk)
+        # threshold = thresholder_test.get_knn_threshold(knnk, knnp)
+        # _, _ = kmediod_test.fit(threshold, knnp, knnk)
 
 
 def add_arguments() -> ArgumentParser:

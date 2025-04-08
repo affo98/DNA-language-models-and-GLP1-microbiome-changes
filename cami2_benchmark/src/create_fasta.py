@@ -13,7 +13,8 @@ Will read the entire content of the FASTA file into memory - beware.""",
 parser.add_argument("fastapath", help="Path to FASTA file")
 parser.add_argument("clusterspath", help="Path to clusters.tsv")
 parser.add_argument("minsize", help="Minimum size of bin in bp", type=int, default=0)
-parser.add_argument("outdir", help="Directory to create")
+parser.add_argument("outdir", help="Directory to create for fasta-bins")
+parser.add_argument("--outtsv", help="Optional path to save filtered clusters as TSV")
 parser.add_argument("--log", help="Path to log file", required=True)
 
 if len(sys.argv) == 1:
@@ -42,6 +43,14 @@ clusters = {
     if sum(lens[c] for c in contigs) >= args.minsize
 }
 num_clusters_after = len(clusters)
+
+# in test-mode binning for LLMs, save the clusters that stay after filtering
+if args.outtsv:
+    with open(args.outtsv, "w") as tsv_f:
+        for cluster_id, contigs in clusters.items():
+            for contig in contigs:
+                tsv_f.write(f"{cluster_id}\t{contig}\n")
+
 
 with vamb.vambtools.Reader(args.fastapath) as file:
     vamb.vambtools.write_bins(pathlib.Path(args.outdir), clusters, file, maxbins=None)
