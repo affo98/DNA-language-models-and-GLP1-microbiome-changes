@@ -35,11 +35,9 @@ class Trainer(nn.Module):
         return token_feat
         
     def prepare_pairwise_input(self, sequences):
-        rand_i = np.random.randint(200)
-        rand_j = np.random.randint(200)
         sequences1, sequences2 = sequences[0], sequences[1]
-        sequences1 = [s[0][rand_i:] for s in sequences1]
-        sequences2 = [s[0][rand_j:] for s in sequences2]
+        sequences1 = [s[0] for s in sequences1]
+        sequences2 = [s[0] for s in sequences2]
         feat1 = self.get_batch_token(sequences1)
         feat2 = self.get_batch_token(sequences2)
 

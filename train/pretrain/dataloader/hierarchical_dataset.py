@@ -82,8 +82,9 @@ class GenomeHierarchihcalDataset(Dataset):
         sequences1, sequences2, labels = [], [], []
         for i in index:
             label = [self.species[i], self.genus[i], self.family[i], self.order[i], self.class_[i], self.phylum[i], self.kingdom[i], self.superkingdom[i]]
-            sequences1.append(self.seq1[i])
-            sequences2.append(self.seq2[i])
+            rand_i = random.choice(list(range(200)))
+            sequences1.append(self.seq1[i][rand_i:])
+            sequences2.append(self.seq2[i][rand_i:])
             labels.append(label)
         
         return [sequences1, sequences2], torch.tensor(labels)
