@@ -104,7 +104,7 @@ def main(args, log):
             args.model_name,
             args.model_path,
             os.path.join(args.save_path, "embeddings", f"{args.model_name}.npy"),
-            normalize_embeddings=True,
+            normalize_embeddings=False,  # CHANGE BACK!!!
             log=log,
         )
         embeddings_test = embedder_test.get_embeddings()
