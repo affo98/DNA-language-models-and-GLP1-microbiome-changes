@@ -8,7 +8,8 @@ import re
 import pandas as pd
 import numpy as np
 
-RESULTS_DIR = os.path.join("cami2_benchmark", "model_results")
+MODEL_RESULTS_DIR = os.path.join("cami2_benchmark", "model_results")
+PROCESSED_DATA_DIR = os.path.join("cami2_benchmark", "processed_data")  
 OUTPUT_DIR = os.path.join("cami2_benchmark", "model_results", "parsed_results")
 
 COMPLETENESS_BINS = [90, 80, 70, 60, 50]
@@ -23,12 +24,12 @@ def parse_quality_report(file_path):
     return df["Completeness"].values
 
 
-def process_all_reports(results_dir):
-    """Walks through the RESULTS_DIR to collect all models and datasets."""
+def process_all_reports(model_results_dir):
+    """Walks through the model_results_dir to collect all models and datasets."""
     data = {}
 
-    for dataset in os.listdir(results_dir):
-        dataset_path = os.path.join(results_dir, dataset, "checkm2")
+    for dataset in os.listdir(model_results_dir):
+        dataset_path = os.path.join(model_results_dir, dataset, "checkm2")
         if not os.path.isdir(dataset_path):
             continue
 
@@ -49,13 +50,13 @@ def process_all_reports(results_dir):
     return data
 
 
-def parse_knn_histograms(results_dir):
+def parse_knn_histograms(model_results_dir):
     """
     Collects similarity histogram JSON files across datasets and models, and includes
     'k' and 'p' as fields in the data instead of using them as keys.
 
     Args:
-        results_dir (str): The base directory containing datasets.
+        model_results_dir (str): The base directory containing datasets.
 
     Returns:
         dict: Nested dict structure:
@@ -63,7 +64,7 @@ def parse_knn_histograms(results_dir):
     """
     histograms = defaultdict(lambda: defaultdict(list))
 
-    for dataset_dir in glob.glob(os.path.join(results_dir, "*")):
+    for dataset_dir in glob.glob(os.path.join(model_results_dir, "*")):
         dataset_name = os.path.basename(dataset_dir)
 
         for model_dir in glob.glob(os.path.join(dataset_dir, "*_output")):
@@ -94,17 +95,23 @@ def parse_knn_histograms(results_dir):
     return histograms
 
 
-def parse_contig_lengths(results_dir):
-    pass
+def parse_contig_lengths(processed_data_dir):
+    
+    
+    
 
 
 if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    cami2_results = process_all_reports(RESULTS_DIR)
+    cami2_results = process_all_reports(MODEL_RESULTS_DIR)
     with open(os.path.join(OUTPUT_DIR, "parsed_checkm2_results.json"), "w") as f:
         json.dump(cami2_results, f, indent=4)
 
-    knn_histograms = parse_knn_histograms(RESULTS_DIR)
+    knn_histograms = parse_knn_histograms(MODEL_RESULTS_DIR)
     with open(os.path.join(OUTPUT_DIR, "parsed_knn_histograms.json"), "w") as f:
         json.dump(knn_histograms, f, indent=4)
+        
+    contig_histograms = parse_contig_lengths(PROCESSED_DATA_DIR)
+    with open(os.path.join(OUTPUT_DIR, "parsed_contig_histograms.json"), "w") as f:
+        json.dump(contig_histograms, f, indent=4)
