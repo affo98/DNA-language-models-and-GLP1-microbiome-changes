@@ -52,6 +52,7 @@ def main(args, log):
         os.makedirs(results_dir)
         embedder_val = Embedder(
             contigs_val,
+            contig_names_val,
             args.batch_sizes,
             args.model_name,
             args.model_path,
@@ -100,6 +101,7 @@ def main(args, log):
 
         embedder_test = Embedder(
             contigs_test,
+            contig_names_test,
             args.batch_sizes,
             args.model_name,
             args.model_path,
