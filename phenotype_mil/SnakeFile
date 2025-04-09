@@ -1,0 +1,14 @@
+import os
+import yaml
+import glob
+
+#dirs
+CAMI2_DIR = os.path.join(os.getcwd(), "cami2_benchmark")
+BINNING_DIR = os.path.join(os.getcwd(), "binning")
+
+SRC_DIR = os.path.join(os.getcwd(), "phenotype_mil", "src")
+LOGS = os.path.join(os.getcwd(), "phenotype_mil", "logs")
+
+
+
+include: "{CAMI2_DIR}/Snakefile.smk"
