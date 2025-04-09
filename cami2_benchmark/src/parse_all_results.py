@@ -13,6 +13,8 @@ OUTPUT_DIR = os.path.join("cami2_benchmark", "model_results", "parsed_results")
 
 COMPLETENESS_BINS = [90, 80, 70, 60, 50]
 
+MODELS_NOT_INCLUDE = ["vamb", "taxvamb", "comebin"]
+
 
 def parse_quality_report(file_path):
     """Parses a CheckM2 quality report and extracts completeness & contamination."""
@@ -67,11 +69,13 @@ def parse_knn_histograms(results_dir):
 
         for model_dir in glob.glob(os.path.join(dataset_dir, "*_output")):
             model_name = os.path.basename(model_dir)
+            if model_name in MODELS_NOT_INCLUDE:
+                continue
             print(model_name)
 
             hist_file = glob.glob(
                 os.path.join(model_dir, "test", "k*_p*_similarity_histogram.json")
-            )
+            )[0]
             print(hist_file)
             filename = os.path.basename(hist_file)
 
