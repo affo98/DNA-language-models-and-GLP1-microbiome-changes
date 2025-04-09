@@ -59,7 +59,7 @@ with vamb.vambtools.Reader(args.fastapath) as file:
 
 with open(args.log, "w") as log_f:
     log_f.write(f"PATH: {args.clusterspath}\n")
-    log_f.write(f"Using minimum binsize of {args.minsize} base-pairs")
+    log_f.write(f"Using minimum binsize of {args.minsize} base-pairs\n")
     log_f.write(f"Total clusters before filtering: {num_clusters_before}\n")
     log_f.write(f"Total clusters after filtering: {num_clusters_after}\n")
     log_f.write(

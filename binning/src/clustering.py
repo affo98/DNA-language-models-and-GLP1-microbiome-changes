@@ -147,14 +147,7 @@ class KMediod:
 
             progress_bar.update(1)
 
-        # seeds_dict = {
-        #    "seed_labels": seed_labels,
-        #    "seeds": [s.tolist() for s in seeds],
-        # }
-        seeds_dict = {
-            str(label): seed.tolist() for label, seed in zip(seed_labels, seeds)
-        }
-        self.save_seeds(seeds_dict)
+        self.save_seeds(seeds, seed_labels)
 
         # Filter small clusters
         labels, counts = torch.unique(predictions, return_counts=True)
@@ -212,13 +205,13 @@ class KMediod:
         self.log.append(f"Predictions file written successfully to {self.save_path}")
         return
 
-    def save_seeds(self, seeds_dict) -> None:
-        """save seeds in save_path in json. Only saved in test-mode"""
+    def save_seeds(self, seeds, seed_labels) -> None:
+        """Save seeds and corresponding labels in a compressed .npz file. Only saved in test-mode."""
 
         if self.mode == "val":
             return
         elif self.mode == "test":
-            output_file = os.path.join(self.save_path, f"seeds.json")
-            with open(output_file, "w") as json_file:
-                json.dump(seeds_dict, json_file, indent=4)
+            output_file = os.path.join(self.save_path, f"seeds.npz")
+            np.savez(output_file, seeds=seeds, seed_labels=seed_labels)
+            self.log.append(f"Seeds saved to {output_file}")
             return
