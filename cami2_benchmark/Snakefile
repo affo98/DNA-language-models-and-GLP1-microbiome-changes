@@ -578,23 +578,6 @@ rule comebin:
         bash run_comebin.sh -a {OUTDIR_PROCESSED}/{DATASET}/catalogue.fna -p {input.bams} -o {output} -n {params.views} -t {params.threads}
         """
 
-# rule postprocess_cluster_outputs_comebin:
-#     input:
-#         model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output")
-#     output:
-#         cluster_fasta=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"))
-#     log:
-#         os.path.join(LOGS, DATASET, "comebin_bin_postprocessing.log")
-#     params:
-#         minsize_bins = 250000
-#     conda:
-#         "envs/cami2_processing.yml"
-#     shell:
-#         """
-#         python {SRC_DIR}/postprocess_cluster_outputs_comebin.py {output.cluster_fasta} {input.model_outputs}/comebin_res/comebin_res_bins \
-#         {params.minsize_bins} --log {log}
-#         """
-
 
 rule postprocess_cluster_outputs_comebin:
     input:
@@ -629,8 +612,8 @@ rule checkm2:
         if [ ! -d "{OUTDIR_MODEL_RESULTS}/checkm2_database" ]; then
             checkm2 database --download --path {OUTDIR_MODEL_RESULTS}/checkm2_database
         fi
-        checkm2 predict --threads {threads} --input {input.fasta_bins} --output-directory {output.output} \
-        --database_path {OUTDIR_MODEL_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
+            checkm2 predict --threads {threads} --input {input.fasta_bins} --output-directory {output.output} \
+            --database_path {OUTDIR_MODEL_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
         """
 
 
@@ -681,7 +664,22 @@ rule checkm2:
 #         """
 
 
-
+# rule postprocess_cluster_outputs_comebin:
+#     input:
+#         model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output")
+#     output:
+#         cluster_fasta=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"))
+#     log:
+#         os.path.join(LOGS, DATASET, "comebin_bin_postprocessing.log")
+#     params:
+#         minsize_bins = 250000
+#     conda:
+#         "envs/cami2_processing.yml"
+#     shell:
+#         """
+#         python {SRC_DIR}/postprocess_cluster_outputs_comebin.py {output.cluster_fasta} {input.model_outputs}/comebin_res/comebin_res_bins \
+#         {params.minsize_bins} --log {log}
+#         """
 
 
 
