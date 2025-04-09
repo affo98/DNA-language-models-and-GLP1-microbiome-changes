@@ -38,6 +38,7 @@ class Embedder:
     def __init__(
         self,
         dna_sequences: list[str],
+        contig_names: list[str],
         batch_sizes: list[int],
         model_name: str,
         model_path: str,
@@ -46,9 +47,8 @@ class Embedder:
         log: Logger,
     ):
 
-        # self.check_params(embeddings, n_bins, block_size)
-
         self.dna_sequences = dna_sequences
+        self.contig_names = contig_names
         self.batch_sizes = batch_sizes
         self.model_name = model_name
         self.model_path = model_path
@@ -65,7 +65,6 @@ class Embedder:
         Otherwise, it calculates new embeddings, saves them, and returns the result.
         This function calls other functions to calculate embeddings.
 
-        Args:dings will be generated.
         model_name (str): Name of the model to use for embedding generation. Models can be found in congis/model.yml.
         model_path (str): Path to the pretrained model file or directory
         dna_sequences (list of str): List of DNA sequences for which embed required for specific models.
@@ -102,8 +101,9 @@ class Embedder:
             embeddings = normalize(embeddings)
 
         self.log.append(f"Embeddings shape: {embeddings.shape}")
-        with open(self.save_path, "wb") as f:
-            np.save(f, embeddings)
+        np.savez(self.save_path, embeddings=embeddings, contig_names=self.contig_names)
+        # with open(self.save_path, "wb") as f:
+        #    np.save(f, embeddings)
 
         torch.cuda.empty_cache()
         return embeddings
