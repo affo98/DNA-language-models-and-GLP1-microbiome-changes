@@ -65,18 +65,15 @@ def parse_knn_histograms(results_dir):
 
     for dataset_dir in glob.glob(os.path.join(results_dir, "*")):
         dataset_name = os.path.basename(dataset_dir)
-        print(dataset_name)
 
         for model_dir in glob.glob(os.path.join(dataset_dir, "*_output")):
             model_name = os.path.basename(model_dir).split("_output")[0]
             if model_name in MODELS_NOT_INCLUDE:
                 continue
-            print(model_name)
 
             hist_file = glob.glob(
                 os.path.join(model_dir, "test", "k*_p*_similarity_histogram.json")
             )[0]
-            print(hist_file)
             filename = os.path.basename(hist_file)
 
             # Extract k and p from filename using regex
