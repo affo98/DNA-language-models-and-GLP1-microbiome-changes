@@ -135,5 +135,5 @@ if __name__ == "__main__":
         json.dump(knn_histograms, f, indent=4)
 
     contig_lengths = parse_contig_lengths(PROCESSED_DATA_DIR)
-    with open(os.path.join(OUTPUT_DIR, "parsed_contig_histograms.json"), "w") as f:
+    with open(os.path.join(OUTPUT_DIR, "parsed_contig_lengths.json"), "w") as f:
         json.dump(contig_lengths, f, indent=4)
