@@ -102,9 +102,6 @@ class Embedder:
 
         self.log.append(f"Embeddings shape: {embeddings.shape}")
         np.savez(self.save_path, embeddings=embeddings, contig_names=self.contig_names)
-        # with open(self.save_path, "wb") as f:
-        #    np.save(f, embeddings)
-
         torch.cuda.empty_cache()
         return embeddings
 
