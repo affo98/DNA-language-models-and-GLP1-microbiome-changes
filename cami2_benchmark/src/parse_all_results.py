@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 
 MODEL_RESULTS_DIR = os.path.join("cami2_benchmark", "model_results")
-PROCESSED_DATA_DIR = os.path.join("cami2_benchmark", "processed_data")  
+PROCESSED_DATA_DIR = os.path.join("cami2_benchmark", "processed_data")
 OUTPUT_DIR = os.path.join("cami2_benchmark", "model_results", "parsed_results")
 
 COMPLETENESS_BINS = [90, 80, 70, 60, 50]
@@ -96,9 +96,7 @@ def parse_knn_histograms(model_results_dir):
 
 
 def parse_contig_lengths(processed_data_dir):
-    
-    
-    
+    pass
 
 
 if __name__ == "__main__":
@@ -111,7 +109,7 @@ if __name__ == "__main__":
     knn_histograms = parse_knn_histograms(MODEL_RESULTS_DIR)
     with open(os.path.join(OUTPUT_DIR, "parsed_knn_histograms.json"), "w") as f:
         json.dump(knn_histograms, f, indent=4)
-        
+
     contig_histograms = parse_contig_lengths(PROCESSED_DATA_DIR)
     with open(os.path.join(OUTPUT_DIR, "parsed_contig_histograms.json"), "w") as f:
         json.dump(contig_histograms, f, indent=4)
