@@ -47,6 +47,7 @@ num_clusters_after = len(clusters)
 # in test-mode binning for LLMs, save the clusters that stay after filtering
 if args.outtsv:
     with open(args.outtsv, "w") as tsv_f:
+        tsv_f.write("clustername\tcontigname\n")  # Write header
         for cluster_id, contigs in clusters.items():
             for contig in contigs:
                 tsv_f.write(f"{cluster_id}\t{contig}\n")
