@@ -56,10 +56,10 @@ conda activate cami2_processing
 #### Output
 
 1. Contig catalogues and BAM-files are saved in `processed_data/<DATASET_NAME>`
-2. The output (results) of the workflow is Checkm2 quality results for the bins. These are found in folder `model_results/<DATASET_NAME>/checkm2`. Run the command below to parse checkm2 results for all datasets and models. The parsed results are saved in `model_results/<DATASET_NAME>/parsed_checkm2_results.json`
+2. The output (results) of the workflow is Checkm2 quality results for the bins. These are found in folder `model_results/<DATASET_NAME>/checkm2`. Run the command below to parse checkm2 results for all datasets and models, as well as knn-histograms, and contig-length histograms. The parsed results are saved in `model_results/parsed_results/parsed_checkm2_results.json`
 
 ```bash
-python cami2_benchmark/src/parse_checkm2_test.py
+python cami2_benchmark/src/parse_all_results.py
 ```
 
 
