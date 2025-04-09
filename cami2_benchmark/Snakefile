@@ -581,6 +581,24 @@ rule comebin:
         bash run_comebin.sh -a {OUTDIR_PROCESSED}/{DATASET}/catalogue.fna -p {input.bams} -o {output} -n {params.views} -t {params.threads}
         """
 
+# rule postprocess_cluster_outputs_comebin:
+#     input:
+#         model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output")
+#     output:
+#         cluster_fasta=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"))
+#     log:
+#         os.path.join(LOGS, DATASET, "comebin_bin_postprocessing.log")
+#     params:
+#         minsize_bins = 250000
+#     conda:
+#         "envs/cami2_processing.yml"
+#     shell:
+#         """
+#         python {SRC_DIR}/postprocess_cluster_outputs_comebin.py {output.cluster_fasta} {input.model_outputs}/comebin_res/comebin_res_bins \
+#         {params.minsize_bins} --log {log}
+#         """
+
+
 rule postprocess_cluster_outputs_comebin:
     input:
         model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output")
@@ -594,8 +612,8 @@ rule postprocess_cluster_outputs_comebin:
         "envs/cami2_processing.yml"
     shell:
         """
-        python {SRC_DIR}/postprocess_cluster_outputs_comebin.py {output.cluster_fasta} {input.model_outputs}/comebin_res/comebin_res_bins \
-        {params.minsize_bins} --log {log}
+        BIN_DIR=$(find {input.model_outputs}/cluster_res -type d -name 'weight_seed_kmeans_k_*_result.tsv_bins' | head -n 1)
+        python {SRC_DIR}/postprocess_cluster_outputs_comebin.py {output.cluster_fasta} $BIN_DIR {params.minsize_bins} --log {log}
         """
 #END COMEBIN
 
