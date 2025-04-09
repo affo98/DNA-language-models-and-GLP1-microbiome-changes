@@ -56,7 +56,7 @@ def main(args, log):
             args.batch_sizes,
             args.model_name,
             args.model_path,
-            os.path.join(args.save_path, "embeddings", f"{args.model_name}.npy"),
+            os.path.join(args.save_path, "embeddings", f"{args.model_name}.npz"),
             normalize_embeddings=True,
             log=log,
         )
@@ -105,7 +105,7 @@ def main(args, log):
             args.batch_sizes,
             args.model_name,
             args.model_path,
-            os.path.join(args.save_path, "embeddings", f"{args.model_name}.npy"),
+            os.path.join(args.save_path, "embeddings", f"{args.model_name}.npz"),
             normalize_embeddings=True,
             log=log,
         )

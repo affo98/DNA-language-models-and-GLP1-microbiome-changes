@@ -5,6 +5,7 @@ from collections import defaultdict
 import re
 import gzip
 from Bio import SeqIO
+from tqdm import tqdm
 
 import pandas as pd
 import numpy as np
@@ -100,11 +101,12 @@ def parse_contig_lengths(processed_data_dir):
     """Reads in contigs from each dataset and saves their length in a list."""
 
     contigs_lengths = defaultdict(list)
-    for dataset_dir in glob(os.path.join(processed_data_dir, "*")):
+    for dataset_dir in tqdm(
+        glob(os.path.join(processed_data_dir, "*")), desc="Parsing contig lengths"
+    ):
         dataset_name = os.path.basename(dataset_dir)
 
         contigs_file = glob(os.path.join(dataset_dir, "catalogue.fna.gz"))[0]
-        print(contigs_file)
 
         lengths = []
 
