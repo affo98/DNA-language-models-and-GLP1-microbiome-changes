@@ -98,6 +98,8 @@ def parse_contig_lengths(results_dir):
 
 
 if __name__ == "__main__":
+    os.mkdir(RESULTS_DIR)
+
     cami2_results = process_all_reports(RESULTS_DIR)
     with open(os.path.join(OUTPUT_DIR, "parsed_checkm2_results.json"), "w") as f:
         json.dump(cami2_results, f, indent=4)
