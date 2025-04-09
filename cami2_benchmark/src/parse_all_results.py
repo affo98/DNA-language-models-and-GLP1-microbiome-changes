@@ -72,7 +72,7 @@ def parse_knn_histograms(results_dir):
             hist_file = glob.glob(
                 os.path.join(model_dir, "test", "k*_p*_similarity_histogram.json")
             )
-
+            print(hist_file)
             filename = os.path.basename(hist_file)
 
             # Extract k and p from filename using regex
