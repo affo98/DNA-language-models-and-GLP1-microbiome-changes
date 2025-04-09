@@ -1,9 +1,10 @@
 import os
 import json
-import glob
+from glob import glob
 from collections import defaultdict
 import re
-
+import gzip
+from Bio import SeqIO
 
 import pandas as pd
 import numpy as np
@@ -64,15 +65,15 @@ def parse_knn_histograms(model_results_dir):
     """
     histograms = defaultdict(lambda: defaultdict(list))
 
-    for dataset_dir in glob.glob(os.path.join(model_results_dir, "*")):
+    for dataset_dir in glob(os.path.join(model_results_dir, "*")):
         dataset_name = os.path.basename(dataset_dir)
 
-        for model_dir in glob.glob(os.path.join(dataset_dir, "*_output")):
+        for model_dir in glob(os.path.join(dataset_dir, "*_output")):
             model_name = os.path.basename(model_dir).split("_output")[0]
             if model_name in MODELS_NOT_INCLUDE:
                 continue
 
-            hist_file = glob.glob(
+            hist_file = glob(
                 os.path.join(model_dir, "test", "k*_p*_similarity_histogram.json")
             )[0]
             filename = os.path.basename(hist_file)
@@ -96,7 +97,30 @@ def parse_knn_histograms(model_results_dir):
 
 
 def parse_contig_lengths(processed_data_dir):
-    pass
+    """Reads in contigs from each dataset and saves their length in a list."""
+
+    contigs_lengths = defaultdict(list)
+    for dataset_dir in glob(os.path.join(processed_data_dir, "*")):
+        dataset_name = os.path.basename(dataset_dir)
+
+        contigs_file = glob(os.path.join(dataset_dir, "catalogue.fna.gz"))[0]
+        print(contigs_file)
+
+        lengths = []
+
+        try:
+            with gzip.open(contigs_file, "rt") as handle:
+                for record in SeqIO.parse(handle, "fasta"):
+                    lengths.append(len(record.seq))
+
+        except Exception:
+            with open(contigs_file, "r") as handle:
+                for record in SeqIO.parse(handle, "fasta"):
+                    lengths.append(len(record.seq))
+
+        contigs_lengths[dataset_name] = lengths
+
+    return contigs_lengths
 
 
 if __name__ == "__main__":
@@ -110,6 +134,6 @@ if __name__ == "__main__":
     with open(os.path.join(OUTPUT_DIR, "parsed_knn_histograms.json"), "w") as f:
         json.dump(knn_histograms, f, indent=4)
 
-    contig_histograms = parse_contig_lengths(PROCESSED_DATA_DIR)
+    contig_lengths = parse_contig_lengths(PROCESSED_DATA_DIR)
     with open(os.path.join(OUTPUT_DIR, "parsed_contig_histograms.json"), "w") as f:
-        json.dump(contig_histograms, f, indent=4)
+        json.dump(contig_lengths, f, indent=4)
