@@ -68,7 +68,7 @@ def parse_knn_histograms(results_dir):
         print(dataset_name)
 
         for model_dir in glob.glob(os.path.join(dataset_dir, "*_output")):
-            model_name = os.path.basename(model_dir)
+            model_name = os.path.basename(model_dir).split("_output")[0]
             if model_name in MODELS_NOT_INCLUDE:
                 continue
             print(model_name)
