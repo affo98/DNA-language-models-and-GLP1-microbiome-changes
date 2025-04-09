@@ -612,7 +612,7 @@ rule postprocess_cluster_outputs_comebin:
         "envs/cami2_processing.yml"
     shell:
         """
-        BIN_DIR=$(find {input.model_outputs}/cluster_res -type d -name 'weight_seed_kmeans_k_*_result.tsv_bins' | head -n 1)
+        BIN_DIR=$(find {input.model_outputs}/comebin_res/cluster_res -type d -name 'weight_seed_kmeans_k_*_result.tsv_bins' | head -n 1)
         python {SRC_DIR}/postprocess_cluster_outputs_comebin.py {output.cluster_fasta} $BIN_DIR {params.minsize_bins} --log {log}
         """
 #END COMEBIN
