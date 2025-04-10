@@ -70,7 +70,7 @@ input_files = []
 
 
 #OTHER MODELS
-elif MODEL in ['tnf'] and not config_nomodelrun:
+if MODEL in ['tnf'] and not config_naomodelrun:
     input_files += [
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "test"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "tnf"),
