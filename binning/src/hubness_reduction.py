@@ -6,8 +6,6 @@ import numpy as np
 
 if __name__ == "__main__":
 
-    from skhubness.analysis import Hubness
-
     X = np.load("dnaberts.npy")
     X = X[:1000]
 
@@ -16,9 +14,6 @@ if __name__ == "__main__":
     hub.fit(X)
     k_skew = hub.score()
     print(f"Skewness = {k_skew:.3f}")
-    print(f"Robin hood index: {hub.robinhood_index:.3f}")
-    print(f"Antihub occurrence: {hub.antihub_occurrence:.3f}")
-    print(f"Hub occurrence: {hub.hub_occurrence:.3f}")
 
     hub_mp = Hubness(k=10, metric="cosine", hubness="mutual_proximity", verbose=2)
     hub_mp.fit(X)
@@ -26,8 +21,4 @@ if __name__ == "__main__":
     print(
         f"Skewness after MP: {k_skew_mp:.3f} "
         f"(reduction of {k_skew - k_skew_mp:.3f})"
-    )
-    print(
-        f"Robin hood: {hub_mp.robinhood_index:.3f} "
-        f"(reduction of {hub.robinhood_index - hub_mp.robinhood_index:.3f})"
     )
