@@ -23,9 +23,7 @@ with open(os.path.join(BINNING_DIR, "models.yml"), "r") as f:
 with open(os.path.join(NGS_DIR, "config/phenotype_studies.yaml"), "r") as f:
     ngs_datasets = yaml.safe_load(f)
 
-ALL_DATASETS_CAMI2 = [d["name"] for d in datasets_model_config["datasets"]]
-ALL_DATASETS_NGS = [d["name"] for d in ngs_datasets["studies"]]
-ALL_DATASETS = ALL_DATASETS_CAMI2 + ALL_DATASETS_NGS
+ALL_DATASETS = [d["name"] for d in datasets_model_config["datasets"]]
 
 DATASET = config.get("DATASET", None)
 assert DATASET in ALL_DATASETS, f"Error: Selected dataset '{DATASET}' is not in the available DATASET: {ALL_DATASETS}"
