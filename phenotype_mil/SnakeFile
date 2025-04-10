@@ -6,7 +6,6 @@ import glob
 CAMI2_DIR = os.path.join(os.getcwd(), "cami2_benchmark")
 BINNING_DIR = os.path.join(os.getcwd(), "binning")
 NGS_DIR = os.path.join(os.getcwd(), "ngs_pipeline")
-OUTDIR_PROCESSED = os.path.join(os.getcwd(), "ngs_pipeline", "INSERTHEREPATH") #need path here
 SRC_DIR = os.path.join(os.getcwd(), "phenotype_mil", "src")
 LOGS = os.path.join(os.getcwd(), "phenotype_mil", "logs")
 OUTDIR_BINNING_RESULTS = os.path.join(os.getcwd(), "phenotype_mil", "binning_results")
@@ -38,6 +37,10 @@ BATCH_SIZES=None
 if MODEL in models_config.keys():
     MODEL_PATH = models_config[MODEL]["model_path"]
     BATCH_SIZES = models_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnabert2', 'dnabert2random'] else 0
+
+
+PROCESSED_DATA_DIR = os.path.join(NGS_DIR, f"{DATASET}_{DATASET_ID}")
+
 
 #processing flow of snakemake 
 config_checkm2 = bool(config.get("CHECKM2", False))
@@ -116,7 +119,7 @@ ruleorder: other_model_val > create_fasta_bins_other_model_val > checkm2_val > p
 #start val
 rule other_model_val:
     input:
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+        catalogue=os.path.join(PROCESSED_DATA_DIR, DATASET, "global_contig_catalogue.fna.gz")
     output:
         dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "validation"))
     log:
@@ -134,7 +137,7 @@ rule other_model_val:
 
 rule create_fasta_bins_other_model_val:
     input:
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        catalogue=os.path.join(PROCESSED_DATA_DIR, DATASET, "global_contig_catalogue.fna.gz"),
         cluster_results = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "validation")                                         
     output:
         dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_validation"))
@@ -209,7 +212,7 @@ rule parse_checkm2_val:
 #-start test
 rule other_model_test:
     input:  
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        catalogue=os.path.join(PROCESSED_DATA_DIR, DATASET, "global_contig_catalogue.fna.gz"),
         best_kp_path=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results")
     output:
         dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test"))
@@ -229,7 +232,7 @@ rule other_model_test:
 
 rule create_fasta_bins_other_model_test:
     input:
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        catalogue=os.path.join(PROCESSED_DATA_DIR, DATASET, "global_contig_catalogue.fna.gz"),
         cluster_results=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test")
     output:
         dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "{MODEL}")),
@@ -309,7 +312,7 @@ rule checkm2:
 #     "KNN_K": KNN_K,
 #     "KNN_P": KNN_P,
 #     # Pass all directory paths you need:
-#     "OUTDIR_PROCESSED": OUTDIR_PROCESSED,
+#     "PROCESSED_DATA_DIR": PROCESSED_DATA_DIR,
 #     "OUTDIR_BINNING_RESULTS": OUTDIR_BINNING_RESULTS,
 #     "LOGS": LOGS,
 #     "BINNING_DIR": BINNING_DIR,
