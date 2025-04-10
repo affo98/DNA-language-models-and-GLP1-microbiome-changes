@@ -27,7 +27,6 @@ DATASET = config.get("DATASET", None)
 assert DATASET in ALL_DATASETS_NAMES, f"Error: Selected dataset '{DATASET}' is not in the available DATASET: {ALL_DATASETS_NAMES}"
 
 DATASET_ID = [d["id"] for d in datasets_model_config["studies"] if d["name"] == DATASET][0]
-print(DATASET_ID, DATASET)
 
 ALL_MODELS  = models_config.keys()
 MODEL = config.get("MODEL", None)
