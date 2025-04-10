@@ -143,32 +143,32 @@ rule other_model_val:
         """
 
 
-rule create_fasta_bins_other_model_val:
-    input:
-        catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
-        cluster_results = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "validation")                                         
-    output:
-        dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_validation"))
-    log:
-        log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "bin_postprocessing.log")
-    params:
-        cluster_results_dir=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "validation", "cluster_results"),
-        minsize_bins=MINSIZE_BINS
-    conda: 
-        os.path.join(CAMI2_DIR, "envs/vamb.yml")
-    shell:
-        """
-        for cluster_file in {params.cluster_results_dir}/clusters_k*_p*.tsv; do
-            k_p=$(basename "$cluster_file" .tsv | sed 's/clusters_//')
-            output_dir={output.dirs}/$k_p
-            log_file={log.log_file}_$k_p.log
+# rule create_fasta_bins_other_model_val:
+#     input:
+#         catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
+#         cluster_results = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "validation")                                         
+#     output:
+#         dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_validation"))
+#     log:
+#         log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "bin_postprocessing.log")
+#     params:
+#         cluster_results_dir=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "validation", "cluster_results"),
+#         minsize_bins=MINSIZE_BINS
+#     conda: 
+#         os.path.join(CAMI2_DIR, "envs/vamb.yml")
+#     shell:
+#         """
+#         for cluster_file in {params.cluster_results_dir}/clusters_k*_p*.tsv; do
+#             k_p=$(basename "$cluster_file" .tsv | sed 's/clusters_//')
+#             output_dir={output.dirs}/$k_p
+#             log_file={log.log_file}_$k_p.log
 
-            mkdir -p "$output_dir"
+#             mkdir -p "$output_dir"
 
-            python {SRC_DIR_CAMI2}/create_fasta.py {input.catalogue} "$cluster_file" {params.minsize_bins} "$output_dir" \
-            --log "$log_file"
-        done
-        """
+#             python {SRC_DIR_CAMI2}/create_fasta.py {input.catalogue} "$cluster_file" {params.minsize_bins} "$output_dir" \
+#             --log "$log_file"
+#         done
+#         """
 
 # rule checkm2_val: 
 #     input:
@@ -199,115 +199,115 @@ rule create_fasta_bins_other_model_val:
 #         done
 #         """
 
-rule parse_checkm2_val:
-    input:
-        checkm2_reports=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation"),
-        val_count=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "validation")
-    output:
-        path=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results"))
-    log:
-        log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "checkm2_validation.log")
-    conda:
-        os.path.join(BINNING_DIR, "envs/binning.yml")
-    shell:
-        """
-        mkdir -p {output.path}
-        n_val=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["n_val"])' "{input.val_count}/n_total_val_test.json")
-        python {SRC_DIR_CAMI2}/parse_checkm2_val.py -i {input.checkm2_reports} -o {output.path} -n $n_val -l {log.log_file}
-        """
-#-end val
+# rule parse_checkm2_val:
+#     input:
+#         checkm2_reports=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation"),
+#         val_count=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "validation")
+#     output:
+#         path=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results"))
+#     log:
+#         log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "checkm2_validation.log")
+#     conda:
+#         os.path.join(BINNING_DIR, "envs/binning.yml")
+#     shell:
+#         """
+#         mkdir -p {output.path}
+#         n_val=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["n_val"])' "{input.val_count}/n_total_val_test.json")
+#         python {SRC_DIR_CAMI2}/parse_checkm2_val.py -i {input.checkm2_reports} -o {output.path} -n $n_val -l {log.log_file}
+#         """
+# #-end val
 
-#-start test
-rule other_model_test:
-    input:  
-        catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
-        best_kp_path=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results")
-    output:
-        dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test"))
-    log:
-        os.path.join(LOGS, DATASET, "{MODEL}_test_binning.log")
-    conda:
-        os.path.join(BINNING_DIR, "envs/binning.yml")
-    shell:
-        """
-        best_combination_file="{input.best_kp_path}/best_combination.json"
-        best_k=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_k"])' $best_combination_file)
-        best_p=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_p"])' $best_combination_file)
+# #-start test
+# rule other_model_test:
+#     input:  
+#         catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
+#         best_kp_path=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results")
+#     output:
+#         dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test"))
+#     log:
+#         os.path.join(LOGS, DATASET, "{MODEL}_test_binning.log")
+#     conda:
+#         os.path.join(BINNING_DIR, "envs/binning.yml")
+#     shell:
+#         """
+#         best_combination_file="{input.best_kp_path}/best_combination.json"
+#         best_k=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_k"])' $best_combination_file)
+#         best_p=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_p"])' $best_combination_file)
 
-        python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
-        -b {BATCH_SIZES} -k $best_k -p $best_p -s {output.dirs} -l {log} -m test
-        """
+#         python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
+#         -b {BATCH_SIZES} -k $best_k -p $best_p -s {output.dirs} -l {log} -m test
+#         """
 
-rule create_fasta_bins_other_model_test:
-    input:
-        catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
-        cluster_results=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test")
-    output:
-        dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "{MODEL}")),
-    log:
-        log_file=os.path.join(LOGS, DATASET, "{MODEL}_test_bin_postprocessing.log")
-    params:
-        minsize_bins = MINSIZE_BINS,
-        clusters_filtered = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "clusters_filtered.tsv")
-    conda: 
-        os.path.join(CAMI2_DIR, "envs/vamb.yml")
-    shell:
-        """
-        python {SRC_DIR_CAMI2}/create_fasta.py {input.catalogue} {input.cluster_results}/clusters.tsv {params.minsize_bins} {output.dirs} \
-        --log {log.log_file} --outtsv {params.clusters_filtered}
-        """
+# rule create_fasta_bins_other_model_test:
+#     input:
+#         catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
+#         cluster_results=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test")
+#     output:
+#         dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "{MODEL}")),
+#     log:
+#         log_file=os.path.join(LOGS, DATASET, "{MODEL}_test_bin_postprocessing.log")
+#     params:
+#         minsize_bins = MINSIZE_BINS,
+#         clusters_filtered = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "clusters_filtered.tsv")
+#     conda: 
+#         os.path.join(CAMI2_DIR, "envs/vamb.yml")
+#     shell:
+#         """
+#         python {SRC_DIR_CAMI2}/create_fasta.py {input.catalogue} {input.cluster_results}/clusters.tsv {params.minsize_bins} {output.dirs} \
+#         --log {log.log_file} --outtsv {params.clusters_filtered}
+#         """
 
-rule checkm2:
-    input:
-        fasta_bins=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "{MODEL}")
-    output:
-        output=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "checkm2", "{MODEL}_results"))
-    conda:
-        os.path.join(CAMI2_DIR, "envs/checkm2.yml")
-    threads:
-        128
-    shell:
-        """
-        if [ ! -d "{OUTDIR_BINNING_RESULTS}/checkm2_database" ]; then
-            checkm2 database --download --path {OUTDIR_BINNING_RESULTS}/checkm2_database
-        fi
-            checkm2 predict --threads {threads} --input {input.fasta_bins} --output-directory {output.output} \
-            --database_path {OUTDIR_BINNING_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
-        """
-#Binning---------------------------------------------------------------------------------------------
-
-
-
-
-rule process_abundances:
-    ...
+# rule checkm2:
+#     input:
+#         fasta_bins=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "{MODEL}")
+#     output:
+#         output=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "checkm2", "{MODEL}_results"))
+#     conda:
+#         os.path.join(CAMI2_DIR, "envs/checkm2.yml")
+#     threads:
+#         128
+#     shell:
+#         """
+#         if [ ! -d "{OUTDIR_BINNING_RESULTS}/checkm2_database" ]; then
+#             checkm2 database --download --path {OUTDIR_BINNING_RESULTS}/checkm2_database
+#         fi
+#             checkm2 predict --threads {threads} --input {input.fasta_bins} --output-directory {output.output} \
+#             --database_path {OUTDIR_BINNING_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
+#         """
+# #Binning---------------------------------------------------------------------------------------------
 
 
 
-rule phenotype_mil:
-    input:
-        cluster_dir = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test"),
-        sample_labels = SAMPLE_LABELS_FILE
-        #abundance = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "abundance.tsv")
-    output:
-        result_dir = directory(os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_results"),
-    log:
-        os.path.join(LOGS, DATASET, "{MODEL}_mil.log"),
-    conda:
-        "envs/phenotype_mil.yml",
-    shell:
-        """
-        mkdir -p {output.result_dir}
-        python phenotype_mil/mil_run.py \
-            --model_name {MODEL} \
-            --dataset_name {DATASET_NAME} \
-            --input_path {input.cluster_dir} \
-            --sample_labels_path {input.sample_labels} \
-            --abundance_path {input.abundance} \
-            --output_path {output.result_dir} \
-            --log {log} \
-            --mil_methods {MIL_METHODS} \
-        """
+
+# rule process_abundances:
+#     ...
+
+
+
+# rule phenotype_mil:
+#     input:
+#         cluster_dir = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test"),
+#         sample_labels = SAMPLE_LABELS_FILE
+#         #abundance = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "abundance.tsv")
+#     output:
+#         result_dir = directory(os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_results"),
+#     log:
+#         os.path.join(LOGS, DATASET, "{MODEL}_mil.log"),
+#     conda:
+#         "envs/phenotype_mil.yml",
+#     shell:
+#         """
+#         mkdir -p {output.result_dir}
+#         python phenotype_mil/mil_run.py \
+#             --model_name {MODEL} \
+#             --dataset_name {DATASET_NAME} \
+#             --input_path {input.cluster_dir} \
+#             --sample_labels_path {input.sample_labels} \
+#             --abundance_path {input.abundance} \
+#             --output_path {output.result_dir} \
+#             --log {log} \
+#             --mil_methods {MIL_METHODS} \
+#         """
 
 
 
