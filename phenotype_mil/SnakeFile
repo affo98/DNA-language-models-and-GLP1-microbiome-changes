@@ -27,11 +27,9 @@ print(models_config)
 
 ALL_DATASETS_NAMES = [d["name"] for d in datasets_model_config["studies"]]
 ALL_DATASETS_IDS = [d["id"] for d in datasets_model_config["studies"]]
-print(ALL_DATASETS_NAMES)
-print(ALL_DATASETS_IDS)
 
 DATASET_NAME = config.get("DATASET", None)
-assert DATASET in ALL_DATASETS, f"Error: Selected dataset '{DATASET_ID}' is not in the available DATASET: {ALL_DATASETS}"
+assert DATASET_NAME in ALL_DATASETS_NAMES, f"Error: Selected dataset '{DATASET_NAME}' is not in the available DATASET: {ALL_DATASETS_NAMES}"
 
 DATASET_ID = [d["id"] for d in datasets_model_config["studies"] if d["name"] == DATASET_NAME]
 print(DATASET_ID, DATASET_NAME)
