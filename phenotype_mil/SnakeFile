@@ -19,8 +19,6 @@ with open(os.path.join(NGS_DIR, "config/phenotype_studies.yaml"), "r") as f:
 
 with open(os.path.join(BINNING_DIR, "models.yml"), "r") as f:
     models_config = yaml.safe_load(f)
-print(models_config)
-
 
 ALL_DATASETS_NAMES = [d["name"] for d in datasets_model_config["studies"]]
 ALL_DATASETS_IDS = [d["id"] for d in datasets_model_config["studies"]]
@@ -31,18 +29,15 @@ assert DATASET_NAME in ALL_DATASETS_NAMES, f"Error: Selected dataset '{DATASET_N
 DATASET_ID = [d["id"] for d in datasets_model_config["studies"] if d["name"] == DATASET_NAME][0]
 print(DATASET_ID, DATASET_NAME)
 
-
-
 ALL_MODELS  = models_config.keys()
-print(ALL_MODELS)
 MODEL = config.get("MODEL", None)
 assert MODEL==None or MODEL in ALL_MODELS, f"Error: Selected model '{MODEL}' is not in the available DATASET: {ALL_MODELS}"
 
 MODEL_PATH=None
 BATCH_SIZES=None
 if MODEL in models_config.keys():
-    MODEL_PATH = other_model_config[MODEL]["model_path"]
-    BATCH_SIZES = other_model_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnabert2', 'dnabert2random'] else 0
+    MODEL_PATH = models_config[MODEL]["model_path"]
+    BATCH_SIZES = models_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnabert2', 'dnabert2random'] else 0
 
 #processing flow of snakemake 
 config_checkm2 = bool(config.get("CHECKM2", False))
