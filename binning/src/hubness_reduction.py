@@ -8,7 +8,7 @@ if __name__ == "__main__":
 
     X = np.load("dnaberts.npy")
 
-    hub = Hubness(k=10, metric="cosine")
+    hub = Hubness(k=10, metric="cosine", verbose=2)
     hub.fit(X)
     k_skew = hub.score()
     print(f"Skewness = {k_skew:.3f}")
@@ -16,7 +16,7 @@ if __name__ == "__main__":
     print(f"Antihub occurrence: {hub.antihub_occurrence:.3f}")
     print(f"Hub occurrence: {hub.hub_occurrence:.3f}")
 
-    hub_mp = Hubness(k=10, metric="cosine", hubness="mutual_proximity")
+    hub_mp = Hubness(k=10, metric="cosine", hubness="mutual_proximity", verbose=2)
     hub_mp.fit(X)
     k_skew_mp = hub_mp.score()
     print(
