@@ -7,7 +7,6 @@ import numpy as np
 if __name__ == "__main__":
 
     X = np.load("dnaberts.npy")
-    X = X[:1000]
 
     hub = Hubness(k=10, metric="cosine", verbose=2)
 
