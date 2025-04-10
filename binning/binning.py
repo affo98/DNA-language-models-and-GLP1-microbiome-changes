@@ -10,7 +10,7 @@ from src.utils import read_contigs, Logger, split_contigs_valtest
 
 # data
 MAX_CONTIG_LENGTH = 60000  # oom with 70.000
-VAL_PROPORTION = 0.01
+VAL_PROPORTION = 0.1
 
 # threshold calculation
 N_BINS = 1000
@@ -28,8 +28,8 @@ def main(args, log):
         args.contigs, filter_len=MAX_CONTIG_LENGTH, log=log
     )
     print(len(contigs))
-    contigs = contigs[0:1000000]
-    contig_names = contig_names[0:1000000]
+    contigs = contigs[0:100000]
+    contig_names = contig_names[0:100000]
 
     contigs_test, contigs_val, contig_names_test, contig_names_val = (
         split_contigs_valtest(
