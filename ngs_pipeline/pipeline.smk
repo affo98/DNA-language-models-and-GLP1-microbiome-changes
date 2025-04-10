@@ -248,7 +248,7 @@ rule alignment:
     threads:
         192
     resources:
-        mem_gb=300
+        mem_gb=360
     conda:
         os.path.join(CONDA_ENVS, "strobealign.yaml")
     shell:
