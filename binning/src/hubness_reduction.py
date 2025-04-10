@@ -2,9 +2,11 @@ from skhubness import Hubness
 import numpy as np
 
 
+# pip install https://github.com/VarIr/scikit-hubness/archive/main.tar.gz
+
 if __name__ == "__main__":
 
-    X = np.load("dnaberts.npz")
+    X = np.load("dnaberts.npy")
 
     hub = Hubness(k=10, metric="cosine")
     hub.fit(X)
