@@ -5,10 +5,118 @@ import glob
 #dirs
 CAMI2_DIR = os.path.join(os.getcwd(), "cami2_benchmark")
 BINNING_DIR = os.path.join(os.getcwd(), "binning")
-
+NGS_DIR = os.path.join(os.getcwd(), "ngs_pipeline")
+OUTDIR_PROCESSED = os.path.join(os.getcwd(), "ngs_pipeline", "INSERTHEREPATH") #need path here
 SRC_DIR = os.path.join(os.getcwd(), "phenotype_mil", "src")
 LOGS = os.path.join(os.getcwd(), "phenotype_mil", "logs")
+OUTDIR_MODEL_RESULTS = os.path.join(os.getcwd(), "phenotype_mil", "binning_results")
+OUTDIR_MIL_RESULTS = os.path.join(os.getcwd(), "phenotype_mil", "mil_results")
+
+
+#DATASET, sample and model config
+with open(os.path.join(NGS_DIR, "config/phenotype_studies.yaml"), "r") as f:
+    datasets_model_config = yaml.safe_load(f)
+print(datasets_model_config)
+
+with open(os.path.join(BINNING_DIR, "models.yml"), "r") as f:
+    models_config = yaml.safe_load(f)
+print(models_config)
+
+ALL_DATASETS = [d["name"] for d in datasets_model_config["datasets"]]
+DATASET = config.get("DATASET", None)
+assert DATASET in ALL_DATASETS, f"Error: Selected dataset '{DATASET}' is not in the available DATASET: {ALL_DATASETS}"
+
+ALL_MODELS  = [d["name"] for d in datasets_model_config["models"]]
+MODEL = config.get("MODEL", None)
+assert MODEL==None or MODEL in ALL_MODELS, f"Error: Selected model '{MODEL}' is not in the available DATASET: {ALL_MODELS}"
+
+MODEL_PATH=None
+BATCH_SIZES=None
+if MODEL in models_config.keys():
+    MODEL_PATH = other_model_config[MODEL]["model_path"]
+    BATCH_SIZES = other_model_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnabert2', 'dnabert2random'] else 0
+
+#processing flow of snakemake 
+config_checkm2 = bool(config.get("CHECKM2", False))
+config_nomodelrun = bool(config.get("NOMODELRUN", False))
+
+
+#contig params
+MINSIZE_BINS=200000 #changed from 250000 in cami2
+MINSIZE_CONTIGS=2000 #do we need this?
+
+#knn params
+KNN_K = [100,200,300,400,500,600,700,800,900,1000]
+KNN_P = [25,50,75]
 
 
 
 include: "{CAMI2_DIR}/Snakefile.smk"
+
+
+print(f"-------------Configuration Flags:--------------")
+print(f"  - DATASET:             {DATASET}")
+print(f"  - Selected Model:      {MODEL}")
+print(f"  - Model Path:          {MODEL_PATH}")
+print(f"  - Batch Sizes:         {BATCH_SIZES}")
+print(f"  - CheckM2:             {config_checkm2}")
+print(f"  - MinSize Bins:        {MINSIZE_BINS}")
+print(f"  - MinSize Contigs:     {MINSIZE_CONTIGS}")
+print(f"  - No model run:        {config_nomodelrun}")
+print(f"  - KNN params:          K:{KNN_K}, P:{KNN_P}")
+
+
+input_files = []
+
+
+#OTHER MODELS
+elif MODEL in ['tnf'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "tnf"),
+    ]
+
+
+elif MODEL in ['tnfkernel'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnfkernel_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "tnfkernel"),
+    ]
+
+elif MODEL in ['dna2vec'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dna2vec_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dna2vec"),
+    ]
+
+
+elif MODEL in ['dnaberts'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberts"),
+    ]
+
+elif MODEL in ['dnabert2'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnabert2_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnabert2"),
+    ]
+elif MODEL in ['dnabert2random'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnabert2random_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnabert2random"),
+    ]
+
+
+if config_checkm2:
+    input_files += [os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", f"{MODEL}_results")]
+
+
+rule all:
+    input: input_files
+
+
+ruleorder: other_model_val > create_fasta_bins_other_model_val > checkm2_val > parse_checkm2_val > other_model_test > create_fasta_bins_other_model_test
+
+
+
