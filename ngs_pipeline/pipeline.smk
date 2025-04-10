@@ -273,7 +273,7 @@ rule alignment:
         os.path.join(CONDA_ENVS, "minimap2.yaml")
     shell:
         """
-        minimap2 -t {threads} -ax sr {input.contig_catalogue_index} {input.r1} {input.r2} | samtools view -bh | samtools sort -o {output}
+        minimap2 -t {threads} -ax sr {input.contig_catalogue_index} {input.r1} {input.r2} | samtools view -bS | samtools sort -o {output}
         """
 #strobealign -t {threads} {input.contig_catalouge} {input.r1} {input.r2} | samtools sort -o {output}
 
