@@ -8,7 +8,17 @@ if __name__ == "__main__":
 
     X = np.load("dnaberts.npy")
 
-    hub = Hubness(k=10, metric="cosine", verbose=2, algorithm="hnsw")
+    hub = Hubness(
+        k=10,
+        metric="euclidean",
+        algorithm="hnsw",
+        algorithm_params={
+            "n_candidates": 100,
+            "metric": "euclidean",
+            "post_processing": 2,
+        },
+        n_jobs=8,
+    )
     hub.fit(X)
     k_skew = hub.score()
     print(f"Skewness = {k_skew:.3f}")
