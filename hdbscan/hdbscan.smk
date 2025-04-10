@@ -17,7 +17,7 @@ rule cluster:
         mem_gb=80
     shell:
         """
-        python -m cluster.py {input.embeddings} {input.contig_catalogue} {threads}
+        python cluster.py {input.embeddings} {input.contig_catalogue} {threads}
         """
 
 
