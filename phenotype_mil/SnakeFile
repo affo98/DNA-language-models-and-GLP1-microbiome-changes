@@ -119,7 +119,7 @@ ruleorder: other_model_val > create_fasta_bins_other_model_val > checkm2_val > p
 #start val
 rule other_model_val:
     input:
-        catalogue=os.path.join(PROCESSED_DATA_DIR, DATASET, "global_contig_catalogue.fna.gz")
+        catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz")
     output:
         dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "validation"))
     log:
@@ -137,7 +137,7 @@ rule other_model_val:
 
 rule create_fasta_bins_other_model_val:
     input:
-        catalogue=os.path.join(PROCESSED_DATA_DIR, DATASET, "global_contig_catalogue.fna.gz"),
+        catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
         cluster_results = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "validation")                                         
     output:
         dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_validation"))
@@ -212,7 +212,7 @@ rule parse_checkm2_val:
 #-start test
 rule other_model_test:
     input:  
-        catalogue=os.path.join(PROCESSED_DATA_DIR, DATASET, "global_contig_catalogue.fna.gz"),
+        catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
         best_kp_path=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results")
     output:
         dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test"))
@@ -232,7 +232,7 @@ rule other_model_test:
 
 rule create_fasta_bins_other_model_test:
     input:
-        catalogue=os.path.join(PROCESSED_DATA_DIR, DATASET, "global_contig_catalogue.fna.gz"),
+        catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
         cluster_results=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test")
     output:
         dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "{MODEL}")),
