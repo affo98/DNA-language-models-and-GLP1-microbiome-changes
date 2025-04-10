@@ -72,7 +72,7 @@ min_version("6.0")
 module other_workflow:
     snakefile: os.path.join(CAMI2_DIR, "Snakefile")
 
-use rule * from other_workflow exclude rule_all as other_*
+use rule other_model_val from other_workflow as other_*
 
 
 #include: os.path.join(CAMI2_DIR, "Snakefile")
