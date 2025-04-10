@@ -121,7 +121,7 @@ elif MODEL in ['dna2vec'] and not config_nomodelrun:
 
 elif MODEL in ['dnaberts'] and not config_nomodelrun:
     input_files += [
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation"))
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation"),
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output", "test"),
         #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberts"),
     ]
