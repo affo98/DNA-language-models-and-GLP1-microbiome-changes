@@ -257,23 +257,23 @@ rule create_fasta_bins_other_model_test:
         --log {log.log_file} --outtsv {params.clusters_filtered}
         """
 
-# rule checkm2:
-#     input:
-#         fasta_bins=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "{MODEL}")
-#     output:
-#         output=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "checkm2", "{MODEL}_results"))
-#     conda:
-#         os.path.join(CAMI2_DIR, "envs/checkm2.yml")
-#     threads:
-#         128
-#     shell:
-#         """
-#         if [ ! -d "{OUTDIR_BINNING_RESULTS}/checkm2_database" ]; then
-#             checkm2 database --download --path {OUTDIR_BINNING_RESULTS}/checkm2_database
-#         fi
-#             checkm2 predict --threads {threads} --input {input.fasta_bins} --output-directory {output.output} \
-#             --database_path {OUTDIR_BINNING_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
-#         """
+rule checkm2:
+    input:
+        fasta_bins=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "{MODEL}")
+    output:
+        output=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "checkm2", "{MODEL}_results"))
+    conda:
+        os.path.join(CAMI2_DIR, "envs/checkm2.yml")
+    threads:
+        128
+    shell:
+        """
+        if [ ! -d "{OUTDIR_BINNING_RESULTS}/checkm2_database" ]; then
+            checkm2 database --download --path {OUTDIR_BINNING_RESULTS}/checkm2_database
+        fi
+            checkm2 predict --threads {threads} --input {input.fasta_bins} --output-directory {output.output} \
+            --database_path {OUTDIR_BINNING_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
+        """
 # #Binning---------------------------------------------------------------------------------------------
 
 
