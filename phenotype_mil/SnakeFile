@@ -65,7 +65,6 @@ print(f"  - No model run:             {config_nomodelrun}")
 print(f"  - KNN params:               K:{KNN_K}, P:{KNN_P}")
 
 
-
 from snakemake.utils import min_version
 min_version("6.0")
 
@@ -75,8 +74,8 @@ module other_workflow:
 
 use rule other_model_val, create_fasta_bins_other_model_val, checkm2_val, parse_checkm2_val, other_model_test, create_fasta_bins_other_model_test, checkm2 from other_workflow as *
 
-input_files = []
 
+input_files = []
 #OTHER MODELS
 if MODEL in ['tnf'] and not config_naomodelrun:
     input_files += [
@@ -112,12 +111,10 @@ elif MODEL in ['dnabert2random'] and not config_nomodelrun:
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET_NAME, "dnabert2random_output", "test"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET_NAME, "fasta_bins", "dnabert2random"),
     ]
-
-
 if config_checkm2:
     input_files += [os.path.join(OUTDIR_MODEL_RESULTS, DATASET_NAME, "checkm2", f"{MODEL}_results")]
 
-
+print(input_files)
 rule all:
     input: input_files
 
