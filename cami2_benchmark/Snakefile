@@ -11,6 +11,7 @@ SRC_DIR = os.path.join(os.getcwd(), "cami2_benchmark", "src")
 BASE = os.path.join(os.getcwd(), "cami2_benchmark")
 LOGS = os.path.join(os.getcwd(), "cami2_benchmark", "logs")
 BINNING_DIR = os.path.join(os.getcwd(), "binning")
+NGS_DIR = os.path.join(os.getcwd(), "ngs_pipeline")
 
 #DATASET, sample and model config
 with open(os.path.join(BASE, "config.yml"), "r") as f:
@@ -19,7 +20,14 @@ with open(os.path.join(BASE, "config.yml"), "r") as f:
 with open(os.path.join(BINNING_DIR, "models.yml"), "r") as f:
     other_model_config = yaml.safe_load(f)
 
-ALL_DATASETS = [d["name"] for d in datasets_model_config["datasets"]]
+with open(os.path.join(NGS_DIR, "config/phenotype_studies.yaml"), "r") as f:
+    ngs_datasets = yaml.safe_load(f)
+
+
+ALL_DATASETS_CAMI2 = [d["name"] for d in datasets_model_config["datasets"]]
+ALL_DATASETS_NGS = [d["name"] for d in datasets_model_config["studies"]]
+ALL_DATASETS = ALL_DATASETS_NAMES + ALL_DATASETS_NGS
+
 DATASET = config.get("DATASET", None)
 assert DATASET in ALL_DATASETS, f"Error: Selected dataset '{DATASET}' is not in the available DATASET: {ALL_DATASETS}"
 
@@ -193,7 +201,7 @@ rule other_model_val:
         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
         pip uninstall -y triton
         python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
-        -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {output.dirs} -l {log} -m val
+        -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {outpu    t.dirs} -l {log} -m val
         """
 
 
