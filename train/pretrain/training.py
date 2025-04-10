@@ -93,9 +93,14 @@ class Trainer(nn.Module):
         print('\n={}/{}=Iterations/Batches'.format(self.all_iter, len(self.train_loader)))
 
         self.model.train()
-        epoch_iterator = tqdm(self.train_loader, desc="Iteration")
+        # epoch_iterator = tqdm(self.train_loader, desc="Iteration") # tqdm might hide logs/errors initially
         for epoch in range(self.args.epochs):
-            self.train_sampler.set_epoch(epoch)
+            # Only set epoch for DistributedSampler
+            if self.args.distributed and self.train_sampler is not None: # Check distributed flag
+                 print(f"Epoch {epoch}: Setting sampler epoch.") # Add log
+                 self.train_sampler.set_epoch(epoch)
+            else:
+                 print(f"Epoch {epoch}: Not setting sampler epoch (single GPU or no sampler).") # Add log
 
             batch_time = AverageMeter('Time', ':6.3f')
             data_time = AverageMeter('Data', ':6.3f')
@@ -107,7 +112,11 @@ class Trainer(nn.Module):
                     [batch_time, data_time, losses],
                     prefix = "Epoch: [{}]".format(epoch))
             
-            for _, (sequences, labels) in enumerate(epoch_iterator):
+            # Use standard iteration if tqdm hides output
+            for i, (sequences, labels) in enumerate(self.train_loader):
+                # Add print statement inside the loop to check if it starts
+                if i == 0:
+                    print(f"Epoch {epoch}, Batch 0: Starting data processing...")
                 data_time.update(time.time() - end)
                 labels = labels.squeeze()
                 input_ids, attention_mask = self.prepare_pairwise_input(sequences)

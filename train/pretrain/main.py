@@ -53,23 +53,35 @@ def main_single_gpu(gpu, ngpus_per_node, args):
     if not os.path.isdir(args.tb_folder):
         os.makedirs(args.tb_folder)
     logger = tb_logger.Logger(logdir=args.tb_folder, flush_secs=2)
+    print("Logger setup complete.")
 
     # Set the device
     torch.cuda.set_device(args.gpu)
+    print(f"Set device to GPU {args.gpu}.")
 
-    # Setup model and criterion (set_model handles moving to args.gpu)
-    # Pass ngpus_per_node=1 to avoid DDP wrapping
+    # Setup model and criterion
+    print("Setting up model and criterion...")
     model, criterion = set_model(ngpus_per_node, args)
-    tokenizer = AutoTokenizer.from_pretrained("zhihan1996/DNABERT-2-117M", trust_remote_code=True)
+    print("Model and criterion setup complete.")
 
-    # Load data (pass distributed flag)
+    # Setup tokenizer
+    print("Loading tokenizer...")
+    tokenizer = AutoTokenizer.from_pretrained("zhihan1996/DNABERT-2-117M", trust_remote_code=True)
+    print("Tokenizer loaded.")
+
+    # Load data
+    print("Loading data...")
     # Ensure load_deep_genome_hierarchical can handle args.distributed = False
     dataloaders_dict, sampler = load_deep_genome_hierarchical(args)
+    print(f"Data loaded. Dataloader length: {len(dataloaders_dict['train'])}")
 
     # Setup optimizer and scheduler
+    print("Setting up optimizer...")
     optimizer = get_optimizer(model, args) # Pass the potentially unwrapped model
+    print("Optimizer setup complete.")
 
     # Create warmup scheduler
+    print("Setting up schedulers...")
     warmup_scheduler = LinearLR(
         optimizer,
         start_factor=0.1,
@@ -90,8 +102,12 @@ def main_single_gpu(gpu, ngpus_per_node, args):
         schedulers=[warmup_scheduler, cosine_scheduler],
         milestones=[int(args.warmup_epochs * len(dataloaders_dict['train']))]
     )
+    print("Schedulers setup complete.")
 
+    # Setup Trainer
+    print("Initializing Trainer...")
     trainer = Trainer(model, tokenizer, criterion, optimizer, dataloaders_dict, sampler, logger, args, scheduler)
+    print("Trainer initialized.")
 
     # Train the model
     print("Starting training on single GPU...")
