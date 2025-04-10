@@ -1,8 +1,6 @@
 import os
 from argparse import ArgumentParser
 
-import traceback
-
 from time import time
 
 from src.clustering import KMediod
