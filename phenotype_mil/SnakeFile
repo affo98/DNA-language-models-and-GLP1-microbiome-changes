@@ -99,8 +99,9 @@ elif MODEL in ['dna2vec'] and not config_nomodelrun:
 
 elif MODEL in ['dnaberts'] and not config_nomodelrun:
     input_files += [
-        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "dnaberts_output", "test"),
-        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "dnaberts"),
+        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_validation")
+        #os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "dnaberts_output", "test"),
+        #os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "dnaberts"),
     ]
 
 elif MODEL in ['dnabert2'] and not config_nomodelrun:
@@ -170,34 +171,34 @@ rule create_fasta_bins_other_model_val:
         done
         """
 
-rule checkm2_val: 
-    input:
-        fasta_bins=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_validation")
-    output:
-        output=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation"))
-    conda:
-        os.path.join(CAMI2_DIR, "envs/checkm2.yml")
-    threads:
-        128
-    shell:
-        """
-        if [ ! -d "{OUTDIR_BINNING_RESULTS}/checkm2_database" ]; then
-            checkm2 database --download --path {OUTDIR_BINNING_RESULTS}/checkm2_database
-        fi
+# rule checkm2_val: 
+#     input:
+#         fasta_bins=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_validation")
+#     output:
+#         output=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation"))
+#     conda:
+#         os.path.join(CAMI2_DIR, "envs/checkm2.yml")
+#     threads:
+#         128
+#     shell:
+#         """
+#         if [ ! -d "{OUTDIR_BINNING_RESULTS}/checkm2_database" ]; then
+#             checkm2 database --download --path {OUTDIR_BINNING_RESULTS}/checkm2_database
+#         fi
 
-        for bin_dir in {input.fasta_bins}/*; do
-            k_p=$(basename "$bin_dir")
-            output_subdir={output.output}/$k_p
+#         for bin_dir in {input.fasta_bins}/*; do
+#             k_p=$(basename "$bin_dir")
+#             output_subdir={output.output}/$k_p
             
-            mkdir -p "$output_subdir"
+#             mkdir -p "$output_subdir"
             
-            echo "FOP FLOOP: Processing $k_p with CheckM2..."
-            checkm2 predict --threads {threads} \
-                            --input "$bin_dir" \
-                            --output-directory "$output_subdir" \
-                            --database_path {OUTDIR_BINNING_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
-        done
-        """
+#             echo "FOP FLOOP: Processing $k_p with CheckM2..."
+#             checkm2 predict --threads {threads} \
+#                             --input "$bin_dir" \
+#                             --output-directory "$output_subdir" \
+#                             --database_path {OUTDIR_BINNING_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
+#         done
+#         """
 
 # rule parse_checkm2_val:
 #     input:
