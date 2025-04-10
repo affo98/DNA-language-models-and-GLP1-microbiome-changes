@@ -25,7 +25,7 @@ with open(os.path.join(NGS_DIR, "config/phenotype_studies.yaml"), "r") as f:
 
 
 ALL_DATASETS_CAMI2 = [d["name"] for d in datasets_model_config["datasets"]]
-ALL_DATASETS_NGS = [d["name"] for d in datasets_model_config["studies"]]
+ALL_DATASETS_NGS = [d["name"] for d in ngs_datasets["studies"]]
 ALL_DATASETS = ALL_DATASETS_NAMES + ALL_DATASETS_NGS
 
 DATASET = config.get("DATASET", None)

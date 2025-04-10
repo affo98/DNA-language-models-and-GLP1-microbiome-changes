@@ -53,20 +53,30 @@ KNN_K = [100,200,300,400,500,600,700,800,900,1000]
 KNN_P = [25,50,75]
 
 print(f"-------------Configuration Flags:--------------")
-print(f"  - DATASET:             {DATASET_ID}")
-print(f"  - DATASET:             {DATASET_NAME}")
-print(f"  - Selected Model:      {MODEL}")
-print(f"  - Model Path:          {MODEL_PATH}")
-print(f"  - Batch Sizes:         {BATCH_SIZES}")
-print(f"  - CheckM2:             {config_checkm2}")
-print(f"  - MinSize Bins:        {MINSIZE_BINS}")
-print(f"  - MinSize Contigs:     {MINSIZE_CONTIGS}")
-print(f"  - No model run:        {config_nomodelrun}")
-print(f"  - KNN params:          K:{KNN_K}, P:{KNN_P}")
+print(f"  - DATASET ID:               {DATASET_ID}")
+print(f"  - DATASET Name:             {DATASET_NAME}")
+print(f"  - Selected Model:           {MODEL}")
+print(f"  - Model Path:               {MODEL_PATH}")
+print(f"  - Batch Sizes:              {BATCH_SIZES}")
+print(f"  - CheckM2:                  {config_checkm2}")
+print(f"  - MinSize Bins:             {MINSIZE_BINS}")
+print(f"  - MinSize Contigs:          {MINSIZE_CONTIGS}")
+print(f"  - No model run:             {config_nomodelrun}")
+print(f"  - KNN params:               K:{KNN_K}, P:{KNN_P}")
 
 
 
-include: os.path.join(CAMI2_DIR, "Snakefile")
+module binning_checkm2:
+    snakefile: os.path.join(CAMI2_DIR, "Snakefile")
+
+use rule binning_checkm2.other_model_val
+use rule binning_checkm2.create_fasta_bins_other_model_val
+use rule binning_checkm2.checkm2_val
+use rule binning_checkm2.parse_checkm2_val
+use rule binning_checkm2.other_model_test
+use rule binning_checkm2.create_fasta_bins_other_model_test
+use rule binning_checkm2.checkm2
+
 input_files = []
 
 #OTHER MODELS
