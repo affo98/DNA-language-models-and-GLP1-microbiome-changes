@@ -10,7 +10,7 @@ from src.utils import read_contigs, Logger, split_contigs_valtest
 
 # data
 MAX_CONTIG_LENGTH = 60000  # oom with 70.000
-VAL_PROPORTION = 0.1
+VAL_PROPORTION = 0.01
 
 # threshold calculation
 N_BINS = 1000
