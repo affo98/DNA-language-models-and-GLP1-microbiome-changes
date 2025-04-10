@@ -71,6 +71,7 @@ min_version("6.0")
 
 module other_workflow:
     snakefile: os.path.join(CAMI2_DIR, "Snakefile")
+    config: config
 
 use rule other_model_val from other_workflow as other_*
 
