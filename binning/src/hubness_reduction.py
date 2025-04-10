@@ -6,7 +6,7 @@ import numpy as np
 
 if __name__ == "__main__":
 
-    X = np.load("dnaberts.npy")
+    from skhubness.analysis import Hubness
 
     hub = Hubness(
         k=10,
@@ -17,25 +17,43 @@ if __name__ == "__main__":
             "metric": "euclidean",
             "post_processing": 2,
         },
+        return_value="robinhood",
         n_jobs=8,
     )
     hub.fit(X)
-    k_skew = hub.score()
-    print(f"Skewness = {k_skew:.3f}")
-    print(f"Robin hood index: {hub.robinhood_index:.3f}")
-    print(f"Antihub occurrence: {hub.antihub_occurrence:.3f}")
-    print(f"Hub occurrence: {hub.hub_occurrence:.3f}")
+    robin_hood = hub.score(X)
+    print(robin_hood)
 
-    hub_mp = Hubness(
-        k=10, metric="cosine", hubness="mutual_proximity", verbose=2, algorithm="hnsw"
-    )
-    hub_mp.fit(X)
-    k_skew_mp = hub_mp.score()
-    print(
-        f"Skewness after MP: {k_skew_mp:.3f} "
-        f"(reduction of {k_skew - k_skew_mp:.3f})"
-    )
-    print(
-        f"Robin hood: {hub_mp.robinhood_index:.3f} "
-        f"(reduction of {hub.robinhood_index - hub_mp.robinhood_index:.3f})"
-    )
+    # X = np.load("dnaberts.npy")
+
+    # hub = Hubness(
+    #     k=10,
+    #     metric="euclidean",
+    #     algorithm="hnsw",
+    #     algorithm_params={
+    #         "n_candidates": 100,
+    #         "metric": "euclidean",
+    #         "post_processing": 2,
+    #     },
+    #     n_jobs=8,
+    # )
+    # hub.fit(X)
+    # k_skew = hub.score()
+    # print(f"Skewness = {k_skew:.3f}")
+    # print(f"Robin hood index: {hub.robinhood_index:.3f}")
+    # print(f"Antihub occurrence: {hub.antihub_occurrence:.3f}")
+    # print(f"Hub occurrence: {hub.hub_occurrence:.3f}")
+
+    # hub_mp = Hubness(
+    #     k=10, metric="cosine", hubness="mutual_proximity", verbose=2, algorithm="hnsw"
+    # )
+    # hub_mp.fit(X)
+    # k_skew_mp = hub_mp.score()
+    # print(
+    #     f"Skewness after MP: {k_skew_mp:.3f} "
+    #     f"(reduction of {k_skew - k_skew_mp:.3f})"
+    # )
+    # print(
+    #     f"Robin hood: {hub_mp.robinhood_index:.3f} "
+    #     f"(reduction of {hub.robinhood_index - hub_mp.robinhood_index:.3f})"
+    # )
