@@ -25,10 +25,10 @@ args = parser.parse_args()
 # Read in FASTA files only to get its length. This way, we can avoid storing
 # in memory contigs for sequences that will never get output anyway
 lens: dict[str, int] = dict()
-with vamb.vambtools.Reader(args.fastapath) as file:
-    for record in vamb.vambtools.byte_iterfasta(
-        file, None
-    ):  # changed this line from vamb github code, otherwise causes error
+import gzip
+
+with gzip.open(args.fastapath, "rb") as file:  # open gzip as binary lines
+    for record in vamb.vambtools.byte_iterfasta(file):
         lens[record.identifier] = len(record)
 
 
