@@ -20,4 +20,4 @@ dependencies:
       - matplotlib
       - seaborn
       - pandas
-      - scikit-image
+      - skhubness
