@@ -62,8 +62,9 @@ rule parse_checkm2_results:
         "checkm2_results",
     output:
         "hdbscan_results.txt",
+    # params:
+    #     "final_results"
     shell:
         """
-        mkdir -p {output}
         python parse_checkm2_val.py -i {input}/quality_report.tsv
         """
