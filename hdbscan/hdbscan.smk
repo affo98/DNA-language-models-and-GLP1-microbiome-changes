@@ -13,8 +13,8 @@ rule cluster:
         "clusters.tsv"
     threads:
         36
-    # resources:
-    #     mem_gb=80
+    resources:
+        mem_gb=200
     shell:
         """
         python cluster.py {input.embeddings} {input.contig_catalogue} {threads}
