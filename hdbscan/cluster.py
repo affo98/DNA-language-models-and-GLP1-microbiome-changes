@@ -15,7 +15,7 @@ def cluster(path_to_embeds: str, threads: int) -> np.array:
 
     with open("hdbscan_log.txt", "w") as f:
         hdb = HDBSCAN(
-            min_cluster_size=100,
+            min_cluster_size=20,
             min_samples=5,
             metric="cosine",
             n_jobs=threads,
