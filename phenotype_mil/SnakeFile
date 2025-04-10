@@ -7,7 +7,6 @@ CAMI2_DIR = os.path.join(os.getcwd(), "cami2_benchmark")
 BINNING_DIR = os.path.join(os.getcwd(), "binning")
 NGS_DIR = os.path.join(os.getcwd(), "ngs_pipeline")
 SRC_DIR = os.path.join(os.getcwd(), "phenotype_mil", "src")
-SRC_DIR_CAMI2 = os.path.join(os.getcwd(), "cami2_benchmark", "src")
 LOGS = os.path.join(os.getcwd(), "phenotype_mil", "logs")
 OUTDIR_BINNING_RESULTS = os.path.join(os.getcwd(), "phenotype_mil", "binning_results")
 OUTDIR_MIL_RESULTS = os.path.join(os.getcwd(), "phenotype_mil", "mil_results")
@@ -166,7 +165,7 @@ rule create_fasta_bins_other_model_val:
 
             mkdir -p "$output_dir"
 
-            python {SRC_DIR_CAMI2}/create_fasta.py {input.catalogue} "$cluster_file" {params.minsize_bins} "$output_dir" \
+            python {SRC_DIR}/create_fasta.py {input.catalogue} "$cluster_file" {params.minsize_bins} "$output_dir" \
             --log "$log_file"
         done
         """
@@ -214,7 +213,7 @@ rule parse_checkm2_val:
         """
         mkdir -p {output.path}
         n_val=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["n_val"])' "{input.val_count}/n_total_val_test.json")
-        python {SRC_DIR_CAMI2}/parse_checkm2_val.py -i {input.checkm2_reports} -o {output.path} -n $n_val -l {log.log_file}
+        python {SRC_DIR}/parse_checkm2_val.py -i {input.checkm2_reports} -o {output.path} -n $n_val -l {log.log_file}
         """
 #-end val
 
@@ -254,7 +253,7 @@ rule create_fasta_bins_other_model_test:
         os.path.join(CAMI2_DIR, "envs/vamb.yml")
     shell:
         """
-        python {SRC_DIR_CAMI2}/create_fasta.py {input.catalogue} {input.cluster_results}/clusters.tsv {params.minsize_bins} {output.dirs} \
+        python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results}/clusters.tsv {params.minsize_bins} {output.dirs} \
         --log {log.log_file} --outtsv {params.clusters_filtered}
         """
 
@@ -289,7 +288,6 @@ rule phenotype_mil:
     input:
         cluster_dir = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test"),
         sample_labels = SAMPLE_LABELS_FILE
-        #abundance = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "abundance.tsv")
     output:
         result_dir = directory(os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_results"),
     log:
