@@ -180,23 +180,39 @@ rule all:
 #comment back in somehow
 
 #OTHER MODEL 
+# rule other_model_val:
+#     input:
+#         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+#     output:
+#         dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation"))
+#     log:
+#         os.path.join(LOGS, DATASET, "{MODEL}_val", "{MODEL}_val_binning.log")
+#     conda:
+#         os.path.join(BINNING_DIR, "envs/binning.yml")
+#     shell:
+#         """
+#         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
+#         pip uninstall -y triton
+#         python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
+#         -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {output.dirs} -l {log} -m val
+#         """
+
 rule other_model_val:
     input:
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+        catalogue=os.path.join(config["OUTDIR_MODEL_PROCESSED"], config["DATASET"], "catalogue.fna.gz")
     output:
-        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation"))
+        dirs=directory(os.path.join(config["OUTDIR_MODEL_PROCESSED"], config["DATASET"], config["MODEL"]+"_output", "validation"))
     log:
-        os.path.join(LOGS, DATASET, "{MODEL}_val", "{MODEL}_val_binning.log")
+        os.path.join(config["LOGS"], config["DATASET"], config["MODEL"]+"_val", config["MODEL"]+"_val_binning.log")
     conda:
-        os.path.join(BINNING_DIR, "envs/binning.yml")
+        os.path.join(config["BINNING_DIR"], "envs/binning.yml")
     shell:
         """
-        mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
+        mkdir -p {OUTDIR_MODEL_RESULTS}/{config["DATASET"]}
         pip uninstall -y triton
-        python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
-        -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {outpu    t.dirs} -l {log} -m val
+        python {config["OUTDIR_MODEL_PROCESSED"]}/binning.py -c {input.catalogue} -mn {config["MODEL"]} -mp {config["MODEL_PATH"]} \
+        -b {config["BATCH_SIZES"]} -k {congif["KNN_K"]} -p {config["KNN_P"]} -s {output.dirs} -l {log} -m val
         """
-
 
 
 
