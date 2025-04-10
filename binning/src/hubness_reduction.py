@@ -1,4 +1,4 @@
-from skhubness import Hubness
+from skhubness.analysis import Hubness
 import numpy as np
 
 
