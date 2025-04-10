@@ -77,7 +77,7 @@ use rule other_model_val, create_fasta_bins_other_model_val, checkm2_val, parse_
 
 input_files = []
 #OTHER MODELS
-if MODEL in ['tnf'] and not config_naomodelrun:
+if MODEL in ['tnf'] and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET_NAME, "tnf_output", "test"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET_NAME, "fasta_bins", "tnf"),
@@ -114,7 +114,7 @@ elif MODEL in ['dnabert2random'] and not config_nomodelrun:
 if config_checkm2:
     input_files += [os.path.join(OUTDIR_MODEL_RESULTS, DATASET_NAME, "checkm2", f"{MODEL}_results")]
 
-print(input_files)
+
 rule all:
     input: input_files
 
