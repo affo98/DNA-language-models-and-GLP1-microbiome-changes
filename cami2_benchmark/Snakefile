@@ -180,50 +180,23 @@ rule all:
 #comment back in somehow
 
 #OTHER MODEL 
-# rule other_model_val:
-#     input:
-#         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
-#     output:
-#         dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation"))
-#     log:
-#         os.path.join(LOGS, DATASET, "{MODEL}_val", "{MODEL}_val_binning.log")
-#     conda:
-#         os.path.join(BINNING_DIR, "envs/binning.yml")
-#     shell:
-#         """
-#         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
-#         pip uninstall -y triton
-#         python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
-#         -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {outpu    t.dirs} -l {log} -m val
-#         """
-
 rule other_model_val:
     input:
-        catalogue = os.path.join(OUTDIR_PROCESSED, config["DATASET"], "catalogue.fna.gz")
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
     output:
-        dirs = directory(lambda wildcards: os.path.join(OUTDIR_MODEL_RESULTS,
-                                                         config["DATASET"],
-                                                         config["MODEL"] + "_output",
-                                                         "validation"))
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation"))
     log:
-        lambda wildcards: os.path.join(LOGS,
-                                        config["DATASET"],
-                                        config["MODEL"] + "_val",
-                                        config["MODEL"] + "_val_binning.log")
-    params:
-        model_path = other_model_config[config["MODEL"]]["model_path"],
-        batch_sizes = other_model_config[config["MODEL"]]["batch_sizes"] if config["MODEL"] in ['dnaberts', 'dnabert2', 'dnabert2random'] else 0,
-        knn_k = KNN_K,
-        knn_p = KNN_P
+        os.path.join(LOGS, DATASET, "{MODEL}_val", "{MODEL}_val_binning.log")
     conda:
         os.path.join(BINNING_DIR, "envs/binning.yml")
     shell:
         """
-        mkdir -p {OUTDIR_MODEL_RESULTS}/{config[DATASET]}
+        mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
         pip uninstall -y triton
-        python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {config[MODEL]} -mp {params.model_path} \
-        -b {params.batch_sizes} -k {params.knn_k} -p {params.knn_p} -s {output.dirs} -l {log} -m val
+        python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
+        -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {outpu    t.dirs} -l {log} -m val
         """
+
 
 
 

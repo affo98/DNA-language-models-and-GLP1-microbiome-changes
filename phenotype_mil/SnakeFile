@@ -52,6 +52,29 @@ MINSIZE_CONTIGS=2000 #do we need this?
 KNN_K = [100,200,300,400,500,600,700,800,900,1000]
 KNN_P = [25,50,75]
 
+external_config = {
+    "DATASET": DATASET,
+    "DATASET_ID": DATASET_ID,
+    "MODEL": MODEL,
+    "MODEL_PATH": MODEL_PATH,
+    "BATCH_SIZES": BATCH_SIZES,
+    "config_checkm2": config_checkm2,
+    "config_nomodelrun": config_nomodelrun,
+    "MINSIZE_BINS": MINSIZE_BINS,
+    "MINSIZE_CONTIGS": MINSIZE_CONTIGS,
+    "KNN_K": KNN_K,
+    "KNN_P": KNN_P,
+    # Pass all directory paths you need:
+    "OUTDIR_PROCESSED": OUTDIR_PROCESSED,
+    "OUTDIR_MODEL_RESULTS": OUTDIR_MODEL_RESULTS,
+    "LOGS": LOGS,
+    "BINNING_DIR": BINNING_DIR,
+    "SRC_DIR": SRC_DIR
+}
+
+
+
+
 print(f"-------------Configuration Flags:--------------")
 print(f"  - DATASET ID:               {DATASET_ID}")
 print(f"  - DATASET Name:             {DATASET}")
@@ -70,7 +93,7 @@ min_version("6.0")
 
 module other_workflow:
     snakefile: os.path.join(CAMI2_DIR, "Snakefile")
-    config: config
+    config: external_config
 
 
 use rule other_model_val from other_workflow as *
