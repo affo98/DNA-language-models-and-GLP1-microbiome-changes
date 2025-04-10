@@ -143,32 +143,32 @@ rule other_model_val:
         """
 
 
-# rule create_fasta_bins_other_model_val:
-#     input:
-#         catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
-#         cluster_results = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "validation")                                         
-#     output:
-#         dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_validation"))
-#     log:
-#         log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "bin_postprocessing.log")
-#     params:
-#         cluster_results_dir=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "validation", "cluster_results"),
-#         minsize_bins=MINSIZE_BINS
-#     conda: 
-#         os.path.join(CAMI2_DIR, "envs/vamb.yml")
-#     shell:
-#         """
-#         for cluster_file in {params.cluster_results_dir}/clusters_k*_p*.tsv; do
-#             k_p=$(basename "$cluster_file" .tsv | sed 's/clusters_//')
-#             output_dir={output.dirs}/$k_p
-#             log_file={log.log_file}_$k_p.log
+rule create_fasta_bins_other_model_val:
+    input:
+        catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
+        cluster_results = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "validation")                                         
+    output:
+        dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_validation"))
+    log:
+        log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "bin_postprocessing.log")
+    params:
+        cluster_results_dir=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "validation", "cluster_results"),
+        minsize_bins=MINSIZE_BINS
+    conda: 
+        os.path.join(CAMI2_DIR, "envs/vamb.yml")
+    shell:
+        """
+        for cluster_file in {params.cluster_results_dir}/clusters_k*_p*.tsv; do
+            k_p=$(basename "$cluster_file" .tsv | sed 's/clusters_//')
+            output_dir={output.dirs}/$k_p
+            log_file={log.log_file}_$k_p.log
 
-#             mkdir -p "$output_dir"
+            mkdir -p "$output_dir"
 
-#             python {SRC_DIR_CAMI2}/create_fasta.py {input.catalogue} "$cluster_file" {params.minsize_bins} "$output_dir" \
-#             --log "$log_file"
-#         done
-#         """
+            python {SRC_DIR_CAMI2}/create_fasta.py {input.catalogue} "$cluster_file" {params.minsize_bins} "$output_dir" \
+            --log "$log_file"
+        done
+        """
 
 # rule checkm2_val: 
 #     input:
