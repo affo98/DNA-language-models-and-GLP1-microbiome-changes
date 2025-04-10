@@ -52,7 +52,7 @@ MINSIZE_CONTIGS=2000 #do we need this?
 KNN_K = [100,200,300,400,500,600,700,800,900,1000]
 KNN_P = [25,50,75]
 
-include: "CAMI2_DIR/Snakefile.smk"
+include: os.path.join(CAMI2_DIR, "Snakefile.smk")
 
 
 print(f"-------------Configuration Flags:--------------")
