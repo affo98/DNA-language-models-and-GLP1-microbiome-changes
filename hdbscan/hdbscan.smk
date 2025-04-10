@@ -14,7 +14,7 @@ rule cluster:
     threads:
         36
     resources:
-        mem_gb=200
+        mem_gb=75
     shell:
         """
         python cluster.py {input.embeddings} {input.contig_catalogue} {threads}
