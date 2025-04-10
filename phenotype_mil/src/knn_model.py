@@ -4,6 +4,8 @@ from scipy.spatial.distance import cdist
 
 from src.utils import Logger
 
+#OTENTIAL USE
+#https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html
 
 class KNNModel:
 

@@ -24,19 +24,13 @@ def get_cluster_catalogue(
     clusters = read_clusters(clusters_filtered_path)
 
     seeds_path = os.path.join(input_path, SEEDS_FILENAME)
-    seeds = get_seeds(seeds_path, clusters.keys())
-
-    cluster_catalogue = list(seeds.values())
-
-    print(cluster_catalogue.shape)
-    print(seeds.shape)
+    cluster_catalogue = get_seeds_centroid_catalogue(seeds_path, clusters.keys(), log)
 
     log.append(f"Cluster catalogue shape: {cluster_catalogue.shape}")
-    log.append(f"Seeds shape: {seeds.shape}")
     return cluster_catalogue
 
 
-def get_seeds(seeds_path: str, clusterids) -> dict[int, np.ndarray]:
+def get_seeds_centroid_catalogue(seeds_path: str, clusterids, log) -> np.array:
     """Loads a seeds dictionary saved in JSON format, converting seed lists back to np.arrays."""
     with open(seeds_path, "r") as filehandle:
         data = json.load(filehandle)
@@ -48,5 +42,8 @@ def get_seeds(seeds_path: str, clusterids) -> dict[int, np.ndarray]:
         for label, seed in data.items()
         if int(label) in clusterids
     }
+    log.append(f"Using {seeds.shape} seeds from {seeds_path}")
 
-    return seeds
+    cluster_catalogue = list(seeds.values())
+
+    return cluster_catalogue
