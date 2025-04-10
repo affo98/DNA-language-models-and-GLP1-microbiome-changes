@@ -12,15 +12,11 @@ import time
 
 def cluster(path_to_embeds: str, threads: int) -> np.array:
     dnabert_metahit_embeds = np.load(path_to_embeds)
-    # dnabert_metahit_embeds = normalize(dnabert_metahit_embeds, norm="l2")
-    min_cluster_size = 20
-    # epsilons = [1, 2, 3, 4, 5]
-    # min_samples = [1, 20, 40, 60, 70, 200]
+
     with open("hdbscan_log.txt", "w") as f:
-        # for epsi in epsilons:
-        # for min_sample in min_samples:
         hdb = HDBSCAN(
-            min_cluster_size=200,
+            min_cluster_size=100,
+            min_samples=5,
             metric="cosine",
             n_jobs=threads,
         )
@@ -42,13 +38,14 @@ def cluster(path_to_embeds: str, threads: int) -> np.array:
         f.write("#" * 100 + "\n" * 2)
         f.write("#" * 30 + "\t" * 2 + "HDBSCAN PARAMETERS" + "\t" * 2 + "#" * 30)
         f.write("\n" * 2)
-        f.write(f"\t\tmin_cluster_size: {min_cluster_size}\n")
+        f.write(f"\t\tmin_cluster_size: {100}\n")
+        f.write(f"\t\tmin_sampes: {5}\n")
         f.write(f"\t\tClustered contigs = {len(list(cluster_labels))}\n")
         f.write("\n" * 2)
         f.write("#" * 100 + "\n")
 
         f.write(
-            f"Number of Clusters: {num_clusters}, with cluster labels {np.unique(cluster_labels).tolist()}: \n"
+            f"Number of Clusters: {num_clusters}, with cluster labels {np.unique(cluster_labels).tolist()}:\n"
         )
         f.write(f"Noicy Contigs i.e. -1: {num_noicy_contigs},\n")
         f.write(f"Numbr of unassigned Contigs: {unassigned_contigs},\n")

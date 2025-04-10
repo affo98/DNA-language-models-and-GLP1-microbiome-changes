@@ -5,35 +5,35 @@ rule all:
     input:
         "hdbscan_results.txt"
 
-# rule cluster:
-#     input:
-#         embeddings = "dnaberts.npy",
-#         contig_catalogue = "catalogue.fna.gz"
-#     output:
-#         "clusters.tsv"
-#     threads:
-#         48
-#     resources:
-#         mem_gb=36
-#     shell:
-#         """
-#         python -m cuml.accel cluster.py {input.embeddings} {input.contig_catalogue} {threads}
-#         """
+rule cluster:
+    input:
+        embeddings = "dnaberts.npy",
+        contig_catalogue = "catalogue.fna.gz"
+    output:
+        "clusters.tsv"
+    threads:
+        36
+    resources:
+        mem_gb=80
+    shell:
+        """
+        python -m cluster.py {input.embeddings} {input.contig_catalogue} {threads}
+        """
 
 
-# rule write_fasta:
-#     input:
-#         "clusters.tsv"
-#     output:
-#        directory("tmp")
-#     params:
-#         contig_catalogue = "catalogue.fna.gz"
-#     shell:
-#         """
-#         mkdir -p tmp
+rule write_fasta:
+    input:
+        "clusters.tsv"
+    output:
+       directory("tmp")
+    params:
+        contig_catalogue = "catalogue.fna.gz"
+    shell:
+        """
+        mkdir -p tmp
 
-#         python create_fasta.py {params.contig_catalogue} clusters.tsv 250000 tmp --log fasta_logs
-#         """
+        python create_fasta.py {params.contig_catalogue} clusters.tsv 250000 tmp --log fasta_logs
+        """
 
 
 rule checkm2:
@@ -62,8 +62,6 @@ rule parse_checkm2_results:
         "checkm2_results",
     output:
         "hdbscan_results.txt",
-    # params:
-    #     "final_results"
     shell:
         """
         python parse_checkm2_val.py -i {input}/quality_report.tsv
