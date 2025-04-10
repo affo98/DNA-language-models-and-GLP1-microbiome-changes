@@ -52,28 +52,35 @@ MINSIZE_CONTIGS=2000 #do we need this?
 KNN_K = [100,200,300,400,500,600,700,800,900,1000]
 KNN_P = [25,50,75]
 
-external_config = {
-    "DATASET": DATASET,
-    "DATASET_ID": DATASET_ID,
-    "MODEL": MODEL,
-    "MODEL_PATH": MODEL_PATH,
-    "BATCH_SIZES": BATCH_SIZES,
-    "config_checkm2": config_checkm2,
-    "config_nomodelrun": config_nomodelrun,
-    "MINSIZE_BINS": MINSIZE_BINS,
-    "MINSIZE_CONTIGS": MINSIZE_CONTIGS,
-    "KNN_K": KNN_K,
-    "KNN_P": KNN_P,
-    # Pass all directory paths you need:
-    "OUTDIR_PROCESSED": OUTDIR_PROCESSED,
-    "OUTDIR_MODEL_RESULTS": OUTDIR_MODEL_RESULTS,
-    "LOGS": LOGS,
-    "BINNING_DIR": BINNING_DIR,
-    "SRC_DIR": SRC_DIR
-}
+# external_config = {
+#     "DATASET": DATASET,
+#     "DATASET_ID": DATASET_ID,
+#     "MODEL": MODEL,
+#     "MODEL_PATH": MODEL_PATH,
+#     "BATCH_SIZES": BATCH_SIZES,
+#     "config_checkm2": config_checkm2,
+#     "config_nomodelrun": config_nomodelrun,
+#     "MINSIZE_BINS": MINSIZE_BINS,
+#     "MINSIZE_CONTIGS": MINSIZE_CONTIGS,
+#     "KNN_K": KNN_K,
+#     "KNN_P": KNN_P,
+#     # Pass all directory paths you need:
+#     "OUTDIR_PROCESSED": OUTDIR_PROCESSED,
+#     "OUTDIR_MODEL_RESULTS": OUTDIR_MODEL_RESULTS,
+#     "LOGS": LOGS,
+#     "BINNING_DIR": BINNING_DIR,
+#     "SRC_DIR": SRC_DIR
+# }
+
+# from snakemake.utils import min_version
+# min_version("6.0")
+
+# module other_workflow:
+#     snakefile: os.path.join(CAMI2_DIR, "Snakefile")
+#     config: external_config
 
 
-
+# use rule other_model_val, create_fasta_bins_other_model_val, checkm2_val, parse_checkm2_val, other_model_test, create_fasta_bins_other_model_test, checkm2 from other_workflow as *
 
 print(f"-------------Configuration Flags:--------------")
 print(f"  - DATASET ID:               {DATASET_ID}")
@@ -87,16 +94,6 @@ print(f"  - MinSize Contigs:          {MINSIZE_CONTIGS}")
 print(f"  - No model run:             {config_nomodelrun}")
 print(f"  - KNN params:               K:{KNN_K}, P:{KNN_P}")
 
-
-from snakemake.utils import min_version
-min_version("6.0")
-
-module other_workflow:
-    snakefile: os.path.join(CAMI2_DIR, "Snakefile")
-    config: external_config
-
-
-use rule other_model_val, create_fasta_bins_other_model_val, checkm2_val, parse_checkm2_val, other_model_test, create_fasta_bins_other_model_test, checkm2 from other_workflow as *
 
 
 input_files = []
@@ -121,9 +118,8 @@ elif MODEL in ['dna2vec'] and not config_nomodelrun:
 
 elif MODEL in ['dnaberts'] and not config_nomodelrun:
     input_files += [
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output", "test"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberts"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberts"),
     ]
 
 elif MODEL in ['dnabert2'] and not config_nomodelrun:
@@ -145,6 +141,160 @@ rule all:
 
 
 ruleorder: other_model_val > create_fasta_bins_other_model_val > checkm2_val > parse_checkm2_val > other_model_test > create_fasta_bins_other_model_test
+
+
+#BINNING---------------------------------------------------------------------------------------------
+#start val
+rule other_model_val:
+    input:
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+    output:
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation"))
+    log:
+        os.path.join(LOGS, DATASET, "{MODEL}_val", "{MODEL}_val_binning.log")
+    conda:
+        os.path.join(BINNING_DIR, "envs/binning.yml")
+    shell:
+        """
+        mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
+        pip uninstall -y triton
+        python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
+        -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {output.dirs} -l {log} -m val
+        """
+
+
+rule create_fasta_bins_other_model_val:
+    input:
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        cluster_results = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation")                                         
+    output:
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_validation"))
+    log:
+        log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "bin_postprocessing.log")
+    params:
+        cluster_results_dir=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation", "cluster_results"),
+        minsize_bins=MINSIZE_BINS
+    conda: 
+        "envs/vamb.yml"
+    shell:
+        """
+        for cluster_file in {params.cluster_results_dir}/clusters_k*_p*.tsv; do
+            k_p=$(basename "$cluster_file" .tsv | sed 's/clusters_//')
+            output_dir={output.dirs}/$k_p
+            log_file={log.log_file}_$k_p.log
+
+            mkdir -p "$output_dir"
+
+            python {SRC_DIR}/create_fasta.py {input.catalogue} "$cluster_file" {params.minsize_bins} "$output_dir" \
+            --log "$log_file"
+        done
+        """
+
+rule checkm2_val: 
+    input:
+        fasta_bins=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_validation")
+    output:
+        output=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation"))
+    conda:
+        "envs/checkm2.yml"
+    threads:
+        128
+    shell:
+        """
+        if [ ! -d "{OUTDIR_MODEL_RESULTS}/checkm2_database" ]; then
+            checkm2 database --download --path {OUTDIR_MODEL_RESULTS}/checkm2_database
+        fi
+
+        for bin_dir in {input.fasta_bins}/*; do
+            k_p=$(basename "$bin_dir")
+            output_subdir={output.output}/$k_p
+            
+            mkdir -p "$output_subdir"
+            
+            echo "FOP FLOOP: Processing $k_p with CheckM2..."
+            checkm2 predict --threads {threads} \
+                            --input "$bin_dir" \
+                            --output-directory "$output_subdir" \
+                            --database_path {OUTDIR_MODEL_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
+        done
+        """
+
+rule parse_checkm2_val:
+    input:
+        checkm2_reports=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation"),
+        val_count=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation")
+    output:
+        path=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results"))
+    log:
+        log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "checkm2_validation.log")
+    conda:
+        os.path.join(BINNING_DIR, "envs/binning.yml")
+    shell:
+        """
+        mkdir -p {output.path}
+        n_val=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["n_val"])' "{input.val_count}/n_total_val_test.json")
+        python {SRC_DIR}/parse_checkm2_val.py -i {input.checkm2_reports} -o {output.path} -n $n_val -l {log.log_file}
+        """
+#-end val
+
+#-start test
+rule other_model_test:
+    input:  
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        best_kp_path=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results")
+    output:
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "test"))
+    log:
+        os.path.join(LOGS, DATASET, "{MODEL}_test_binning.log")
+    conda:
+        os.path.join(BINNING_DIR, "envs/binning.yml")
+    shell:
+        """
+        best_combination_file="{input.best_kp_path}/best_combination.json"
+        best_k=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_k"])' $best_combination_file)
+        best_p=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_p"])' $best_combination_file)
+
+        python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
+        -b {BATCH_SIZES} -k $best_k -p $best_p -s {output.dirs} -l {log} -m test
+        """
+
+rule create_fasta_bins_other_model_test:
+    input:
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "test")
+    output:
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{MODEL}")),
+    log:
+        log_file=os.path.join(LOGS, DATASET, "{MODEL}_test_bin_postprocessing.log")
+    params:
+        minsize_bins = MINSIZE_BINS,
+        clusters_filtered = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "test", "clusters_filtered.tsv")
+    conda: 
+        "envs/vamb.yml"
+    shell:
+        """
+        python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results}/clusters.tsv {params.minsize_bins} {output.dirs} \
+        --log {log.log_file} --outtsv {params.clusters_filtered}
+        """
+
+rule checkm2:
+    input:
+        fasta_bins=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{MODEL}")
+    output:
+        output=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{MODEL}_results"))
+    conda:
+        "envs/checkm2.yml"
+    threads:
+        128
+    shell:
+        """
+        if [ ! -d "{OUTDIR_MODEL_RESULTS}/checkm2_database" ]; then
+            checkm2 database --download --path {OUTDIR_MODEL_RESULTS}/checkm2_database
+        fi
+            checkm2 predict --threads {threads} --input {input.fasta_bins} --output-directory {output.output} \
+            --database_path {OUTDIR_MODEL_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
+        """
+#Binning---------------------------------------------------------------------------------------------
 
 
 

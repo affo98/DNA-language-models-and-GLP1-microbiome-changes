@@ -198,8 +198,6 @@ rule other_model_val:
         """
 
 
-
-
 rule create_fasta_bins_other_model_val:
     input:
         catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
