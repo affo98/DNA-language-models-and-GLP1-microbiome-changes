@@ -23,7 +23,6 @@ with open(os.path.join(BINNING_DIR, "models.yml"), "r") as f:
 with open(os.path.join(NGS_DIR, "config/phenotype_studies.yaml"), "r") as f:
     ngs_datasets = yaml.safe_load(f)
 
-
 ALL_DATASETS_CAMI2 = [d["name"] for d in datasets_model_config["datasets"]]
 ALL_DATASETS_NGS = [d["name"] for d in ngs_datasets["studies"]]
 ALL_DATASETS = ALL_DATASETS_CAMI2 + ALL_DATASETS_NGS
@@ -181,7 +180,7 @@ rule all:
     input: input_files
 
 
-ruleorder: other_model_val > create_fasta_bins_other_model_val > checkm2_val > parse_checkm2_val > other_model_test > create_fasta_bins_other_model_test > process_metahit > concatenate
+#ruleorder: other_model_val > create_fasta_bins_other_model_val > checkm2_val > parse_checkm2_val > other_model_test > create_fasta_bins_other_model_test > process_metahit > concatenate
 
 
 
