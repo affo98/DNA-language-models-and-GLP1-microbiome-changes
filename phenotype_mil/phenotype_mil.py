@@ -11,6 +11,8 @@ from src.knn_model import KNNModel
 
 from src.eval import append_eval_metrics
 
+
+
 DISTANCE_METRIC_BAG = 'cosine'
 
 #params knn
@@ -19,10 +21,11 @@ KNN_K = 5
 
 def main(args, log):
     
-    sample_ids, labels = read_sample_labels(args.sample_labels_path, split_train_test=False, log)
+    sample_ids, labels = read_sample_labels(args.sample_labels_path, log, split_train_test=False)
     cluster_catalogue = get_cluster_catalogue(args.input_path, args.output_path, log)
 
-    abundances = get_abundances(args.input_path, args.output_path, log)
+    #read abundances that are ade in snakemake rule, maybe
+    #abundances = get_abundances(args.input_path, args.output_path, log)
     #assert abundances is same as sample ids and labels
     
     eval_metrics = {'metrics': []}
@@ -65,7 +68,7 @@ def add_arguments() -> ArgumentParser:
         help="Name of the model to use for embedding generation",
     )
     parser.add_argument(
-        "--dataset",
+        "--dataset_name",
         "-d",
         help="Name of the dataset",
     )
@@ -75,9 +78,14 @@ def add_arguments() -> ArgumentParser:
         help="Path to the input directory contining cluster results",
     )
     parser.add_argument(
-        "-sample_labels_path",
+        "--sample_labels_path",
         "-s",
         help="Path to the sample labels file",
+    )
+    parser.add_argument(
+        "--abundances_path",
+        "-a",
+        help="Path to the abundances file",
     )
     parser.add_argument(
         "--output_path",
@@ -90,7 +98,7 @@ def add_arguments() -> ArgumentParser:
         help="Path to save logfile",
     )
     parser.add_argument(
-        "--mil_method",
+        "--mil_methods",
         "-m",
         args="+",
         choices=["knn", "classifier", "graph"],

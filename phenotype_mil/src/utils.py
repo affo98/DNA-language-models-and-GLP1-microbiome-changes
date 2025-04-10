@@ -54,7 +54,7 @@ def read_clusters(clusters_path: str) -> dict[str, set[str]]:
 
 
 def read_sample_labels(
-    sample_labels_path: str, split_train_test: bool, log,
+    sample_labels_path: str, log:Logger, split_train_test: bool
 ) -> tuple[list[str], list[str]]:
     sample_ids = []
     labels = []

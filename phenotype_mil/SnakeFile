@@ -7,6 +7,7 @@ CAMI2_DIR = os.path.join(os.getcwd(), "cami2_benchmark")
 BINNING_DIR = os.path.join(os.getcwd(), "binning")
 NGS_DIR = os.path.join(os.getcwd(), "ngs_pipeline")
 SRC_DIR = os.path.join(os.getcwd(), "phenotype_mil", "src")
+SRC_DIR_CAMI2 = os.path.join(os.getcwd(), "cami2_benchmark", "src")
 LOGS = os.path.join(os.getcwd(), "phenotype_mil", "logs")
 OUTDIR_BINNING_RESULTS = os.path.join(os.getcwd(), "phenotype_mil", "binning_results")
 OUTDIR_MIL_RESULTS = os.path.join(os.getcwd(), "phenotype_mil", "mil_results")
@@ -39,7 +40,14 @@ if MODEL in models_config.keys():
     BATCH_SIZES = models_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnabert2', 'dnabert2random'] else 0
 
 
+MIL_METHODS = config.get("MIL_METHODS", [])
+if isinstance(MIL_METHODS, str):
+    MIL_METHODS = [MIL_METHODS]
+assert isinstance(MIL_METHODS, list), "MIL_METHODS must be a list of method names"
+
+
 PROCESSED_DATA_DIR = os.path.join(NGS_DIR, f"{DATASET}_{DATASET_ID}")
+SAMPLE_LABELS_FILE = os.path.join(NGS_DIR, "raw_data", "sample_labels", f"{DATASET}_{DATASET_ID}_sample_labels.txt")
 
 
 #processing flow of snakemake 
@@ -66,6 +74,7 @@ print(f"  - MinSize Bins:             {MINSIZE_BINS}")
 print(f"  - MinSize Contigs:          {MINSIZE_CONTIGS}")
 print(f"  - No model run:             {config_nomodelrun}")
 print(f"  - KNN params:               K:{KNN_K}, P:{KNN_P}")
+print(f"  - MIL Method:               {MIL_METHODS}")
 
 
 
@@ -157,7 +166,7 @@ rule create_fasta_bins_other_model_val:
 
             mkdir -p "$output_dir"
 
-            python {SRC_DIR}/create_fasta.py {input.catalogue} "$cluster_file" {params.minsize_bins} "$output_dir" \
+            python {SRC_DIR_CAMI2}/create_fasta.py {input.catalogue} "$cluster_file" {params.minsize_bins} "$output_dir" \
             --log "$log_file"
         done
         """
@@ -205,7 +214,7 @@ rule parse_checkm2_val:
         """
         mkdir -p {output.path}
         n_val=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["n_val"])' "{input.val_count}/n_total_val_test.json")
-        python {SRC_DIR}/parse_checkm2_val.py -i {input.checkm2_reports} -o {output.path} -n $n_val -l {log.log_file}
+        python {SRC_DIR_CAMI2}/parse_checkm2_val.py -i {input.checkm2_reports} -o {output.path} -n $n_val -l {log.log_file}
         """
 #-end val
 
@@ -245,7 +254,7 @@ rule create_fasta_bins_other_model_test:
         os.path.join(CAMI2_DIR, "envs/vamb.yml")
     shell:
         """
-        python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results}/clusters.tsv {params.minsize_bins} {output.dirs} \
+        python {SRC_DIR_CAMI2}/create_fasta.py {input.catalogue} {input.cluster_results}/clusters.tsv {params.minsize_bins} {output.dirs} \
         --log {log.log_file} --outtsv {params.clusters_filtered}
         """
 
@@ -267,6 +276,45 @@ rule checkm2:
             --database_path {OUTDIR_BINNING_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
         """
 #Binning---------------------------------------------------------------------------------------------
+
+
+
+
+rule process_abundances:
+    ...
+
+
+
+rule phenotype_mil:
+    input:
+        cluster_dir = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test"),
+        sample_labels = SAMPLE_LABELS_FILE
+        #abundance = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "abundance.tsv")
+    output:
+        result_dir = directory(os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_results"),
+    log:
+        os.path.join(LOGS, DATASET, "{MODEL}_mil.log"),
+    conda:
+        "envs/phenotype_mil.yml",
+    shell:
+        """
+        mkdir -p {output.result_dir}
+        python phenotype_mil/mil_run.py \
+            --model_name {MODEL} \
+            --dataset_name {DATASET_NAME} \
+            --input_path {input.cluster_dir} \
+            --sample_labels_path {input.sample_labels} \
+            --abundance_path {input.abundance} \
+            --output_path {output.result_dir} \
+            --log {log} \
+            --mil_methods {MIL_METHODS} \
+        """
+
+
+
+
+
+
 
 
 
