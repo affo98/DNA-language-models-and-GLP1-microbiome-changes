@@ -99,8 +99,7 @@ elif MODEL in ['dna2vec'] and not config_nomodelrun:
 
 elif MODEL in ['dnaberts'] and not config_nomodelrun:
     input_files += [
-        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "dnaberts_output", "checkm2_validation_results")
-        #os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "dnaberts_output", "test"),
+        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "dnaberts_output", "test"),
         #os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "dnaberts"),
     ]
 
@@ -219,25 +218,25 @@ rule parse_checkm2_val:
 # #-end val
 
 # #-start test
-# rule other_model_test:
-#     input:  
-#         catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
-#         best_kp_path=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results")
-#     output:
-#         dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test"))
-#     log:
-#         os.path.join(LOGS, DATASET, "{MODEL}_test_binning.log")
-#     conda:
-#         os.path.join(BINNING_DIR, "envs/binning.yml")
-#     shell:
-#         """
-#         best_combination_file="{input.best_kp_path}/best_combination.json"
-#         best_k=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_k"])' $best_combination_file)
-#         best_p=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_p"])' $best_combination_file)
+rule other_model_test:
+    input:  
+        catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
+        best_kp_path=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results")
+    output:
+        dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test"))
+    log:
+        os.path.join(LOGS, DATASET, "{MODEL}_test_binning.log")
+    conda:
+        os.path.join(BINNING_DIR, "envs/binning.yml")
+    shell:
+        """
+        best_combination_file="{input.best_kp_path}/best_combination.json"
+        best_k=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_k"])' $best_combination_file)
+        best_p=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_p"])' $best_combination_file)
 
-#         python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
-#         -b {BATCH_SIZES} -k $best_k -p $best_p -s {output.dirs} -l {log} -m test
-#         """
+        python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
+        -b {BATCH_SIZES} -k $best_k -p $best_p -s {output.dirs} -l {log} -m test
+        """
 
 # rule create_fasta_bins_other_model_test:
 #     input:
