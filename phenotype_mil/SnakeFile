@@ -100,7 +100,7 @@ elif MODEL in ['dna2vec'] and not config_nomodelrun:
 elif MODEL in ['dnaberts'] and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "dnaberts_output", "test"),
-        #os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "dnaberts"),
+        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "dnaberts"),
     ]
 
 elif MODEL in ['dnabert2'] and not config_nomodelrun:
@@ -238,24 +238,24 @@ rule other_model_test:
         -b {BATCH_SIZES} -k $best_k -p $best_p -s {output.dirs} -l {log} -m test
         """
 
-# rule create_fasta_bins_other_model_test:
-#     input:
-#         catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
-#         cluster_results=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test")
-#     output:
-#         dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "{MODEL}")),
-#     log:
-#         log_file=os.path.join(LOGS, DATASET, "{MODEL}_test_bin_postprocessing.log")
-#     params:
-#         minsize_bins = MINSIZE_BINS,
-#         clusters_filtered = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "clusters_filtered.tsv")
-#     conda: 
-#         os.path.join(CAMI2_DIR, "envs/vamb.yml")
-#     shell:
-#         """
-#         python {SRC_DIR_CAMI2}/create_fasta.py {input.catalogue} {input.cluster_results}/clusters.tsv {params.minsize_bins} {output.dirs} \
-#         --log {log.log_file} --outtsv {params.clusters_filtered}
-#         """
+rule create_fasta_bins_other_model_test:
+    input:
+        catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
+        cluster_results=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test")
+    output:
+        dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "{MODEL}")),
+    log:
+        log_file=os.path.join(LOGS, DATASET, "{MODEL}_test_bin_postprocessing.log")
+    params:
+        minsize_bins = MINSIZE_BINS,
+        clusters_filtered = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "clusters_filtered.tsv")
+    conda: 
+        os.path.join(CAMI2_DIR, "envs/vamb.yml")
+    shell:
+        """
+        python {SRC_DIR_CAMI2}/create_fasta.py {input.catalogue} {input.cluster_results}/clusters.tsv {params.minsize_bins} {output.dirs} \
+        --log {log.log_file} --outtsv {params.clusters_filtered}
+        """
 
 # rule checkm2:
 #     input:
