@@ -3,37 +3,37 @@
 
 rule all:
     input:
-        "checkm2_results"
+        "hdbscan_results.txt"
 
-rule cluster:
-    input:
-        embeddings = "dnaberts.npy",
-        contig_catalogue = "catalogue.fna.gz"
-    output:
-        "clusters.tsv"
-    threads:
-        48
-    resources:
-        mem_gb=200
-    shell:
-        """
-        python -m cuml.accel cluster.py {input.embeddings} {input.contig_catalogue} {threads}
-        """
+# rule cluster:
+#     input:
+#         embeddings = "dnaberts.npy",
+#         contig_catalogue = "catalogue.fna.gz"
+#     output:
+#         "clusters.tsv"
+#     threads:
+#         48
+#     resources:
+#         mem_gb=36
+#     shell:
+#         """
+#         python -m cuml.accel cluster.py {input.embeddings} {input.contig_catalogue} {threads}
+#         """
 
 
-rule write_fasta:
-    input:
-        "clusters.tsv"
-    output:
-       directory("tmp")
-    params:
-        contig_catalogue = "catalogue.fna.gz"
-    shell:
-        """
-        mkdir -p tmp
+# rule write_fasta:
+#     input:
+#         "clusters.tsv"
+#     output:
+#        directory("tmp")
+#     params:
+#         contig_catalogue = "catalogue.fna.gz"
+#     shell:
+#         """
+#         mkdir -p tmp
 
-        python create_fasta.py {params.contig_catalogue} clusters.tsv 250000 tmp --log fasta_logs
-        """
+#         python create_fasta.py {params.contig_catalogue} clusters.tsv 250000 tmp --log fasta_logs
+#         """
 
 
 rule checkm2:
