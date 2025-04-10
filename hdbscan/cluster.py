@@ -22,18 +22,19 @@ def cluster(path_to_embeds: str, threads: int) -> np.array:
                 metric="cosine",
                 n_jobs=threads,
             )
+            start = time.time()
+            fmt = time.gmtime(start)
+            current_time = time.strftime("%D %T", fmt)
+            f.write(
+                f"STARTED AT {current_time} with minimum cluster size {200} and cosine \n"
+            )
+            hdb.fit(dnabert_metahit_embeds)
+
+            end = time.time()
+            elapsed_time = end - start
+            cluster_labels = hdb.labels_
         except MemoryError:
             sys.exit(f"MEMORY: {MemoryError}")
-        start = time.time()
-        fmt = time.gmtime(start)
-        current_time = time.strftime("%D %T", fmt)
-        f.write(
-            f"STARTED AT {current_time} with minimum cluster size {200} and cosine \n"
-        )
-        hdb.fit(dnabert_metahit_embeds)
-        end = time.time()
-        elapsed_time = end - start
-        cluster_labels = hdb.labels_
 
         num_clusters = len(np.unique(cluster_labels).tolist())
         num_noicy_contigs = (cluster_labels == -1).sum()
