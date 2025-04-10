@@ -20,5 +20,3 @@ dependencies:
       - matplotlib
       - seaborn
       - pandas
-      - scikit-learn==0.21.3
-      - scikit-hubness
