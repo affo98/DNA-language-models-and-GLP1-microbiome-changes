@@ -12,14 +12,18 @@ import time
 
 def cluster(path_to_embeds: str, threads: int) -> np.array:
     dnabert_metahit_embeds = np.load(path_to_embeds)
-
+    print("LOADED EMBDS", flush=True)
     with open("hdbscan_log.txt", "w") as f:
-        hdb = HDBSCAN(
-            min_cluster_size=20,
-            min_samples=5,
-            metric="cosine",
-            n_jobs=threads,
-        )
+        print("RUNNING HDBSCAN", flush=True)
+        try:
+            hdb = HDBSCAN(
+                min_cluster_size=20,
+                min_samples=5,
+                metric="cosine",
+                n_jobs=threads,
+            )
+        except MemoryError:
+            sys.exit(f"MEMORY: {MemoryError}")
         start = time.time()
         fmt = time.gmtime(start)
         current_time = time.strftime("%D %T", fmt)
