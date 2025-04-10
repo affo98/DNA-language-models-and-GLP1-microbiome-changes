@@ -199,9 +199,9 @@ rule all:
 
 rule other_model_val:
     input:
-        catalogue=os.path.join(config["OUTDIR_MODEL_PROCESSED"], config["DATASET"], "catalogue.fna.gz")
+        catalogue=os.path.join(config["OUTDIR_PROCESSED"], config["DATASET"], "catalogue.fna.gz")
     output:
-        dirs=directory(os.path.join(config["OUTDIR_MODEL_PROCESSED"], config["DATASET"], config["MODEL"]+"_output", "validation"))
+        dirs=directory(os.path.join(config["OUTDIR_PROCESSED"], config["DATASET"], config["MODEL"]+"_output", "validation"))
     log:
         os.path.join(config["LOGS"], config["DATASET"], config["MODEL"]+"_val", config["MODEL"]+"_val_binning.log")
     conda:
@@ -210,7 +210,7 @@ rule other_model_val:
         """
         mkdir -p {OUTDIR_MODEL_RESULTS}/{config["DATASET"]}
         pip uninstall -y triton
-        python {config["OUTDIR_MODEL_PROCESSED"]}/binning.py -c {input.catalogue} -mn {config["MODEL"]} -mp {config["MODEL_PATH"]} \
+        python {config["OUTDIR_PROCESSED"]}/binning.py -c {input.catalogue} -mn {config["MODEL"]} -mp {config["MODEL_PATH"]} \
         -b {config["BATCH_SIZES"]} -k {congif["KNN_K"]} -p {config["KNN_P"]} -s {output.dirs} -l {log} -m val
         """
 
