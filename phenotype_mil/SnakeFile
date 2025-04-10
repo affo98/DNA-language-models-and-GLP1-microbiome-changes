@@ -94,42 +94,42 @@ input_files = []
 #OTHER MODELS
 if MODEL in ['tnf'] and not config_naomodelrun:
     input_files += [
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "test"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "tnf"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET_NAME, "tnf_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET_NAME, "fasta_bins", "tnf"),
     ]
 elif MODEL in ['tnfkernel'] and not config_nomodelrun:
     input_files += [
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnfkernel_output", "test"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "tnfkernel"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET_NAME, "tnfkernel_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET_NAME, "fasta_bins", "tnfkernel"),
     ]
 
 elif MODEL in ['dna2vec'] and not config_nomodelrun:
     input_files += [
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dna2vec_output", "test"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dna2vec"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET_NAME, "dna2vec_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET_NAME, "fasta_bins", "dna2vec"),
     ]
 
 
 elif MODEL in ['dnaberts'] and not config_nomodelrun:
     input_files += [
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output", "test"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberts"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET_NAME, "dnaberts_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET_NAME, "fasta_bins", "dnaberts"),
     ]
 
 elif MODEL in ['dnabert2'] and not config_nomodelrun:
     input_files += [
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnabert2_output", "test"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnabert2"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET_NAME, "dnabert2_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET_NAME, "fasta_bins", "dnabert2"),
     ]
 elif MODEL in ['dnabert2random'] and not config_nomodelrun:
     input_files += [
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnabert2random_output", "test"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnabert2random"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET_NAME, "dnabert2random_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET_NAME, "fasta_bins", "dnabert2random"),
     ]
 
 
 if config_checkm2:
-    input_files += [os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", f"{MODEL}_results")]
+    input_files += [os.path.join(OUTDIR_MODEL_RESULTS, DATASET_NAME, "checkm2", f"{MODEL}_results")]
 
 
 rule all:
