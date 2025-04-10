@@ -73,21 +73,7 @@ module other_workflow:
     snakefile: os.path.join(CAMI2_DIR, "Snakefile")
     config: config
 
-use rule other_model_val from other_workflow as other_*
-
-
-#include: os.path.join(CAMI2_DIR, "Snakefile")
-
-# module binning_checkm2:
-#     snakefile: os.path.join(CAMI2_DIR, "Snakefile")
-
-# use rule binning_checkm2.other_model_val
-# use rule binning_checkm2.create_fasta_bins_other_model_val
-# use rule binning_checkm2.checkm2_val
-# use rule binning_checkm2.parse_checkm2_val
-# use rule binning_checkm2.other_model_test
-# use rule binning_checkm2.create_fasta_bins_other_model_test
-# use rule binning_checkm2.checkm2
+use rule other_model_val, create_fasta_bins_other_model_val, checkm2_val, parse_checkm2_val, other_model_test, create_fasta_bins_other_model_test, checkm2 from other_workflow as *
 
 input_files = []
 
