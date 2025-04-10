@@ -2,7 +2,7 @@ from skhubness import Hubness
 import numpy as np
 
 
-if name == "main":
+if __name__ == "__main__":
 
     X = np.load("dnaberts.npz")
 
