@@ -16,13 +16,10 @@ OUTDIR_MIL_RESULTS = os.path.join(os.getcwd(), "phenotype_mil", "mil_results")
 #DATASET, sample and model config
 with open(os.path.join(NGS_DIR, "config/phenotype_studies.yaml"), "r") as f:
     datasets_model_config = yaml.safe_load(f)
-print(datasets_model_config)
 
 with open(os.path.join(BINNING_DIR, "models.yml"), "r") as f:
     models_config = yaml.safe_load(f)
 print(models_config)
-
-
 
 
 ALL_DATASETS_NAMES = [d["name"] for d in datasets_model_config["studies"]]
@@ -31,15 +28,12 @@ ALL_DATASETS_IDS = [d["id"] for d in datasets_model_config["studies"]]
 DATASET_NAME = config.get("DATASET", None)
 assert DATASET_NAME in ALL_DATASETS_NAMES, f"Error: Selected dataset '{DATASET_NAME}' is not in the available DATASET: {ALL_DATASETS_NAMES}"
 
-DATASET_ID = [d["id"] for d in datasets_model_config["studies"] if d["name"] == DATASET_NAME]
+DATASET_ID = [d["id"] for d in datasets_model_config["studies"] if d["name"] == DATASET_NAME][0]
 print(DATASET_ID, DATASET_NAME)
 
 
 
-
-
-
-ALL_MODELS  = [d["name"] for d in datasets_model_config["models"]]
+ALL_MODELS  = [d["name"] for d in models_config["models"]]
 MODEL = config.get("MODEL", None)
 assert MODEL==None or MODEL in ALL_MODELS, f"Error: Selected model '{MODEL}' is not in the available DATASET: {ALL_MODELS}"
 
