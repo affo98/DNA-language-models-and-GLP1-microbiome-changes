@@ -33,7 +33,8 @@ print(DATASET_ID, DATASET_NAME)
 
 
 
-ALL_MODELS  = [d["name"] for d in models_config["models"]]
+ALL_MODELS  = models_config.keys()
+print(ALL_MODELS)
 MODEL = config.get("MODEL", None)
 assert MODEL==None or MODEL in ALL_MODELS, f"Error: Selected model '{MODEL}' is not in the available DATASET: {ALL_MODELS}"
 
