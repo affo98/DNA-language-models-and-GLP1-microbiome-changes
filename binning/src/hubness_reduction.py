@@ -15,10 +15,10 @@ if __name__ == "__main__":
     k_skew = hub.score()
     print(f"Skewness = {k_skew:.3f}")
 
-    hub_mp = Hubness(k=10, metric="cosine", hubness="mutual_proximity", verbose=2)
-    hub_mp.fit(X)
-    k_skew_mp = hub_mp.score()
-    print(
-        f"Skewness after MP: {k_skew_mp:.3f} "
-        f"(reduction of {k_skew - k_skew_mp:.3f})"
-    )
+    # hub_mp = Hubness(k=10, metric="cosine", hubness="mutual_proximity", verbose=2)
+    # hub_mp.fit(X)
+    # k_skew_mp = hub_mp.score()
+    # print(
+    #     f"Skewness after MP: {k_skew_mp:.3f} "
+    #     f"(reduction of {k_skew - k_skew_mp:.3f})"
+    # )
