@@ -7,6 +7,7 @@ import numpy as np
 if __name__ == "__main__":
 
     X = np.load("dnaberts.npz")
+    X = X["embeddings"]
 
     hub = Hubness(k=10, metric="cosine", verbose=2, return_value="all")
 
