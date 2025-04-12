@@ -1,21 +1,29 @@
 from skhubness.analysis import Hubness
 from skhubness.reduction import MutualProximity
 import numpy as np
-
+from sklearn.metrics.pairwise import cosine_similarity
 
 # pip install https://github.com/VarIr/scikit-hubness/archive/main.tar.gz
 
 
 # if __name__ == "__main__":
 
-#     X = np.load("dnaberts.npz")
-#     X = X["embeddings"]
+    X = np.load("dnaberts.npz")
+    X = X["embeddings"]
+    
+    X = X[:10000]
+    X = cosine_similarity(X)
+    
+    negative_indices = np.where(X < 0)
+    print(negative_indices)
+    
+    
 
-#     hub = Hubness(k=10, metric="cosine", verbose=2, return_value="all")
-#     hub.fit(X)
-#     hubness_metrics = hub.score()
-#     print("Robinhood Index (Before MP):", hubness_metrics.get("robinhood"))
-#     print("k-Skewness (Before MP):", hubness_metrics.get("k_skewness"))
+    hub = Hubness(k=10, metric="cosine", verbose=2, return_value="all")
+    hub.fit(X)
+    hubness_metrics = hub.score()
+    print("Robinhood Index (Before MP):", hubness_metrics.get("robinhood"))
+    print("k-Skewness (Before MP):", hubness_metrics.get("k_skewness"))
 
 
 # hub_mp = Hubness(k=10, metric="cosine", hubness="mutual_proximity", verbose=2)
@@ -27,87 +35,3 @@ import numpy as np
 # )
 
 
-from skhubness.analysis import Hubness
-from skhubness.reduction import MutualProximity
-from sklearn.neighbors import NearestNeighbors
-import numpy as np
-from scipy.sparse import csr_matrix
-
-
-def calculate_robinhood(k_occurrence):
-    """Calculates the Robin Hood index from k-occurrence counts."""
-    n = len(k_occurrence)
-    total_occurrences = sum(k_occurrence)
-    mean_occurrence = total_occurrences / n
-    redistribution = sum(max(0, count - mean_occurrence) for count in k_occurrence)
-    robinhood_index = (
-        redistribution / total_occurrences if total_occurrences > 0 else 0.0
-    )
-    return robinhood_index
-
-
-def calculate_k_skewness(k_occurrence):
-    """Calculates the k-skewness from k-occurrence counts."""
-    mean_k = np.mean(k_occurrence)
-    std_k = np.std(k_occurrence)
-    if std_k == 0:
-        return 0.0
-    return np.mean(((k_occurrence - mean_k) / std_k) ** 3)
-
-
-if __name__ == "__main__":
-
-    X = np.load("dnaberts.npz")
-    X = X["embeddings"]
-
-    k_neighbors = 10
-    metric = "cosine"
-
-    # Calculate hubness before MP
-    hub_before = Hubness(k=k_neighbors, metric=metric, verbose=0, return_value="all")
-    hub_before.fit(X)
-    hubness_before = hub_before.score()
-    print("--- Hubness Before Mutual Proximity ---")
-    print("Robinhood Index:", hubness_before.get("robinhood"))
-    print("k-Skewness:", hubness_before.get("k_skewness"))
-    print("-" * 40)
-
-    # Find k-nearest neighbors to create the sparse graph
-    nn = NearestNeighbors(n_neighbors=k_neighbors, metric=metric)
-    nn.fit(X)
-    _, indices = nn.kneighbors(X)
-    indptr = np.arange(X.shape[0] + 1)
-    data = np.ones(X.shape[0] * k_neighbors, dtype=int)
-    knn_graph = csr_matrix(
-        (data, indices.ravel(), indptr), shape=(X.shape[0], X.shape[0])
-    )
-
-    # Reduce hubness using Mutual Proximity
-    mp = MutualProximity(k=k_neighbors, method="standard")
-    mp.fit(knn_graph)  # Fit with the sparse k-neighbors graph
-    X_reduced_dist = mp.transform(X)
-
-    # Find k-Nearest Neighbors based on reduced distances
-    n_samples = X.shape[0]
-    neighbor_indices_after_mp = np.zeros((n_samples, k_neighbors), dtype=int)
-    for i in range(n_samples):
-        distances_i = X_reduced_dist[i]
-        nearest_indices = np.argsort(distances_i)[:k_neighbors]
-        neighbor_indices_after_mp[i] = nearest_indices
-
-    # Calculate k-occurrence from the neighbor indices
-    k_occurrence_after_mp = np.zeros(n_samples, dtype=int)
-    for neighbors in neighbor_indices_after_mp:
-        for neighbor_idx in neighbors:
-            k_occurrence_after_mp[neighbor_idx] += 1
-
-    # Calculate Robinhood and k-Skewness from k-occurrence
-    robinhood_after_mp = calculate_robinhood(k_occurrence_after_mp)
-    k_skewness_after_mp = calculate_k_skewness(k_occurrence_after_mp)
-
-    print("\n--- Hubness After Standard Mutual Proximity (Manual Calculation) ---")
-    print("Robinhood Index:", robinhood_after_mp)
-    print("k-Skewness:", k_skewness_after_mp)
-    print("-" * 40)
-
-    # You can repeat this for other MP methods if needed
