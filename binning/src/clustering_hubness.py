@@ -69,7 +69,7 @@ class KMediod:
         from skhubness.utils.kneighbors_graph import check_kneighbors_graph
         from skhubness.reduction import MutualProximity
 
-        sim_matrix_input = sim_matrix.copy()
+        sim_matrix_input = sim_matrix.clone()
         if len(sim_matrix_input.shape) == 1:
             sim_matrix = sim_matrix.unsqueeze(0)
 
