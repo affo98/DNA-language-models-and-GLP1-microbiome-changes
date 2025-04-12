@@ -69,10 +69,6 @@ class KMediod:
         from skhubness.utils.kneighbors_graph import check_kneighbors_graph
         from skhubness.reduction import MutualProximity
 
-        # sim_matrix_input = sim_matrix.clone()
-        # if len(sim_matrix_input.shape) == 1:
-        #     sim_matrix = sim_matrix.unsqueeze(0)
-
         distance_matrix = 1 - sim_matrix.cpu().numpy()  # convert to dist.
         n_samples = distance_matrix.shape[0]
 
@@ -98,9 +94,6 @@ class KMediod:
 
         sim_matrix_mp = 1 - distance_matrix_mp  # convert to sim.
         sim_matrix_mp = torch.tensor(sim_matrix_mp, dtype=torch.float64)
-
-        # if len(sim_matrix_input.shape) == 1:
-        #     return sim_matrix_mp.squeeze()
 
         return sim_matrix_mp
 
@@ -170,8 +163,13 @@ class KMediod:
                 similarities = self.apply_mp(similarities, knn_k)  # APPLY MP HERE
                 seed_similarity = similarities[-1]
 
+                print(type(seed_similarity), type(min_similarity), type(available_mask))
                 candidate_mask = (seed_similarity >= min_similarity) & available_mask
                 candidates = torch.where(candidate_mask)[0]
+
+                # similarities = torch.mv(self.embeddings, seed)
+                # candidate_mask = (similarities >= min_similarity) & available_mask
+                # candidates = torch.where(candidate_mask)[0]
 
                 if len(candidates) == 0:
                     break
