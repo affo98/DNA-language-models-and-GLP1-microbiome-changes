@@ -168,7 +168,7 @@ class KMediod:
                 candidate_mask = (seed_similarity >= min_similarity) & available_mask
                 candidates = torch.where(candidate_mask)[0]
 
-                if len(candidates) == 0:
+                if len(candidates) < 1:  # CHANGED
                     break
 
                 seed = torch.mean(self.embeddings[candidates], dim=0)  # update seed
@@ -185,7 +185,9 @@ class KMediod:
 
                 cluster_sims = torch.mm(self.embeddings[candidates], block_embs.T)
                 print("ASDHASDJKHASJKHASJKHJADSK", cluster_sims.shape)
-                cluster_sims = self.apply_mp(cluster_sims, knn_k)  # APPLY MP HERE
+                cluster_sims = self.apply_mp(
+                    cluster_sims, candidates.shape - 1
+                )  # APPLY MP HERE
                 cluster_sims = torch.where(
                     cluster_sims >= min_similarity, cluster_sims, 0.0
                 )
