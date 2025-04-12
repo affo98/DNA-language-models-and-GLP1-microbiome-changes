@@ -6,18 +6,16 @@ from sklearn.metrics.pairwise import cosine_similarity
 # pip install https://github.com/VarIr/scikit-hubness/archive/main.tar.gz
 
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
 
     X = np.load("dnaberts.npz")
     X = X["embeddings"]
-    
+
     X = X[:10000]
     X = cosine_similarity(X)
-    
+
     negative_indices = np.where(X < 0)
     print(negative_indices)
-    
-    
 
     hub = Hubness(k=10, metric="cosine", verbose=2, return_value="all")
     hub.fit(X)
@@ -33,5 +31,3 @@ from sklearn.metrics.pairwise import cosine_similarity
 #     f"Skewness after MP: {k_skew_mp:.3f} "
 #     f"(reduction of {k_skew - k_skew_mp:.3f})"
 # )
-
-
