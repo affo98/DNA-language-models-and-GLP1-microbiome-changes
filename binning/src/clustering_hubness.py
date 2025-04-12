@@ -161,11 +161,11 @@ class KMediod:
 
                 similarities = torch.mm(sampled_embeddings, self.embeddings.T)
                 print(
-                    f"seed_similarity device: {similarities.device}, type: {type(seed_similarity)}"
+                    f"seed_similarity device: {similarities.device}, type: {type(similarities)}"
                 )
                 similarities = self.apply_mp(similarities, knn_k)  # APPLY MP HERE
                 print(
-                    f"seed_similarity device: {similarities.device}, type: {type(seed_similarity)}"
+                    f"seed_similarity device: {similarities.device}, type: {type(similarities)}"
                 )
                 seed_similarity = similarities[-1]
 
@@ -180,10 +180,6 @@ class KMediod:
                 )
                 candidate_mask = (seed_similarity >= min_similarity) & available_mask
                 candidates = torch.where(candidate_mask)[0]
-
-                # similarities = torch.mv(self.embeddings, seed)
-                # candidate_mask = (similarities >= min_similarity) & available_mask
-                # candidates = torch.where(candidate_mask)[0]
 
                 if len(candidates) == 0:
                     break
