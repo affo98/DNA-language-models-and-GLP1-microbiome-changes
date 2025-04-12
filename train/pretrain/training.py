@@ -96,7 +96,7 @@ class Trainer(nn.Module):
             training_state = torch.load(training_state_path)
             self.optimizer.load_state_dict(training_state['optimizer'])
             self.gstep = training_state['gstep']
-            self.current_epoch = training_state['epoch']
+            self.current_epoch = training_state['epoch']+1
             
             if self.scheduler is not None and 'scheduler' in training_state:
                 self.scheduler.load_state_dict(training_state['scheduler'])
@@ -143,7 +143,8 @@ class Trainer(nn.Module):
         
         # Load checkpoint if resuming
         if hasattr(self.args, 'resume_from') and self.args.resume_from:
-            self.load_checkpoint(self.args.resume_from)
+            checkpoint_dir = os.path.join(self.args.resPath, self.args.resume_from)
+            self.load_checkpoint(checkpoint_dir)
         
         # Skip epochs that were already completed
         start_epoch = self.current_epoch if hasattr(self, 'current_epoch') else 0
