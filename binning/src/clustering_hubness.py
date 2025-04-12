@@ -187,16 +187,12 @@ class KMediod:
 
                 n_total = self.embeddings.shape[0]
                 rng = np.random.default_rng(seed=42)
-
                 sampled_indices = rng.choice(n_total, size=n_samples, replace=False)
                 sampled_embeddings = self.embeddings[sampled_indices]
-                sampled_embeddings = torch.cat(sampled_embeddings, seed)
+                sampled_embeddings = torch.cat((sampled_embeddings, seed.unsqueeze(0)))
 
-                # then compute similarities
                 similarities = torch.mm(sampled_embeddings, self.embeddings.T)
                 similarities = self.apply_mp(similarities, knn_k)  # APPLY MP HERE
-
-                # extract seed from similarites
                 seed_similarity = similarities[-1]
 
                 candidate_mask = (seed_similarity >= min_similarity) & available_mask
