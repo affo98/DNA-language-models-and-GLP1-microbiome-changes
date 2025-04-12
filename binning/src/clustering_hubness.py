@@ -64,7 +64,7 @@ class KMediod:
         self.device = device
         self.block_size = block_size
 
-    def apply_mp(sim_matrix: torch.Tensor, n_neighbors: 10) -> torch.Tensor:
+    def apply_mp(self, sim_matrix: torch.Tensor, n_neighbors: 10) -> torch.Tensor:
         from sklearn.neighbors import kneighbors_graph
         from skhubness.utils.kneighbors_graph import check_kneighbors_graph
         from skhubness.reduction import MutualProximity
