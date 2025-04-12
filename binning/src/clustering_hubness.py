@@ -64,12 +64,11 @@ class KMediod:
         self.device = device
         self.block_size = block_size
 
-    def apply_mp(self, sim_matrix: torch.Tensor, n_neighbors: 10) -> torch.Tensor:
+    def apply_mp(self, sim_matrix: torch.Tensor, n_neighbors: int) -> torch.Tensor:
         from sklearn.neighbors import kneighbors_graph
         from skhubness.utils.kneighbors_graph import check_kneighbors_graph
         from skhubness.reduction import MutualProximity
 
-        print(type(sim_matrix))
         distance_matrix = 1 - sim_matrix.numpy()  # convert to dist.
         n_samples = distance_matrix.shape[0]
 
@@ -121,8 +120,7 @@ class KMediod:
             block_sim_matrix = torch.mm(
                 block_embeddings, self.embeddings.T
             )  # Shape: (block_size, n) - sim of block to all other data points
-            print(type(block_sim_matrix))
-            block_sim_matrix = self.apply_mp(block_sim_matrix)  # APPLY MP HERE
+            block_sim_matrix = self.apply_mp(block_sim_matrix, knn_k)  # APPLY MP HERE
 
             block_density = torch.sum(
                 torch.where(block_sim_matrix >= min_similarity, block_sim_matrix, 0.0),
