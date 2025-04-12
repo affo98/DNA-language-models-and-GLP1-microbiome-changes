@@ -6,9 +6,9 @@ import numpy as np
 
 if __name__ == "__main__":
 
-    X = np.load("dnaberts.npy")
+    X = np.load("dnaberts.npz")
 
-    hub = Hubness(k=10, metric="cosine", verbose=2)
+    hub = Hubness(k=10, metric="cosine", verbose=2, return_value="all")
 
     hub.fit(X)
     hubness_metrics = hub.score()
