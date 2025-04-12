@@ -140,7 +140,7 @@ class KMediod:
                 cluster_sims = torch.where(
                     cluster_sims >= min_similarity, cluster_sims, 0.0
                 )
-                print("ASDHASJKDHASKHDASKABSBDASADSB", cluster_sims.shape[0])
+                print("ASDHASJKDHASKHDASKABSBDASADSB", cluster_sims.shape)
 
                 density_vector[block_start:block_end] -= torch.sum(cluster_sims, dim=1)
 
