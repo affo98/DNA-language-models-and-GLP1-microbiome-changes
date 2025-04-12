@@ -152,7 +152,7 @@ class KMediod:
 
             for _ in range(self.num_steps):
                 similarities = torch.mv(self.embeddings, seed)
-                similarities = self.apply_mp(similarities)  # APPLY MP HERE
+                similarities = self.apply_mp(similarities, knn_k)  # APPLY MP HERE
                 candidate_mask = (similarities >= min_similarity) & available_mask
                 candidates = torch.where(candidate_mask)[0]
 
@@ -172,7 +172,7 @@ class KMediod:
                 block_embs = self.embeddings[block_start:block_end]
 
                 cluster_sims = torch.mm(block_embs, self.embeddings[candidates].T)
-                cluster_sims = self.apply_mp(cluster_sims)  # APPLY MP HERE
+                cluster_sims = self.apply_mp(cluster_sims, knn_k)  # APPLY MP HERE
                 cluster_sims = torch.where(
                     cluster_sims >= min_similarity, cluster_sims, 0.0
                 )
