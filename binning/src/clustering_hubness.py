@@ -69,6 +69,10 @@ class KMediod:
         from skhubness.utils.kneighbors_graph import check_kneighbors_graph
         from skhubness.reduction import MutualProximity
 
+        sim_matrix_input = sim_matrix.copy()
+        if len(sim_matrix_input.shape) == 1:
+            sim_matrix = sim_matrix.unsqueeze(0)
+
         distance_matrix = 1 - sim_matrix.cpu().numpy()  # convert to dist.
         n_samples = distance_matrix.shape[0]
 
@@ -92,10 +96,13 @@ class KMediod:
                 mp_graph[i].toarray().ravel()[neighbor_indices]
             )
 
-        sim_matrix_np = 1 - distance_matrix_mp  # convert to sim.
-        sim_matrix_np = torch.tensor(sim_matrix_np, dtype=torch.float64)
+        sim_matrix_mp = 1 - distance_matrix_mp  # convert to sim.
+        sim_matrix_mp = torch.tensor(sim_matrix_mp, dtype=torch.float64)
 
-        return sim_matrix_np
+        if len(sim_matrix_input.shape) == 1:
+            return sim_matrix_mp.squeeze()
+
+        return sim_matrix_mp
 
     def fit(self, min_similarity: float, knn_k: int, knn_p: float) -> np.array:
         """Runs the Iterative k-mediod algorithm, and saves the output predictions."""
