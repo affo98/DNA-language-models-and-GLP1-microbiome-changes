@@ -168,7 +168,7 @@ class KMediod:
                 candidate_mask = (seed_similarity >= min_similarity) & available_mask
                 candidates = torch.where(candidate_mask)[0]
 
-                if len(candidates) < 1:  # CHANGED
+                if len(candidates) == 0:
                     break
 
                 seed = torch.mean(self.embeddings[candidates], dim=0)  # update seed
@@ -183,16 +183,33 @@ class KMediod:
                 block_end = min(i + self.block_size, n_samples)
                 block_embs = self.embeddings[block_start:block_end]
 
-                cluster_sims = torch.mm(self.embeddings[candidates], block_embs.T)
-                print("ASDHASDJKHASJKHASJKHJADSK", cluster_sims.shape)
-                cluster_sims = self.apply_mp(
-                    cluster_sims, candidates.shape[0] - 1
-                )  # APPLY MP HERE
-                cluster_sims = torch.where(
-                    cluster_sims >= min_similarity, cluster_sims, 0.0
+                # add some non-candidate embeddings, required for apply_mp
+                non_candidates = torch.where(~candidate_mask)[0]
+                non_candidate_samples = min(n_samples, self.block_size)
+                rng = np.random.default_rng(seed=42)
+                sampled_indices_noncand = rng.choice(
+                    non_candidates.shape[0], size=non_candidate_samples, replace=False
+                )
+                sampled_embeddings_noncand = self.embeddings[
+                    sampled_indices_noncand
+                ].to(self.device)
+
+                cluster_sims = torch.cat(
+                    (sampled_embeddings_noncand, self.embeddings[candidates])
                 )
 
-                density_vector[block_start:block_end] -= torch.sum(cluster_sims, dim=1)
+                cluster_sims = torch.mm(self.embeddings[candidates], block_embs.T)
+                print("ASDHASDJKHASJKHASJKHJADSK", cluster_sims.shape)
+                cluster_sims = self.apply_mp(cluster_sims, knn_k)  # APPLY MP HERE
+                candidate_sims = cluster_sims[-len(candidates) :]
+                print("ASDASDAS", candidate_sims.shape)
+                candidate_sims = torch.where(
+                    candidate_sims >= min_similarity, candidate_sims, 0.0
+                )
+
+                density_vector[block_start:block_end] -= torch.sum(
+                    candidate_sims, dim=1
+                )
 
             density_vector[candidates] = -100
 
