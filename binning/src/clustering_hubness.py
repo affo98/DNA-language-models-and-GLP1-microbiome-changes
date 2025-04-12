@@ -190,9 +190,7 @@ class KMediod:
 
                 sampled_indices = rng.choice(n_total, size=n_samples, replace=False)
                 sampled_embeddings = self.embeddings[sampled_indices]
-                sampled_embeddings = torch.concat(
-                    sampled_embeddings, seed.unsqueeze(0)
-                )  # add seed
+                sampled_embeddings = torch.concat(sampled_embeddings, seed)
 
                 # then compute similarities
                 similarities = torch.mm(sampled_embeddings, self.embeddings.T)
