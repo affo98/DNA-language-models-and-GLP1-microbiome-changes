@@ -71,7 +71,6 @@ class KMediod:
 
         distance_matrix = 1 - sim_matrix.cpu().numpy()  # convert to dist.
         n_samples_mp = distance_matrix.shape[0]
-        print(n_samples_mp)
 
         # need sorted graph in this format
         knn_graph = kneighbors_graph(
@@ -88,9 +87,7 @@ class KMediod:
         # replace original distances of k neighbors with MP-distances, and keep other distances
         distance_matrix_mp = np.copy(distance_matrix)
         for i in range(n_samples_mp):
-            print(i)
             neighbor_indices = knn_graph_sorted[i].indices
-            print(neighbor_indices)
             distance_matrix_mp[i, neighbor_indices] = (
                 mp_graph[i].toarray().ravel()[neighbor_indices]
             )
@@ -187,7 +184,7 @@ class KMediod:
                 block_embs = self.embeddings[block_start:block_end]
 
                 cluster_sims = torch.mm(block_embs, self.embeddings[candidates].T)
-                print("ASDHASDJKHASJKHASJKHJADSK", cluster_sims.shape)
+                # print("ASDHASDJKHASJKHASJKHJADSK", cluster_sims.shape)
                 # cluster_sims = self.apply_mp(cluster_sims, knn_k)  # APPLY MP HERE
                 cluster_sims = torch.where(
                     cluster_sims >= min_similarity, cluster_sims, 0.0
