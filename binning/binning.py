@@ -3,9 +3,8 @@ from argparse import ArgumentParser
 
 from time import time
 
-from src.clustering import KMediod  # CHANGE
-
-# from src.clustering_hubness import KMediod
+# from src.clustering import KMediod  # CHANGE
+from src.clustering_hubness import KMediod
 from src.get_embeddings import Embedder
 from src.threshold import Threshold
 from src.utils import read_contigs, Logger, split_contigs_valtest
