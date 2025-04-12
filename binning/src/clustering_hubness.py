@@ -104,6 +104,32 @@ class KMediod:
 
         return sim_matrix_mp
 
+    def sample_embeddings(
+        embeddings: torch.Tensor,
+        n_samples: int = 5000,
+    ) -> torch.Tensor:
+        """
+        Function to randomly sample embeddings, ensuring the seed (medoid) is included in the sample.
+
+        Args:
+            embeddings (torch.Tensor): The complete tensor of embeddings.
+            seed (torch.Tensor): The seed embedding (medoid).
+            n_samples (int): The number of embeddings to sample (including the seed).
+            random_seed (int): The seed to ensure reproducibility.
+
+        Returns:
+            torch.Tensor: A tensor of randomly selected embeddings, including the seed.
+        """
+
+        n_total = embeddings.shape[0]
+        rng = np.random.default_rng(seed=42)
+
+        sampled_indices = rng.choice(n_total, size=n_samples, replace=False)
+
+        sampled_embeddings = embeddings[sampled_indices]
+
+        return sampled_embeddings
+
     def fit(self, min_similarity: float, knn_k: int, knn_p: float) -> np.array:
         """Runs the Iterative k-mediod algorithm, and saves the output predictions."""
 
@@ -158,9 +184,24 @@ class KMediod:
             available_mask = predictions == -1  # points that are still available
 
             for _ in range(self.num_steps):
-                similarities = torch.mv(self.embeddings, seed)
-                similarities = self.apply_mp(similarities, 1)  # APPLY MP HERE
-                candidate_mask = (similarities >= min_similarity) & available_mask
+
+                n_total = self.embeddings.shape[0]
+                rng = np.random.default_rng(seed=42)
+
+                sampled_indices = rng.choice(n_total, size=n_samples, replace=False)
+                sampled_embeddings = self.embeddings[sampled_indices]
+                sampled_embeddings = torch.concat(
+                    sampled_embeddings, seed.unsqueeze(0)
+                )  # add seed
+
+                # then compute similarities
+                similarities = torch.mm(sampled_embeddings, self.embeddings.T)
+                similarities = self.apply_mp(similarities, knn_k)  # APPLY MP HERE
+
+                # extract seed from similarites
+                seed_similarity = similarities[-1]
+
+                candidate_mask = (seed_similarity >= min_similarity) & available_mask
                 candidates = torch.where(candidate_mask)[0]
 
                 if len(candidates) == 0:
