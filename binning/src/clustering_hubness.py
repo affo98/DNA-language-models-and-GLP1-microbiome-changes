@@ -93,7 +93,9 @@ class KMediod:
             )
 
         sim_matrix_mp = 1 - distance_matrix_mp  # convert to sim.
-        sim_matrix_mp = torch.tensor(sim_matrix_mp, dtype=torch.float64)
+        sim_matrix_mp = torch.tensor(
+            sim_matrix_mp, dtype=torch.float64, device=self.device
+        )
 
         return sim_matrix_mp
 
