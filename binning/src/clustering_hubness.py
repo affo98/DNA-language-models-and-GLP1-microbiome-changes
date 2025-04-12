@@ -159,7 +159,7 @@ class KMediod:
 
             for _ in range(self.num_steps):
                 similarities = torch.mv(self.embeddings, seed)
-                similarities = self.apply_mp(similarities, knn_k)  # APPLY MP HERE
+                similarities = self.apply_mp(similarities, 1)  # APPLY MP HERE
                 candidate_mask = (similarities >= min_similarity) & available_mask
                 candidates = torch.where(candidate_mask)[0]
 
