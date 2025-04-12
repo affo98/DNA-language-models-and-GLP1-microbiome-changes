@@ -200,9 +200,7 @@ class KMediod:
                 )
 
                 cluster_sims = torch.mm(block_embs, sampled_embeddings.T)
-                print("ASDHASDJKHASJKHASJKHJADSK", cluster_sims.shape)
                 cluster_sims = self.apply_mp(cluster_sims, knn_k)  # APPLY MP HERE
-                print("ASDHASDJKHASJKHASJKHJADSK", cluster_sims.shape)
 
                 candidate_sims = cluster_sims[:, -len(candidates) :]
                 print("ASDASDAS", candidate_sims.shape)
