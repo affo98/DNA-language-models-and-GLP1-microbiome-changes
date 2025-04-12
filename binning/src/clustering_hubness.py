@@ -121,6 +121,7 @@ class KMediod:
             block_sim_matrix = torch.mm(
                 block_embeddings, self.embeddings.T
             )  # Shape: (block_size, n) - sim of block to all other data points
+            print(type(block_sim_matrix))
             block_sim_matrix = self.apply_mp(block_sim_matrix)  # APPLY MP HERE
 
             block_density = torch.sum(
