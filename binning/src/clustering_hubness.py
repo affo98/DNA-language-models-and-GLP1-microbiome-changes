@@ -158,10 +158,10 @@ class KMediod:
             available_mask = predictions == -1  # points that are still available
 
             for _ in range(self.num_steps):
-
                 rng = np.random.default_rng(seed=42)
+                seed_samples = min(n_samples - 1, self.block_size)
                 sampled_indices = rng.choice(
-                    n_samples, size=self.block_size, replace=False
+                    n_samples, size=seed_samples, replace=False
                 )
                 sampled_embeddings = self.embeddings[sampled_indices]
                 sampled_embeddings = torch.cat((sampled_embeddings, seed.unsqueeze(0)))
