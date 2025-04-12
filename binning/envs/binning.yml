@@ -20,3 +20,4 @@ dependencies:
       - matplotlib
       - seaborn
       - pandas
+      - git+https://github.com/VarIr/scikit-hubness.git
