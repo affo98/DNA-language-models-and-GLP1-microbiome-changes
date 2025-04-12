@@ -11,8 +11,10 @@ if __name__ == "__main__":
     hub = Hubness(k=10, metric="cosine", verbose=2)
 
     hub.fit(X)
-    k_skew = hub.score()
-    print(f"Skewness = {k_skew:.3f}")
+    hubness_metrics = hub.score()
+
+    print("Robinhood Index (after MP):", hubness_metrics.get("robinhood"))
+    print("k-Skewness (after MP):", hubness_metrics.get("k_skewness"))
 
     # hub_mp = Hubness(k=10, metric="cosine", hubness="mutual_proximity", verbose=2)
     # hub_mp.fit(X)
