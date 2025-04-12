@@ -69,7 +69,7 @@ class KMediod:
         from skhubness.utils.kneighbors_graph import check_kneighbors_graph
         from skhubness.reduction import MutualProximity
 
-        distance_matrix = 1 - sim_matrix.numpy()  # convert to dist.
+        distance_matrix = 1 - sim_matrix.cpu().numpy()  # convert to dist.
         n_samples = distance_matrix.shape[0]
 
         # need sorted graph in this format
