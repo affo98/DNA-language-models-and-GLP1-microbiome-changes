@@ -23,9 +23,11 @@ class GenomeHierarchihcalDataset(Dataset):
         if load_train:
             with open(os.path.join(args.datapath, args.train_dataname)) as tsvfile:
                 data = list(csv.reader(tsvfile, delimiter="\t"))
+                self.train = True
         else:
             with open(os.path.join(args.datapath, args.val_dataname)) as tsvfile:
                 data = list(csv.reader(tsvfile, delimiter="\t"))
+                self.train = False
 
         self.tokenizer = AutoTokenizer.from_pretrained("zhihan1996/DNABERT-2-117M", trust_remote_code=True)
         self.id = [i for i in range(len(data[1:]))]
@@ -80,12 +82,19 @@ class GenomeHierarchihcalDataset(Dataset):
     
     def __getitem__(self, index):
         sequences1, sequences2, labels = [], [], []
-        for i in index:
-            label = [self.species[i], self.genus[i], self.family[i], self.order[i], self.class_[i], self.phylum[i], self.kingdom[i], self.superkingdom[i]]
-            rand_i = random.choice(list(range(200)))
-            sequences1.append(self.seq1[i][rand_i:])
-            sequences2.append(self.seq2[i][rand_i:])
-            labels.append(label)
+        if self.train:
+            for i in index:
+                label = [self.species[i], self.genus[i], self.family[i], self.order[i], self.class_[i], self.phylum[i], self.kingdom[i], self.superkingdom[i]]
+                rand_i = random.choice(list(range(200)))
+                sequences1.append(self.seq1[i][rand_i:])
+                sequences2.append(self.seq2[i][rand_i:])
+                labels.append(label)
+        else:
+            for i in index:
+                label = [self.species[i], self.genus[i], self.family[i], self.order[i], self.class_[i], self.phylum[i], self.kingdom[i], self.superkingdom[i]]
+                sequences1.append(self.seq1[i])
+                sequences2.append(self.seq2[i])
+                labels.append(label)
         
         return [sequences1, sequences2], torch.tensor(labels)
 
@@ -265,10 +274,16 @@ def load_deep_genome_hierarchical(args):
     
     sequence_datasets = {'train': train_dataset,
                       'val': val_dataset}
-    
-    train_sampler = HierarchicalBatchSampler(batch_size=args.batch_size,
-                                       drop_last=True,
-                                       dataset=train_dataset)
+    if args.distributed:
+        train_sampler = HierarchicalBatchSampler(batch_size=args.batch_size,
+                                           drop_last=True,
+                                           dataset=train_dataset)
+    else:
+        train_sampler = HierarchicalBatchSampler(batch_size=args.batch_size,
+                                           drop_last=True,
+                                           dataset=train_dataset,
+                                           num_replicas=1,
+                                           rank=0)
     val_sampler = ValidationBatchSampler(batch_size=args.batch_size,
                                            drop_last=True,
                                            dataset=val_dataset)

@@ -19,7 +19,7 @@ class Trainer(nn.Module):
         self.val_loader = dataloaders_dict['val']
         self.train_sampler = sampler['train']
         self.val_sampler = sampler['val']
-        self.gstep = 0
+        self.gstep = 0 
         self.criterion = criterion
         self.logger = logger
 
@@ -59,9 +59,53 @@ class Trainer(nn.Module):
                 self.last_saved_step = step
                 if not os.path.exists(save_dir):
                     os.makedirs(save_dir)
-                self.model.module.dnabert2.save_pretrained(save_dir)
+                if self.args.distributed:
+                    self.model.module.dnabert2.save_pretrained(save_dir)
+                    torch.save(self.model.module.contrast_head.state_dict(), save_dir+"/con_weights.ckpt")
+                else:
+                    self.model.dnabert2.save_pretrained(save_dir)
+                    torch.save(self.model.contrast_head.state_dict(), save_dir+"/con_weights.ckpt")
                 self.tokenizer.save_pretrained(save_dir)
-                torch.save(self.model.module.contrast_head.state_dict(), save_dir+"/con_weights.ckpt")
+                
+                # Save optimizer and scheduler state for resuming training
+                checkpoint = {
+                    'optimizer': self.optimizer.state_dict(),
+                    'gstep': self.gstep,
+                    'epoch': self.current_epoch
+                }
+                if self.scheduler is not None:
+                    checkpoint['scheduler'] = self.scheduler.state_dict()
+                torch.save(checkpoint, os.path.join(save_dir, "training_state.pt"))
+
+    def load_checkpoint(self, checkpoint_dir):
+        """Load model and training state from checkpoint"""
+        if self.args.gpu == 0:
+            print(f"Loading checkpoint from {checkpoint_dir}")
+        
+        # Load model weights
+        if self.args.distributed:
+            self.model.module.dnabert2.from_pretrained(checkpoint_dir)
+            self.model.module.contrast_head.load_state_dict(torch.load(os.path.join(checkpoint_dir, "con_weights.ckpt")))
+        else:
+            self.model.dnabert2.from_pretrained(checkpoint_dir)
+            self.model.contrast_head.load_state_dict(torch.load(os.path.join(checkpoint_dir, "con_weights.ckpt")))
+        
+        # Load training state if it exists
+        training_state_path = os.path.join(checkpoint_dir, "training_state.pt")
+        if os.path.exists(training_state_path):
+            training_state = torch.load(training_state_path)
+            self.optimizer.load_state_dict(training_state['optimizer'])
+            self.gstep = training_state['gstep']
+            self.current_epoch = training_state['epoch']
+            
+            if self.scheduler is not None and 'scheduler' in training_state:
+                self.scheduler.load_state_dict(training_state['scheduler'])
+            
+            if self.args.gpu == 0:
+                print(f"Resuming from step {self.gstep}, epoch {self.current_epoch}")
+        else:
+            if self.args.gpu == 0:
+                print("No training state found, starting from beginning")
 
     def train_step(self, input_ids, attention_mask, labels):    
         if self.args.gpu is not None:
@@ -93,8 +137,20 @@ class Trainer(nn.Module):
         print('\n={}/{}=Iterations/Batches'.format(self.all_iter, len(self.train_loader)))
 
         self.model.train()
+        
+        # Initialize current_epoch for tracking
+        self.current_epoch = 0
+        
+        # Load checkpoint if resuming
+        if hasattr(self.args, 'resume_from') and self.args.resume_from:
+            self.load_checkpoint(self.args.resume_from)
+        
+        # Skip epochs that were already completed
+        start_epoch = self.current_epoch if hasattr(self, 'current_epoch') else 0
+        
         epoch_iterator = tqdm(self.train_loader, desc="Iteration")
-        for epoch in range(self.args.epochs):
+        for epoch in range(start_epoch, self.args.epochs):
+            self.current_epoch = epoch
             self.train_sampler.set_epoch(epoch)
 
             batch_time = AverageMeter('Time', ':6.3f')
@@ -125,9 +181,11 @@ class Trainer(nn.Module):
                 #if self.gstep > self.args.logging_step*self.args.logging_num:
                 #    break
                 self.gstep += 1
-                
+
+            self.save_model(step=self.gstep)
             print("Finish Epoch: ", epoch)
-            dist.barrier()
+            if self.args.distributed:
+                dist.barrier()
         
         return None
     

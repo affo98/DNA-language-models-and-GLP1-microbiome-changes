@@ -27,17 +27,105 @@ def run(args):
     args.resPath = setup_path(args)
     #set_global_random_seed(args.seed)
 
-    device_id = torch.cuda.device_count()
-    print("\t {} GPUs available to use!".format(device_id))
-    mp.spawn(main_worker, nprocs=device_id, args=(device_id, args))
-    
+    device_count = torch.cuda.device_count()
+    print("\t {} GPUs available to use!".format(device_count))
+
+    if device_count <= 1:
+        print("Running on a single GPU.")
+        # Add a flag to indicate non-distributed mode
+        args.distributed = False
+        main_single_gpu(0, 1, args) # Use gpu=0, ngpus_per_node=1
+    else:
+        print("Running on multiple GPUs using DDP.")
+        # Add a flag to indicate distributed mode
+        args.distributed = True
+        mp.spawn(main_worker, nprocs=device_count, args=(device_count, args))
+
     return None
+
+# New function for single GPU execution
+def main_single_gpu(gpu, ngpus_per_node, args):
+    print("Setting up for single GPU execution on GPU: {}".format(gpu))
+    args.gpu = gpu
+
+    # Setup logger
+    args.tb_folder = f'./tensorboard_gpu{args.gpu}'
+    if not os.path.isdir(args.tb_folder):
+        os.makedirs(args.tb_folder)
+    logger = tb_logger.Logger(logdir=args.tb_folder, flush_secs=2)
+    print("Logger setup complete.")
+
+    # Set the device
+    torch.cuda.set_device(args.gpu)
+    print(f"Set device to GPU {args.gpu}.")
+
+    # Setup model and criterion
+    print("Setting up model and criterion...")
+    model, criterion = set_model(ngpus_per_node, args)
+    print("Model and criterion setup complete.")
+
+    # Setup tokenizer
+    print("Loading tokenizer...")
+    tokenizer = AutoTokenizer.from_pretrained("zhihan1996/DNABERT-2-117M", trust_remote_code=True)
+    print("Tokenizer loaded.")
+
+    # Load data
+    print("Loading data...")
+    # Ensure load_deep_genome_hierarchical can handle args.distributed = False
+    dataloaders_dict, sampler = load_deep_genome_hierarchical(args)
+    print(f"Data loaded. Dataloader length: {len(dataloaders_dict['train'])}")
+
+    # Setup optimizer and scheduler
+    print("Setting up optimizer...")
+    optimizer = get_optimizer(model, args) # Pass the potentially unwrapped model
+    print("Optimizer setup complete.")
+
+    # Create warmup scheduler
+    print("Setting up schedulers...")
+    warmup_scheduler = LinearLR(
+        optimizer,
+        start_factor=0.1,
+        end_factor=1.0,
+        total_iters=int(args.warmup_epochs * len(dataloaders_dict['train']))
+    )
+
+    # Create cosine annealing scheduler
+    cosine_scheduler = CosineAnnealingLR(
+        optimizer,
+        T_max=int((args.epochs - args.warmup_epochs) * len(dataloaders_dict['train'])),
+        eta_min=args.min_lr
+    )
+
+    # Combine them
+    scheduler = SequentialLR(
+        optimizer,
+        schedulers=[warmup_scheduler, cosine_scheduler],
+        milestones=[int(args.warmup_epochs * len(dataloaders_dict['train']))]
+    )
+    print("Schedulers setup complete.")
+
+    # Setup Trainer
+    print("Initializing Trainer...")
+    trainer = Trainer(model, tokenizer, criterion, optimizer, dataloaders_dict, sampler, logger, args, scheduler)
+    print("Trainer initialized.")
+
+    # Train the model
+    print("Starting training on single GPU...")
+    trainer.train()
+
+    # Run validation on the single GPU
+    print("Running validation on single GPU...")
+    # Pass the model directly as it's not wrapped in DDP
+    trainer.run_validation(model)
+
+    print("Single GPU training and validation finished.")
+
 
 def main_worker(gpu, ngpus_per_node, args):
     print("GPU in main worker is {}".format(gpu))
     args.gpu = gpu
 
-    args.tb_folder = f'./tensorboard_{args.gpu}'
+    args.tb_folder = f'./tensorboard_gpu{args.gpu}' # Use unique folder per GPU
     if not os.path.isdir(args.tb_folder):
         os.makedirs(args.tb_folder)
 
@@ -45,7 +133,7 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # suppress printing if not master
     if args.gpu != 0:
-        def print_pass(*args):
+        def print_pass(*args_pass, **kwargs_pass): # Fixed signature
             pass
         builtins.print = print_pass
 
@@ -111,9 +199,14 @@ def set_model(ngpus_per_node, args):
     torch.cuda.set_device(args.gpu)
     model.cuda(args.gpu)
     args.batch_size = int(args.batch_size / ngpus_per_node)
-    print("Updated batch size is {}".format(args.batch_size))
-    #args.workers = int((args.workers + ngpus_per_node - 1) / ngpus_per_node)
-    model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=True)
+    print(f"{ngpus_per_node} GPUs, Batch size per GPU {args.batch_size}")
+
+    # Only wrap with DDP if using more than one GPU
+    if ngpus_per_node > 1 and args.distributed:
+        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=True)
+        print(f"GPU {args.gpu}: Wrapped model with DDP.")
+    else:
+        print(f"GPU {args.gpu}: Running on single GPU, DDP not applied.")
 
     criterion = criterion.cuda(args.gpu)
     return model, criterion
@@ -139,15 +232,14 @@ def get_args(argv):
     parser.add_argument('--warmup_epochs', type=float, default=0.3, help='Number of warmup epochs for learning rate')
     parser.add_argument('--epochs', type=int, default=3)
     parser.add_argument('--print-freq', '-p', default=100, type=int, metavar='N', help='print frequency (default: 10)')
-    #parser.add_argument('--weight_decay', type=float, default=1e-03, help="Weight decay for AdamW")
-    #parser.add_argument('--train_batch_size', type=int, default=48, help="Batch size used for training dataset")
-    #parser.add_argument('--val_batch_size', type=int, default=360, help="Batch size used for validating dataset")
-     
+    parser.add_argument('--distributed', action='store_true', help=argparse.SUPPRESS)
     # Contrastive learning
     parser.add_argument('--feat_dim', type=int, default=128, help="Dimension of the projected features for instance discrimination loss")
     parser.add_argument('--temp', type=float, default=0.07, help="Temperature required by contrastive loss")
     parser.add_argument('--loss', type=str, default='hmce', help='loss type', choices=['hmc', 'hce', 'hmce'])
     
+    # Add resume training arguments
+    parser.add_argument('--resume_from', type=str, default=None, help='Path to checkpoint directory to resume training from')
     
     args = parser.parse_args(argv)
     args.use_gpu = args.gpuid[0] >= 0
@@ -157,6 +249,9 @@ def get_args(argv):
 
 if __name__ == '__main__':
     args = get_args(sys.argv[1:])
+    # Ensure results directory exists
+    if not os.path.exists(args.resdir):
+        os.makedirs(args.resdir)
     run(args)
 
 
