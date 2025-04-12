@@ -29,7 +29,9 @@ import numpy as np
 
 from skhubness.analysis import Hubness
 from skhubness.reduction import MutualProximity
+from sklearn.neighbors import NearestNeighbors
 import numpy as np
+from scipy.sparse import csr_matrix
 
 
 def calculate_robinhood(k_occurrence):
@@ -70,9 +72,19 @@ if __name__ == "__main__":
     print("k-Skewness:", hubness_before.get("k_skewness"))
     print("-" * 40)
 
+    # Find k-nearest neighbors to create the sparse graph
+    nn = NearestNeighbors(n_neighbors=k_neighbors, metric=metric)
+    nn.fit(X)
+    _, indices = nn.kneighbors(X)
+    indptr = np.arange(X.shape[0] + 1)
+    data = np.ones(X.shape[0] * k_neighbors, dtype=int)
+    knn_graph = csr_matrix(
+        (data, indices.ravel(), indptr), shape=(X.shape[0], X.shape[0])
+    )
+
     # Reduce hubness using Mutual Proximity
     mp = MutualProximity(k=k_neighbors, method="standard")
-    mp.fit(X)
+    mp.fit(knn_graph)  # Fit with the sparse k-neighbors graph
     X_reduced_dist = mp.transform(X)
 
     # Find k-Nearest Neighbors based on reduced distances
