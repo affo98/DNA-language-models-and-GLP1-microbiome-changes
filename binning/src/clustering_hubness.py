@@ -157,7 +157,8 @@ class KMediod:
                     n_samples, size=seed_samples, replace=False
                 )
                 print(sampled_indices)
-                sampled_embeddings = self.embeddings[sampled_indices]
+                sampled_embeddings = self.embeddings[sampled_indices].to(self.device)
+
                 sampled_embeddings = torch.cat((sampled_embeddings, seed.unsqueeze(0)))
 
                 similarities = torch.mm(sampled_embeddings, self.embeddings.T)
