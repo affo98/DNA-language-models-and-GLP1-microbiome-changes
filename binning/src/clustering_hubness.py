@@ -121,7 +121,7 @@ class KMediod:
                 block_embeddings, self.embeddings.T
             )  # Shape: (block_size, n) - sim of block to all other data points
             block_sim_matrix = self.apply_mp(block_sim_matrix, knn_k)  # APPLY MP HERE
-
+            print(block_sim_matrix.device)
             block_density = torch.sum(
                 torch.where(block_sim_matrix >= min_similarity, block_sim_matrix, 0.0),
                 dim=1,
@@ -156,30 +156,18 @@ class KMediod:
                 sampled_indices = rng.choice(
                     n_samples, size=seed_samples, replace=False
                 )
-                print(sampled_indices)
                 sampled_embeddings = self.embeddings[sampled_indices].to(self.device)
 
                 sampled_embeddings = torch.cat((sampled_embeddings, seed.unsqueeze(0)))
 
                 similarities = torch.mm(sampled_embeddings, self.embeddings.T)
-                print(
-                    f"seed_similarity device: {similarities.device}, type: {type(similarities)}"
-                )
+                print(f"seed_similarity device: {similarities.device}")
+
                 similarities = self.apply_mp(similarities, knn_k)  # APPLY MP HERE
-                print(
-                    f"seed_similarity device: {similarities.device}, type: {type(similarities)}"
-                )
+                print(f"seed_similarity device: {similarities.device}")
+
                 seed_similarity = similarities[-1]
 
-                print(
-                    f"seed_similarity device: {seed_similarity.device}, type: {type(seed_similarity)}"
-                )
-                print(
-                    f"min_similarity device: {min_similarity.device}, type: {type(min_similarity)}"
-                )
-                print(
-                    f"available_mask device: {available_mask.device}, type: {type(available_mask)}"
-                )
                 candidate_mask = (seed_similarity >= min_similarity) & available_mask
                 candidates = torch.where(candidate_mask)[0]
 
