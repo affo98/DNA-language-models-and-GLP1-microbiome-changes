@@ -69,9 +69,9 @@ class KMediod:
         from skhubness.utils.kneighbors_graph import check_kneighbors_graph
         from skhubness.reduction import MutualProximity
 
-        sim_matrix_input = sim_matrix.clone()
-        if len(sim_matrix_input.shape) == 1:
-            sim_matrix = sim_matrix.unsqueeze(0)
+        # sim_matrix_input = sim_matrix.clone()
+        # if len(sim_matrix_input.shape) == 1:
+        #     sim_matrix = sim_matrix.unsqueeze(0)
 
         distance_matrix = 1 - sim_matrix.cpu().numpy()  # convert to dist.
         n_samples = distance_matrix.shape[0]
@@ -99,36 +99,10 @@ class KMediod:
         sim_matrix_mp = 1 - distance_matrix_mp  # convert to sim.
         sim_matrix_mp = torch.tensor(sim_matrix_mp, dtype=torch.float64)
 
-        if len(sim_matrix_input.shape) == 1:
-            return sim_matrix_mp.squeeze()
+        # if len(sim_matrix_input.shape) == 1:
+        #     return sim_matrix_mp.squeeze()
 
         return sim_matrix_mp
-
-    def sample_embeddings(
-        embeddings: torch.Tensor,
-        n_samples: int = 5000,
-    ) -> torch.Tensor:
-        """
-        Function to randomly sample embeddings, ensuring the seed (medoid) is included in the sample.
-
-        Args:
-            embeddings (torch.Tensor): The complete tensor of embeddings.
-            seed (torch.Tensor): The seed embedding (medoid).
-            n_samples (int): The number of embeddings to sample (including the seed).
-            random_seed (int): The seed to ensure reproducibility.
-
-        Returns:
-            torch.Tensor: A tensor of randomly selected embeddings, including the seed.
-        """
-
-        n_total = embeddings.shape[0]
-        rng = np.random.default_rng(seed=42)
-
-        sampled_indices = rng.choice(n_total, size=n_samples, replace=False)
-
-        sampled_embeddings = embeddings[sampled_indices]
-
-        return sampled_embeddings
 
     def fit(self, min_similarity: float, knn_k: int, knn_p: float) -> np.array:
         """Runs the Iterative k-mediod algorithm, and saves the output predictions."""
@@ -185,9 +159,10 @@ class KMediod:
 
             for _ in range(self.num_steps):
 
-                n_total = self.embeddings.shape[0]
                 rng = np.random.default_rng(seed=42)
-                sampled_indices = rng.choice(n_total, size=n_samples, replace=False)
+                sampled_indices = rng.choice(
+                    n_samples, size=self.block_size, replace=False
+                )
                 sampled_embeddings = self.embeddings[sampled_indices]
                 sampled_embeddings = torch.cat((sampled_embeddings, seed.unsqueeze(0)))
 
