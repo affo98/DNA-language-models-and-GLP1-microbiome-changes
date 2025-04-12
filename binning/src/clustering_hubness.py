@@ -185,7 +185,8 @@ class KMediod:
 
                 # add some non-candidate embeddings, required for apply_mp
                 non_candidates = torch.where(~candidate_mask)[0]
-                non_candidate_samples = min(n_samples, self.block_size)
+                n_non_candidates = non_candidates.shape[0]
+                non_candidate_samples = min(n_non_candidates, self.block_size)
                 rng = np.random.default_rng(seed=42)
                 sampled_indices_noncand = rng.choice(
                     non_candidates.shape[0], size=non_candidate_samples, replace=False
