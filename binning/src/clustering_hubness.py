@@ -194,7 +194,6 @@ class KMediod:
                 sampled_embeddings = self.embeddings[sampled_indices_noncand].to(
                     self.device
                 )
-
                 sampled_embeddings = torch.cat(
                     (sampled_embeddings, self.embeddings[candidates])
                 )
@@ -203,7 +202,6 @@ class KMediod:
                 cluster_sims = self.apply_mp(cluster_sims, knn_k)  # APPLY MP HERE
 
                 candidate_sims = cluster_sims[:, -len(candidates) :]
-                print("ASDASDAS", candidate_sims.shape)
                 candidate_sims = torch.where(
                     candidate_sims >= min_similarity, candidate_sims, 0.0
                 )
