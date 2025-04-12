@@ -89,6 +89,7 @@ class KMediod:
         distance_matrix_mp = np.copy(distance_matrix)
         for i in range(n_samples_mp):
             neighbor_indices = knn_graph_sorted[i].indices
+            print(i)
             distance_matrix_mp[i, neighbor_indices] = (
                 mp_graph[i].toarray().ravel()[neighbor_indices]
             )
