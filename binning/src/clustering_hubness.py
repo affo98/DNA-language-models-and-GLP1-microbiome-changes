@@ -186,7 +186,7 @@ class KMediod:
                 cluster_sims = torch.mm(self.embeddings[candidates], block_embs.T)
                 print("ASDHASDJKHASJKHASJKHJADSK", cluster_sims.shape)
                 cluster_sims = self.apply_mp(
-                    cluster_sims, candidates.shape - 1
+                    cluster_sims, int(candidates.shape)
                 )  # APPLY MP HERE
                 cluster_sims = torch.where(
                     cluster_sims >= min_similarity, cluster_sims, 0.0
