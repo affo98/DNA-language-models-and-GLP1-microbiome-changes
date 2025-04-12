@@ -183,9 +183,9 @@ class KMediod:
                 block_end = min(i + self.block_size, n_samples)
                 block_embs = self.embeddings[block_start:block_end]
 
-                cluster_sims = torch.mm(block_embs, self.embeddings[candidates].T)
-                # print("ASDHASDJKHASJKHASJKHJADSK", cluster_sims.shape)
-                # cluster_sims = self.apply_mp(cluster_sims, knn_k)  # APPLY MP HERE
+                cluster_sims = torch.mm(self.embeddings[candidates], block_embs.T)
+                print("ASDHASDJKHASJKHASJKHJADSK", cluster_sims.shape)
+                cluster_sims = self.apply_mp(cluster_sims, knn_k)  # APPLY MP HERE
                 cluster_sims = torch.where(
                     cluster_sims >= min_similarity, cluster_sims, 0.0
                 )
