@@ -156,6 +156,7 @@ class KMediod:
                 sampled_indices = rng.choice(
                     n_samples, size=seed_samples, replace=False
                 )
+                print(sampled_indices)
                 sampled_embeddings = self.embeddings[sampled_indices]
                 sampled_embeddings = torch.cat((sampled_embeddings, seed.unsqueeze(0)))
 
