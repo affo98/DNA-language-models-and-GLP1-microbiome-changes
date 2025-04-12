@@ -81,7 +81,7 @@ class KMediod:
         )
         knn_graph_sorted = check_kneighbors_graph(knn_graph)
 
-        mp = MutualProximity(method="normal", verbose=1)
+        mp = MutualProximity(method="normal", verbose=0)
         mp_graph = mp.fit_transform(knn_graph_sorted)
 
         # replace original distances of k neighbors with MP-distances, and keep other distances
