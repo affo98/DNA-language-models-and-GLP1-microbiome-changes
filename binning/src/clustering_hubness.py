@@ -189,17 +189,17 @@ class KMediod:
                 non_candidate_samples = min(n_non_candidates, self.block_size)
                 rng = np.random.default_rng(seed=42)
                 sampled_indices_noncand = rng.choice(
-                    non_candidates.shape[0], size=non_candidate_samples, replace=False
+                    n_non_candidates, size=non_candidate_samples, replace=False
                 )
-                sampled_embeddings_noncand = self.embeddings[
-                    sampled_indices_noncand
-                ].to(self.device)
-
-                cluster_sims = torch.cat(
-                    (sampled_embeddings_noncand, self.embeddings[candidates])
+                sampled_embeddings = self.embeddings[sampled_indices_noncand].to(
+                    self.device
                 )
 
-                cluster_sims = torch.mm(self.embeddings[candidates], block_embs.T)
+                sampled_embeddings = torch.cat(
+                    (sampled_embeddings, self.embeddings[candidates])
+                )
+
+                cluster_sims = torch.mm(sampled_embeddings, block_embs.T)
                 print("ASDHASDJKHASJKHASJKHJADSK", cluster_sims.shape)
                 cluster_sims = self.apply_mp(cluster_sims, knn_k)  # APPLY MP HERE
                 candidate_sims = cluster_sims[-len(candidates) :]
