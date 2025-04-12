@@ -3,7 +3,8 @@ from argparse import ArgumentParser
 
 from time import time
 
-from src.clustering import KMediod
+# from src.clustering import KMediod
+from src.clustering_hubness import KMediod
 from src.get_embeddings import Embedder
 from src.threshold import Threshold
 from src.utils import read_contigs, Logger, split_contigs_valtest
@@ -27,8 +28,8 @@ def main(args, log):
     contigs, contig_names = read_contigs(
         args.contigs, filter_len=MAX_CONTIG_LENGTH, log=log
     )
-    # contigs = contigs[0:100000]
-    # contig_names = contig_names[0:100000]
+    contigs = contigs[0:10000]
+    contig_names = contig_names[0:10000]
 
     contigs_test, contigs_val, contig_names_test, contig_names_val = (
         split_contigs_valtest(
