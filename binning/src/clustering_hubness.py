@@ -70,7 +70,8 @@ class KMediod:
         from skhubness.reduction import MutualProximity
 
         distance_matrix = 1 - sim_matrix.cpu().numpy()  # convert to dist.
-        n_samples = distance_matrix.shape[0]
+        n_samples_mp = distance_matrix.shape[0]
+        print(n_samples_mp)
 
         # need sorted graph in this format
         knn_graph = kneighbors_graph(
@@ -86,7 +87,7 @@ class KMediod:
 
         # replace original distances of k neighbors with MP-distances, and keep other distances
         distance_matrix_mp = np.copy(distance_matrix)
-        for i in range(n_samples):
+        for i in range(n_samples_mp):
             neighbor_indices = knn_graph_sorted[i].indices
             distance_matrix_mp[i, neighbor_indices] = (
                 mp_graph[i].toarray().ravel()[neighbor_indices]
@@ -123,7 +124,6 @@ class KMediod:
                 block_embeddings, self.embeddings.T
             )  # Shape: (block_size, n) - sim of block to all other data points
             block_sim_matrix = self.apply_mp(block_sim_matrix, knn_k)  # APPLY MP HERE
-            print(block_sim_matrix.device)
             block_density = torch.sum(
                 torch.where(block_sim_matrix >= min_similarity, block_sim_matrix, 0.0),
                 dim=1,
@@ -153,21 +153,17 @@ class KMediod:
             available_mask = predictions == -1  # points that are still available
 
             for _ in range(self.num_steps):
+
                 rng = np.random.default_rng(seed=42)
                 seed_samples = min(n_samples - 1, self.block_size)
                 sampled_indices = rng.choice(
                     n_samples, size=seed_samples, replace=False
                 )
+
                 sampled_embeddings = self.embeddings[sampled_indices].to(self.device)
-
                 sampled_embeddings = torch.cat((sampled_embeddings, seed.unsqueeze(0)))
-
                 similarities = torch.mm(sampled_embeddings, self.embeddings.T)
-                print(f"seed_similarity device: {similarities.device}")
-
                 similarities = self.apply_mp(similarities, knn_k)  # APPLY MP HERE
-                print(f"seed_similarity device: {similarities.device}")
-
                 seed_similarity = similarities[-1]
 
                 candidate_mask = (seed_similarity >= min_similarity) & available_mask
