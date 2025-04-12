@@ -15,7 +15,7 @@ VAL_PROPORTION = 0.1
 
 # threshold calculation
 N_BINS = 1000
-BLOCK_SIZE = 1000
+BLOCK_SIZE = 5000  # increased from 1000 when using hubness
 
 # kmediod
 MIN_BIN_SIZE = 2  # changed from 10 to 2, because bins less than MINSIZE_BINS (250000) will be removed in postprocessing.
