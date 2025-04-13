@@ -194,7 +194,7 @@ rule semibin:
     output:
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output")
     conda:
-        "envs/semibin_environment.yml"
+        "envs/semibin.yml"
     params:
         threads=20
     shell:
