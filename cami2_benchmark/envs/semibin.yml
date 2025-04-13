@@ -7,7 +7,8 @@ dependencies:
   - python
   - pip
   - semibin=2.1.0
+  - pytorch=2.5
+  - torchvision
+  - torchaudio
   - pip:
-      - torch
-      - torchvision
-      - torchaudio
+      - torch==2.5.0
