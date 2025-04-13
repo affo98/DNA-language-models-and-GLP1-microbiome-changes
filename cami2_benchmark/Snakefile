@@ -111,7 +111,7 @@ if config_alignment:
 if config_alignment_semibin:
     input_files += expand(
         os.path.join(OUTDIR_PROCESSED, DATASET, "semibin", "{sample}_sorted.bam"),
-        sample=SAMPLET.get(DATASET, [])
+        sample=SAMPLES.get(DATASET, [])
     )
 
 
