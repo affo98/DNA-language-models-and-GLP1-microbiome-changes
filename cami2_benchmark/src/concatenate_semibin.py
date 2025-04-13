@@ -27,7 +27,7 @@ def concatenate_fasta(
     identifiers: set[str] = set()
     for inpathno, inpath in enumerate(inpaths):
         print(inpath)
-        sample_barcode = inpath.split("_")[0]
+        sample_barcode = inpath.split("/")[-1].split("_")[0]
         print(sample_barcode)
         try:
             with Reader(inpath) as infile:
