@@ -267,38 +267,6 @@ rule postprocess_cluster_outputs_semibin:
         """
 
 
-
-
-# rule concatenate_process_semibin:
-#     input:
-#         os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
-#     output:
-#         os.path.join(OUTDIR, DATASET, "semibin/catalogue_semibin.fna")
-#     conda:
-#         "envs/cami2_environment.yml"
-#     shell:
-#         """
-#         zcat {input} | sed -E 's/([0-9]+)([A-Za-z])/\\1:\\2/' > {output} 
-#         """
-
-
-# rule bam_process_semibin:
-#     input:
-#         bam=os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam")
-#     output:
-#         modified_bam=os.path.join(OUTDIR, DATASET, "semibin/{sample}_sorted_semibin.bam")
-#     conda:
-#         "envs/cami2_environment.yml"
-#     shell:
-#         """
-#         samtools view -H {input.bam} | \\
-#         sed -E 's/([0-9]+)([A-Za-z0-9]+)/\\1:\\2/' | \\
-#         samtools reheader - {input.bam} > {output.modified_bam}
-#         """
-
-
-
-
 rule download_metahit:
     output:
         contigs_raw=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue_raw.fna.gz")
@@ -758,6 +726,33 @@ rule checkm2:
 #         """
 
 
+
+# rule concatenate_process_semibin:
+#     input:
+#         os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
+#     output:
+#         os.path.join(OUTDIR, DATASET, "semibin/catalogue_semibin.fna")
+#     conda:
+#         "envs/cami2_environment.yml"
+#     shell:
+#         """
+#         zcat {input} | sed -E 's/([0-9]+)([A-Za-z])/\\1:\\2/' > {output} 
+#         """
+
+
+# rule bam_process_semibin:
+#     input:
+#         bam=os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam")
+#     output:
+#         modified_bam=os.path.join(OUTDIR, DATASET, "semibin/{sample}_sorted_semibin.bam")
+#     conda:
+#         "envs/cami2_environment.yml"
+#     shell:
+#         """
+#         samtools view -H {input.bam} | \\
+#         sed -E 's/([0-9]+)([A-Za-z0-9]+)/\\1:\\2/' | \\
+#         samtools reheader - {input.bam} > {output.modified_bam}
+#         """
 
     
 
