@@ -44,7 +44,9 @@ if MODEL in other_model_config.keys():
 #processing flow of snakemake 
 config_download = bool(config.get("DOWNLOAD", False))
 config_concatenate = bool(config.get("CONCATENATE", False))
+config_concatenate_semibin = bool(config.get("CONCATENATE_SEMIBIN", False))
 config_alignment = bool(config.get("ALIGNMENT", False))
+config_alignment_semibin = bool(config.get("ALIGNMENT_SEMIBIN", False))
 config_checkm2 = bool(config.get("CHECKM2", False))
 config_nomodelrun = bool(config.get("NOMODELRUN", False))
 
@@ -91,11 +93,12 @@ if config_download:
             os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
         ]
 
-if config_concatenate and MODEL != 'semibin':
+if config_concatenate:
     input_files.append(
         os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
     )
-elif config_concatenate and MODEL == 'semibin':
+
+if config_concatenate_semibin:
      input_files.append(
         os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue"),
     )
@@ -105,6 +108,13 @@ if config_alignment:
         os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"),
         sample=SAMPLES.get(DATASET, [])
     )
+if config_alignment_semibin:
+    input_files += expand(
+        os.path.join(OUTDIR_PROCESSED, DATASET, "semibin", "{sample}_sorted.bam"),
+        sample=SAMPLET.get(DATASET, [])
+    )
+
+
 
 if MODEL=='vamb' and not config_nomodelrun:
     input_files += [
@@ -229,7 +239,20 @@ rule concatenate_semibin:
         mv {params.tmp_output} {params.final_output}
         """
 
-
+rule alignment_semibin:
+    input:
+        read=os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"),
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+    output:
+        os.path.join(OUTDIR_PROCESSED, DATASET, "semibin", "{sample}_sorted.bam")
+    threads:
+        192
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
+        """
 
 # rule concatenate_process_semibin:
 #     input:
