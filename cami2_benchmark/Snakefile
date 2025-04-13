@@ -100,7 +100,7 @@ if config_concatenate:
 
 if config_concatenate_semibin:
      input_files.append(
-        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue")
+        os.path.join(OUTDIR_PROCESSED, DATASET, "semibin", "catalogue.fna.gz"),
     )
 
 if config_alignment:
