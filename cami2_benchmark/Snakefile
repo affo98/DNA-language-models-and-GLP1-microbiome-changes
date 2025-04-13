@@ -195,10 +195,40 @@ rule semibin:
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output")
     conda:
         "envs/semibin_environment.yml"
+    params:
+        threads=20
     shell:
         """
-        SemiBin2 multi_easy_bin -i catalogue.fna -b path_to_bams/*.bam -o output_semibin2 --separator C
+        SemiBin2 multi_easy_bin -i {input.catalogue} -b {input.bams} -o {output} --separator C \
+        -engine gpu -t {params.threads}
         """
+
+
+#COMEBIN
+# rule comebin:
+#     input:
+#         catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
+#         bams=os.path.join(OUTDIR_PROCESSED, DATASET)
+#     output:
+#         directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output"))
+#     params:
+#         views=6,
+#         threads=192
+#     conda:
+#         "envs/comebin.yml"
+#     shell:  
+#         """
+#         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
+
+#         if [ ! -f "{OUTDIR_PROCESSED}/{DATASET}/catalogue.fna" ]; then
+#             gzip -dkc {input.catalogue} > {OUTDIR_PROCESSED}/{DATASET}/catalogue.fna
+#         fi
+
+#         bash run_comebin.sh -a {OUTDIR_PROCESSED}/{DATASET}/catalogue.fna -p {input.bams} -o {output} -n {params.views} -t {params.threads}
+#         """
+
+
+
 
 
 # rule concatenate_process_semibin:
