@@ -26,7 +26,9 @@ def concatenate_fasta(
 
     identifiers: set[str] = set()
     for inpathno, inpath in enumerate(inpaths):
-        sample_barcode = inpath.split("/")[-2].split("_")[-1]
+        print(inpath)
+        sample_barcode = inpath.split("_")[0]
+        print(sample_barcode)
         try:
             with Reader(inpath) as infile:
                 # If we rename, seq identifiers only have to be unique for each sample
