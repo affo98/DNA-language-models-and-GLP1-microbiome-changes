@@ -216,7 +216,7 @@ rule concatenate_semibin:
         """
         SemiBin2 concatenate_fasta --input-fasta {input} --output {output.tmp_folder} -m {params.min_length}
         mv {params.tmp_output} {output.final_output}
-        rm {output.tmp_folder}
+        rm -rf {output.tmp_folder}
         """
 
 rule alignment_semibin:
