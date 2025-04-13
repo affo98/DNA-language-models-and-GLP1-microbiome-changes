@@ -100,7 +100,7 @@ if config_concatenate:
 
 if config_concatenate_semibin:
      input_files.append(
-        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        os.path.join(OUTDIR_PROCESSED, DATASET, "semibin", "catalogue.fna.gz"),
     )
 
 if config_alignment:
@@ -113,8 +113,6 @@ if config_alignment_semibin:
         os.path.join(OUTDIR_PROCESSED, DATASET, "semibin", "{sample}_sorted.bam"),
         sample=SAMPLES.get(DATASET, [])
     )
-
-
 
 if MODEL=='vamb' and not config_nomodelrun:
     input_files += [
@@ -224,7 +222,7 @@ rule concatenate_semibin:
 rule alignment_semibin:
     input:
         read=os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"),
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "semibin", "catalogue.fna.gz")
     output:
         os.path.join(OUTDIR_PROCESSED, DATASET, "semibin", "{sample}_sorted.bam")
     threads:
