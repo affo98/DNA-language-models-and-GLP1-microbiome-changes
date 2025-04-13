@@ -214,7 +214,7 @@ rule concatenate_semibin:
     params:
         min_length=MINSIZE_CONTIGS
     conda:
-        "envs/vamb.yml"
+        "envs/semibin.yml"
     shell:
         """
         SemiBin2 concatenate_fasta -input-fasta {input} -output {output} -m {params.min_length}
