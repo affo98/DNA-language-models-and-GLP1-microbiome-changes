@@ -91,9 +91,13 @@ if config_download:
             os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
         ]
 
-if config_concatenate:
+if config_concatenate and model != 'semibin':
     input_files.append(
         os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+    )
+elif config_concatenate and model == 'semibin':
+     input_files.append(
+        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue"),
     )
 
 if config_alignment:
@@ -182,7 +186,9 @@ rule all:
     input: input_files
 
 
-ruleorder: other_model_val > create_fasta_bins_other_model_val > checkm2_val > parse_checkm2_val > other_model_test > create_fasta_bins_other_model_test > concatenate_semibin >  concatenate > process_metahit
+ruleorder: other_model_val > create_fasta_bins_other_model_val > checkm2_val > parse_checkm2_val > other_model_test > create_fasta_bins_other_model_test >  concatenate > process_metahit
+
+#concatenate_semibin >
 
 
 
@@ -208,19 +214,20 @@ rule concatenate_semibin:
     input:
         expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
     output:
-        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue")
     log:
         os.path.join(LOGS, DATASET, "concatenate.log")
     params:
         min_length=MINSIZE_CONTIGS
+        tmp_output=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue", "concatenated.fa.gz")
+        final_output=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
     conda:
         "envs/semibin.yml"
     shell:
         """
         SemiBin2 concatenate_fasta --input-fasta {input} --output {output} -m {params.min_length}
+        mv {params.tmp_output} {params.final_output}
         """
-
-
 
 
 
@@ -295,7 +302,6 @@ rule download_cami2:
         """
 
 
-#CHANGE BACK! script
 rule concatenate:
     input:
         expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
@@ -309,7 +315,7 @@ rule concatenate:
         "envs/vamb.yml"
     shell:
         """
-        python {SRC_DIR}/concatenate_semibin.py {output} {input} -m {params.min_length} 
+        python {SRC_DIR}/concatenate.py {output} {input} -m {params.min_length} 
         python {SRC_DIR}/concatenate_log.py {input} {output} -m {params.min_length} --log {log}
         """
 
