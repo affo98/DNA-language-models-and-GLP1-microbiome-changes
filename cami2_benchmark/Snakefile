@@ -129,6 +129,14 @@ elif MODEL == 'comebin' and not config_nomodelrun:
     ]
 
 
+
+elif MODEL == 'semibin' and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output"),
+        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "semibin"),
+    ]
+
+
 #OTHER MODELS
 elif MODEL in ['tnf'] and not config_nomodelrun:
     input_files += [
@@ -148,8 +156,6 @@ elif MODEL in ['dna2vec'] and not config_nomodelrun:
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dna2vec_output", "test"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dna2vec"),
     ]
-
-
 elif MODEL in ['dnaberts'] and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output", "test"),
@@ -177,6 +183,128 @@ rule all:
 
 
 ruleorder: other_model_val > create_fasta_bins_other_model_val > checkm2_val > parse_checkm2_val > other_model_test > create_fasta_bins_other_model_test > process_metahit > concatenate
+
+
+
+
+rule semibin:
+    input:
+        catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
+        bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+    output:
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output")
+    conda:
+        "envs/semibin_environment.yml"
+    shell:
+        """
+        SemiBin2 multi_easy_bin -i catalogue.fna -b path_to_bams/*.bam -o output_semibin2 --separator C
+        """
+
+
+# rule concatenate_process_semibin:
+#     input:
+#         os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
+#     output:
+#         os.path.join(OUTDIR, DATASET, "semibin/catalogue_semibin.fna")
+#     conda:
+#         "envs/cami2_environment.yml"
+#     shell:
+#         """
+#         zcat {input} | sed -E 's/([0-9]+)([A-Za-z])/\\1:\\2/' > {output} 
+#         """
+
+
+# rule bam_process_semibin:
+#     input:
+#         bam=os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam")
+#     output:
+#         modified_bam=os.path.join(OUTDIR, DATASET, "semibin/{sample}_sorted_semibin.bam")
+#     conda:
+#         "envs/cami2_environment.yml"
+#     shell:
+#         """
+#         samtools view -H {input.bam} | \\
+#         sed -E 's/([0-9]+)([A-Za-z0-9]+)/\\1:\\2/' | \\
+#         samtools reheader - {input.bam} > {output.modified_bam}
+#         """
+
+
+
+
+rule download_metahit:
+    output:
+        contigs_raw=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue_raw.fna.gz")
+    params:
+        url = "https://figshare.com/ndownloader/files/50894283"
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        wget {params.url} -O {output.contigs_raw}
+        """
+
+rule process_metahit:
+    input:
+        contigs_raw=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue_raw.fna.gz")
+    output:
+        contigs_processed=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+    log:
+        os.path.join(LOGS, DATASET, "process_metahit.log")
+    params:
+        min_length=MINSIZE_CONTIGS
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        python {SRC_DIR}/process_metahit.py -i {input.contigs_raw} -o {output.contigs_processed} --log {log} -m {params.min_length}
+        """
+
+
+rule download_cami2:
+    output:
+        contigs=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, [])),
+        reads=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), sample=SAMPLES.get(DATASET, []))
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        python {SRC_DIR}/get_cami2_data.py {DATASET} {sample_str}
+        """
+
+
+
+rule concatenate:
+    input:
+        expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
+    output:
+        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+    log:
+        os.path.join(LOGS, DATASET, "concatenate.log")
+    params:
+        min_length=MINSIZE_CONTIGS
+    conda:
+        "envs/vamb.yml"
+    shell:
+        """
+        python {SRC_DIR}/concatenate_semibin.py {output} {input} -m {params.min_length}
+        python {SRC_DIR}/concatenate_log.py {input} {output} -m {params.min_length} --log {log}
+        """
+
+
+rule alignment:
+    input:
+        read=os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"),
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+    output:
+        os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam")
+    threads:
+        192
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
+        """
 
 
 #OTHER MODEL 
@@ -314,81 +442,6 @@ rule create_fasta_bins_other_model_test:
 #END OTHER MODEL
 
 
-
-rule download_metahit:
-    output:
-        contigs_raw=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue_raw.fna.gz")
-    params:
-        url = "https://figshare.com/ndownloader/files/50894283"
-    conda:
-        "envs/cami2_processing.yml"
-    shell:
-        """
-        wget {params.url} -O {output.contigs_raw}
-        """
-
-rule process_metahit:
-    input:
-        contigs_raw=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue_raw.fna.gz")
-    output:
-        contigs_processed=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
-    log:
-        os.path.join(LOGS, DATASET, "process_metahit.log")
-    params:
-        min_length=MINSIZE_CONTIGS
-    conda:
-        "envs/cami2_processing.yml"
-    shell:
-        """
-        python {SRC_DIR}/process_metahit.py -i {input.contigs_raw} -o {output.contigs_processed} --log {log} -m {params.min_length}
-        """
-
-
-rule download_cami2:
-    output:
-        contigs=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, [])),
-        reads=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), sample=SAMPLES.get(DATASET, []))
-    conda:
-        "envs/cami2_processing.yml"
-    shell:
-        """
-        python {SRC_DIR}/get_cami2_data.py {DATASET} {sample_str}
-        """
-
-
-
-rule concatenate:
-    input:
-        expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
-    output:
-        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
-    log:
-        os.path.join(LOGS, DATASET, "concatenate.log")
-    params:
-        min_length=MINSIZE_CONTIGS
-    conda:
-        "envs/vamb.yml"
-    shell:
-        """
-        python {SRC_DIR}/concatenate.py {output} {input} -m {params.min_length}
-        python {SRC_DIR}/concatenate_log.py {input} {output} -m {params.min_length} --log {log}
-        """
-
-
-rule alignment:
-    input:
-        read=os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"),
-        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
-    output:
-        os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam")
-    threads:
-        192
-    conda:
-        "envs/cami2_processing.yml"
-    shell:
-        """
-        strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
-        """
 
 
 #VAMB
@@ -618,48 +671,6 @@ rule checkm2:
 
 
 
-
-
-# rule semibin:
-#     input:
-#         catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
-#         bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
-#     output:
-#         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output")
-#     conda:
-#         "envs/semibin_environment.yml"
-#     shell:
-#         """
-        
-#         """
-
-
-# rule concatenate_process_semibin:
-#     input:
-#         os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
-#     output:
-#         os.path.join(OUTDIR, DATASET, "semibin/catalogue_semibin.fna")
-#     conda:
-#         "envs/cami2_environment.yml"
-#     shell:
-#         """
-#         zcat {input} | sed -E 's/([0-9]+)([A-Za-z])/\\1:\\2/' > {output} 
-#         """
-
-
-# rule bam_process_semibin:
-#     input:
-#         bam=os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam")
-#     output:
-#         modified_bam=os.path.join(OUTDIR, DATASET, "semibin/{sample}_sorted_semibin.bam")
-#     conda:
-#         "envs/cami2_environment.yml"
-#     shell:
-#         """
-#         samtools view -H {input.bam} | \\
-#         sed -E 's/([0-9]+)([A-Za-z0-9]+)/\\1:\\2/' | \\
-#         samtools reheader - {input.bam} > {output.modified_bam}
-#         """
 
 
 # rule postprocess_cluster_outputs_comebin:

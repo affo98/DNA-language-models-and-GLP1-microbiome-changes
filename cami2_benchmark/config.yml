@@ -43,10 +43,10 @@ models:
   - name: vamb
   - name: taxvamb
   - name: comebin
+  - name: semibin
   - name: tnf
   - name: tnfkernel
   - name: dna2vec
   - name: dnaberts
   - name: dnabert2
   - name: dnabert2random
-  #- name: semibin2
