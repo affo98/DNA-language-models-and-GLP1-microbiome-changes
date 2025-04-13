@@ -88,12 +88,12 @@ if config_download:
     elif DATASET == 'metahit':
         input_files += [
             os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue_raw.fna.gz"),
-            os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+            os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
         ]
 
 if config_concatenate:
     input_files.append(
-        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
     )
 
 if config_alignment:
