@@ -2,6 +2,7 @@ import argparse
 import os
 import shutil
 import gzip
+from tqdm import tqdm
 
 from Bio import SeqIO
 
@@ -24,7 +25,7 @@ def postprocess(input_dir, output_dir, min_total_length, log_file):
     num_clusters_before = 0
     num_clusters_after = 0
 
-    for filename in os.listdir(input_dir):
+    for filename in tqdm(os.listdir(input_dir), desc="Postprocessing Bins"):
         if filename.endswith((".fasta", ".fa", ".fasta.gz", ".fa.gz")):
             input_file_path = os.path.join(input_dir, filename)
             total_length = 0
