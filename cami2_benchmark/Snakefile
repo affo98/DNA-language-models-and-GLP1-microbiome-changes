@@ -91,11 +91,11 @@ if config_download:
             os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
         ]
 
-if config_concatenate and model != 'semibin':
+if config_concatenate and MODEL != 'semibin':
     input_files.append(
         os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
     )
-elif config_concatenate and model == 'semibin':
+elif config_concatenate and MODEL == 'semibin':
      input_files.append(
         os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue"),
     )
