@@ -200,30 +200,12 @@ ruleorder: other_model_val > create_fasta_bins_other_model_val > checkm2_val > p
 
 
 
-
-rule semibin:
-    input:
-        catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
-        bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
-    output:
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output")
-    conda:
-        "envs/semibin.yml"
-    params:
-        threads=20
-    shell:
-        """
-        SemiBin2 multi_easy_bin -i {input.catalogue} -b {input.bams} -o {output} --separator C \
-        -t {params.threads}
-        """
-
-
 rule concatenate_semibin:
     input:
         expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
     output:
         tmp_folder=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue"),
-        final_output=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+        final_output=os.path.join(OUTDIR_PROCESSED, DATASET, "semibin", "catalogue.fna.gz")
     log:
         os.path.join(LOGS, DATASET, "concatenate.log")
     params:
@@ -236,6 +218,7 @@ rule concatenate_semibin:
         """
         SemiBin2 concatenate_fasta --input-fasta {input} --output {output.tmp_folder} -m {params.min_length}
         mv {params.tmp_output} {output.final_output}
+        rm {output.tmp_folder}
         """
 
 rule alignment_semibin:
@@ -252,6 +235,25 @@ rule alignment_semibin:
         """
         strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
         """
+
+
+rule semibin:
+    input:
+        catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "semibin", "catalogue.fna.gz")),
+        bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "semibin", "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+    output:
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output")
+    conda:
+        "envs/semibin.yml"
+    params:
+        threads=20
+    shell:
+        """
+        SemiBin2 multi_easy_bin -i {input.catalogue} -b {input.bams} -o {output} --separator C \
+        -t {params.threads}
+        """
+
+
 
 # rule concatenate_process_semibin:
 #     input:
