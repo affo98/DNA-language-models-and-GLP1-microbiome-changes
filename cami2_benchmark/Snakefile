@@ -204,28 +204,21 @@ rule semibin:
         """
 
 
-#COMEBIN
-# rule comebin:
-#     input:
-#         catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
-#         bams=os.path.join(OUTDIR_PROCESSED, DATASET)
-#     output:
-#         directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output"))
-#     params:
-#         views=6,
-#         threads=192
-#     conda:
-#         "envs/comebin.yml"
-#     shell:  
-#         """
-#         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
-
-#         if [ ! -f "{OUTDIR_PROCESSED}/{DATASET}/catalogue.fna" ]; then
-#             gzip -dkc {input.catalogue} > {OUTDIR_PROCESSED}/{DATASET}/catalogue.fna
-#         fi
-
-#         bash run_comebin.sh -a {OUTDIR_PROCESSED}/{DATASET}/catalogue.fna -p {input.bams} -o {output} -n {params.views} -t {params.threads}
-#         """
+rule concatenate_semibin:
+    input:
+        expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
+    output:
+        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+    log:
+        os.path.join(LOGS, DATASET, "concatenate.log")
+    params:
+        min_length=MINSIZE_CONTIGS
+    conda:
+        "envs/vamb.yml"
+    shell:
+        """
+        SemiBin2 concatenate_fasta -input-fasta {input} -output {output} -m {params.min_length}
+        """
 
 
 
@@ -302,7 +295,7 @@ rule download_cami2:
         """
 
 
-
+#CHANGE BACK! script
 rule concatenate:
     input:
         expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
@@ -316,7 +309,7 @@ rule concatenate:
         "envs/vamb.yml"
     shell:
         """
-        python {SRC_DIR}/concatenate_semibin.py {output} {input} -m {params.min_length}
+        python {SRC_DIR}/concatenate_semibin.py {output} {input} -m {params.min_length} 
         python {SRC_DIR}/concatenate_log.py {input} {output} -m {params.min_length} --log {log}
         """
 
