@@ -100,7 +100,7 @@ if config_concatenate:
 
 if config_concatenate_semibin:
      input_files.append(
-        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue"),
+        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
     )
 
 if config_alignment:
@@ -224,19 +224,20 @@ rule concatenate_semibin:
     input:
         expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
     output:
-        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue")
+        tmp_folder=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue")
+        final_output=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
     log:
         os.path.join(LOGS, DATASET, "concatenate.log")
     params:
         min_length=MINSIZE_CONTIGS,
         tmp_output=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue", "concatenated.fa.gz"),
-        final_output=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+        
     conda:
         "envs/semibin.yml"
     shell:
         """
-        SemiBin2 concatenate_fasta --input-fasta {input} --output {output} -m {params.min_length}
-        mv {params.tmp_output} {params.final_output}
+        SemiBin2 concatenate_fasta --input-fasta {input} --output {output.tmp_folder} -m {params.min_length}
+        mv {params.tmp_output} {output.final_output}
         """
 
 rule alignment_semibin:
