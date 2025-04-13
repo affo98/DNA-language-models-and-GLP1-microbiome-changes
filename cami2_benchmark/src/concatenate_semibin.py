@@ -27,15 +27,14 @@ def concatenate_fasta(
     identifiers: set[str] = set()
     for inpathno, inpath in enumerate(inpaths):
         print(inpath)
-        sample_barcode = inpath.split("/")[-1].split("_")[0]
-        print(sample_barcode)
+        sample_barcode = inpath.split("/")[-1].split("_")[0]  # changed
         try:
             with Reader(inpath) as infile:
                 # If we rename, seq identifiers only have to be unique for each sample
                 if rename:
                     identifiers.clear()
 
-                for entry in byte_iterfasta(infile):
+                for entry in byte_iterfasta(infile, inpath):  # changed
                     if len(entry) < minlength:
                         continue
 
