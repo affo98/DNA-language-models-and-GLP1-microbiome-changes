@@ -201,8 +201,6 @@ ruleorder: other_model_val > create_fasta_bins_other_model_val > checkm2_val > p
 
 
 
-
-
 rule semibin:
     input:
         catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
@@ -224,7 +222,7 @@ rule concatenate_semibin:
     input:
         expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
     output:
-        tmp_folder=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue")
+        tmp_folder=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue"),
         final_output=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
     log:
         os.path.join(LOGS, DATASET, "concatenate.log")
