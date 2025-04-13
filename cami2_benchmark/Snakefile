@@ -200,7 +200,7 @@ rule semibin:
     shell:
         """
         SemiBin2 multi_easy_bin -i {input.catalogue} -b {input.bams} -o {output} --separator C \
-        -engine gpu -t {params.threads}
+        -t {params.threads}
         """
 
 
