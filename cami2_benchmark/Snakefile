@@ -218,7 +218,7 @@ rule concatenate_semibin:
     log:
         os.path.join(LOGS, DATASET, "concatenate.log")
     params:
-        min_length=MINSIZE_CONTIGS
+        min_length=MINSIZE_CONTIGS,
         tmp_output=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue", "concatenated.fa.gz"),
         final_output=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
     conda:
