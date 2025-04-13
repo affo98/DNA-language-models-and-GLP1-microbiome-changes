@@ -194,26 +194,26 @@ rule all:
     input: input_files
 
 
-# ruleorder: other_model_val > create_fasta_bins_other_model_val > checkm2_val > parse_checkm2_val > other_model_test > create_fasta_bins_other_model_test > concatenate_semibin >  concatenate > process_metahit
+ruleorder: other_model_val > create_fasta_bins_other_model_val > checkm2_val > parse_checkm2_val > other_model_test > create_fasta_bins_other_model_test > concatenate_semibin >  concatenate > process_metahit
 
 #ruleorder to aboiv conflicts between rules
-base_ruleorder = [
-    "other_model_val",
-    "create_fasta_bins_other_model_val",
-    "checkm2_val",
-    "parse_checkm2_val",
-    "other_model_test",
-    "create_fasta_bins_other_model_test",
-]
+# base_ruleorder = [
+#     "other_model_val",
+#     "create_fasta_bins_other_model_val",
+#     "checkm2_val",
+#     "parse_checkm2_val",
+#     "other_model_test",
+#     "create_fasta_bins_other_model_test",
+# ]
 
-if config["MODEL"] == "semibin":
-    final_rules = ["concatenate_semibin", "concatenate", "process_metahit"]
-elif config["DATASET"] == "metahit":
-    final_rules = ["process_metahit", "concatenate", "concatenate_semibin"]
-else:
-    final_rules = ["concatenate", "concatenate_semibin", "process_metahit"]
+# if config["MODEL"] == "semibin":
+#     final_rules = ["concatenate_semibin", "concatenate", "process_metahit"]
+# elif config["DATASET"] == "metahit":
+#     final_rules = ["process_metahit", "concatenate", "concatenate_semibin"]
+# else:
+#     final_rules = ["concatenate", "concatenate_semibin", "process_metahit"]
 
-ruleorder: *base_ruleorder, *final_rules
+# ruleorder: *base_ruleorder, *final_rules
 
 
 
