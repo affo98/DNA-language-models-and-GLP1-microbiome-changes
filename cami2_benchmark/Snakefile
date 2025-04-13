@@ -203,22 +203,22 @@ rule concatenate_semibin:
         expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
     output:
         tmp_folder=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue"),
-        final_output=os.path.join(OUTDIR_PROCESSED, DATASET, "semibin", "catalogue.fna.gz")
     log:
         os.path.join(LOGS, DATASET, "concatenate.log")
     params:
         min_length=MINSIZE_CONTIGS,
         tmp_output=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue", "concatenated.fa.gz"),
+        final_output=os.path.join(OUTDIR_PROCESSED, DATASET, "semibin", "catalogue.fna.gz")
         
     conda:
         "envs/semibin.yml"
     shell:
         """
         SemiBin2 concatenate_fasta --input-fasta {input} --output {output.tmp_folder} -m {params.min_length}
+        mv {params.tmp_output} {params.final_output}
+        rm -rf {output.tmp_folder}
         """
-        #        mv {params.tmp_output} {output.final_output}
-        #rm -rf {output.tmp_folder}
-
+        
 rule alignment_semibin:
     input:
         read=os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"),
