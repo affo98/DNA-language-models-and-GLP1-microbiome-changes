@@ -145,7 +145,7 @@ elif MODEL == 'comebin' and not config_nomodelrun:
 elif MODEL == 'semibin' and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output"),
-        #os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "semibin"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "semibin"),
     ]
 
 
@@ -238,7 +238,7 @@ rule semibin:
         catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "semibin", "catalogue.fna.gz")),
         bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "semibin", "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
     output:
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output")
+        directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output"))
     conda:
         "envs/semibin.yml"
     params:
@@ -248,6 +248,24 @@ rule semibin:
         SemiBin2 multi_easy_bin -i {input.catalogue} -b {input.bams} -o {output} --separator C \
         -t {params.threads}
         """
+
+rule postprocess_cluster_outputs_semibin:
+    input:
+        model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output")
+    output:
+        cluster_fasta=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "semibin"))
+    log:
+        os.path.join(LOGS, DATASET, "semibin_bin_postprocessing.log")
+    params:
+        minsize_bins = MINSIZE_BINS
+
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        python {SRC_DIR}/postprocess_cluster_outputs_comebin_semibin.py {output.cluster_fasta} {input.model_outputs}/bins {params.minsize_bins} --log {log}
+        """
+
 
 
 
@@ -687,13 +705,13 @@ rule postprocess_cluster_outputs_comebin:
     log:
         os.path.join(LOGS, DATASET, "comebin_bin_postprocessing.log")
     params:
-        minsize_bins = 250000
+        minsize_bins = MINSIZE_BINS
     conda:
         "envs/cami2_processing.yml"
     shell:
         """
         BIN_DIR=$(find {input.model_outputs}/comebin_res/cluster_res -type d -name 'weight_seed_kmeans_k_*_result.tsv_bins' | head -n 1)
-        python {SRC_DIR}/postprocess_cluster_outputs_comebin.py {output.cluster_fasta} $BIN_DIR {params.minsize_bins} --log {log}
+        python {SRC_DIR}/postprocess_cluster_outputs_comebin_semibin.py {output.cluster_fasta} $BIN_DIR {params.minsize_bins} --log {log}
         """
 #END COMEBIN
 
