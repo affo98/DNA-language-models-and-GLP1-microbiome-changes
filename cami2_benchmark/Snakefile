@@ -217,7 +217,7 @@ rule concatenate_semibin:
         "envs/semibin.yml"
     shell:
         """
-        SemiBin2 concatenate_fasta -input-fasta {input} -output {output} -m {params.min_length}
+        SemiBin2 concatenate_fasta --input-fasta {input} --output {output} -m {params.min_length}
         """
 
 
