@@ -14,7 +14,9 @@ from src.utils import read_contigs, Logger, split_contigs_valtest
 
 # data
 MAX_CONTIG_LENGTH = 60000  # oom with 70.000
-VAL_PROPORTION = 0.1
+VAL_PROPORTION = (
+    0.01  # 0.1 for cami2, and 0.01 should be enough for phenotype datasets.
+)
 
 # threshold calculation
 N_BINS = 1000
