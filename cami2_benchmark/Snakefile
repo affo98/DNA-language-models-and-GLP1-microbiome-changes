@@ -56,10 +56,8 @@ MINSIZE_BINS=250000
 MINSIZE_CONTIGS=2000
 
 #knn params
-# KNN_K = [100,200,300,400,500,600,700,800,900,1000]
-# KNN_P = [25,50,75]
-KNN_K = [400]
-KNN_P = [25]
+KNN_K = [100,200,300,400,500,600,700,800,900,1000]
+KNN_P = [25,50,75]
 
 print(f"-------------Configuration Flags:--------------")
 print(f"  - DATASET:             {DATASET}")
@@ -196,25 +194,6 @@ rule all:
 
 ruleorder: other_model_val > create_fasta_bins_other_model_val > checkm2_val > parse_checkm2_val > other_model_test > create_fasta_bins_other_model_test > concatenate_semibin >  concatenate > process_metahit
 
-#ruleorder to aboiv conflicts between rules
-# base_ruleorder = [
-#     "other_model_val",
-#     "create_fasta_bins_other_model_val",
-#     "checkm2_val",
-#     "parse_checkm2_val",
-#     "other_model_test",
-#     "create_fasta_bins_other_model_test",
-# ]
-
-# if config["MODEL"] == "semibin":
-#     final_rules = ["concatenate_semibin", "concatenate", "process_metahit"]
-# elif config["DATASET"] == "metahit":
-#     final_rules = ["process_metahit", "concatenate", "concatenate_semibin"]
-# else:
-#     final_rules = ["concatenate", "concatenate_semibin", "process_metahit"]
-
-# ruleorder: *base_ruleorder, *final_rules
-
 
 
 rule concatenate_semibin:
@@ -264,9 +243,11 @@ rule semibin:
         threads=20
     shell:
         """
-        SemiBin2 multi_easy_bin -i {input.catalogue} -b {input.bams} -o {output} --separator C \
+        SemiBin2 multi_easy_bin -i {input.catalogue} -b {input.bams} -o {output} \
         -t {params.threads} --write-pre-reclustering-bins --self-supervised --engine gpu
         """
+
+# --separator C
 
 rule postprocess_cluster_outputs_semibin:
     input:
