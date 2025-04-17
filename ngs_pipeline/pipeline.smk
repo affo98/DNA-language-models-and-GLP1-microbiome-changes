@@ -71,7 +71,7 @@ def get_samples(wildcards):
 
 rule all:
     input:
-        os.path.join(OUTDIR, "algn/{sample}_sorted.bam"),
+        os.path.join(OUTDIR, "algn/{wildcards.sample}_sorted.bam"),
         os.path.join(OUTDIR, "global_contig_catalogue.fna.gz"),
         os.path.join(OUTDIR, "abdn_coverm/abundances.tsv")
         # os.path.join(OUTDIR, "abdn_coverm/abundances.tsv")
