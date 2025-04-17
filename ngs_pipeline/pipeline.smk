@@ -236,31 +236,31 @@ rule concatenate:
         python {params.concatenate} {output} {input} -m 94
         """
 
-rule build_index:
-    input:
-        os.path.join(OUTDIR, "global_contig_catalogue.fna.gz")
-    output:
-        os.path.join(OUTDIR, "minimap/catalogue.mmi")
-    conda:
-        os.path.join(CONDA_ENVS, "minimap2.yaml")
-    params:
-        concatenate = os.path.join(PY_SCRIPTS, "concatenate.py")
-    threads:
-        48
-    resources:
-        mem_gb=100
-    shell:
-        """
-        mkdir -p minimap
-        minimap2 -I 100G -d {output} {input}
-        """
+# rule build_index:
+#     input:
+#         os.path.join(OUTDIR, "global_contig_catalogue.fna.gz")
+#     output:
+#         os.path.join(OUTDIR, "minimap/catalogue.mmi")
+#     conda:
+#         os.path.join(CONDA_ENVS, "minimap2.yaml")
+#     params:
+#         concatenate = os.path.join(PY_SCRIPTS, "concatenate.py")
+#     threads:
+#         48
+#     resources:
+#         mem_gb=100
+#     shell:
+#         """
+#         mkdir -p minimap
+#         minimap2 -I 100G -d {output} {input}
+#         """
 
 rule alignment:
     input:
         r1=os.path.join(OUTDIR, "knead/{sample}/paired_1.fastq"),
         r2=os.path.join(OUTDIR, "knead/{sample}/paired_2.fastq"),
-        # contig_catalouge=os.path.join(OUTDIR,"global_contig_catalogue.fna.gz")
-        contig_catalogue_index = os.path.join(OUTDIR, "minimap/catalogue.mmi")
+        contig_catalouge=os.path.join(OUTDIR,"global_contig_catalogue.fna.gz")
+        # contig_catalogue_index = os.path.join(OUTDIR, "minimap/catalogue.mmi")
     output:
         os.path.join(OUTDIR, "algn/{sample}_sorted.bam"),
     benchmark:
@@ -270,13 +270,15 @@ rule alignment:
     resources:
         mem_gb=360
     conda:
-        os.path.join(CONDA_ENVS, "minimap2.yaml")
+        # os.path.join(CONDA_ENVS, "minimap2.yaml")
+        os.path.join(CONDA_ENVS, "strobealing.yaml")
     shell:
+        # """
+        # minimap2 -t {threads} -ax sr {input.contig_catalogue_index} {input.r1} {input.r2} | samtools view -bS | samtools sort -o {output}
+        # """
         """
-        minimap2 -t {threads} -ax sr {input.contig_catalogue_index} {input.r1} {input.r2} | samtools view -bS | samtools sort -o {output}
-        """
-#strobealign -t {threads} {input.contig_catalouge} {input.r1} {input.r2} | samtools sort -o {output}
-
+        strobealign -t {threads} {input.contig_catalouge} {input.r1} {input.r2} | samtools sort -o {output}
+        """    
 rule get_coverage:
     input:
         os.path.join(OUTDIR, "algn/{sample}_sorted.bam"),
