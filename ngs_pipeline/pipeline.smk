@@ -271,7 +271,7 @@ rule alignment:
         mem_gb=90
     conda:
         # os.path.join(CONDA_ENVS, "minimap2.yaml")
-        os.path.join(CONDA_ENVS, "strobealing.yaml")
+        os.path.join(CONDA_ENVS, "strobealign.yaml")
     shell:
         # """
         # minimap2 -t {threads} -ax sr {input.contig_catalogue_index} {input.r1} {input.r2} | samtools view -bS | samtools sort -o {output}
