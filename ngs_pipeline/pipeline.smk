@@ -76,19 +76,19 @@ rule all:
         # os.path.join(DATAPATH, "SAMEA{sample}/1.fastq.gz"),
         # os.path.join(DATAPATH, "SAMEA{sample}/2.fastq.gz"),
 
-# checkpoint download:
-#     output:
-#         directory(DATAPATH)
-#     conda:
-#         os.path.join(CONDA_ENVS, "get_phenotype_reads.yaml"),
-#     params:
-#         dataset_id = STUDY_ID,
-#         dataset_name = STUDY_NAME,
-#         get_reads_py = os.path.join(PY_SCRIPTS, "get_phenotype_reads.py"),
-#     shell:
-#         """
-#         python {params.get_reads_py} -i {params.dataset_id} -n {params.dataset_name}
-#         """
+checkpoint download:
+    output:
+        directory(DATAPATH)
+    conda:
+        os.path.join(CONDA_ENVS, "get_phenotype_reads.yaml"),
+    params:
+        dataset_id = STUDY_ID,
+        dataset_name = STUDY_NAME,
+        get_reads_py = os.path.join(PY_SCRIPTS, "get_phenotype_reads.py"),
+    shell:
+        """
+        python {params.get_reads_py} -i {params.dataset_id} -n {params.dataset_name}
+        """
 
 
 # rule fastqc:
