@@ -268,7 +268,7 @@ rule alignment:
     threads:
         192
     resources:
-        mem_gb=360
+        mem_gb=90
     conda:
         # os.path.join(CONDA_ENVS, "minimap2.yaml")
         os.path.join(CONDA_ENVS, "strobealing.yaml")
