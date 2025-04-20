@@ -291,7 +291,6 @@ class TrainBatchSampler(Sampler):
         super().__init__(dataset)
         self.batch_size = batch_size
         self.dataset = dataset
-        self.epoch=0
         if num_replicas is None:
             if not dist.is_available():
                 raise RuntimeError("Requires distributed package to be available")
@@ -323,16 +322,15 @@ class TrainBatchSampler(Sampler):
               self.num_samples, len(self.dataset), self.rank)
 
     def __iter__(self):
-        all_indices = np.load("indices_epoch{}.npy".format(self.epoch))
-
         # Define a fixed number of batches per epoch
         num_batches = self.__len__()
         for i in range(num_batches):
-            batch = all_indices[(self.num_replicas*i+self.rank) * self.batch_size:(self.num_replicas*i+self.rank + 1) * self.batch_size]
+            batch = self.indices[(self.num_replicas*i+self.rank) * self.batch_size:(self.num_replicas*i+self.rank + 1) * self.batch_size]
             yield batch
     
     def set_epoch(self, epoch):
-        self.epoch = epoch
+        self.indices = np.load("indices_epoch{}.npy".format(epoch))
+
 
     def __len__(self) -> int:
         return self.num_samples // self.batch_size
