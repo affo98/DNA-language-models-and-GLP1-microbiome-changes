@@ -261,38 +261,42 @@ def map_sampleid_to_alias(samples_fastq: dict, study_name: str) -> dict:
                 for sample_id, runs in samples_fastq[study_id].items()
                 if sample_id in sample_ids
             }
+        if not os.path.exists(sample_labels_output_file):
+            with open(sample_labels_output_file, "w") as file:
+                header = lines[0].strip().split("\t")
+                updated_header = "\t".join(["sample_id", header[1]])
+                file.write(updated_header + "\n")
 
-        with open(sample_labels_output_file, "w") as file:
-            header = lines[0].strip().split("\t")
-            updated_header = "\t".join(["sample_id", header[1]])
-            file.write(updated_header + "\n")
+                if study_id in ["PRJEB4336", "PRJEB1786"]:
+                    for line in lines[1:]:
+                        parts = line.strip().split("\t")
+                        sample_alias = parts[0]
+                        sample_label = parts[1]
+                        sample_id = sample_alias_to_id.get(sample_alias, "Error")
 
-            if study_id in ["PRJEB4336", "PRJEB1786"]:
-                for line in lines[1:]:
-                    parts = line.strip().split("\t")
-                    sample_alias = parts[0]
-                    sample_label = parts[1]
-                    sample_id = sample_alias_to_id.get(sample_alias, "Error")
+                        updated_line = "\t".join([sample_id, sample_label])
+                        file.write(updated_line + "\n")
 
-                    updated_line = "\t".join([sample_id, sample_label])
-                    file.write(updated_line + "\n")
+                elif study_id in [
+                    "PRJEB12123",
+                    "PRJEB21528",
+                    "PRJNA422434",
+                ] or study_id in ["PRJDB3601", "PRJNA448494"]:
+                    for sample_id, sample_label in zip(sample_ids, sample_labels):
+                        updated_line = "\t".join([sample_id, str(sample_label)])
+                        file.write(updated_line + "\n")
 
-            elif study_id in [
-                "PRJEB12123",
-                "PRJEB21528",
-                "PRJNA422434",
-            ] or study_id in ["PRJDB3601", "PRJNA448494"]:
-                for sample_id, sample_label in zip(sample_ids, sample_labels):
-                    updated_line = "\t".join([sample_id, str(sample_label)])
-                    file.write(updated_line + "\n")
-
-            samples_after = len(samples_fastq[study_id])
-            # with open(args.log, "a") as log:
-            #     log.write(
-            #         f"#Samples {study_id} {study_name} \n    Before: {samples_before}"
-            #     )
-            #     log.write(f"    After:  {samples_after} \n")
-
+                samples_after = len(samples_fastq[study_id])
+                # with open(args.log, "a") as log:
+                #     log.write(
+                #         f"#Samples {study_id} {study_name} \n    Before: {samples_before}"
+                #     )
+                #     log.write(f"    After:  {samples_after} \n")
+        else:
+            print(
+                f"{sample_labels_output_file} already exists!\nContinueing workflow to downloads"
+            )
+            continue
     return samples_fastq
 
 
@@ -334,9 +338,12 @@ def download_all_fastq_files(samples_fastq: dict, study_name: str) -> None:
                     destination_path = os.path.join(
                         sample_dir, fastq_filename.split("_")[-1]
                     )
+                    print("#################\n")
+                    print("DESTINATION", destination_path, flush=True)
+                    print("CHECK", os.path.exists(destination_path), flush=True)
+                    print("#################\n")
                     if not os.path.exists(destination_path):
                         download_fastq(fastq_file, destination_path)
-
     return
 
 
