@@ -10,13 +10,12 @@ import os
 import csv
 import torch
 import math
+import numpy as np
 import torch.distributed as dist
 from typing import Optional
 from torch.utils.data.dataset import Dataset
 from torch.utils.data.sampler import Sampler
 import random
-from transformers import AutoTokenizer
-
 
 class GenomeHierarchihcalDataset(Dataset):
     def __init__(self, args, load_train=True):
@@ -29,7 +28,6 @@ class GenomeHierarchihcalDataset(Dataset):
                 data = list(csv.reader(tsvfile, delimiter="\t"))
                 self.train = False
 
-        self.tokenizer = AutoTokenizer.from_pretrained("zhihan1996/DNABERT-2-117M", trust_remote_code=True)
         self.id = [i for i in range(len(data[1:]))]
         self.seq1 = [d[11] for d in data[1:]]
         self.seq2 = [d[12] for d in data[1:]]
@@ -240,9 +238,108 @@ class HierarchicalBatchSampler(Sampler):
     def __len__(self) -> int:
         return self.num_samples // self.batch_size
     
+class CustomDataset(Dataset):
+    def __init__(self, args, load_train=True):
+        if load_train:
+            with open(os.path.join(args.datapath, args.train_dataname)) as tsvfile:
+                data = list(csv.reader(tsvfile, delimiter="\t"))
+                self.train = True
+        else:
+            with open(os.path.join(args.datapath, args.val_dataname)) as tsvfile:
+                data = list(csv.reader(tsvfile, delimiter="\t"))
+                self.train = False
+
+        self.id = [i for i in range(len(data[1:]))]
+        self.seq1 = [d[11] for d in data[1:]]
+        self.seq2 = [d[12] for d in data[1:]]
+        self.species = [int(d[3]) for d in data[1:]]
+        self.genus = [int(d[4]) for d in data[1:]]
+        self.family = [int(d[5]) for d in data[1:]]
+        self.order = [int(d[6]) for d in data[1:]]
+        self.class_ = [int(d[7]) for d in data[1:]]
+        self.phylum = [int(d[8]) for d in data[1:]]
+        self.kingdom = [int(d[9]) for d in data[1:]]
+        self.superkingdom = [int(d[10]) for d in data[1:]]
+
+    def __len__(self):
+        return len(self.species)
+    
+    def __getitem__(self, index):
+        sequences1, sequences2, labels = [], [], []
+        if self.train:
+            for i in index:
+                label = [self.species[i], self.genus[i], self.family[i], self.order[i], self.class_[i], self.phylum[i], self.kingdom[i], self.superkingdom[i]]
+                rand_i = random.choice(list(range(200)))
+                sequences1.append(self.seq1[i][rand_i:])
+                sequences2.append(self.seq2[i][rand_i:])
+                labels.append(label)
+        else:
+            for i in index:
+                label = [self.species[i], self.genus[i], self.family[i], self.order[i], self.class_[i], self.phylum[i], self.kingdom[i], self.superkingdom[i]]
+                sequences1.append(self.seq1[i])
+                sequences2.append(self.seq2[i])
+                labels.append(label)
+        
+        return [sequences1, sequences2], torch.tensor(labels)
+    
+class TrainBatchSampler(Sampler):
+    def __init__(self, batch_size: int,
+        drop_last: bool, dataset: CustomDataset,
+        num_replicas: Optional[int] = None,
+        rank: Optional[int] = None) -> None:
+
+        super().__init__(dataset)
+        self.batch_size = batch_size
+        self.dataset = dataset
+        self.epoch=0
+        if num_replicas is None:
+            if not dist.is_available():
+                raise RuntimeError("Requires distributed package to be available")
+            num_replicas = dist.get_world_size()
+        if rank is None:
+            if not dist.is_available():
+                raise RuntimeError("Requires distributed package to be available")
+            rank = dist.get_rank()
+        self.num_replicas = num_replicas
+        self.rank = rank
+        self.drop_last = drop_last
+        # If the dataset length is evenly divisible by # of replicas, then there
+        # is no need to drop any data, since the dataset will be split equally.
+        if self.drop_last and len(self.dataset) % self.num_replicas != 0:  # type: ignore
+            # Split to nearest available length that is evenly divisible.
+            # This is to ensure each rank receives the same amount of data when
+            # using this Sampler.
+            self.num_samples = math.ceil(
+                # `type:ignore` is required because Dataset cannot provide a default __len__
+                # see NOTE in pytorch/torch/utils/data/sampler.py
+                (len(self.dataset) - self.num_replicas) / \
+                self.num_replicas  # type: ignore
+            )
+        else:
+            self.num_samples = math.ceil(
+                len(self.dataset) / self.num_replicas)  # type: ignore
+        self.total_size = self.num_samples * self.num_replicas
+        print(self.total_size, self.num_replicas, self.batch_size,
+              self.num_samples, len(self.dataset), self.rank)
+
+    def __iter__(self):
+        all_indices = np.load("indices_epoch{}.npy".format(self.epoch))
+
+        # Define a fixed number of batches per epoch
+        num_batches = self.__len__()
+        for i in range(num_batches):
+            batch = all_indices[(self.num_replicas*i+self.rank) * self.batch_size:(self.num_replicas*i+self.rank + 1) * self.batch_size]
+            yield batch
+    
+    def set_epoch(self, epoch):
+        self.epoch = epoch
+
+    def __len__(self) -> int:
+        return self.num_samples // self.batch_size
+    
 class ValidationBatchSampler(Sampler):
     def __init__(self, batch_size: int,
-        drop_last: bool, dataset: GenomeHierarchihcalDataset,
+        drop_last: bool, dataset: CustomDataset,
         ) -> None:
 
         super().__init__(dataset)
@@ -269,17 +366,17 @@ class ValidationBatchSampler(Sampler):
         return self.num_samples // self.batch_size
     
 def load_deep_genome_hierarchical(args):
-    train_dataset = GenomeHierarchihcalDataset(args, load_train=True)
-    val_dataset = GenomeHierarchihcalDataset(args, load_train=False)
+    train_dataset = CustomDataset(args, load_train=True)
+    val_dataset = CustomDataset(args, load_train=False)
     
     sequence_datasets = {'train': train_dataset,
                       'val': val_dataset}
     if args.distributed:
-        train_sampler = HierarchicalBatchSampler(batch_size=args.batch_size,
+        train_sampler = TrainBatchSampler(batch_size=args.batch_size,
                                            drop_last=True,
                                            dataset=train_dataset)
     else:
-        train_sampler = HierarchicalBatchSampler(batch_size=args.batch_size,
+        train_sampler = TrainBatchSampler(batch_size=args.batch_size,
                                            drop_last=True,
                                            dataset=train_dataset,
                                            num_replicas=1,
