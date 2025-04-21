@@ -9,8 +9,8 @@ CONDA_ENVS = config['CONDA_ENVS']
 DB = config['DB']
 FASTQC_PATH = config['FASTQC_PATH']
 
-STUDY_ID = config["studies"][3].get("id")
-STUDY_NAME = config["studies"][3].get("name")
+STUDY_ID = config["studies"][4].get("id")
+STUDY_NAME = config["studies"][4].get("name")
 
 
 OUTDIR = f"{STUDY_NAME}_{STUDY_ID}"
@@ -215,13 +215,30 @@ checkpoint download:
 #         rm -rf {params.tmp_dir}
 #         """ 
 
+rule rename_contigs:
+    input:
+        os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"),
+    output:
+        renamed_contigs=os.path.join(OUTDIR, "spades/asm_{sample}/contigs_renamed.fasta"),
+        contigs_lookup=os.path.join(OUTDIR, "spades/asm_{sample}/contigs_lu.json")
+    threads:
+        12
+    params:
+        clean_contigs = os.path.join(PY_SCRIPTS, "clean_contig_names.py")
+    shell:
+        """
+        python {params.clean_contigs} {input} {output.renamed_contigs} {output.contigs_lookup}
+        """
+
+    
+
 
 rule concatenate:
     # input:
     #     os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta")
     input:
         lambda wildcards: expand(
-            os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"),
+            os.path.join(OUTDIR, "spades/asm_{sample}/contigs_renamed.fasta"),
             sample=get_samples(wildcards)
         )
     output:
@@ -237,31 +254,31 @@ rule concatenate:
         python {params.concatenate} {output} {input} -m 94
         """
 
-# rule build_index:
-#     input:
-#         os.path.join(OUTDIR, "global_contig_catalogue.fna.gz")
-#     output:
-#         os.path.join(OUTDIR, "minimap/catalogue.mmi")
-#     conda:
-#         os.path.join(CONDA_ENVS, "minimap2.yaml")
-#     params:
-#         concatenate = os.path.join(PY_SCRIPTS, "concatenate.py")
-#     threads:
-#         48
-#     resources:
-#         mem_gb=100
-#     shell:
-#         """
-#         mkdir -p minimap
-#         minimap2 -I 100G -d {output} {input}
-#         """
+rule build_index:
+    input:
+        os.path.join(OUTDIR, "global_contig_catalogue.fna.gz")
+    output:
+        os.path.join(OUTDIR, "minimap/catalogue.mmi")
+    conda:
+        os.path.join(CONDA_ENVS, "minimap2.yaml")
+    params:
+        concatenate = os.path.join(PY_SCRIPTS, "concatenate.py")
+    threads:
+        48
+    resources:
+        mem_gb=100
+    shell:
+        """
+        mkdir -p minimap
+        minimap2 -I 100G -d {output} {input}
+        """
 
 rule alignment:
     input:
         r1=os.path.join(OUTDIR, "knead/{sample}/paired_1.fastq"),
         r2=os.path.join(OUTDIR, "knead/{sample}/paired_2.fastq"),
-        contig_catalouge=os.path.join(OUTDIR,"global_contig_catalogue.fna.gz")
-        # contig_catalogue_index = os.path.join(OUTDIR, "minimap/catalogue.mmi")
+        # contig_catalouge=os.path.join(OUTDIR,"global_contig_catalogue.fna.gz")
+        contig_catalogue_index = os.path.join(OUTDIR, "minimap/catalogue.mmi")
     output:
         os.path.join(OUTDIR, "algn/{sample}_sorted.bam"),
     benchmark:
@@ -274,12 +291,12 @@ rule alignment:
         # os.path.join(CONDA_ENVS, "minimap2.yaml")
         os.path.join(CONDA_ENVS, "strobealign.yaml")
     shell:
-        # """
-        # minimap2 -t {threads} -ax sr {input.contig_catalogue_index} {input.r1} {input.r2} | samtools view -bS | samtools sort -o {output}
-        # """
         """
-        strobealign -t {threads} {input.contig_catalouge} {input.r1} {input.r2} | samtools sort -o {output}
-        """    
+        minimap2 -t {threads} -ax sr {input.contig_catalogue_index} {input.r1} {input.r2} | samtools view -bS | samtools sort -o {output}
+        """
+        # """
+        # strobealign -t {threads} {input.contig_catalouge} {input.r1} {input.r2} | samtools sort -o {output}
+        # """    
 rule get_coverage:
     input:
         os.path.join(OUTDIR, "algn/{sample}_sorted.bam"),
