@@ -23,7 +23,7 @@ model = AutoModel.from_pretrained(
 )
 
 
-for seqlen in [2000, 5000, 1000, 10000, 60000]
+for seqlen in [2000, 5000, 1000, 10000, 60000]:
     sequence = "A" * seqlen  # example length
     inputs = tokenizer([sequence] * 1, return_tensors="pt", padding=True).to("cuda")
 
