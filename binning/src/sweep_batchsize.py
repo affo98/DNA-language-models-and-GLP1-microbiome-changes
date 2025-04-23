@@ -29,7 +29,7 @@ for seqlen in [2000, 5000, 1000, 10000, 60000]:
     sequence = "A" * seqlen  # example length
     inputs = tokenizer([sequence] * 1, return_tensors="pt", padding=True).to("cuda")
 
-    for bs in [8, 16, 32, 64, 128, 256, 512, 1024]:
+    for bs in [8, 16, 32, 64, 128]:
         inputs_expanded = {k: v.repeat(bs, 1) for k, v in inputs.items()}
         # warmup
         for _ in range(5):
