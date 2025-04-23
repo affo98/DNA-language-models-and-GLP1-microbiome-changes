@@ -13,7 +13,7 @@
 * [20 February 2025](#date-30-january-2025)
 * [06 February 2025](#date-30-january-2025)
 
-#### Date:  April 2025
+#### Date: 23 April 2025
 
 ##### Who did you help this week?
 
