@@ -167,7 +167,7 @@ class Embedder:
             max([len(seq) for seq in self.dna_sequences]) + 1,
         ]
 
-        batch_sizes = [32, 32, 32, 32, 32, 32, 32, 8, 1]
+        batch_sizes = [32, 32, 32, 32, 32, 32, 32, 32, 8, 1]
 
         original_ids = (
             []
