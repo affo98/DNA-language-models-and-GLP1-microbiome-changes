@@ -3,6 +3,7 @@
 [Overleaf report](https://www.overleaf.com/project/679796b5a02b660e4f96beff)
 
 #### Meeting Outline
+* [23 April 2025](#date-30-january-2025)
 * [09 April 2025](#date-30-january-2025)
 * [03 April 2025](#date-30-january-2025)
 * [27 March 2025](#date-30-january-2025)
@@ -11,6 +12,35 @@
 * [27 February 2025](#date-30-january-2025)
 * [20 February 2025](#date-30-january-2025)
 * [06 February 2025](#date-30-january-2025)
+
+#### Date: 09 April 2025
+
+##### Who did you help this week?
+
+
+##### Who helped you this week?
+
+
+##### What did you achieve?
+
+* More results on Cami2 and metahit datasets - see image below. LLMs are much worse than binners such as VAMB, TaxVamb, and Comebin. We still want to get results from Semibin.
+![cami2results](images/cami2_23apr.png)
+
+
+##### What did you struggle with?
+
+* In the phenotype prediction, we currently have a ~ 100 Million contigs, and this takes a very long time to get embeddings with DNABERT-S (potentially multiple weeks). We need to reduce the number of contigs, maybe with co-assembly, where reads from all patients are assembled at the same time.
+
+##### Where do you need help from Veronika?
+
+* Is there a deadline for the draft? 
+* After getting embeddings from contigs in phenotype datasets, we want to do MIL. We currently have the ideas:
+
+1. Each patient represented by an abundance vector, specifying how many contigs they have in each cluster/species. Then do KNN. This is a simple "bag-of-words" that you suggested earlier. 
+2. We can also include the embeddings of clusters, and either represent each cluster with a centroid embeddings or with Hausdorff distances to other centroids. These can be multiplied with patient abundances to include the signal from each patient. 
+3. We can also have a classifier instead of a KNN.
+
+
 
 
 
