@@ -229,12 +229,23 @@ class Embedder:
         )  # To reduce Padding overhead
         dna_sequences = ContigDataset(sorted_dna_sequences)
 
+        # data_loader = DataLoader(
+        #     dna_sequences,
+        #     batch_size=batch_size * self.n_gpu,
+        #     shuffle=False,
+        #     collate_fn=self.collate_fn,
+        #     num_workers=2 * self.n_gpu,
+        # )
+
         data_loader = DataLoader(
             dna_sequences,
             batch_size=batch_size * self.n_gpu,
             shuffle=False,
             collate_fn=self.collate_fn,
-            num_workers=2 * self.n_gpu,
+            num_workers=4 * self.n_gpu,
+            pin_memory=True,
+            persistent_workers=True,
+            prefetch_factor=4,
         )
 
         all_token_lengths = []
@@ -255,7 +266,6 @@ class Embedder:
             ].to(self.device)
 
             with torch.inference_mode():
-                # with torch.no_grad():
                 with autocast(device_type=self.device.type):  # mixed precision
                     model_output = (
                         self.llm_model.forward(
