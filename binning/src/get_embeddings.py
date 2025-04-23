@@ -129,20 +129,16 @@ class Embedder:
             #     self.model_path,
             #     config=config,
             #     trust_remote_code=True,
+
             # pip install 'accelerate>=0.26.0
             # pip install -U bitsandbytes
-
-            from bitsandbytes import Linear4bit
-
-            quantization_config = {
-                "load_in_4bit": True,
-                "compute_dtype": torch.float16,
-            }
-            # quant_config = BitsAndBytesConfig(
-            #     load_in_8bit=True,
-            #     llm_int8_threshold=6.0,
-            #     llm_int8_enable_fp32_cpu_offload=True,
-            # )
+            quantization_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_quant_type="nf4",  # NormalFloat4 quantization
+                bnb_4bit_use_double_quant=True,  # Enable double quantization
+                bnb_4bit_compute_dtype=torch.bfloat16,  # Use bfloat16 for computation
+                bnb_4bit_quant_storage=torch.bfloat16,  # Store quantized weights in bfloat16
+            )
 
             self.llm_model = AutoModel.from_pretrained(
                 self.model_path,
