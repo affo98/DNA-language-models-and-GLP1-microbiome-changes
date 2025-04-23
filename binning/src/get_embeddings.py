@@ -229,26 +229,15 @@ class Embedder:
         )  # To reduce Padding overhead
         dna_sequences = ContigDataset(sorted_dna_sequences)
 
-        # data_loader = DataLoader(
-        #     dna_sequences,
-        #     batch_size=batch_size * self.n_gpu,
-        #     shuffle=False,
-        #     collate_fn=self.collate_fn,
-        #     num_workers=2 * self.n_gpu,
-        # )
-
         data_loader = DataLoader(
             dna_sequences,
             batch_size=batch_size * self.n_gpu,
             shuffle=False,
             collate_fn=self.collate_fn,
-            num_workers=4 * self.n_gpu,
-            pin_memory=True,
-            persistent_workers=True,
-            prefetch_factor=4,
+            num_workers=2 * self.n_gpu,
         )
 
-        all_token_lengths = []
+        # all_token_lengths = []
         for i, batch in enumerate(tqdm(data_loader)):
 
             # inputs_tokenized = self.llm_tokenizer.batch_encode_plus(
@@ -288,15 +277,15 @@ class Embedder:
                             (embeddings, embedding), dim=0
                         )  # concatenate along the batch dimension
 
-                    token_lengths = attention_mask.sum(dim=1).cpu().numpy()
-                    all_token_lengths.extend(token_lengths)
+                    # token_lengths = attention_mask.sum(dim=1).cpu().numpy()
+                    # all_token_lengths.extend(token_lengths)
 
-        min_token_length = min(all_token_lengths)
-        max_token_length = max(all_token_lengths)
+        # min_token_length = min(all_token_lengths)
+        # max_token_length = max(all_token_lengths)
 
-        self.log.append(
-            f"Min token length: {min_token_length}, Max token length: {max_token_length}"
-        )
+        # self.log.append(
+        #    f"Min token length: {min_token_length}, Max token length: {max_token_length}"
+        # )
 
         embeddings = np.array(embeddings.detach().cpu())
 
