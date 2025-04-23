@@ -10,10 +10,7 @@ from torch.utils.data import DataLoader
 from torch.amp import autocast
 from torch.amp.autocast_mode import is_autocast_available
 
-from transformers import (
-    AutoTokenizer,
-    AutoModel,
-)
+from transformers import AutoTokenizer, AutoModel, BitsAndBytesConfig
 
 from transformers.models.bert.configuration_bert import BertConfig
 
@@ -128,11 +125,25 @@ class Embedder:
         )
 
         if self.model_name != "dnabert2random":
-            self.llm_model = AutoModel.from_pretrained(
+            # self.llm_model = AutoModel.from_pretrained(
+            #     self.model_path,
+            #     config=config,
+            #     trust_remote_code=True,
+
+            quant_config = BitsAndBytesConfig(
+                load_in_8bit=True,
+                llm_int8_threshold=6.0,
+                llm_int8_enable_fp32_cpu_offload=True,
+            )
+
+            self.llm_modelmodel = AutoModel.from_pretrained(
                 self.model_path,
                 config=config,
                 trust_remote_code=True,
+                quantization_config=quant_config,
+                device_map="auto",
             )
+
         elif self.model_name == "dnabert2random":
             self.llm_model = AutoModel.from_config(
                 config, trust_remote_code=True
@@ -208,7 +219,10 @@ class Embedder:
         }
 
     def llm_inference(
-        self, dna_sequences_filtered: list[str], batch_size: int
+        self,
+        dna_sequences_filtered: list[str],
+        batch_size: int,
+        log_tokenlengths: bool = False,
     ) -> np.array:
         """Calculates embeddings for DNA sequences using a specified language model (LLM).
 
@@ -236,8 +250,8 @@ class Embedder:
             collate_fn=self.collate_fn,
             num_workers=2 * self.n_gpu,
         )
-
-        # all_token_lengths = []
+        if log_tokenlengths:
+            all_token_lengths = []
         for i, batch in enumerate(tqdm(data_loader)):
 
             # inputs_tokenized = self.llm_tokenizer.batch_encode_plus(
@@ -276,16 +290,16 @@ class Embedder:
                         embeddings = torch.cat(
                             (embeddings, embedding), dim=0
                         )  # concatenate along the batch dimension
+                    if log_tokenlengths:
+                        token_lengths = attention_mask.sum(dim=1).cpu().numpy()
+                        all_token_lengths.extend(token_lengths)
 
-                    # token_lengths = attention_mask.sum(dim=1).cpu().numpy()
-                    # all_token_lengths.extend(token_lengths)
-
-        # min_token_length = min(all_token_lengths)
-        # max_token_length = max(all_token_lengths)
-
-        # self.log.append(
-        #    f"Min token length: {min_token_length}, Max token length: {max_token_length}"
-        # )
+        if log_tokenlengths:
+            min_token_length = min(all_token_lengths)
+            max_token_length = max(all_token_lengths)
+            self.log.append(
+                f"Min token length: {min_token_length}, Max token length: {max_token_length}"
+            )
 
         embeddings = np.array(embeddings.detach().cpu())
 
