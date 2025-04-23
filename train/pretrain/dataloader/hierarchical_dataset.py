@@ -238,53 +238,130 @@ class HierarchicalBatchSampler(Sampler):
     def __len__(self) -> int:
         return self.num_samples // self.batch_size
     
-class CustomDataset(Dataset):
-    def __init__(self, args, load_train=True):
-        if load_train:
-            with open(os.path.join(args.datapath, args.train_dataname)) as tsvfile:
-                data = list(csv.reader(tsvfile, delimiter="\t"))
-                self.train = True
-        else:
-            with open(os.path.join(args.datapath, args.val_dataname)) as tsvfile:
-                data = list(csv.reader(tsvfile, delimiter="\t"))
-                self.train = False
+class TrainDataset(Dataset):
+    def __init__(self, args):
+        # Set chunk size (multiple of batch size is efficient)
+        self.chunk_size = args.batch_size * 31
 
-        self.id = [i for i in range(len(data[1:]))]
-        self.seq1 = [d[11] for d in data[1:]]
-        self.seq2 = [d[12] for d in data[1:]]
-        self.species = [int(d[3]) for d in data[1:]]
-        self.genus = [int(d[4]) for d in data[1:]]
-        self.family = [int(d[5]) for d in data[1:]]
-        self.order = [int(d[6]) for d in data[1:]]
-        self.class_ = [int(d[7]) for d in data[1:]]
-        self.phylum = [int(d[8]) for d in data[1:]]
-        self.kingdom = [int(d[9]) for d in data[1:]]
-        self.superkingdom = [int(d[10]) for d in data[1:]]
+        self.datapath = args.datapath
+        self.file_pattern = "train_2m_{}.tsv"
+        
+        # Manage current epoch and loaded data
+        self.current_epoch = 0
+        self.current_chunk_start = 0
+        self.current_chunk_end = 0
+        
+        # Check total number of samples (read initial file)
+        self.load_initial_file()
 
+    def load_initial_file(self):
+        with open(os.path.join(self.datapath, self.file_pattern.format(0))) as tsvfile:
+            self.total_samples = sum(1 for _ in tsvfile) - 1
+            
+    def get_current_file_path(self):
+        return os.path.join(self.datapath, self.file_pattern.format(self.current_epoch))
+    
+    def set_epoch(self, epoch):
+        self.current_epoch = epoch
+        self.current_chunk_start = 0
+        self.current_chunk_end = 0
+    
+    def ensure_data_loaded(self, idx):
+        if (self.current_data is None or 
+            idx < self.current_chunk_start or 
+            idx >= self.current_chunk_end):
+            self.load_chunk(idx)
+    
+    def load_chunk(self, start_idx):
+        # Adjust start position (align to chunk size multiple)
+        chunk_start = (start_idx // self.chunk_size) * self.chunk_size
+        chunk_end = min(chunk_start + self.chunk_size, self.total_samples)
+        
+        # Get current file path
+        current_file_path = self.get_current_file_path()
+        
+        # Read necessary rows
+        chunk_data = []
+        with open(current_file_path) as tsvfile:
+            reader = csv.reader(tsvfile, delimiter="\t")
+            # Skip header
+            next(reader)
+            
+            # Skip rows until start position
+            for _ in range(chunk_start):
+                next(reader, None)
+                
+            # Load required rows
+            for _ in range(chunk_end - chunk_start):
+                try:
+                    row = next(reader)
+                    chunk_data.append(row)
+                except StopIteration:
+                    break
+        
+        # Process data into required format
+        self.current_data = {
+            'id': list(range(chunk_start, chunk_start + len(chunk_data))),
+            'seq1': [d[11] for d in chunk_data],
+            'seq2': [d[12] for d in chunk_data],
+            'species': [int(d[3]) for d in chunk_data],
+            'genus': [int(d[4]) for d in chunk_data],
+            'family': [int(d[5]) for d in chunk_data],
+            'order': [int(d[6]) for d in chunk_data],
+            'class_': [int(d[7]) for d in chunk_data],
+            'phylum': [int(d[8]) for d in chunk_data],
+            'kingdom': [int(d[9]) for d in chunk_data],
+            'superkingdom': [int(d[10]) for d in chunk_data],
+        }
+        
+        # Update chunk range
+        self.current_chunk_start = chunk_start
+        self.current_chunk_end = chunk_start + len(chunk_data)
+    
     def __len__(self):
-        return len(self.species)
+        return self.total_samples
+    
+    def get_item_at_idx(self, idx):
+        # Calculate relative position within chunk
+        relative_idx = idx - self.current_chunk_start
+        
+        label = [
+            self.current_data['species'][relative_idx],
+            self.current_data['genus'][relative_idx],
+            self.current_data['family'][relative_idx],
+            self.current_data['order'][relative_idx],
+            self.current_data['class_'][relative_idx],
+            self.current_data['phylum'][relative_idx],
+            self.current_data['kingdom'][relative_idx],
+            self.current_data['superkingdom'][relative_idx]
+        ]
+        # For training data, cut from random position
+        rand_i = random.choice(list(range(200)))
+        seq1 = self.current_data['seq1'][relative_idx][rand_i:]
+        seq2 = self.current_data['seq2'][relative_idx][rand_i:]
+            
+        return seq1, seq2, label
     
     def __getitem__(self, index):
-        sequences1, sequences2, labels = [], [], []
-        if self.train:
-            for i in index:
-                label = [self.species[i], self.genus[i], self.family[i], self.order[i], self.class_[i], self.phylum[i], self.kingdom[i], self.superkingdom[i]]
-                rand_i = random.choice(list(range(200)))
-                sequences1.append(self.seq1[i][rand_i:])
-                sequences2.append(self.seq2[i][rand_i:])
-                labels.append(label)
-        else:
-            for i in index:
-                label = [self.species[i], self.genus[i], self.family[i], self.order[i], self.class_[i], self.phylum[i], self.kingdom[i], self.superkingdom[i]]
-                sequences1.append(self.seq1[i])
-                sequences2.append(self.seq2[i])
+        # For batch sampling, index is a list of indices
+        if isinstance(index, list):
+            sequences1, sequences2, labels = [], [], []
+            
+            # Load data using first index of the chunk
+            self.ensure_data_loaded(index[0])
+                
+            # Process all indices in this chunk
+            for idx in index:
+                seq1, seq2, label = self.get_item_at_idx(idx)
+                sequences1.append(seq1)
+                sequences2.append(seq2)
                 labels.append(label)
         
         return [sequences1, sequences2], torch.tensor(labels)
     
 class TrainBatchSampler(Sampler):
     def __init__(self, batch_size: int,
-        drop_last: bool, dataset: CustomDataset,
+        drop_last: bool, dataset: TrainDataset,
         num_replicas: Optional[int] = None,
         rank: Optional[int] = None) -> None:
 
@@ -324,12 +401,13 @@ class TrainBatchSampler(Sampler):
     def __iter__(self):
         # Define a fixed number of batches per epoch
         num_batches = self.__len__()
+        indices = list(range(self.dataset.__len__()))
         for i in range(num_batches):
-            batch = self.indices[(self.num_replicas*i+self.rank) * self.batch_size:(self.num_replicas*i+self.rank + 1) * self.batch_size]
+            batch =indices[(self.num_replicas*i+self.rank) * self.batch_size:(self.num_replicas*i+self.rank + 1) * self.batch_size]
             yield batch
     
     def set_epoch(self, epoch):
-        self.indices = np.load("indices_epoch{}.npy".format(epoch))
+        self.epoch = epoch
 
 
     def __len__(self) -> int:
@@ -337,7 +415,7 @@ class TrainBatchSampler(Sampler):
     
 class ValidationBatchSampler(Sampler):
     def __init__(self, batch_size: int,
-        drop_last: bool, dataset: CustomDataset,
+        drop_last: bool, dataset: GenomeHierarchihcalDataset,
         ) -> None:
 
         super().__init__(dataset)
@@ -364,8 +442,9 @@ class ValidationBatchSampler(Sampler):
         return self.num_samples // self.batch_size
     
 def load_deep_genome_hierarchical(args):
-    train_dataset = CustomDataset(args, load_train=True)
-    val_dataset = CustomDataset(args, load_train=False)
+    #train_dataset = GenomeHierarchihcalDataset(args, load_train=True)
+    train_dataset = TrainDataset(args)
+    val_dataset = GenomeHierarchihcalDataset(args, load_train=False)
     
     sequence_datasets = {'train': train_dataset,
                       'val': val_dataset}
