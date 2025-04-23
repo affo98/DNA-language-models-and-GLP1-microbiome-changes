@@ -163,10 +163,12 @@ class Embedder:
         ### Looping through the sequences ###
         min_sequence_lengths = [
             min([len(seq) for seq in self.dna_sequences]) - 1,
+            5000,
             10000,
             20000,
         ]
         max_sequence_lengths = [
+            5000,
             10000,
             20000,
             max([len(seq) for seq in self.dna_sequences]) + 1,
@@ -216,7 +218,7 @@ class Embedder:
             batch,
             padding="longest",  # pad up to longest in this batch
             truncation=True,  # truncate if too long
-            return_tensors="pt",  # return PyTorch tensors
+            return_tensors="pt",
         )
 
         return {
