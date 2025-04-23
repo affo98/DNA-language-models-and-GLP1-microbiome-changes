@@ -69,7 +69,7 @@ for seqlen in seq_lens:
             if "out of memory" in str(e):
                 print(f"  Batch {bs}: OOM on warmup, skipping.")
                 torch.cuda.empty_cache()
-                continue
+                break
             else:
                 raise
 
@@ -86,6 +86,6 @@ for seqlen in seq_lens:
             if "out of memory" in str(e):
                 print(f"  Batch {bs}: OOM, skipping.")
                 torch.cuda.empty_cache()
-                continue
+                break
             else:
                 raise
