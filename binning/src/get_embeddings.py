@@ -198,7 +198,11 @@ class Embedder:
             truncation=True,  # truncate if too long
             return_tensors="pt",  # return PyTorch tensors
         )
-        return encodings["input_ids"], encodings["attention_mask"]
+
+        return {
+            "input_ids": encodings["input_ids"],
+            "attention_mask": encodings["attention_mask"],
+        }
 
     def llm_inference(
         self, dna_sequences_filtered: list[str], batch_size: int
