@@ -232,18 +232,22 @@ class Embedder:
 
         all_token_lengths = []
         for i, batch in enumerate(tqdm(data_loader)):
+
+            # inputs_tokenized = self.llm_tokenizer.batch_encode_plus(
+            #     batch,
+            #     return_tensors="pt",
+            #     return_attention_mask=True,
+            #     padding=True,
+            #     #max_length=self.llm_tokenizer.model_max_length,  # change to avoid OOM erros
+            # )
+            # input_ids = inputs_tokenized["input_ids"].to(self.device)
+            # attention_mask = inputs_tokenized["attention_mask"].to(self.device)
+
+            input_ids, attention_mask = batch["input_ids"].to(self.device), batch[
+                "attention_mask"
+            ].to(self.device)
+
             with torch.no_grad():
-                inputs_tokenized = self.llm_tokenizer.batch_encode_plus(
-                    batch,
-                    return_tensors="pt",
-                    return_attention_mask=True,
-                    padding=True,
-                    max_length=self.llm_tokenizer.model_max_length,  # change to avoid OOM erros
-                )
-
-                input_ids = inputs_tokenized["input_ids"].to(self.device)
-                attention_mask = inputs_tokenized["attention_mask"].to(self.device)
-
                 model_output = (
                     self.llm_model.forward(
                         input_ids=input_ids, attention_mask=attention_mask
