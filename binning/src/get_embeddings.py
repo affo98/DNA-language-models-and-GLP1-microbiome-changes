@@ -131,17 +131,24 @@ class Embedder:
             #     trust_remote_code=True,
             # pip install 'accelerate>=0.26.0
             # pip install -U bitsandbytes
-            quant_config = BitsAndBytesConfig(
-                load_in_8bit=True,
-                llm_int8_threshold=6.0,
-                llm_int8_enable_fp32_cpu_offload=True,
-            )
+
+            from bitsandbytes import Linear4bit
+
+            quantization_config = {
+                "load_in_4bit": True,
+                "compute_dtype": torch.float16,
+            }
+            # quant_config = BitsAndBytesConfig(
+            #     load_in_8bit=True,
+            #     llm_int8_threshold=6.0,
+            #     llm_int8_enable_fp32_cpu_offload=True,
+            # )
 
             self.llm_model = AutoModel.from_pretrained(
                 self.model_path,
                 config=config,
                 trust_remote_code=True,
-                quantization_config=quant_config,
+                quantization_config=quantization_config,
                 device_map="auto",
             )
             self.llm_model = self.llm_model.eval()  # 8BIT
