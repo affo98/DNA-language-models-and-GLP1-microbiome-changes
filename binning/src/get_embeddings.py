@@ -30,6 +30,7 @@ from src.dataset import ContigDataset
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore", message="Increasing alibi size")
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
+torch._dynamo.config.capture_scalar_outputs = True
 
 
 class Embedder:
@@ -139,7 +140,7 @@ class Embedder:
             )  # no pretrained weights
 
         self.llm_model = self.llm_model.to(self.device).eval()
-        self.llm_model = torch.compile(self.llm_model, backend="eager")
+        self.llm_model = torch.compile(self.llm_model, backend="eager", dynamic=True)
 
         if self.n_gpu > 1:
             self.llm_model = nn.DataParallel(self.llm_model)
