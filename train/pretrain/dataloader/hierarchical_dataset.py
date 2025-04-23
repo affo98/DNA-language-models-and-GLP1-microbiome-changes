@@ -248,21 +248,19 @@ class TrainDataset(Dataset):
         
         # Manage current epoch and loaded data
         self.current_epoch = 0
+        self.current_data = None
         self.current_chunk_start = 0
         self.current_chunk_end = 0
         
         # Check total number of samples (read initial file)
-        self.load_initial_file()
-
-    def load_initial_file(self):
-        with open(os.path.join(self.datapath, self.file_pattern.format(0))) as tsvfile:
-            self.total_samples = sum(1 for _ in tsvfile) - 1
+        self.total_samples = 2165598
             
     def get_current_file_path(self):
         return os.path.join(self.datapath, self.file_pattern.format(self.current_epoch))
     
     def set_epoch(self, epoch):
         self.current_epoch = epoch
+        self.current_data = None
         self.current_chunk_start = 0
         self.current_chunk_end = 0
     

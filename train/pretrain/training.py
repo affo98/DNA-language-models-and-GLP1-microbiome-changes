@@ -228,9 +228,6 @@ class Trainer(nn.Module):
             except Exception as e:
                 print(f"Error loading checkpoint from {load_dir}: {e}")
                 continue
-            
-            # Set validation sampler epoch
-            self.val_sampler.set_epoch(1)
 
             batch_time = AverageMeter('Time', ':6.3f')
             data_time = AverageMeter('Data', ':6.3f')

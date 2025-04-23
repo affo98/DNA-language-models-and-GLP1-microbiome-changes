@@ -50,8 +50,8 @@ def main_single_gpu(gpu, ngpus_per_node, args):
 
     # Setup logger
     args.tb_folder = f'./tensorboard_gpu{args.gpu}'
-    if not os.path.isdir(args.tb_folder):
-        os.makedirs(args.tb_folder)
+    #if not os.path.isdir(args.tb_folder):
+    #    os.makedirs(args.tb_folder)
     logger = tb_logger.Logger(logdir=args.tb_folder, flush_secs=2)
     print("Logger setup complete.")
 
@@ -138,7 +138,7 @@ def main_worker(gpu, ngpus_per_node, args):
         builtins.print = print_pass
 
     dist.init_process_group(backend="nccl", init_method="env://",
-                            world_size=ngpus_per_node, rank=args.gpu, timeout=timedelta(hours=24))
+                            world_size=ngpus_per_node, rank=args.gpu, timeout=timedelta(hours=72))
     dist.barrier()
 
     model, criterion = set_model(ngpus_per_node, args)
@@ -217,16 +217,16 @@ def get_args(argv):
     parser.add_argument('--gpuid', nargs="+", type=int, default=[0], help="The list of gpuid. Negative value means cpu-only")
     parser.add_argument('--seed', type=int, default=1, help="Random seed")
     parser.add_argument('--resdir', type=str, default="./results")
-    parser.add_argument('--logging_step', type=int, default=1000, help="How many iteration steps to save the model checkpoint and loss value once")
-    parser.add_argument('--logging_num', type=int, default=12, help="How many times to log totally")
+    parser.add_argument('--logging_step', type=int, default=10000, help="How many iteration steps to save the model checkpoint and loss value once")
+    parser.add_argument('--logging_num', type=int, default=36, help="How many times to log totally")
     # Dataset
     parser.add_argument('--datapath', type=str, default='./data/reference_genome_links/', help="The dict of data")
     parser.add_argument('--train_dataname', type=str, default='train_2m.csv', help="Name of the data used for training")
     parser.add_argument('--val_dataname', type=str, default='val_48k.csv', help="Name of the data used for validating")
     # Training parameters
-    parser.add_argument('--max_length', type=int, default=512, help="Max length of tokens")
-    parser.add_argument('--batch_size', type=int, default=36, help="Batch size used for training/validating dataset")
-    parser.add_argument('--lr', type=float, default=1e-05, help="Learning rate")
+    parser.add_argument('--max_length', type=int, default=2000, help="Max length of tokens")
+    parser.add_argument('--batch_size', type=int, default=18, help="Batch size used for training/validating dataset")
+    parser.add_argument('--lr', type=float, default=7e-07, help="Learning rate")
     parser.add_argument('--lr_scale', type=int, default=100, help="")
     parser.add_argument('--min_lr', type=float, default=0.0, help='Minimum learning rate for cosine scheduler')
     parser.add_argument('--warmup_epochs', type=float, default=0.3, help='Number of warmup epochs for learning rate')
