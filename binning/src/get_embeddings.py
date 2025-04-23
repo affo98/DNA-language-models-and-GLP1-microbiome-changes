@@ -144,13 +144,14 @@ class Embedder:
                 quantization_config=quant_config,
                 device_map="auto",
             )
-        self.llm_model = self.llm_model.eval() #8BIT
+            self.llm_model = self.llm_model.eval()  # 8BIT
+
         elif self.model_name == "dnabert2random":
             self.llm_model = AutoModel.from_config(
                 config, trust_remote_code=True
             )  # no pretrained weights
 
-        #self.llm_model = self.llm_model.to(self.device).eval()
+        # self.llm_model = self.llm_model.to(self.device).eval()
 
         if self.n_gpu > 1:
             self.llm_model = nn.DataParallel(self.llm_model)
