@@ -141,109 +141,72 @@ class Embedder:
         if self.n_gpu > 1:
             self.llm_model = nn.DataParallel(self.llm_model)
 
-        # ——— Model Setup (omitted for brevity) ———
-        # ——— Bucketing Parameters ———
-        TOKEN_TARGET = 70000  # target tokens per batch
-        AVG_TOKEN_LENGTH = 5  # assume 1 token covers 5 nucleotides
-        STEP = 1000  # nt bucket size
+        ### Looping through the sequences ###
+        min_sequence_lengths = [
+            min([len(seq) for seq in self.dna_sequences]) - 1,
+            3000,
+            4000,
+            5000,
+            6000,
+            7000,
+            8000,
+            9000,
+            10000,
+            20000,
+        ]
+        max_sequence_lengths = [
+            3000,
+            4000,
+            5000,
+            6000,
+            7000,
+            8000,
+            9000,
+            10000,
+            20000,
+            max([len(seq) for seq in self.dna_sequences]) + 1,
+        ]
 
-        # Compute sequence‐length breaks
-        lengths = [len(seq) for seq in self.dna_sequences]
-        min_len, max_len = min(lengths) - 1, max(lengths) + 1
-        breaks = list(range(min_len, max_len, STEP))
-        if breaks[-1] < max_len:
-            breaks.append(max_len)
+        batch_sizes = [32, 32, 32, 32, 32, 32, 32, 32, 32, 8, 1]
 
-        original_ids = []
+        original_ids = (
+            []
+        )  # [index in the original list, so if dna_seq is in position 4512, teh index is 4512]
         processed_embeddings = []
 
-        # ——— Loop over each length bucket ———
-        for seq_min, seq_max in zip(breaks[:-1], breaks[1:]):
-            # 1) Gather sequences in this bucket
-            bucket = [
-                (i, seq)
-                for i, seq in enumerate(self.dna_sequences)
-                if seq_min <= len(seq) < seq_max
-            ]
-            if not bucket:
-                continue
-            idxs, seqs = zip(*bucket)
+        for sequence_length_min, sequence_length_max, batch_size in zip(
+            min_sequence_lengths, max_sequence_lengths, batch_sizes
+        ):
 
-            # 2) Estimate tokens per sequence (rounded up)
-            bucket_len = seq_max - 1
-            tokens_per_seq = (bucket_len + AVG_TOKEN_LENGTH - 1) // AVG_TOKEN_LENGTH
-
-            # 3) Compute batch_size to target ~TOKEN_TARGET tokens/batch
-            batch_size = max(1, TOKEN_TARGET // tokens_per_seq)
-
-            self.log.append(
-                f"Bucket nt‐len sequences {len(list(seqs))} [{seq_min},{seq_max}) → "
-                f"≈{tokens_per_seq} tokens/seq → "
-                f"batch_size={batch_size}"
+            indices_filtered, dna_sequences_filtered = zip(
+                *[
+                    (index, seq)
+                    for (index, seq) in enumerate(self.dna_sequences)
+                    if (sequence_length_min <= len(seq) < sequence_length_max)
+                    # and (if len(seq) < LLM_SEQ_MAX_LENGTH) #set max length to avoid OOM errors. Already handles in utils.py.
+                ]
             )
+            self.log.append(
+                f"Running {len(dna_sequences_filtered)} sequences with len between {sequence_length_min} to {sequence_length_max}"
+            )
+            if len(dna_sequences_filtered) == 0:
+                continue
 
-            # 4) Run inference on this bucket
-            emb = self.llm_inference(list(seqs), batch_size)
-            processed_embeddings.append(emb)
-            original_ids.extend(idxs)
+            dna_sequences_filtered = list(dna_sequences_filtered)
+            print(batch_size)
+            embeddings = self.llm_inference(dna_sequences_filtered, batch_size)
+            processed_embeddings.append(embeddings)
 
-        # ——— Concatenate and restore original order ———
-        embeddings = np.concatenate(processed_embeddings, axis=0)
+            indices_filtered = list(indices_filtered)
+            original_ids.extend(indices_filtered)
+
+        embeddings = np.concatenate(
+            processed_embeddings,
+            axis=0,
+        )
         embeddings = embeddings[np.argsort(original_ids)]
+
         return embeddings
-
-        ### Looping through the sequences ###
-        # min_sequence_lengths = [
-        #     min([len(seq) for seq in self.dna_sequences]) - 1,
-        #     5000,
-        #     10000,
-        #     20000,
-        # ]
-        # max_sequence_lengths = [
-        #     5000,
-        #     10000,
-        #     20000,
-        #     max([len(seq) for seq in self.dna_sequences]) + 1,
-        # ]
-
-        # original_ids = (
-        #     []
-        # )  # [index in the original list, so if dna_seq is in position 4512, teh index is 4512]
-        # processed_embeddings = []
-
-        # for sequence_length_min, sequence_length_max, batch_size in zip(
-        #     min_sequence_lengths, max_sequence_lengths, self.batch_sizes
-        # ):
-
-        #     indices_filtered, dna_sequences_filtered = zip(
-        #         *[
-        #             (index, seq)
-        #             for (index, seq) in enumerate(self.dna_sequences)
-        #             if (sequence_length_min <= len(seq) < sequence_length_max)
-        #             # and (if len(seq) < LLM_SEQ_MAX_LENGTH) #set max length to avoid OOM errors. Already handles in utils.py.
-        #         ]
-        #     )
-        #     self.log.append(
-        #         f"Running {len(dna_sequences_filtered)} sequences with len between {sequence_length_min} to {sequence_length_max}"
-        #     )
-        #     if len(dna_sequences_filtered) == 0:
-        #         continue
-
-        #     dna_sequences_filtered = list(dna_sequences_filtered)
-        #     print(batch_size)
-        #     embeddings = self.llm_inference(dna_sequences_filtered, batch_size)
-        #     processed_embeddings.append(embeddings)
-
-        #     indices_filtered = list(indices_filtered)
-        #     original_ids.extend(indices_filtered)
-
-        # embeddings = np.concatenate(
-        #     processed_embeddings,
-        #     axis=0,
-        # )
-        # embeddings = embeddings[np.argsort(original_ids)]
-
-        # return embeddings
 
     def collate_fn(self, batch: list[str]):
         # batch: list of raw DNA sequences
