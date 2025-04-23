@@ -116,7 +116,8 @@ class Embedder:
             self.model_path,
             padding_side="right",
             trust_remote_code=True,
-            padding="max_length",
+            use_fast=True,
+            # padding="max_length",
         )
 
         config = BertConfig.from_pretrained(
@@ -189,6 +190,16 @@ class Embedder:
 
         return embeddings
 
+    def collate_fn(self, batch: list[str]):
+        # batch: list of raw DNA sequences
+        encodings = self.llm_tokenizer(
+            batch,
+            padding="longest",  # pad up to longest in this batch
+            truncation=True,  # truncate if too long
+            return_tensors="pt",  # return PyTorch tensors
+        )
+        return encodings["input_ids"], encodings["attention_mask"]
+
     def llm_inference(
         self, dna_sequences_filtered: list[str], batch_size: int
     ) -> np.array:
@@ -209,13 +220,13 @@ class Embedder:
         sorted_dna_sequences, idx = sort_sequences(
             dna_sequences_filtered
         )  # To reduce Padding overhead
-
         dna_sequences = ContigDataset(sorted_dna_sequences)
 
         data_loader = DataLoader(
             dna_sequences,
             batch_size=batch_size * self.n_gpu,
             shuffle=False,
+            collate_fn=self.collate_fn,
             num_workers=2 * self.n_gpu,
         )
 
