@@ -8,6 +8,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.amp import autocast
+from torch.amp.autocast_mode import is_autocast_available
 
 from transformers import (
     AutoTokenizer,
@@ -110,7 +111,9 @@ class Embedder:
 
         ### Model Setup ###
         self.device, self.n_gpu = get_available_device()
-        self.log.append(f"Using device: {self.device}\nwith {self.n_gpu} GPUs")
+        self.log.append(
+            f"Using device: {self.device}\nwith {self.n_gpu} GPUs\n Using mixed precision (autocast): {is_autocast_available(self.device.type)}"
+        )
 
         self.llm_tokenizer = AutoTokenizer.from_pretrained(
             self.model_path,
