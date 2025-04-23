@@ -60,7 +60,7 @@ MINSIZE_CONTIGS=2000 #do we need this?
 #knn/binning params
 KNN_K = [100,200,300,400,500,600,700,800,900,1000]
 KNN_P = [25,50,75]
-VAL_PROPORTION=0.05
+VAL_PROPORTION=0.02
 
 
 print(f"-------------Configuration Flags:--------------")
