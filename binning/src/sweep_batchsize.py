@@ -2,6 +2,10 @@ import time, torch
 from transformers import AutoModel, AutoTokenizer, BertConfig
 
 
+import os
+
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+
 tokenizer = AutoTokenizer.from_pretrained(
     "zhihan1996/DNABERT-S",
     padding_side="right",
