@@ -139,7 +139,7 @@ class Embedder:
             )  # no pretrained weights
 
         self.llm_model = self.llm_model.to(self.device).eval()
-        self.llm_model = torch.compile(self.llm_model)
+        self.llm_model = torch.compile(self.llm_model, backend="aot_eager")
 
         if self.n_gpu > 1:
             self.llm_model = nn.DataParallel(self.llm_model)
