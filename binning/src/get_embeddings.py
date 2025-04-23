@@ -7,7 +7,7 @@ from tqdm import tqdm
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-
+from torch.amp import autocast
 
 from transformers import (
     AutoTokenizer,
@@ -252,27 +252,30 @@ class Embedder:
             ].to(self.device)
 
             with torch.no_grad():
-                model_output = (
-                    self.llm_model.forward(
-                        input_ids=input_ids, attention_mask=attention_mask
-                    )[0]
-                    .detach()
-                    .cpu()
-                )
-                attention_mask = attention_mask.unsqueeze(-1).detach().cpu()
-                embedding = torch.sum(model_output * attention_mask, dim=1) / torch.sum(
-                    attention_mask, dim=1
-                )  # along the sequence length
+                with autocast(device_type=self.device):  # mixed precision
+                    model_output = (
+                        self.llm_model.forward(
+                            input_ids=input_ids, attention_mask=attention_mask
+                        )[0]
+                        .detach()
+                        .cpu()
+                    )
+                    attention_mask = attention_mask.unsqueeze(-1).detach().cpu()
+                    embedding = torch.sum(
+                        model_output * attention_mask, dim=1
+                    ) / torch.sum(
+                        attention_mask, dim=1
+                    )  # along the sequence length
 
-                if i == 0:
-                    embeddings = embedding
-                else:
-                    embeddings = torch.cat(
-                        (embeddings, embedding), dim=0
-                    )  # concatenate along the batch dimension
+                    if i == 0:
+                        embeddings = embedding
+                    else:
+                        embeddings = torch.cat(
+                            (embeddings, embedding), dim=0
+                        )  # concatenate along the batch dimension
 
-                token_lengths = attention_mask.sum(dim=1).cpu().numpy()
-                all_token_lengths.extend(token_lengths)
+                    token_lengths = attention_mask.sum(dim=1).cpu().numpy()
+                    all_token_lengths.extend(token_lengths)
 
         min_token_length = min(all_token_lengths)
         max_token_length = max(all_token_lengths)
