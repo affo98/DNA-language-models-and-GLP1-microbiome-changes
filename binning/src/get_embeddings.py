@@ -129,14 +129,15 @@ class Embedder:
             #     self.model_path,
             #     config=config,
             #     trust_remote_code=True,
-
+            # pip install 'accelerate>=0.26.0
+            # pip install -U bitsandbytes
             quant_config = BitsAndBytesConfig(
                 load_in_8bit=True,
                 llm_int8_threshold=6.0,
                 llm_int8_enable_fp32_cpu_offload=True,
             )
 
-            self.llm_modelmodel = AutoModel.from_pretrained(
+            self.llm_model = AutoModel.from_pretrained(
                 self.model_path,
                 config=config,
                 trust_remote_code=True,
