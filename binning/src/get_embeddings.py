@@ -125,36 +125,37 @@ class Embedder:
         )
 
         if self.model_name != "dnabert2random":
-            # self.llm_model = AutoModel.from_pretrained(
-            #     self.model_path,
-            #     config=config,
-            #     trust_remote_code=True,
-
-            # pip install 'accelerate>=0.26.0
-            # pip install -U bitsandbytes
-            quantization_config = BitsAndBytesConfig(
-                load_in_4bit=True,
-                bnb_4bit_quant_type="nf4",  # NormalFloat4 quantization
-                bnb_4bit_use_double_quant=True,  # Enable double quantization
-                bnb_4bit_compute_dtype=torch.bfloat16,  # Use bfloat16 for computation
-                bnb_4bit_quant_storage=torch.bfloat16,  # Store quantized weights in bfloat16
-            )
-
             self.llm_model = AutoModel.from_pretrained(
                 self.model_path,
                 config=config,
                 trust_remote_code=True,
-                quantization_config=quantization_config,
-                device_map="auto",
             )
-            self.llm_model = self.llm_model.eval()  # 8BIT
+            #### 8 bit ####
+            # pip install 'accelerate>=0.26.0
+            # pip install -U bitsandbytes
+            # quantization_config = BitsAndBytesConfig(
+            #     load_in_4bit=True,
+            #     bnb_4bit_quant_type="nf4",  # NormalFloat4 quantization
+            #     bnb_4bit_use_double_quant=True,  # Enable double quantization
+            #     bnb_4bit_compute_dtype=torch.bfloat16,  # Use bfloat16 for computation
+            #     bnb_4bit_quant_storage=torch.bfloat16,  # Store quantized weights in bfloat16
+            # )
+
+            # self.llm_model = AutoModel.from_pretrained(
+            #     self.model_path,
+            #     config=config,
+            #     trust_remote_code=True,
+            #     quantization_config=quantization_config,
+            #     device_map="auto",
+            # )
+            # self.llm_model = self.llm_model.eval()  # 8BIT
 
         elif self.model_name == "dnabert2random":
             self.llm_model = AutoModel.from_config(
                 config, trust_remote_code=True
             )  # no pretrained weights
 
-        # self.llm_model = self.llm_model.to(self.device).eval()
+        self.llm_model = self.llm_model.to(self.device).eval()
 
         if self.n_gpu > 1:
             self.llm_model = nn.DataParallel(self.llm_model)
@@ -273,9 +274,7 @@ class Embedder:
                 "attention_mask"
             ].to(self.device)
 
-            with torch.inference_mode(), torch.autocast(
-                device_type=self.device.type, dtype=torch.bfloat16
-            ):
+            with torch.inference_mode(), torch.autocast(device_type=self.device.type):
                 model_output = (
                     self.llm_model.forward(
                         input_ids=input_ids, attention_mask=attention_mask
