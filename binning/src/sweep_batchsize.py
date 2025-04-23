@@ -1,8 +1,6 @@
 import time, torch
 from transformers import AutoModel, AutoTokenizer, BertConfig
 
-model = AutoModel.from_pretrained("your-model").eval().to("cuda")
-tokenizer = AutoTokenizer.from_pretrained("your-model")
 
 tokenizer = AutoTokenizer.from_pretrained(
     "zhihan1996/DNABERT-S",
@@ -16,10 +14,14 @@ config = BertConfig.from_pretrained(
     "zhihan1996/DNABERT-S",
 )
 
-model = AutoModel.from_pretrained(
-    "zhihan1996/DNABERT-S",
-    config=config,
-    trust_remote_code=True,
+model = (
+    AutoModel.from_pretrained(
+        "zhihan1996/DNABERT-S",
+        config=config,
+        trust_remote_code=True,
+    )
+    .eval()
+    .to("cuda")
 )
 
 
