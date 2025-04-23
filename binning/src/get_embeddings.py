@@ -273,8 +273,9 @@ class Embedder:
                 "attention_mask"
             ].to(self.device)
 
-            with torch.inference_mode():
-                # with autocast(device_type=self.device.type):  # mixed precision
+            with torch.inference_mode(), torch.autocast(
+                device_type=self.device.type, dtype=torch.bfloat16
+            ):
                 model_output = (
                     self.llm_model.forward(
                         input_ids=input_ids, attention_mask=attention_mask
