@@ -145,7 +145,6 @@ class Embedder:
                 config=config,
                 trust_remote_code=True,
                 quantization_config=quantization_config,
-                torch_dtype=torch.bfloat16,
                 device_map="auto",
             )
             self.llm_model = self.llm_model.eval()  # 8BIT
