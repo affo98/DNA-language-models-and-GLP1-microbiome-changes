@@ -167,7 +167,7 @@ class Embedder:
             max([len(seq) for seq in self.dna_sequences]) + 1,
         ]
 
-        batch_sizes = [32, 32, 32, 32, 32, 32, 32, 32, 32, 8, 1]
+        batch_sizes = [32, 32, 32, 32, 32, 32, 32, 32, 8, 1]
 
         original_ids = (
             []
@@ -177,7 +177,7 @@ class Embedder:
         for sequence_length_min, sequence_length_max, batch_size in zip(
             min_sequence_lengths, max_sequence_lengths, batch_sizes
         ):
-
+            print(batch_size)
             indices_filtered, dna_sequences_filtered = zip(
                 *[
                     (index, seq)
