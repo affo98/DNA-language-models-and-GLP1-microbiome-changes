@@ -57,9 +57,11 @@ config_nomodelrun = bool(config.get("NOMODELRUN", False))
 MINSIZE_BINS=200000 #changed from 250000 in cami2, could potentially be smaller, e.g. 150.000
 MINSIZE_CONTIGS=2000 #do we need this?
 
-#knn params
+#knn/binning params
 KNN_K = [100,200,300,400,500,600,700,800,900,1000]
 KNN_P = [25,50,75]
+VAL_PROPORTION=0.05
+
 
 print(f"-------------Configuration Flags:--------------")
 print(f"  - DATASET ID:               {DATASET_ID}")
@@ -138,7 +140,7 @@ rule other_model_val:
         mkdir -p {OUTDIR_BINNING_RESULTS}/{DATASET}
         pip uninstall -y triton
         python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
-        -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {output.dirs} -l {log} -m val
+        -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {output.dirs} -l {log} -m val -vp {VAL_PROPORTION}
         """
 
 
@@ -234,7 +236,7 @@ rule other_model_test:
         best_p=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_p"])' $best_combination_file)
 
         python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
-        -b {BATCH_SIZES} -k $best_k -p $best_p -s {output.dirs} -l {log} -m test
+        -b {BATCH_SIZES} -k $best_k -p $best_p -s {output.dirs} -l {log} -m test -vp {VAL_PROPORTION}
         """
 
 rule create_fasta_bins_other_model_test:

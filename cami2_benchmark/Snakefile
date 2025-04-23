@@ -58,6 +58,7 @@ MINSIZE_CONTIGS=2000
 #knn params
 KNN_K = [100,200,300,400,500,600,700,800,900,1000]
 KNN_P = [25,50,75]
+VAL_PROPORTION=0.1
 # KNN_K = [200]
 # KNN_P = [25]
 
@@ -359,7 +360,7 @@ rule other_model_val:
         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
         pip uninstall -y triton
         python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
-        -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {output.dirs} -l {log} -m val
+        -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {output.dirs} -l {log} -m val -vp {VAL_PROPORTION}
         """
 
 
@@ -455,7 +456,7 @@ rule other_model_test:
         best_p=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_p"])' $best_combination_file)
 
         python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
-        -b {BATCH_SIZES} -k $best_k -p $best_p -s {output.dirs} -l {log} -m test
+        -b {BATCH_SIZES} -k $best_k -p $best_p -s {output.dirs} -l {log} -m test -vp {VAL_PROPORTION}
         """
 
 rule create_fasta_bins_other_model_test:
@@ -695,7 +696,7 @@ rule checkm2:
         "envs/checkm2.yml"
     threads:
         128
-    shell:
+    shell:  
         """
         if [ ! -d "{OUTDIR_MODEL_RESULTS}/checkm2_database" ]; then
             checkm2 database --download --path {OUTDIR_MODEL_RESULTS}/checkm2_database

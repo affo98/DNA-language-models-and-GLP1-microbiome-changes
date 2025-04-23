@@ -36,7 +36,7 @@ def main(args, log):
 
     contigs_test, contigs_val, contig_names_test, contig_names_val = (
         split_contigs_valtest(
-            contigs, contig_names, log, args.save_path, VAL_PROPORTION
+            contigs, contig_names, log, args.save_path, args.val_proportion
         )
     )
 
@@ -193,6 +193,13 @@ def add_arguments() -> ArgumentParser:
         choices=["val", "test"],
         required=True,
         help="Choose whether to run in validation ('val') or test ('test') mode.",
+    )
+    parser.add_argument(
+        "--val_proportion",
+        "-vp",
+        type=float,
+        default=VAL_PROPORTION,
+        help="Proportion of data to use for validation (default: 0.1)",
     )
 
     args = parser.parse_args()
