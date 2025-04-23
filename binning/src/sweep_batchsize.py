@@ -47,15 +47,21 @@ model = (
 #         print(f"Batch {bs}, seq-len {seqlen}: {tokens/elapsed:.1f} tokens/sec")
 
 
-seq_lens = [2000, 5000, 1000, 10000, 60000]
+seq_lens = [2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 15000, 20000, 60000]
 
 # Batch sizes: 2, 4, 6, … up to 128
 batch_sizes = list(range(2, 130, 2))
+
+# Store results: { seq_len: [(batch_size, tokens_per_sec), ...] }
+results = {}
 
 for seqlen in seq_lens:
     sequence = "A" * seqlen
     inputs = tokenizer([sequence], return_tensors="pt", padding=True).to("cuda")
     print(f"\n=== Sequence length: {seqlen} ===")
+
+    # Initialize list for this seq length
+    results[seqlen] = []
 
     for bs in batch_sizes:
         # Expand inputs to current batch size
@@ -67,7 +73,7 @@ for seqlen in seq_lens:
                 _ = model(**inputs_expanded)
         except RuntimeError as e:
             if "out of memory" in str(e):
-                print(f"  Batch {bs}: OOM on warmup, skipping.")
+                print(f"  Batch {bs}: OOM on warmup, skipping rest of this seq-len.")
                 torch.cuda.empty_cache()
                 break
             else:
@@ -81,11 +87,24 @@ for seqlen in seq_lens:
             torch.cuda.synchronize()
             elapsed = time.time() - start
             tokens = bs * inputs_expanded["input_ids"].shape[1]
-            print(f"  Batch {bs}: {tokens/elapsed:.1f} tokens/sec")
+            tps = tokens / elapsed
+            print(f"  Batch {bs}: {tps:.1f} tokens/sec")
+            results[seqlen].append((bs, tps))
         except RuntimeError as e:
             if "out of memory" in str(e):
-                print(f"  Batch {bs}: OOM, skipping.")
+                print(f"  Batch {bs}: OOM on timed run, skipping rest of this seq-len.")
                 torch.cuda.empty_cache()
                 break
             else:
                 raise
+
+# After all runs, print sorted top performers per seq length
+print("\n\n=== Top batch sizes per sequence length ===")
+for seqlen, data in results.items():
+    if not data:
+        print(f"Seq-len {seqlen}: no successful batches")
+        continue
+    # Sort by throughput descending and take top 5
+    top5 = sorted(data, key=lambda x: x[1], reverse=True)[:5]
+    formatted = ", ".join(f"{bs}→{tps:.0f} t/s" for bs, tps in top5)
+    print(f"Seq-len {seqlen}: {formatted}")
