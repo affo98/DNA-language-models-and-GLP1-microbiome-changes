@@ -198,6 +198,7 @@ class Embedder:
                 continue
 
             dna_sequences_filtered = list(dna_sequences_filtered)
+            print(batch_size)
             embeddings = self.llm_inference(dna_sequences_filtered, batch_size)
             processed_embeddings.append(embeddings)
 
