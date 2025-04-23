@@ -108,6 +108,38 @@ class Embedder:
     def calculate_llm_embedding(self) -> np.array:
         """Get llm embeddings. Process dna sequences based on their length to increase efficiency, i.e. use a large batch size"""
 
+        ### Model Setup ###
+        self.device, self.n_gpu = get_available_device()
+        self.log.append(f"Using device: {self.device}\nwith {self.n_gpu} GPUs")
+
+        self.llm_tokenizer = AutoTokenizer.from_pretrained(
+            self.model_path,
+            padding_side="right",
+            trust_remote_code=True,
+            padding="max_length",
+        )
+
+        config = BertConfig.from_pretrained(
+            self.model_path,
+        )
+
+        if self.model_name != "dnabert2random":
+            self.llm_model = AutoModel.from_pretrained(
+                self.model_path,
+                config=config,
+                trust_remote_code=True,
+            )
+        elif self.model_name == "dnabert2random":
+            self.llm_model = AutoModel.from_config(
+                config, trust_remote_code=True
+            )  # no pretrained weights
+
+        self.llm_model = self.llm_model.to(self.device).eval()
+
+        if self.n_gpu > 1:
+            self.llm_model = nn.DataParallel(self.llm_model)
+
+        ### Looping through the sequences ###
         min_sequence_lengths = [
             min([len(seq) for seq in self.dna_sequences]) - 1,
             10000,
@@ -180,58 +212,31 @@ class Embedder:
 
         dna_sequences = ContigDataset(sorted_dna_sequences)
 
-        device, n_gpu = get_available_device()
-        self.log.append(f"Using device: {device}\nwith {n_gpu} GPUs")
-
-        tokenizer = AutoTokenizer.from_pretrained(
-            self.model_path,
-            padding_side="right",
-            trust_remote_code=True,
-            padding="max_length",
-        )
-
-        config = BertConfig.from_pretrained(
-            self.model_path,
-        )
-
-        if self.model_name != "dnabert2random":
-            model = AutoModel.from_pretrained(
-                self.model_path,
-                config=config,
-                trust_remote_code=True,
-            )
-        elif self.model_name == "dnabert2random":
-            model = AutoModel.from_config(
-                config, trust_remote_code=True
-            )  # no pretrained weights
-
-        model = model.to(device)
-        if n_gpu > 1:
-            model = nn.DataParallel(model)
-
         data_loader = DataLoader(
             dna_sequences,
-            batch_size=batch_size * n_gpu,
+            batch_size=batch_size * self.n_gpu,
             shuffle=False,
-            num_workers=2 * n_gpu,
+            num_workers=2 * self.n_gpu,
         )
 
         all_token_lengths = []
         for i, batch in enumerate(tqdm(data_loader)):
             with torch.no_grad():
-                inputs_tokenized = tokenizer.batch_encode_plus(
+                inputs_tokenized = self.llm_tokenizer.batch_encode_plus(
                     batch,
                     return_tensors="pt",
                     return_attention_mask=True,
                     padding=True,
-                    max_length=tokenizer.model_max_length,  # change to avoid OOM erros
+                    max_length=self.llm_tokenizer.model_max_length,  # change to avoid OOM erros
                 )
 
-                input_ids = inputs_tokenized["input_ids"].to(device)
-                attention_mask = inputs_tokenized["attention_mask"].to(device)
+                input_ids = inputs_tokenized["input_ids"].to(self.device)
+                attention_mask = inputs_tokenized["attention_mask"].to(self.device)
 
                 model_output = (
-                    model.forward(input_ids=input_ids, attention_mask=attention_mask)[0]
+                    self.llm_model.forward(
+                        input_ids=input_ids, attention_mask=attention_mask
+                    )[0]
                     .detach()
                     .cpu()
                 )
