@@ -117,7 +117,7 @@ class Embedder:
             padding_side="right",
             trust_remote_code=True,
             use_fast=True,
-            # padding="max_length",
+            padding="max_length",
         )
 
         config = BertConfig.from_pretrained(
@@ -252,7 +252,7 @@ class Embedder:
             ].to(self.device)
 
             with torch.no_grad():
-                with autocast(device_type=self.device):  # mixed precision
+                with autocast(device_type=self.device.type):  # mixed precision
                     model_output = (
                         self.llm_model.forward(
                             input_ids=input_ids, attention_mask=attention_mask
