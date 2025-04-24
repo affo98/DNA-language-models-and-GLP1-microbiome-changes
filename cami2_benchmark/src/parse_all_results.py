@@ -4,6 +4,7 @@ from glob import glob
 from collections import defaultdict
 import re
 import gzip
+from collections import defaultdict
 
 from Bio import SeqIO
 from tqdm import tqdm
@@ -22,6 +23,26 @@ OUTPUT_DIR = os.path.join("cami2_benchmark", "model_results", "parsed_results")
 COMPLETENESS_BINS = [90, 80, 70, 60, 50]
 
 MODELS_NOT_INCLUDE = ["vamb", "taxvamb", "comebin"]
+
+DATASETS = [
+    "airways_short",
+    "gastro_short",
+    "oral_short",
+    "urogenital_short",
+    "skin_short",
+    "plant_short",
+    "marine_short",
+    "metahit",
+]
+
+OTHER_MODELS = [
+    "tnf",
+    "tnfkernel",
+    "dna2vec",
+    "dnabert2",
+    "dnabert2random",
+    "dnaberts",
+]
 
 
 def parse_quality_report(file_path):
@@ -131,40 +152,29 @@ def parse_contig_lengths(processed_data_dir):
 
 
 def parse_runtimes(base_dir: str) -> pd.DataFrame:
-    results = []
+    results = defaultdict(lambda: {"runtime_minutes": 0})
 
-    models_binning = [
-        "tnf",
-        "tnfkernel",
-        "dna2vec",
-        "dnabert2",
-        "dnabert2random",
-        "dnaberts",
-    ]
     binning_pattern = re.compile(r"(\w+?)_(test|val)_binning\.log")
 
     for root, _, files in os.walk(base_dir):
         for fname in files:
             match = binning_pattern.match(fname)
-            print(match)
             if match:
-                model, dataset = match.groups()
-                if model in models_binning:
-                    full_path = os.path.join(root, fname)
-                    with open(full_path, "r") as f:
-                        content = f.read()
-                        runtime_match = re.search(
-                            r"Binning of .* ran in ([\d.]+) Seconds", content
-                        )
-                        if runtime_match:
-                            runtime_min = float(runtime_match.group(1)) / 60
-                            results.append(
-                                {
-                                    "dataset": dataset,
-                                    "model": model,
-                                    "runtime_minutes": runtime_min,
-                                }
+                model, _ = match.groups()
+                if model in OTHER_MODELS:
+                    dataset = next((ds for ds in DATASETS if ds in root), None)
+                    if dataset:
+                        full_path = os.path.join(root, fname)
+                        with open(full_path, "r") as f:
+                            content = f.read()
+                            runtime_match = re.search(
+                                r"Binning of .* ran in ([\d.]+) Seconds", content
                             )
+                            if runtime_match:
+                                runtime_min = float(runtime_match.group(1)) / 60
+                                key = (dataset, model)
+                                results[key]["runtime_minutes"] += runtime_min
+
     print(results)
 
     # # Handle vamb and taxvamb
