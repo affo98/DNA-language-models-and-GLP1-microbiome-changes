@@ -147,22 +147,23 @@ def parse_contig_lengths(processed_data_dir):
                     lengths.append(len(record.seq))
 
         contigs_lengths[dataset_name] = lengths
-        
+
         lengths_array = np.array(lengths)
 
         if len(lengths_array) > 0:
-            contigs_summary.append({
-                "dataset": dataset_name,
-                "num_contigs": len(lengths_array),
-                "total_length": int(lengths_array.sum()),
-                "mean_length": float(lengths_array.mean()),
-                "median_length": float(np.median(lengths_array)),
-                "min_length": int(lengths_array.min()),
-                "max_length": int(lengths_array.max()),
-                "25_percentile": float(np.percentile(lengths_array, 25)),
-                "75_percentile": float(np.percentile(lengths_array, 75)),
-            })
-
+            contigs_summary.append(
+                {
+                    "dataset": dataset_name,
+                    "num_contigs": len(lengths_array),
+                    "total_length": int(lengths_array.sum()),
+                    "mean_length": float(lengths_array.mean()),
+                    "median_length": float(np.median(lengths_array)),
+                    "min_length": int(lengths_array.min()),
+                    "max_length": int(lengths_array.max()),
+                    "25_percentile": float(np.percentile(lengths_array, 25)),
+                    "75_percentile": float(np.percentile(lengths_array, 75)),
+                }
+            )
 
     return contigs_summary, contigs_lengths
 
@@ -274,67 +275,100 @@ def parse_bin_postprocess(logdir: str) -> pd.DataFrame:
                 log_path = os.path.join(
                     logdir, dataset, f"{model}_test_bin_postprocessing.log"
                 )
-            elif model in BINNER_MODELS
+            elif model in BINNER_MODELS:
                 log_path = os.path.join(
                     logdir, dataset, f"{model}_bin_postprocessing.log"
                 )
             if os.path.isfile(log_path):
                 with open(log_path, "r") as f:
                     content = f.read()
-                    pre_clusters = re.search(r"Total clusters before filtering: (\d+)", content)
-                    post_clusters = re.search(r"Total clusters after filtering: (\d+)", content)
-                    removed_clusters = re.search(r"Number of clusters removed: (\d+)", content)
+                    pre_clusters = re.search(
+                        r"Total clusters before filtering: (\d+)", content
+                    )
+                    post_clusters = re.search(
+                        r"Total clusters after filtering: (\d+)", content
+                    )
+                    removed_clusters = re.search(
+                        r"Number of clusters removed: (\d+)", content
+                    )
 
-                    results.append({
-                        "dataset": dataset,
-                        "model": model,
-                        "clusters_before": int(pre_clusters.group(1)) if pre_clusters else None,
-                        "clusters_after": int(post_clusters.group(1)) if post_clusters else None,
-                        "clusters_removed": int(removed_clusters.group(1)) if removed_clusters else None,
-                    })
+                    results.append(
+                        {
+                            "dataset": dataset,
+                            "model": model,
+                            "clusters_before": (
+                                int(pre_clusters.group(1)) if pre_clusters else None
+                            ),
+                            "clusters_after": (
+                                int(post_clusters.group(1)) if post_clusters else None
+                            ),
+                            "clusters_removed": (
+                                int(removed_clusters.group(1))
+                                if removed_clusters
+                                else None
+                            ),
+                        }
+                    )
     results_df = pd.DataFrame(results)
     print(results_df)
     results_df.to_csv(os.path.join(OUTPUT_DIR, "bin_postprocess.csv"), index=False)
-    
-    
-def parse_nvaltest(model_results_dir:str) -> pd.DataFrame:
+
+
+def parse_nvaltest(model_results_dir: str) -> pd.DataFrame:
     results = []
     for dataset in DATASETS:
         for model in OTHER_MODELS:
-            filepath = os.path.join(model_results_dir, dataset,  f"{model}_output", "test", "n_total_val_test.json")
+            filepath = os.path.join(
+                model_results_dir,
+                dataset,
+                f"{model}_output",
+                "test",
+                "n_total_val_test.json",
+            )
             with open(filepath, "r") as f:
                 data = json.load(f)
-                results.append({
+                results.append(
+                    {
                         "dataset": dataset,
                         "model": model,
                         "n_total": data.get("n_total"),
                         "n_val": data.get("n_val"),
                         "n_test": data.get("n_test"),
-                    })
+                    }
+                )
 
     results_df = pd.DataFrame(results)
     print(results_df)
     results_df.to_csv(os.path.join(OUTPUT_DIR, "n_val_test.csv"), index=False)
     return pd.DataFrame(results)
-     
 
-def parse_heatmaps(model_results_dir:str) -> pd.DataFrame:
+
+def parse_heatmaps(model_results_dir: str) -> pd.DataFrame:
     results = []
     for dataset in DATASETS:
         for model in OTHER_MODELS:
-            filepath = os.path.join(model_results_dir, dataset,  f"{model}_output", "checkm2_validation_results", "heatmap.json")
+            filepath = os.path.join(
+                model_results_dir,
+                dataset,
+                f"{model}_output",
+                "checkm2_validation_results",
+                "heatmap.json",
+            )
             with open(filepath, "r") as f:
                 data = json.load(f)
-                results.append({
+                results.append(
+                    {
                         "dataset": dataset,
                         "model": model,
                         "heatmap": data,
-                    })
+                    }
+                )
 
     results_df = pd.DataFrame(results)
     print(results_df)
     results_df.to_csv(os.path.join(OUTPUT_DIR, "heatmaps.csv"), index=False)
     return pd.DataFrame(results)
+
 
 if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -352,7 +386,7 @@ if __name__ == "__main__":
         json.dump(contig_lengths, f, indent=4)
 
     runtimes = parse_runtimes(BASE_DIR)
-    
+
     bin_postprocess = parse_bin_postprocess(LOG_DIR)
-    
+
     n_valtest = parse_nvaltest(MODEL_RESULTS_DIR)
