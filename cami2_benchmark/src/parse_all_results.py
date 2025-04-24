@@ -257,11 +257,13 @@ def parse_runtimes(base_dir: str) -> pd.DataFrame:
     try:
         with open(start_path, "r") as f:
             for line in f:
+                print(line)
                 if "generate_aug_data" in line:
                     start_time = parse_timestamp(line)
                     break
         with open(end_path, "r") as f:
             lines = f.readlines()
+            print(lines)
             for line in reversed(lines):
                 if "Reading Map:" in line:
                     end_time = parse_timestamp(line)
@@ -277,7 +279,6 @@ def parse_runtimes(base_dir: str) -> pd.DataFrame:
     print(comebin_df)
 
     runtimes_df = pd.concat([other_models_df, vamb_df, comebin_df], ignore_index=True)
-    print(runtimes_df)
     runtimes_df.to_csv(os.path.join(OUTPUT_DIR, "runtimes.csv"), index=False)
 
     return runtimes_df
