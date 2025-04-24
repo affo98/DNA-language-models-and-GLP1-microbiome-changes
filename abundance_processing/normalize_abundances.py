@@ -228,7 +228,8 @@ def normalize_by_global_contig_abundances(
 
 
 def vamb_abundances(abundance, output_abundance_path):
-    abundance = abundance.copy()
+    print("calculating abundances")
+    # abundance = abundance.copy()
     sample_depths_sum = abundance.sum(axis=0)
     print("#" * 50)
     print(f"\t\tSAMPLE DEPTHS SUM VAMB:\n{sample_depths_sum}")
