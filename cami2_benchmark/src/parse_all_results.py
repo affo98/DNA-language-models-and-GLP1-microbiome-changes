@@ -215,7 +215,6 @@ def parse_runtimes(base_dir: str) -> pd.DataFrame:
             for k, v in other_model_result.items()
         ]
     )
-    print(other_models_df)
 
     # ----- vamb and taxvamb -----
     vamb_result = []
@@ -238,8 +237,6 @@ def parse_runtimes(base_dir: str) -> pd.DataFrame:
                             }
                         )
     vamb_df = pd.DataFrame(vamb_result)
-    print(vamb_df)
-    print(vamb_df)
 
     # ----- comebin -----
     def parse_timestamp(line):
@@ -277,6 +274,7 @@ def parse_runtimes(base_dir: str) -> pd.DataFrame:
         print(f"Error processing comebin logs: {e}")
 
     comebin_df = pd.DataFrame(comebin_result)
+    print(comebin_df)
 
     runtimes_df = pd.concat([other_models_df, vamb_df, comebin_df], ignore_index=True)
     print(runtimes_df)
