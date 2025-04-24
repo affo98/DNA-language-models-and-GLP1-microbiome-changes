@@ -15,8 +15,6 @@ def log(msg: str, path: str = "log.txt"):
         msg (str): The string to be logged
         path (str): Path to the log file. Defaults to "log.txt".
     """
-    if os.path.exists("log.txt"):
-        os.remove("log.txt")
     with open(path, "a") as f:
         f.write(msg + "\n")
 
@@ -34,7 +32,8 @@ def process_abundance(
     Returns:
         tuple(np.ndarray, int): Sum of sample abundances with shape (1 x n_samples), n_samples
     """
-
+    if os.path.exists("log.txt"):
+        os.remove("log.txt")
     log("#" * 100)
     log(f"\t\tProcessing {abundance_path} containing n_contigs = {num_contigs}")
     log(f"\t\tIterating through the contig catalogue with a chunk size of {chunk_size}")
@@ -234,7 +233,7 @@ def normalize_by_global_contig_abundances(
         )
         first_chunk = False
     log(
-        "Finished normalizing the abundances and wrote them to path: normalized_abundances.tsv"
+        f"Finished normalizing the abundances and wrote them to path: {output_abundance_path}"
     )
     return None
 
