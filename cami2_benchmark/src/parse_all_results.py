@@ -152,10 +152,10 @@ def parse_contig_lengths(processed_data_dir):
 
 
 def parse_runtimes(base_dir: str) -> pd.DataFrame:
-    results = defaultdict(lambda: {"runtime_minutes": 0})
 
+    # ----- other models -----
+    other_model_result = defaultdict(lambda: {"runtime_minutes": 0})
     binning_pattern = re.compile(r"(\w+?)_(test|val)_binning\.log")
-
     for root, _, files in os.walk(base_dir):
         for fname in files:
             match = binning_pattern.match(fname)
@@ -173,28 +173,39 @@ def parse_runtimes(base_dir: str) -> pd.DataFrame:
                             if runtime_match:
                                 runtime_min = float(runtime_match.group(1)) / 60
                                 key = (dataset, model)
-                                results[key]["runtime_minutes"] += runtime_min
+                                other_model_result[key][
+                                    "runtime_minutes"
+                                ] += runtime_min
 
     other_models_df = pd.DataFrame(
         [
             {"dataset": k[0], "model": k[1], "runtime_minutes": v["runtime_minutes"]}
-            for k, v in results.items()
+            for k, v in other_model_result.items()
         ]
     )
-
     print(other_models_df)
 
-    # # Handle vamb and taxvamb
-    # for model in ['vamb', 'taxvamb']:
-    #     log_path = os.path.join(base_dir, f'{model}_output/log.txt')
-    #     if os.path.isfile(log_path):
-    #         with open(log_path, 'r') as f:
-    #             content = f.read()
-    #             match = re.search(r'Completed Vamb in ([\d.]+) seconds', content)
-    #             if match:
-    #                 runtime_min = float(match.group(1)) / 60
-    #                 dataset = 'unknown'  # modify as needed
-    #                 results.append({'dataset': dataset, 'model': model, 'runtime_minutes': runtime_min})
+    # ----- vamb and taxvamb -----
+    vamb_result = []
+    for dataset in DATASETS:
+        for model in ["vamb", "taxvamb"]:
+            log_path = os.path.join(base_dir, "model_results", dataset, f"{model]_output", "log.txt")
+            if os.path.isfile(log_path):
+                with open(log_path, "r") as f:
+                    content = f.read()
+                    match = re.search(r"Completed Vamb in ([\d.]+) seconds", content)
+                    if match:
+                        runtime_min = float(match.group(1)) / 60
+                        vamb_result.append(
+                            {
+                                "dataset": dataset,
+                                "model": model,
+                                "runtime_minutes": runtime_min,
+                            }
+                        )
+    vamb_df = pd.DataFrame(vamb_result)
+    print(vamb_df)
+    
 
     # # Handle comebin
     # start_path = os.path.join(base_dir, 'comebin_output/data_sugmentation/comebin.log')
