@@ -225,6 +225,7 @@ def parse_runtimes(base_dir: str) -> pd.DataFrame:
                 base_dir, "model_results", dataset, f"{model}_output", "log.txt"
             )
             if os.path.isfile(log_path):
+                print(log_path)
                 with open(log_path, "r") as f:
                     content = f.read()
                     match = re.search(r"Completed Vamb in ([\d.]+) seconds", content)
@@ -276,7 +277,9 @@ def parse_runtimes(base_dir: str) -> pd.DataFrame:
         print(f"Error processing comebin logs: {e}")
 
     comebin_df = pd.DataFrame(comebin_result)
+
     runtimes_df = pd.concat([other_models_df, vamb_df, comebin_df], ignore_index=True)
+    print(runtimes_df)
     runtimes_df.to_csv(os.path.join(OUTPUT_DIR, "runtimes.csv"), index=False)
 
     return runtimes_df
@@ -396,8 +399,8 @@ if __name__ == "__main__":
 
     runtimes = parse_runtimes(BASE_DIR)
 
-    bin_postprocess = parse_bin_postprocess(LOG_DIR)
+    # bin_postprocess = parse_bin_postprocess(LOG_DIR)
 
-    n_valtest = parse_nvaltest(MODEL_RESULTS_DIR)
+    # n_valtest = parse_nvaltest(MODEL_RESULTS_DIR)
 
-    heatmaps = parse_heatmaps(MODEL_RESULTS_DIR)
+    # heatmaps = parse_heatmaps(MODEL_RESULTS_DIR)
