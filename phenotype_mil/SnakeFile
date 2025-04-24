@@ -36,10 +36,10 @@ assert MODEL==None or MODEL in ALL_MODELS, f"Error: Selected model '{MODEL}' is 
 MODEL_PATH=None
 BATCH_SIZES=None
 WEIGHT_PATH=None
-if MODEL in other_model_config.keys():
-    MODEL_PATH = other_model_config[MODEL]["model_path"]
-    BATCH_SIZES = other_model_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnaberth', 'dnabert2', 'dnabert2random'] else 0
-    WEIGHT_PATH = other_model_config[MODEL]["weight_path"] if 'dnaberth' in  MODEL else None
+if MODEL in models_config.keys():
+    MODEL_PATH = models_config[MODEL]["model_path"]
+    BATCH_SIZES = models_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnaberth', 'dnabert2', 'dnabert2random'] else 0
+    WEIGHT_PATH = models_config[MODEL]["weight_path"] if 'dnaberth' in  MODEL else None
 
 
 MIL_METHODS = config.get("MIL_METHODS", [])
@@ -66,7 +66,8 @@ KNN_K = [100,200,300,400,500,600,700,800,900,1000]
 KNN_P = [25,50,75]
 
 if DATASET == 'T2D-EW':
-    VAL_PROPORTION=0.05 # change for eisuke
+    VAL_PROPORTION=0.05 
+    #VAL_PROPORTION=*0.004 # change for all samples, should be around 100k
 else:
     VAL_PROPORTION=0.02
 
