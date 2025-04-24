@@ -189,7 +189,9 @@ def parse_runtimes(base_dir: str) -> pd.DataFrame:
     vamb_result = []
     for dataset in DATASETS:
         for model in ["vamb", "taxvamb"]:
-            log_path = os.path.join(base_dir, "model_results", dataset, f"{model]_output", "log.txt")
+            log_path = os.path.join(
+                base_dir, "model_results", dataset, f"{model}_output", "log.txt"
+            )
             if os.path.isfile(log_path):
                 with open(log_path, "r") as f:
                     content = f.read()
@@ -205,7 +207,6 @@ def parse_runtimes(base_dir: str) -> pd.DataFrame:
                         )
     vamb_df = pd.DataFrame(vamb_result)
     print(vamb_df)
-    
 
     # # Handle comebin
     # start_path = os.path.join(base_dir, 'comebin_output/data_sugmentation/comebin.log')
