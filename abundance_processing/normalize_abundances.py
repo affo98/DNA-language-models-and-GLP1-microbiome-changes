@@ -13,7 +13,7 @@ def log(msg: str, path: str = "log.txt"):
 
     Args:
         msg (str): The string to be logged
-        path (str): Path to the log file. Defaults to "log.txt".
+        path (str, optional): Path to the log file. Defaults to "log.txt".
     """
     with open(path, "a") as f:
         f.write(msg + "\n")
@@ -34,13 +34,13 @@ def process_abundance(
     """
     if os.path.exists("log.txt"):
         os.remove("log.txt")
-    log("#" * 100)
+    log(f"{'#'* 100}\n")
     log(f"\t\tProcessing {abundance_path} containing n_contigs = {num_contigs}")
     log(f"\t\tIterating through the contig catalogue with a chunk size of {chunk_size}")
 
-    log("#" * 100, "\n")
+    log(f"{'#'* 100}\n")
     log("\t\t\t STEP 1")
-    log("#" * 100, "\n")
+    log(f"{'#'* 100}\n")
     ### 1. Compute sample_depths_sum (total abundance per sample) in a first pass ###
     sample_depths_sum = None
     chunk_iter, chunk_iter_copy = tee(
@@ -99,9 +99,9 @@ def normalize_by_sample_abundance(
     Returns:
         np.ndarray: Sum of contig abundances of shape (n_contigs x 1)
     """
-    log("#" * 100, "\n")
+    log(f"{'#'* 100}\n")
     log("\t\t\t STEP 2")
-    log("#" * 100, "\n")
+    log(f"{'#'* 100}\n")
 
     total_contig_abundance = None
     chunk_iter = pd.read_csv(
@@ -172,9 +172,9 @@ def normalize_by_global_contig_abundances(
     Returns:
         None:
     """
-    log("#" * 100, "\n")
+    log(f"{'#'* 100}\n")
     log("\t\t\t STEP 3")
-    log("#" * 100, "\n")
+    log(f"{'#'* 100}\n")
 
     first_chunk = True
     chunk_iter = pd.read_csv(
@@ -229,7 +229,7 @@ def normalize_by_global_contig_abundances(
             sep="\t",
             mode="w" if first_chunk else "a",  # Write header only once
             header=first_chunk,
-            index=False,
+            index=True,
         )
         first_chunk = False
     log(
