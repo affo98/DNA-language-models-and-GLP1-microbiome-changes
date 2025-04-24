@@ -195,16 +195,16 @@ def parse_runtimes(base_dir:str)->pd.DataFrame:
 if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    cami2_results = process_all_reports(MODEL_RESULTS_DIR)
-    with open(os.path.join(OUTPUT_DIR, "parsed_checkm2_results.json"), "w") as f:
-        json.dump(cami2_results, f, indent=4)
+    # cami2_results = process_all_reports(MODEL_RESULTS_DIR)
+    # with open(os.path.join(OUTPUT_DIR, "parsed_checkm2_results.json"), "w") as f:
+    #     json.dump(cami2_results, f, indent=4)
 
-    knn_histograms = parse_knn_histograms(MODEL_RESULTS_DIR)
-    with open(os.path.join(OUTPUT_DIR, "parsed_knn_histograms.json"), "w") as f:
-        json.dump(knn_histograms, f, indent=4)
+    # knn_histograms = parse_knn_histograms(MODEL_RESULTS_DIR)
+    # with open(os.path.join(OUTPUT_DIR, "parsed_knn_histograms.json"), "w") as f:
+    #     json.dump(knn_histograms, f, indent=4)
 
-    contig_lengths = parse_contig_lengths(PROCESSED_DATA_DIR)
-    with open(os.path.join(OUTPUT_DIR, "parsed_contig_lengths.json"), "w") as f:
-        json.dump(contig_lengths, f, indent=4)
+    # contig_lengths = parse_contig_lengths(PROCESSED_DATA_DIR)
+    # with open(os.path.join(OUTPUT_DIR, "parsed_contig_lengths.json"), "w") as f:
+    #     json.dump(contig_lengths, f, indent=4)
         
     runtimes = parse_runtimes(LOG_DIR, MODEL_RESULTS_DIR))
