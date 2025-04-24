@@ -172,7 +172,7 @@ def parse_contig_lengths(processed_data_dir):
             )
 
     with open(os.path.join(OUTPUT_DIR, "parsed_contig_lengths.json"), "w") as f:
-        json.dump(contig_lengths, f, indent=4)
+        json.dump(contigs_lengths, f, indent=4)
 
     contigs_summary_df = pd.DataFrame(contigs_summary)
     print(contigs_summary_df)
