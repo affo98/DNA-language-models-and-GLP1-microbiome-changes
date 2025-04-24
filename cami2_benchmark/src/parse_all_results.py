@@ -175,7 +175,14 @@ def parse_runtimes(base_dir: str) -> pd.DataFrame:
                                 key = (dataset, model)
                                 results[key]["runtime_minutes"] += runtime_min
 
-    print(results)
+    other_models_df = pd.DataFrame(
+        [
+            {"dataset": k[0], "model": k[1], "runtime_minutes": v["runtime_minutes"]}
+            for k, v in results.items()
+        ]
+    )
+
+    print(other_models_df)
 
     # # Handle vamb and taxvamb
     # for model in ['vamb', 'taxvamb']:
