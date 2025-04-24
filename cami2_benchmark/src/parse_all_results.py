@@ -22,7 +22,7 @@ OUTPUT_DIR = os.path.join("cami2_benchmark", "model_results", "parsed_results")
 
 COMPLETENESS_BINS = [90, 80, 70, 60, 50]
 
-MODELS_NOT_INCLUDE = ["vamb", "taxvamb", "comebin"]
+BINNER_MODELS = ["vamb", "taxvamb", "comebin"]
 
 DATASETS = [
     "airways_short",
@@ -97,7 +97,7 @@ def parse_knn_histograms(model_results_dir):
 
         for model_dir in glob(os.path.join(dataset_dir, "*_output")):
             model_name = os.path.basename(model_dir).split("_output")[0]
-            if model_name in MODELS_NOT_INCLUDE:
+            if model_name in BINNER_MODELS:
                 continue
 
             hist_file = glob(
@@ -126,12 +126,12 @@ def parse_knn_histograms(model_results_dir):
 def parse_contig_lengths(processed_data_dir):
     """Reads in contigs from each dataset and saves their length in a list."""
 
+    contigs_summary = []
     contigs_lengths = defaultdict(list)
     for dataset_dir in tqdm(
         glob(os.path.join(processed_data_dir, "*")), desc="Parsing contig lengths"
     ):
         dataset_name = os.path.basename(dataset_dir)
-
         contigs_file = glob(os.path.join(dataset_dir, "catalogue.fna.gz"))[0]
 
         lengths = []
@@ -147,8 +147,24 @@ def parse_contig_lengths(processed_data_dir):
                     lengths.append(len(record.seq))
 
         contigs_lengths[dataset_name] = lengths
+        
+        lengths_array = np.array(lengths)
 
-    return contigs_lengths
+        if len(lengths_array) > 0:
+            contigs_summary.append({
+                "dataset": dataset_name,
+                "num_contigs": len(lengths_array),
+                "total_length": int(lengths_array.sum()),
+                "mean_length": float(lengths_array.mean()),
+                "median_length": float(np.median(lengths_array)),
+                "min_length": int(lengths_array.min()),
+                "max_length": int(lengths_array.max()),
+                "25_percentile": float(np.percentile(lengths_array, 25)),
+                "75_percentile": float(np.percentile(lengths_array, 75)),
+            })
+
+
+    return contigs_summary, contigs_lengths
 
 
 def parse_runtimes(base_dir: str) -> pd.DataFrame:
@@ -208,32 +224,117 @@ def parse_runtimes(base_dir: str) -> pd.DataFrame:
     vamb_df = pd.DataFrame(vamb_result)
     print(vamb_df)
 
-    # # Handle comebin
-    # start_path = os.path.join(base_dir, 'comebin_output/data_sugmentation/comebin.log')
-    # end_path = os.path.join(base_dir, 'comebin_output/comebin_res/comebin.log')
+    # ----- comebin -----
+    def parse_timestamp(line):
+        return datetime.strptime(line[:23], "%Y-%m-%d %H:%M:%S,%f")
 
-    # def parse_timestamp(line):
-    #     return datetime.strptime(line[:23], '%Y-%m-%d %H:%M:%S,%f')
+    comebin_result = []
+    for dataset in DATASETS:
+        start_path = os.path.join(
+            base_dir,
+            "model_results",
+            dataset,
+            "comebin_output/data_augmentation/comebin.log",
+        )
+        end_path = os.path.join(
+            base_dir, "model_results", dataset, "comebin_output/comebin_res/comebin.log"
+        )
 
-    # try:
-    #     with open(start_path, 'r') as f:
-    #         for line in f:
-    #             if 'generate_aug_data' in line:
-    #                 start_time = parse_timestamp(line)
-    #                 break
-    #     with open(end_path, 'r') as f:
-    #         lines = f.readlines()
-    #         for line in reversed(lines):
-    #             if 'Reading Map:' in line:
-    #                 end_time = parse_timestamp(line)
-    #                 break
-    #     runtime_min = (end_time - start_time).total_seconds() / 60
-    #     results.append({'dataset': 'unknown', 'model': 'comebin', 'runtime_minutes': runtime_min})
-    # except Exception as e:
-    #     print(f"Error processing comebin logs: {e}")
+    try:
+        with open(start_path, "r") as f:
+            for line in f:
+                if "generate_aug_data" in line:
+                    start_time = parse_timestamp(line)
+                    break
+        with open(end_path, "r") as f:
+            lines = f.readlines()
+            for line in reversed(lines):
+                if "Reading Map:" in line:
+                    end_time = parse_timestamp(line)
+                    break
+        runtime_min = (end_time - start_time).total_seconds() / 60
+        comebin_result.append(
+            {"dataset": dataset, "model": "comebin", "runtime_minutes": runtime_min}
+        )
+    except Exception as e:
+        print(f"Error processing comebin logs: {e}")
 
-    # return pd.DataFrame(results)
+    comebin_df = pd.DataFrame(comebin_result)
+    runtimes_df = pd.concat([other_models_df, vamb_df, comebin_df], ignore_index=True)
+    runtimes_df.to_csv(os.path.join(OUTPUT_DIR, "runtimes.csv"), index=False)
 
+    return runtimes_df
+
+
+def parse_bin_postprocess(logdir: str) -> pd.DataFrame:
+    results = []
+    for dataset in DATASETS:
+        for model in OTHER_MODELS + BINNER_MODELS:
+            if model in OTHER_MODELS:
+                log_path = os.path.join(
+                    logdir, dataset, f"{model}_test_bin_postprocessing.log"
+                )
+            elif model in BINNER_MODELS
+                log_path = os.path.join(
+                    logdir, dataset, f"{model}_bin_postprocessing.log"
+                )
+            if os.path.isfile(log_path):
+                with open(log_path, "r") as f:
+                    content = f.read()
+                    pre_clusters = re.search(r"Total clusters before filtering: (\d+)", content)
+                    post_clusters = re.search(r"Total clusters after filtering: (\d+)", content)
+                    removed_clusters = re.search(r"Number of clusters removed: (\d+)", content)
+
+                    results.append({
+                        "dataset": dataset,
+                        "model": model,
+                        "clusters_before": int(pre_clusters.group(1)) if pre_clusters else None,
+                        "clusters_after": int(post_clusters.group(1)) if post_clusters else None,
+                        "clusters_removed": int(removed_clusters.group(1)) if removed_clusters else None,
+                    })
+    results_df = pd.DataFrame(results)
+    print(results_df)
+    results_df.to_csv(os.path.join(OUTPUT_DIR, "bin_postprocess.csv"), index=False)
+    
+    
+def parse_nvaltest(model_results_dir:str) -> pd.DataFrame:
+    results = []
+    for dataset in DATASETS:
+        for model in OTHER_MODELS:
+            filepath = os.path.join(model_results_dir, dataset,  f"{model}_output", "test", "n_total_val_test.json")
+            with open(filepath, "r") as f:
+                data = json.load(f)
+                results.append({
+                        "dataset": dataset,
+                        "model": model,
+                        "n_total": data.get("n_total"),
+                        "n_val": data.get("n_val"),
+                        "n_test": data.get("n_test"),
+                    })
+
+    results_df = pd.DataFrame(results)
+    print(results_df)
+    results_df.to_csv(os.path.join(OUTPUT_DIR, "n_val_test.csv"), index=False)
+    return pd.DataFrame(results)
+     
+
+def parse_heatmaps(model_results_dir:str) -> pd.DataFrame:
+    results = []
+    for dataset in DATASETS:
+        for model in OTHER_MODELS:
+            filepath = os.path.join(model_results_dir, dataset,  f"{model}_output", "checkm2_validation_results", "heatmap.json")
+            with open(filepath, "r") as f:
+                data = json.load(f)
+                results.append({
+                        "dataset": dataset,
+                        "model": model,
+                        "heatmap": data,
+                    })
+
+    results_df = pd.DataFrame(results)
+    print(results_df)
+    results_df.to_csv(os.path.join(OUTPUT_DIR, "heatmaps.csv"), index=False)
+    return pd.DataFrame(results)
 
 if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -246,8 +347,12 @@ if __name__ == "__main__":
     # with open(os.path.join(OUTPUT_DIR, "parsed_knn_histograms.json"), "w") as f:
     #     json.dump(knn_histograms, f, indent=4)
 
-    # contig_lengths = parse_contig_lengths(PROCESSED_DATA_DIR)
-    # with open(os.path.join(OUTPUT_DIR, "parsed_contig_lengths.json"), "w") as f:
-    #     json.dump(contig_lengths, f, indent=4)
+    contig_summary, contig_lengths = parse_contig_lengths(PROCESSED_DATA_DIR)
+    with open(os.path.join(OUTPUT_DIR, "parsed_contig_lengths.json"), "w") as f:
+        json.dump(contig_lengths, f, indent=4)
 
     runtimes = parse_runtimes(BASE_DIR)
+    
+    bin_postprocess = parse_bin_postprocess(LOG_DIR)
+    
+    n_valtest = parse_nvaltest(MODEL_RESULTS_DIR)
