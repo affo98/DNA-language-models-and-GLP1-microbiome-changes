@@ -11,7 +11,7 @@ sample_ids_to_keep = {
 }
 
 # Input and output file paths
-input_fasta = "T2D-EW_PRJE1786/global_contig_catalogue.fna.gz"
+input_fasta = "T2D-EW_PRJEB1786/global_contig_catalogue.fna.gz"
 output_fasta = "global_contig_catalogue.fna.gz"
 
 # Filter and write the sequences
