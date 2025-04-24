@@ -225,7 +225,6 @@ def parse_runtimes(base_dir: str) -> pd.DataFrame:
                 base_dir, "model_results", dataset, f"{model}_output", "log.txt"
             )
             if os.path.isfile(log_path):
-                print(log_path)
                 with open(log_path, "r") as f:
                     content = f.read()
                     match = re.search(r"Completed Vamb in ([\d.]+) seconds", content)
@@ -239,6 +238,7 @@ def parse_runtimes(base_dir: str) -> pd.DataFrame:
                             }
                         )
     vamb_df = pd.DataFrame(vamb_result)
+    print(vamb_df)
     print(vamb_df)
 
     # ----- comebin -----
