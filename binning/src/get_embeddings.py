@@ -40,6 +40,7 @@ class Embedder:
         batch_sizes: list[int],
         model_name: str,
         model_path: str,
+        weight_path: str,
         save_path: str,
         normalize_embeddings: bool,
         log: Logger,
@@ -50,6 +51,7 @@ class Embedder:
         self.batch_sizes = batch_sizes
         self.model_name = model_name
         self.model_path = model_path
+        self.weight_path = weight_path
         self.save_path = save_path
         self.normalize_embeddings = normalize_embeddings
         self.log = log
@@ -92,7 +94,7 @@ class Embedder:
             embeddings = self.calculate_tnf(use_kernel=True)
         elif self.model_name == "dna2vec":
             embeddings = self.calculate_dna2vec()
-        elif self.model_name in ["dnaberts", "dnabert2", "dnabert2random"]:
+        elif self.model_name in ["dnaberts", "dnaberth", "dnabert2", "dnabert2random"]:
             embeddings = self.calculate_llm_embedding()
 
         if self.normalize_embeddings:
@@ -130,6 +132,11 @@ class Embedder:
                 config=config,
                 trust_remote_code=True,
             )
+            if self.model_name == "dnaberth":
+                self.llm_model.load_state_dict(torch.load(self.weight_path))
+                self.log.append(
+                    f"Loading DNABERTH model weights from path {self.weight_path}"
+                )
 
         elif self.model_name == "dnabert2random":
             self.llm_model = AutoModel.from_config(

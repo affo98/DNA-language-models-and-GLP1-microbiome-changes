@@ -37,9 +37,11 @@ assert MODEL==None or MODEL in ALL_MODELS, f"Error: Selected model '{MODEL}' is 
 
 MODEL_PATH=None
 BATCH_SIZES=None
+WEIGHT_PATH=None
 if MODEL in other_model_config.keys():
     MODEL_PATH = other_model_config[MODEL]["model_path"]
-    BATCH_SIZES = other_model_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnabert2', 'dnabert2random'] else 0
+    BATCH_SIZES = other_model_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnaberth', 'dnabert2', 'dnabert2random'] else 0
+    WEIGHT_PATH = other_model_config[MODEL]["weight_path"] if 'dnaberth' in  MODEL else None
 
 #processing flow of snakemake 
 config_download = bool(config.get("DOWNLOAD", False))
@@ -360,7 +362,7 @@ rule other_model_val:
         mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
         pip uninstall -y triton
         python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
-        -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {output.dirs} -l {log} -m val -vp {VAL_PROPORTION}
+        -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {output.dirs} -l {log} -m val -vp {VAL_PROPORTION} -wp {WEIGHT_PATH}
         """
 
 
@@ -456,7 +458,7 @@ rule other_model_test:
         best_p=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_p"])' $best_combination_file)
 
         python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
-        -b {BATCH_SIZES} -k $best_k -p $best_p -s {output.dirs} -l {log} -m test -vp {VAL_PROPORTION}
+        -b {BATCH_SIZES} -k $best_k -p $best_p -s {output.dirs} -l {log} -m test -vp {VAL_PROPORTION} -wp {WEIGHT_PATH}
         """
 
 rule create_fasta_bins_other_model_test:

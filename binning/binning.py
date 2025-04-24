@@ -58,6 +58,7 @@ def main(args, log):
             args.batch_sizes,
             args.model_name,
             args.model_path,
+            args.weight_path,
             os.path.join(args.save_path, "embeddings", f"{args.model_name}.npz"),
             normalize_embeddings=True,
             log=log,
@@ -107,6 +108,7 @@ def main(args, log):
             args.batch_sizes,
             args.model_name,
             args.model_path,
+            args.weight_path,
             os.path.join(args.save_path, "embeddings", f"{args.model_name}.npz"),
             normalize_embeddings=True,
             log=log,
@@ -155,6 +157,12 @@ def add_arguments() -> ArgumentParser:
         "--model_path",
         "-mp",
         help="Path to the pretrained model file or directory",
+    )
+    parser.add_argument(
+        "--weight_path",
+        "-wp",
+        default=None,
+        help="Path to the pretrained model weights file for DNABert-H",
     )
     parser.add_argument(
         "--batch_sizes",
