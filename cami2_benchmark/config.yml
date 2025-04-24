@@ -48,5 +48,6 @@ models:
   - name: tnfkernel
   - name: dna2vec
   - name: dnaberts
+  - name: dnaberth_400k
   - name: dnabert2
   - name: dnabert2random
