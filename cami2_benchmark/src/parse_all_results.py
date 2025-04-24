@@ -13,8 +13,6 @@ import pandas as pd
 import numpy as np
 
 
-
-
 MODEL_RESULTS_DIR = os.path.join("cami2_benchmark", "model_results")
 LOG_DIR = os.path.join("cami2_benchmark", "logs")
 BASE_DIR = "cami2_benchmark"
@@ -132,26 +130,39 @@ def parse_contig_lengths(processed_data_dir):
     return contigs_lengths
 
 
-def parse_runtimes(base_dir:str)->pd.DataFrame:
+def parse_runtimes(base_dir: str) -> pd.DataFrame:
     results = []
-    
-    models_binning = ['tnf', 'tnfkernel', 'dna2vec', 'dnabert2', 'dnabert2random', 'dnaberts']
-    binning_pattern = re.compile(r'(\w+?)_(test|val)_binning\.log')
+
+    models_binning = [
+        "tnf",
+        "tnfkernel",
+        "dna2vec",
+        "dnabert2",
+        "dnabert2random",
+        "dnaberts",
+    ]
+    binning_pattern = re.compile(r"(\w+?)_(test|val)_binning\.log")
 
     for fname in os.listdir(base_dir):
         match = binning_pattern.match(fname)
         if match:
             model, dataset = match.groups()
             if model in models_binning:
-                with open(os.path.join(base_dir, fname), 'r') as f:
+                with open(os.path.join(base_dir, fname), "r") as f:
                     content = f.read()
-                    runtime_match = re.search(r'Binning of .* ran in ([\d.]+) Seconds', content)
+                    runtime_match = re.search(
+                        r"Binning of .* ran in ([\d.]+) Seconds", content
+                    )
                     if runtime_match:
                         runtime_min = float(runtime_match.group(1)) / 60
-                        results.append({'dataset': dataset, 'model': model, 'runtime_minutes': runtime_min})
+                        results.append(
+                            {
+                                "dataset": dataset,
+                                "model": model,
+                                "runtime_minutes": runtime_min,
+                            }
+                        )
     print(results)
-
-
 
     # # Handle vamb and taxvamb
     # for model in ['vamb', 'taxvamb']:
@@ -168,7 +179,7 @@ def parse_runtimes(base_dir:str)->pd.DataFrame:
     # # Handle comebin
     # start_path = os.path.join(base_dir, 'comebin_output/data_sugmentation/comebin.log')
     # end_path = os.path.join(base_dir, 'comebin_output/comebin_res/comebin.log')
-    
+
     # def parse_timestamp(line):
     #     return datetime.strptime(line[:23], '%Y-%m-%d %H:%M:%S,%f')
 
@@ -190,7 +201,7 @@ def parse_runtimes(base_dir:str)->pd.DataFrame:
     #     print(f"Error processing comebin logs: {e}")
 
     # return pd.DataFrame(results)
-    
+
 
 if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -206,5 +217,5 @@ if __name__ == "__main__":
     # contig_lengths = parse_contig_lengths(PROCESSED_DATA_DIR)
     # with open(os.path.join(OUTPUT_DIR, "parsed_contig_lengths.json"), "w") as f:
     #     json.dump(contig_lengths, f, indent=4)
-        
-    runtimes = parse_runtimes(LOG_DIR, MODEL_RESULTS_DIR))
+
+    runtimes = parse_runtimes(LOG_DIR, MODEL_RESULTS_DIR)
