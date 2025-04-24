@@ -132,7 +132,7 @@ class Embedder:
                 config=config,
                 trust_remote_code=True,
             )
-            if self.model_name == "dnaberth":
+            if "dnaberth" in self.model_name:
                 self.llm_model.load_state_dict(torch.load(self.weight_path))
                 self.log.append(
                     f"Loading DNABERTH model weights from path {self.weight_path}"
