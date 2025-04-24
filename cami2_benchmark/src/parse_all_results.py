@@ -175,7 +175,6 @@ def parse_contig_lengths(processed_data_dir):
         json.dump(contigs_lengths, f, indent=4)
 
     contigs_summary_df = pd.DataFrame(contigs_summary)
-    print(contigs_summary_df)
     contigs_summary_df.to_csv(
         os.path.join(OUTPUT_DIR, "parsed_contig_lengths.csv"), index=False
     )
@@ -390,9 +389,9 @@ if __name__ == "__main__":
 
     # knn_histograms = parse_knn_histograms(MODEL_RESULTS_DIR)
 
-    # contig_summary, contig_lengths = parse_contig_lengths(PROCESSED_DATA_DIR)
+    contig_summary, contig_lengths = parse_contig_lengths(PROCESSED_DATA_DIR)
 
-    runtimes = parse_runtimes(BASE_DIR)
+    # runtimes = parse_runtimes(BASE_DIR)
 
     # bin_postprocess = parse_bin_postprocess(LOG_DIR)
 
