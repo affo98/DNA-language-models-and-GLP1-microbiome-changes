@@ -38,6 +38,10 @@ def process_abundance(
     log("#" * 100)
     log(f"\t\tProcessing {abundance_path} containing n_contigs = {num_contigs}")
     log(f"\t\tIterating through the contig catalogue with a chunk size of {chunk_size}")
+
+    log("#" * 100, "\n")
+    log("\t\t\t STEP 1")
+    log("#" * 100, "\n")
     ### 1. Compute sample_depths_sum (total abundance per sample) in a first pass ###
     sample_depths_sum = None
     chunk_iter, chunk_iter_copy = tee(
@@ -96,6 +100,10 @@ def normalize_by_sample_abundance(
     Returns:
         np.ndarray: Sum of contig abundances of shape (n_contigs x 1)
     """
+    log("#" * 100, "\n")
+    log("\t\t\t STEP 2")
+    log("#" * 100, "\n")
+
     total_contig_abundance = None
     chunk_iter = pd.read_csv(
         abundance_path, sep="\t", index_col=0, chunksize=chunk_size
@@ -165,6 +173,10 @@ def normalize_by_global_contig_abundances(
     Returns:
         None:
     """
+    log("#" * 100, "\n")
+    log("\t\t\t STEP 3")
+    log("#" * 100, "\n")
+
     first_chunk = True
     chunk_iter = pd.read_csv(
         abundance_path, sep="\t", index_col=0, chunksize=chunk_size
@@ -227,83 +239,31 @@ def normalize_by_global_contig_abundances(
     return None
 
 
-def vamb_abundances(abundance, output_abundance_path):
-    print("calculating abundances")
-    # abundance = abundance.copy()
-    sample_depths_sum = abundance.sum(axis=0)
-    print("#" * 50)
-    print(f"\t\tSAMPLE DEPTHS SUM VAMB:\n{sample_depths_sum}")
-    print("#" * 50, "\n")
-    # normalize OG abundances
-    abundance *= 1_000_000 / sample_depths_sum
-    # print(f"same sahpes as OG abundances 3x2:{abundance.shape}")
-
-    total_abundance = abundance.sum(axis=1)
-    # print(f"total abundance -> sum all contig abundances across samples -> 3x1: {total_abundance.shape}")
-
-    # Normalize abundance to sum to 1
-    n_samples = abundance.shape[1]
-    # print(f"number of samples -> 2: {n_samples}")
-
-    zero_total_abundance = total_abundance == 0
-    # print(f"Masking array with any contigs with zero abundances, should be third entry {zero_total_abundance.shape}, {zero_total_abundance}")
-
-    abundance[zero_total_abundance] = 1 / n_samples
-    # print(f"Setting the zero abundances to be 1/N_samples: 0.5 {abundance[zero_total_abundance]}")
-
-    nonzero_total_abundance = total_abundance.copy()
-    # print(f"copying total abundances of all contigs with nonzero abundances: {nonzero_total_abundance.shape}")
-
-    nonzero_total_abundance[zero_total_abundance] = 1.0
-    # print(f"setting sum index of zero abundant entries = 1 as 1/n * n = 1: {nonzero_total_abundance[zero_total_abundance]}")
-    abundance /= nonzero_total_abundance.reshape((-1, 1))
-    # print(f"(3,0) numpy to actualy vector -> reshaped to : {nonzero_total_abundance.reshape((-1, 1)).shape}")
-    # print(f"Normalizing abundances by contigs abundances across samples")
-
-    # print(f"Final Normalized abundances:\n {abundance}")
-
-    with open(output_abundance_path, "w") as file:
-        header = (
-            "contig\t" + "\t".join(str(i) for i in range(abundance.shape[1])) + "\n"
-        )
-        file.write(header)
-        for i in range(abundance.shape[0]):
-            line = f"{i}\t" + "\t".join(str(val) for val in abundance[i, :]) + "\n"
-            file.write(line)
-    return None
-
-
 if __name__ == "__main__":
 
     path_to_abundances = sys.argv[1]  # "../../../../../Downloads/abundances.tsv"
-    print(path_to_abundances)
+
     path_to_normalized_abundances = sys.argv[2]
-    print(path_to_normalized_abundances)
-    run_vamb = sys.argv[3]
-    print(run_vamb, type(run_vamb))
-    if run_vamb == "True":
-        abundance_df = pd.read_csv(path_to_abundances)
-        vamb_abundances(abundance_df.to_numpy(), path_to_normalized_abundances)
-    else:
-        chunk_size = 1000000
 
-        stdout_lines = subprocess.run(
-            ["wc", "-l", "<", f"{path_to_abundances}"], capture_output=True, text=True
-        )
-        num_contigs = int(stdout_lines.stdout.strip().split()[0]) - 1
+    chunk_size = 1000000
 
-        sample_depths_sum, n_samples = process_abundance(
-            path_to_abundances, num_contigs, chunk_size
-        )
-        total_contig_abundance = normalize_by_sample_abundance(
-            path_to_abundances, sample_depths_sum, n_samples, num_contigs, chunk_size
-        )
-        normalize_by_global_contig_abundances(
-            path_to_abundances,
-            path_to_normalized_abundances,
-            sample_depths_sum,
-            total_contig_abundance,
-            num_contigs,
-            n_samples,
-            chunk_size,
-        )
+    stdout_lines = subprocess.run(
+        ["wc", "-l", "<", f"{path_to_abundances}"], capture_output=True, text=True
+    )
+    num_contigs = int(stdout_lines.stdout.strip().split()[0]) - 1
+
+    sample_depths_sum, n_samples = process_abundance(
+        path_to_abundances, num_contigs, chunk_size
+    )
+    total_contig_abundance = normalize_by_sample_abundance(
+        path_to_abundances, sample_depths_sum, n_samples, num_contigs, chunk_size
+    )
+    normalize_by_global_contig_abundances(
+        path_to_abundances,
+        path_to_normalized_abundances,
+        sample_depths_sum,
+        total_contig_abundance,
+        num_contigs,
+        n_samples,
+        chunk_size,
+    )
