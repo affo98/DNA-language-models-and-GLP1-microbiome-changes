@@ -1,0 +1,23 @@
+from Bio import SeqIO
+
+# Define the sample IDs to include
+sample_ids_to_keep = {
+    "1906463",
+    "1906460",
+    "1906474",
+    "1906451",
+    "1906543",
+    "1906572",
+}
+
+# Input and output file paths
+input_fasta = "all_contigs.fasta"
+output_fasta = "filtered_contigs.fasta"
+
+# Filter and write the sequences
+with open(output_fasta, "w") as out_handle:
+    for record in SeqIO.parse(input_fasta, "fasta"):
+        if any(sample_id in record.id for sample_id in sample_ids_to_keep):
+            SeqIO.write(record, out_handle, "fasta")
+
+print(f"Filtered contigs written to: {output_fasta}")
