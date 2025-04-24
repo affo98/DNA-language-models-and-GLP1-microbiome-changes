@@ -275,8 +275,11 @@ def vamb_abundances(abundance, output_abundance_path):
 if __name__ == "__main__":
 
     path_to_abundances = sys.argv[1]  # "../../../../../Downloads/abundances.tsv"
+    print(path_to_abundances)
     path_to_normalized_abundances = sys.argv[2]
+    print(path_to_normalized_abundances)
     run_vamb = sys.argv[3]
+    print(run_vamb, type(run_vamb))
     if run_vamb is True:
         abundance_df = pd.read_csv(path_to_abundances)
         vamb_abundances(abundance_df.to_numpy(), path_to_normalized_abundances)
