@@ -254,26 +254,26 @@ def parse_runtimes(base_dir: str) -> pd.DataFrame:
             base_dir, "model_results", dataset, "comebin_output/comebin_res/comebin.log"
         )
 
-    try:
-        with open(start_path, "r") as f:
-            for line in f:
-                print(line)
-                if "generate_aug_data" in line:
-                    start_time = parse_timestamp(line)
-                    break
-        with open(end_path, "r") as f:
-            lines = f.readlines()
-            print(lines)
-            for line in reversed(lines):
-                if "Reading Map:" in line:
-                    end_time = parse_timestamp(line)
-                    break
-        runtime_min = (end_time - start_time).total_seconds() / 60
-        comebin_result.append(
-            {"dataset": dataset, "model": "comebin", "runtime_minutes": runtime_min}
-        )
-    except Exception as e:
-        print(f"Error processing comebin logs: {e}")
+        try:
+            with open(start_path, "r") as f:
+                for line in f:
+                    print(line)
+                    if "generate_aug_data" in line:
+                        start_time = parse_timestamp(line)
+                        break
+            with open(end_path, "r") as f:
+                lines = f.readlines()
+                print(lines)
+                for line in reversed(lines):
+                    if "Reading Map:" in line:
+                        end_time = parse_timestamp(line)
+                        break
+            runtime_min = (end_time - start_time).total_seconds() / 60
+            comebin_result.append(
+                {"dataset": dataset, "model": "comebin", "runtime_minutes": runtime_min}
+            )
+        except Exception as e:
+            print(f"Error processing comebin logs: {e}")
 
     comebin_df = pd.DataFrame(comebin_result)
     print(comebin_df)
