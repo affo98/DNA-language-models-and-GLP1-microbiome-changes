@@ -218,4 +218,4 @@ if __name__ == "__main__":
     # with open(os.path.join(OUTPUT_DIR, "parsed_contig_lengths.json"), "w") as f:
     #     json.dump(contig_lengths, f, indent=4)
 
-    runtimes = parse_runtimes(LOG_DIR, MODEL_RESULTS_DIR)
+    runtimes = parse_runtimes(BASE_DIR)
