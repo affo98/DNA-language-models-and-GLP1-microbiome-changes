@@ -280,7 +280,7 @@ if __name__ == "__main__":
     print(path_to_normalized_abundances)
     run_vamb = sys.argv[2]
     print(run_vamb, type(run_vamb))
-    if run_vamb is True:
+    if run_vamb is "True":
         abundance_df = pd.read_csv(path_to_abundances)
         vamb_abundances(abundance_df.to_numpy(), path_to_normalized_abundances)
     else:
