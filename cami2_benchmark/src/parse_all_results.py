@@ -367,7 +367,7 @@ def parse_heatmaps(model_results_dir: str) -> pd.DataFrame:
                 dataset,
                 f"{model}_output",
                 "checkm2_validation_results",
-                "heatmap.json",
+                "heatmap_data.json",
             )
             with open(filepath, "r") as f:
                 data = json.load(f)
@@ -394,7 +394,7 @@ if __name__ == "__main__":
 
     # contig_summary, contig_lengths = parse_contig_lengths(PROCESSED_DATA_DIR)
 
-    # runtimes = parse_runtimes(BASE_DIR)
+    runtimes = parse_runtimes(BASE_DIR)
 
     bin_postprocess = parse_bin_postprocess(LOG_DIR)
 
