@@ -94,7 +94,12 @@ class Embedder:
             embeddings = self.calculate_tnf(use_kernel=True)
         elif self.model_name == "dna2vec":
             embeddings = self.calculate_dna2vec()
-        elif self.model_name in ["dnaberts", "dnaberth", "dnabert2", "dnabert2random"]:
+        elif self.model_name in [
+            "dnaberts",
+            "dnaberth_400k",
+            "dnabert2",
+            "dnabert2random",
+        ]:
             embeddings = self.calculate_llm_embedding()
 
         if self.normalize_embeddings:
