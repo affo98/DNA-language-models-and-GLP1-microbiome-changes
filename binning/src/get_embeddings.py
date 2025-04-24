@@ -27,6 +27,7 @@ from src.dataset import ContigDataset
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore", message="Increasing alibi size")
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 
 class Embedder:
