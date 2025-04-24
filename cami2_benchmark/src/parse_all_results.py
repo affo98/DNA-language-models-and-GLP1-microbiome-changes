@@ -145,6 +145,7 @@ def parse_runtimes(base_dir: str) -> pd.DataFrame:
 
     for fname in os.listdir(base_dir):
         match = binning_pattern.match(fname)
+        print(match)
         if match:
             model, dataset = match.groups()
             if model in models_binning:
