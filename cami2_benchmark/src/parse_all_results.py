@@ -143,26 +143,28 @@ def parse_runtimes(base_dir: str) -> pd.DataFrame:
     ]
     binning_pattern = re.compile(r"(\w+?)_(test|val)_binning\.log")
 
-    for fname in os.listdir(base_dir):
-        match = binning_pattern.match(fname)
-        print(match)
-        if match:
-            model, dataset = match.groups()
-            if model in models_binning:
-                with open(os.path.join(base_dir, fname), "r") as f:
-                    content = f.read()
-                    runtime_match = re.search(
-                        r"Binning of .* ran in ([\d.]+) Seconds", content
-                    )
-                    if runtime_match:
-                        runtime_min = float(runtime_match.group(1)) / 60
-                        results.append(
-                            {
-                                "dataset": dataset,
-                                "model": model,
-                                "runtime_minutes": runtime_min,
-                            }
+    for root, _, files in os.walk(base_dir):
+        for fname in files:
+            match = binning_pattern.match(fname)
+            print(match)
+            if match:
+                model, dataset = match.groups()
+                if model in models_binning:
+                    full_path = os.path.join(root, fname)
+                    with open(full_path, "r") as f:
+                        content = f.read()
+                        runtime_match = re.search(
+                            r"Binning of .* ran in ([\d.]+) Seconds", content
                         )
+                        if runtime_match:
+                            runtime_min = float(runtime_match.group(1)) / 60
+                            results.append(
+                                {
+                                    "dataset": dataset,
+                                    "model": model,
+                                    "runtime_minutes": runtime_min,
+                                }
+                            )
     print(results)
 
     # # Handle vamb and taxvamb
