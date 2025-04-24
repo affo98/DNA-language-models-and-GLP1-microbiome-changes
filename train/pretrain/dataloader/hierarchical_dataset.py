@@ -16,6 +16,7 @@ from typing import Optional
 from torch.utils.data.dataset import Dataset
 from torch.utils.data.sampler import Sampler
 import random
+import itertools
 
 class GenomeHierarchihcalDataset(Dataset):
     def __init__(self, args, load_train=True):
@@ -254,7 +255,10 @@ class TrainDataset(Dataset):
         
         # Check total number of samples (read initial file)
         self.total_samples = 2165598
-            
+        
+        # Cache for line positions in files to avoid rescanning
+        self.line_positions_cache = {}
+        
     def get_current_file_path(self):
         return os.path.join(self.datapath, self.file_pattern.format(self.current_epoch))
     
@@ -270,6 +274,42 @@ class TrainDataset(Dataset):
             idx >= self.current_chunk_end):
             self.load_chunk(idx)
     
+    def index_file_lines(self, file_path):
+        """Index all line positions in the file and cache them for future access"""
+        if file_path in self.line_positions_cache:
+            return self.line_positions_cache[file_path]
+            
+        line_positions = []
+        with open(file_path, 'rb') as f:
+            # Skip header
+            f.readline()
+            header_end = f.tell()
+            
+            # Record start position of each line
+            line_positions.append(header_end)
+            
+            # Find all line start positions efficiently
+            # Use larger buffer for faster reading
+            buffer_size = 8 * 1024 * 1024  # 8MB buffer
+            chunk = f.read(buffer_size)
+            
+            pos = header_end
+            while chunk:
+                for i in range(len(chunk)):
+                    if chunk[i] == ord('\n'):
+                        line_positions.append(pos + i + 1)
+                
+                pos += len(chunk)
+                chunk = f.read(buffer_size)
+                
+                # Early stop if we've found enough lines
+                if len(line_positions) > self.total_samples:
+                    break
+                
+        # Cache the result
+        self.line_positions_cache[file_path] = line_positions
+        return line_positions
+    
     def load_chunk(self, start_idx):
         # Adjust start position (align to chunk size multiple)
         chunk_start = (start_idx // self.chunk_size) * self.chunk_size
@@ -278,67 +318,107 @@ class TrainDataset(Dataset):
         # Get current file path
         current_file_path = self.get_current_file_path()
         
-        # Read necessary rows
-        chunk_data = []
-        with open(current_file_path) as tsvfile:
-            reader = csv.reader(tsvfile, delimiter="\t")
-            # Skip header
-            next(reader)
-            
-            # Skip rows until start position
-            for _ in range(chunk_start):
-                next(reader, None)
-                
-            # Load required rows
-            for _ in range(chunk_end - chunk_start):
-                try:
-                    row = next(reader)
-                    chunk_data.append(row)
-                except StopIteration:
-                    break
+        # Get indexed line positions (cached if already computed)
+        line_positions = self.index_file_lines(current_file_path)
         
-        # Process data into required format
+        # Read chunk data efficiently using line positions
+        chunk_data = []
+        with open(current_file_path, 'r') as f:
+            # Skip header if needed
+            if chunk_start > 0 and chunk_start < len(line_positions):
+                # Seek to the starting line position
+                f.seek(line_positions[chunk_start])
+            else:
+                # Skip header line
+                f.readline()
+                
+            # Read only the necessary lines (read in bulk for efficiency)
+            lines_to_read = chunk_end - chunk_start
+            chunk_data = []
+            
+            # Read in batches to improve performance with large files
+            batch_size = 1000
+            for i in range(0, lines_to_read, batch_size):
+                batch_lines = list(itertools.islice(f, min(batch_size, lines_to_read - i)))
+                for line in batch_lines:
+                    # Parse the TSV line
+                    row = line.strip().split('\t')
+                    chunk_data.append(row)
+        
+        # Process data into required format using efficient numpy operations
+        num_rows = len(chunk_data)
+        
+        # Preallocate arrays for better performance
+        seq1 = []
+        seq2 = []
+        
+        # Extract arrays directly from rows
+        species = np.zeros(num_rows, dtype=np.int32)
+        genus = np.zeros(num_rows, dtype=np.int32)
+        family = np.zeros(num_rows, dtype=np.int32)
+        order = np.zeros(num_rows, dtype=np.int32)
+        class_ = np.zeros(num_rows, dtype=np.int32)
+        phylum = np.zeros(num_rows, dtype=np.int32)
+        kingdom = np.zeros(num_rows, dtype=np.int32)
+        superkingdom = np.zeros(num_rows, dtype=np.int32)
+        
+        # Process rows in a single pass
+        for i, row in enumerate(chunk_data):
+                seq1.append(row[11])
+                seq2.append(row[12])
+                species[i] = int(row[3])
+                genus[i] = int(row[4])
+                family[i] = int(row[5])
+                order[i] = int(row[6])
+                class_[i] = int(row[7])
+                phylum[i] = int(row[8])
+                kingdom[i] = int(row[9])
+                superkingdom[i] = int(row[10])
+        
+        # Store data in a more efficient format
         self.current_data = {
-            'id': list(range(chunk_start, chunk_start + len(chunk_data))),
-            'seq1': [d[11] for d in chunk_data],
-            'seq2': [d[12] for d in chunk_data],
-            'species': [int(d[3]) for d in chunk_data],
-            'genus': [int(d[4]) for d in chunk_data],
-            'family': [int(d[5]) for d in chunk_data],
-            'order': [int(d[6]) for d in chunk_data],
-            'class_': [int(d[7]) for d in chunk_data],
-            'phylum': [int(d[8]) for d in chunk_data],
-            'kingdom': [int(d[9]) for d in chunk_data],
-            'superkingdom': [int(d[10]) for d in chunk_data],
+            'id': list(range(chunk_start, chunk_start + num_rows)),
+            'seq1': seq1,
+            'seq2': seq2,
+            'species': species,
+            'genus': genus,
+            'family': family,
+            'order': order,
+            'class_': class_,
+            'phylum': phylum,
+            'kingdom': kingdom,
+            'superkingdom': superkingdom,
         }
         
         # Update chunk range
         self.current_chunk_start = chunk_start
-        self.current_chunk_end = chunk_start + len(chunk_data)
-    
-    def __len__(self):
-        return self.total_samples
+        self.current_chunk_end = chunk_start + num_rows
     
     def get_item_at_idx(self, idx):
         # Calculate relative position within chunk
         relative_idx = idx - self.current_chunk_start
         
+        # Fast numpy array indexing for numerical values
         label = [
-            self.current_data['species'][relative_idx],
-            self.current_data['genus'][relative_idx],
-            self.current_data['family'][relative_idx],
-            self.current_data['order'][relative_idx],
-            self.current_data['class_'][relative_idx],
-            self.current_data['phylum'][relative_idx],
-            self.current_data['kingdom'][relative_idx],
-            self.current_data['superkingdom'][relative_idx]
+            int(self.current_data['species'][relative_idx]),
+            int(self.current_data['genus'][relative_idx]),
+            int(self.current_data['family'][relative_idx]),
+            int(self.current_data['order'][relative_idx]),
+            int(self.current_data['class_'][relative_idx]),
+            int(self.current_data['phylum'][relative_idx]),
+            int(self.current_data['kingdom'][relative_idx]),
+            int(self.current_data['superkingdom'][relative_idx])
         ]
+        
         # For training data, cut from random position
         rand_i = random.choice(list(range(200)))
         seq1 = self.current_data['seq1'][relative_idx][rand_i:]
         seq2 = self.current_data['seq2'][relative_idx][rand_i:]
             
         return seq1, seq2, label
+    
+    def __len__(self):
+        return self.total_samples
     
     def __getitem__(self, index):
         # For batch sampling, index is a list of indices
