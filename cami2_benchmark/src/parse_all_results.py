@@ -75,6 +75,9 @@ def process_all_reports(model_results_dir):
                 data[dataset] = {}
             data[dataset][model] = bin_counts
 
+    with open(os.path.join(OUTPUT_DIR, "parsed_checkm2_results.json"), "w") as f:
+        json.dump(data, f, indent=4)
+
     return data
 
 
@@ -120,6 +123,9 @@ def parse_knn_histograms(model_results_dir):
             data["p"] = p
             histograms[dataset_name][model_name] = data
 
+    with open(os.path.join(OUTPUT_DIR, "parsed_knn_histograms.json"), "w") as f:
+        json.dump(histograms, f, indent=4)
+
     return histograms
 
 
@@ -164,6 +170,15 @@ def parse_contig_lengths(processed_data_dir):
                     "75_percentile": float(np.percentile(lengths_array, 75)),
                 }
             )
+
+    with open(os.path.join(OUTPUT_DIR, "parsed_contig_lengths.json"), "w") as f:
+        json.dump(contig_lengths, f, indent=4)
+
+    contigs_summary_df = pd.DataFrame(contigs_summary)
+    print(contigs_summary_df)
+    contigs_summary_df.to_csv(
+        os.path.join(OUTPUT_DIR, "parsed_contig_lengths.csv"), index=False
+    )
 
     return contigs_summary, contigs_lengths
 
@@ -374,19 +389,15 @@ if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     # cami2_results = process_all_reports(MODEL_RESULTS_DIR)
-    # with open(os.path.join(OUTPUT_DIR, "parsed_checkm2_results.json"), "w") as f:
-    #     json.dump(cami2_results, f, indent=4)
 
     # knn_histograms = parse_knn_histograms(MODEL_RESULTS_DIR)
-    # with open(os.path.join(OUTPUT_DIR, "parsed_knn_histograms.json"), "w") as f:
-    #     json.dump(knn_histograms, f, indent=4)
 
     contig_summary, contig_lengths = parse_contig_lengths(PROCESSED_DATA_DIR)
-    with open(os.path.join(OUTPUT_DIR, "parsed_contig_lengths.json"), "w") as f:
-        json.dump(contig_lengths, f, indent=4)
 
     runtimes = parse_runtimes(BASE_DIR)
 
     bin_postprocess = parse_bin_postprocess(LOG_DIR)
 
     n_valtest = parse_nvaltest(MODEL_RESULTS_DIR)
+
+    heatmaps = parse_heatmaps(MODEL_RESULTS_DIR)
