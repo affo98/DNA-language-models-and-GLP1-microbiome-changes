@@ -2,7 +2,7 @@
 
 #SBATCH --job-name=t2dew # Job name
 #SBATCH --output=t2dew.out
-#SBATCH --exclude=cn[1-19]
+#SBATCH --exclude=cn[3-18]
 #SBATCH --exclude=desktop[1-16]
 #SBATCH --gres=gpu:l40s:4
 #SBATCH --time=5-00:00:00
