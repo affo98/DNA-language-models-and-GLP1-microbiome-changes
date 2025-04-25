@@ -119,7 +119,7 @@ if __name__ == "__main__":
     for arg, value in vars(args).items():
         log.append(f"{arg}: {value}")
 
-    os.makedirs(args.save_path)
+    os.makedirs(args.output_path)
     main(args, log)
 
     end_time = time()
