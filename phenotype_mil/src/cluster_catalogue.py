@@ -21,7 +21,7 @@ def get_cluster_catalogue(
     """
 
     clusters_filtered_path = os.path.join(input_path, CLUSTERS_FILENAME)
-    clusters = read_clusters(clusters_filtered_path)
+    clusters = read_clusters(clusters_filtered_path, log)
 
     seeds_path = os.path.join(input_path, SEEDS_FILENAME)
     cluster_catalogue = get_seeds_centroid_catalogue(seeds_path, clusters.keys(), log)
@@ -34,7 +34,7 @@ def get_seeds_centroid_catalogue(seeds_path: str, clusterids, log) -> np.array:
     """Loads a seeds dictionary saved in JSON format, converting seed lists back to np.arrays."""
     seeds_npz = np.load(seeds_path, allow_pickle=True)
     all_seeds = dict(seeds_npz)
-    print(all_seeds.shape)
+    print(all_seeds.keys(), len(all_seeds))
 
     clusterids = set(int(cid) for cid in clusterids)
 
