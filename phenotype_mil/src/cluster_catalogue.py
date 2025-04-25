@@ -9,7 +9,7 @@ from src.utils import Logger, read_clusters
 
 
 CLUSTERS_FILENAME = "clusters_filtered.tsv"
-SEEDS_FILENAME = "seeds.json"
+SEEDS_FILENAME = "seeds.npz"
 
 
 def get_cluster_catalogue(
@@ -32,14 +32,15 @@ def get_cluster_catalogue(
 
 def get_seeds_centroid_catalogue(seeds_path: str, clusterids, log) -> np.array:
     """Loads a seeds dictionary saved in JSON format, converting seed lists back to np.arrays."""
-    with open(seeds_path, "r") as filehandle:
-        data = json.load(filehandle)
+    seeds_npz = np.load(seeds_path, allow_pickle=True)
+    all_seeds = dict(seeds_npz)
+    print(all_seeds)
 
     clusterids = set(int(cid) for cid in clusterids)
 
     seeds = {
         int(label): np.array(seed)
-        for label, seed in data.items()
+        for label, seed in all_seeds.items()
         if int(label) in clusterids
     }
     log.append(f"Using {seeds.shape} seeds from {seeds_path}")
