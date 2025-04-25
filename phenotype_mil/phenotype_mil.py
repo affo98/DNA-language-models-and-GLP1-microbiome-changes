@@ -22,7 +22,8 @@ def main(args, log):
     sample_ids, labels = read_sample_labels(
         args.sample_labels_path, log, split_train_test=False
     )
-    cluster_catalogue = get_cluster_catalogue(args.input_path, args.output_path, log)
+    print(sample_ids, labels)
+    cluster_catalogue = get_cluster_catalogue(args.input_path, log)
 
     # read abundances that are ade in snakemake rule, maybe
     # abundances = get_abundances(args.input_path, args.output_path, log)

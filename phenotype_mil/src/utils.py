@@ -67,6 +67,7 @@ def read_sample_labels(
             labels.append(str(row[1]))
 
     if not split_train_test:
+        assert len(sample_ids) == len(labels)
         return np.array(sample_ids), np.array(labels)
 
     sample_ids_train, sample_ids_test, labels_train, labels_test = (
