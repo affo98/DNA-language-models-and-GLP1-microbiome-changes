@@ -66,8 +66,8 @@ KNN_K = [100,200,300,400,500,600,700,800,900,1000]
 KNN_P = [25,50,75]
 
 if DATASET == 'T2D-EW':
-    VAL_PROPORTION=0.05 
-    #VAL_PROPORTION=*0.004 # change for all samples, should be around 100k
+    #VAL_PROPORTION=0.05 
+    VAL_PROPORTION=*0.004 # change for all samples, should be around 100k
 else:
     VAL_PROPORTION=0.02
 
@@ -294,30 +294,31 @@ rule checkm2:
 
 
 
-# rule phenotype_mil:
-#     input:
-#         cluster_dir = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test"),
-#         sample_labels = SAMPLE_LABELS_FILE
-#         #abundance = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "abundance.tsv")
-#     output:
-#         result_dir = directory(os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_results"),
-#     log:
-#         os.path.join(LOGS, DATASET, "{MODEL}_mil.log"),
-#     conda:
-#         "envs/phenotype_mil.yml",
-#     shell:
-#         """
-#         mkdir -p {output.result_dir}
-#         python phenotype_mil/phenotype_mil.py \
-#             --model_name {MODEL} \
-#             --dataset_name {DATASET_NAME} \
-#             --input_path {input.cluster_dir} \
-#             --sample_labels_path {input.sample_labels} \
-#             --abundance_path {input.abundance} \
-#             --output_path {output.result_dir} \
-#             --log {log} \
-#             --mil_methods {MIL_METHODS} \
-#         """
+rule phenotype_mil:
+    input:
+        cluster_dir = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test"),
+        sample_labels = SAMPLE_LABELS_FILE
+        #abundance = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "abundance.tsv")
+        abundance = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test")
+    output:
+        result_dir = directory(os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_results")),
+    log:
+        os.path.join(LOGS, DATASET, "{MODEL}_mil.log"),
+    conda:
+        "envs/phenotype_mil.yml",
+    shell:
+        """
+        mkdir -p {output.result_dir}
+        python phenotype_mil/phenotype_mil.py \
+            --model_name {MODEL} \
+            --dataset_name {DATASET_NAME} \
+            --input_path {input.cluster_dir} \
+            --sample_labels_path {input.sample_labels} \
+            --abundance_path {input.abundance} \
+            --output_path {output.result_dir} \
+            --log {log} \
+            --mil_methods {MIL_METHODS} \
+        """
 
 
 
