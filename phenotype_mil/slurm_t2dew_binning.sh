@@ -1,11 +1,11 @@
 #!/bin/bash
 
-#SBATCH --job-name=test3 # Job name
-#SBATCH --output=test3.out
+#SBATCH --job-name=t2dew # Job name
+#SBATCH --output=t2dew.out
 #SBATCH #--exclude=cn[1-11]
 #SBATCH #--exclude=cn=[12-18]
 #SBATCH --gres=gpu:l40s:4
-#SBATCH --time=00:01:00
+#SBATCH --time=5-00:00:00
 #SBATCH --nodelist=cn19
 #SBATCH --partition=purrlab_students
 
