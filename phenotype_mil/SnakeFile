@@ -315,7 +315,7 @@ rule phenotype_mil:
         mkdir -p {output.result_dir}
         python phenotype_mil/phenotype_mil.py \
             --model_name {MODEL} \
-            --dataset_name {DATASET_NAME} \
+            --dataset_name {DATASET} \
             --input_path {input.cluster_dir} \
             --sample_labels_path {input.sample_labels} \
             --abundance_path {input.abundance} \
