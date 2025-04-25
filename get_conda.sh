@@ -41,7 +41,7 @@ else
     source ~/.bashrc || source ~/.zshrc
 
     #get mamba
-    conda install -n base -c conda-forge mamba
+    conda install -n base -c conda-forge mamba --yes
 
     #ensure that flexible channels are used
     conda config --set channel_priority flexible
