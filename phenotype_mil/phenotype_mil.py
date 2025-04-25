@@ -99,9 +99,9 @@ def add_arguments() -> ArgumentParser:
     parser.add_argument(
         "--mil_methods",
         "-m",
-        args="+",
+        nargs="+",
         choices=["knn", "classifier", "graph"],
-        help="MIL method to use)",
+        help="MIL method to use",
     )
 
     args = parser.parse_args()
