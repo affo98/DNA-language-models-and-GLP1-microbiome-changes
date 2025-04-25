@@ -63,6 +63,7 @@ def read_sample_labels(
     with open(sample_labels_path, "r") as file:
         reader = csv.reader(file, delimiter="\t")
         first_row = next(reader, None)  # Skip the header
+        print(first_row)
         if first_row == SAMPLE_HEADER:
             log.append(f"Header Skipped in sample labels file: {first_row}")
         else:
