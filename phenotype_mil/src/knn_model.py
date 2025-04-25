@@ -4,8 +4,9 @@ from scipy.spatial.distance import cdist
 
 from src.utils import Logger
 
-#OTENTIAL USE
-#https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html
+# OTENTIAL USE
+# https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html
+
 
 class KNNModel:
 
@@ -16,7 +17,7 @@ class KNNModel:
         abundances_train: np.array,
         abundances_test: np.array,
         log=Logger,
-        save_path=str
+        save_path=str,
     ):
 
         self.labels_train = labels_train
@@ -29,23 +30,22 @@ class KNNModel:
     def predict(self, k: int, distance_metric: str) -> list[str]:
         """Predict the labels for the test set using KNN."""
 
-           """Predict the labels for the test set using KNN."""
-        
-        distances = cdist(self.abundances_test, self.abundances_train, metric=distance_metric)
+        distances = cdist(
+            self.abundances_test, self.abundances_train, metric=distance_metric
+        )
         top_k_indices = np.argsort(distances, axis=1)[:, :k]
-        top_k_labels = np.array([np.array(self.labels_train)[indices] for indices in top_k_indices])
-        
+        top_k_labels = np.array(
+            [np.array(self.labels_train)[indices] for indices in top_k_indices]
+        )
 
         predictions = []
         for labels in top_k_labels:
-            majority_label = Counter(labels).most_common(1)[0][0] #majority voting pred
+            majority_label = Counter(labels).most_common(1)[0][
+                0
+            ]  # majority voting pred
             predictions.append(majority_label)
-        
+
         self.predictions = predictions
         return predictions
-    
-    def plot_predictions(self):
-        ...
-        
-        
-        
+
+    def plot_predictions(self): ...
