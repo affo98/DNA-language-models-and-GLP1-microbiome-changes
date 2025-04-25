@@ -34,7 +34,7 @@ def get_seeds_centroid_catalogue(seeds_path: str, clusterids, log) -> np.array:
     """Loads a seeds dictionary saved in JSON format, converting seed lists back to np.arrays."""
     seeds_npz = np.load(seeds_path, allow_pickle=True)
     seed_labels = seeds_npz["seed_labels"]
-    seed_embeddings = seeds_npz["seed_embeddings"]
+    seed_embeddings = seeds_npz["seeds"]
 
     clusterids = set(int(cid) for cid in clusterids)
 
