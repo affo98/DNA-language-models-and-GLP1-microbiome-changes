@@ -5,6 +5,7 @@ import numpy as np
 
 
 CLUSTERS_HEADER = "clustername\tcontigname"
+SAMPLE_HEADER = "sample_id\tlabel"
 
 
 class Logger:
@@ -63,6 +64,8 @@ def read_sample_labels(
         reader = csv.reader(file, delimiter="\t")
         # to-do: skip header if it exists
         for row in reader:
+            if row.rstrip(" \n") == SAMPLE_HEADER:
+                continue
             sample_ids.append(str(row[0]))
             labels.append(str(row[1]))
 
