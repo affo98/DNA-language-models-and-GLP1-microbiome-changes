@@ -11,53 +11,52 @@ from src.knn_model import KNNModel
 
 from src.eval import append_eval_metrics
 
+DISTANCE_METRIC_BAG = "cosine"
 
-
-DISTANCE_METRIC_BAG = 'cosine'
-
-#params knn
+# params knn
 KNN_K = 5
 
 
 def main(args, log):
-    
-    sample_ids, labels = read_sample_labels(args.sample_labels_path, log, split_train_test=False)
+
+    sample_ids, labels = read_sample_labels(
+        args.sample_labels_path, log, split_train_test=False
+    )
     cluster_catalogue = get_cluster_catalogue(args.input_path, args.output_path, log)
 
-    #read abundances that are ade in snakemake rule, maybe
-    #abundances = get_abundances(args.input_path, args.output_path, log)
-    #assert abundances is same as sample ids and labels
-    
-    eval_metrics = {'metrics': []}
-    
-    skf = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
-    for fold_idx, (train_idx, test_idx) in enumerate(skf.split(abundances, labels)):
-        fold = f"fold_{fold_idx + 1}"
-        abundances_train, abundances_test = abundances[train_idx], abundances[test_idx]
-        labels_train, labels_test = labels[train_idx], labels[test_idx]
-        sample_ids_train, sample_ids_test = sample_ids[train_idx], sample_ids[test_idx]
-        log.append(f"Fold {fold} - Train samples: {len(sample_ids_train)}, Test samples: {len(sample_ids_test)}")
-        
-        for mil_method in args.mil_method:
-            log.append(f"Using MIL method: {mil_method}")
-            
-            if mil_method == "knn":
-                knnmodel = KNNModel(labels_train,
-                                    labels_test,
-                                    abundances_train,
-                                    abundances_test,
-                                    log=log,
-                                    )
-                predictions = knnmodel.predict(k=, distance_metric = DISTANCE_METRIC_BAG)
-            
-            elif mil_method == 'classifier':
-                pass
-            elif mil_method == 'graph':
-                pass
-            
-            eval_metrics = append_eval_metrics(eval_metrics, labels_test, predictions, mil_method, fold)
-            
-                
+    # read abundances that are ade in snakemake rule, maybe
+    # abundances = get_abundances(args.input_path, args.output_path, log)
+    # assert abundances is same as sample ids and labels
+
+    # eval_metrics = {'metrics': []}
+
+    # skf = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
+    # for fold_idx, (train_idx, test_idx) in enumerate(skf.split(abundances, labels)):
+    #     fold = f"fold_{fold_idx + 1}"
+    #     abundances_train, abundances_test = abundances[train_idx], abundances[test_idx]
+    #     labels_train, labels_test = labels[train_idx], labels[test_idx]
+    #     sample_ids_train, sample_ids_test = sample_ids[train_idx], sample_ids[test_idx]
+    #     log.append(f"Fold {fold} - Train samples: {len(sample_ids_train)}, Test samples: {len(sample_ids_test)}")
+
+    #     for mil_method in args.mil_method:
+    #         log.append(f"Using MIL method: {mil_method}")
+
+    #         if mil_method == "knn":
+    #             knnmodel = KNNModel(labels_train,
+    #                                 labels_test,
+    #                                 abundances_train,
+    #                                 abundances_test,
+    #                                 log=log,
+    #                                 )
+    #             predictions = knnmodel.predict(k=, distance_metric = DISTANCE_METRIC_BAG)
+
+    #         elif mil_method == 'classifier':
+    #             pass
+    #         elif mil_method == 'graph':
+    #             pass
+
+    #         eval_metrics = append_eval_metrics(eval_metrics, labels_test, predictions, mil_method, fold)
+
 
 def add_arguments() -> ArgumentParser:
     parser = ArgumentParser()
