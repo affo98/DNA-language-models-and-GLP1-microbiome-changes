@@ -6,6 +6,8 @@ channels:
 dependencies:
   - python
   - pip
+  - meson
+  - compilers
   - pip:
       - vamb
       - Bio
