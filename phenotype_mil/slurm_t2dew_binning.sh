@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#SBATCH --job-name=test3 # Job name
+#SBATCH --output=test3.out
+#SBATCH #--exclude=cn[1-11]
+#SBATCH #--exclude=cn=[12-18]
+#SBATCH --gres=gpu:l40s:4
+#SBATCH --time=00:01:00
+#SBATCH --nodelist=cn19
+#SBATCH --partition=purrlab_students
+
+nvidia-smi
+
+chmod +x get_conda.sh
+bash get_conda.sh
+source ~/.bashrc
+
+conda env create -f phenotype_mil/envs/snakeenv.yml --yes && conda activate snakeenv
+
+snakemake --snakefile phenotype_mil/SnakeFile --config DATASET=T2D-EW MODEL=dnaberts --use-conda --cores all
