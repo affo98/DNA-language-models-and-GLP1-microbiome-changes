@@ -55,6 +55,7 @@ SAMPLE_LABELS_FILE = os.path.join(NGS_DIR, "raw_data", "sample_labels", f"{DATAS
 #processing flow of snakemake 
 config_checkm2 = bool(config.get("CHECKM2", False))
 config_nomodelrun = bool(config.get("NOMODELRUN", False))
+config_phenotype_mil = bool(config.get("PHENOTYPE_MIL", False))
 
 
 #contig params
@@ -83,6 +84,7 @@ print(f"  - MinSize Bins:             {MINSIZE_BINS}")
 print(f"  - MinSize Contigs:          {MINSIZE_CONTIGS}")
 print(f"  - No model run:             {config_nomodelrun}")
 print(f"  - KNN params:               K:{KNN_K}, P:{KNN_P}")
+print(f"  - Phenotype MIL:            {config_phenotype_mil}")
 print(f"  - MIL Method:               {MIL_METHODS}")
 
 
@@ -125,6 +127,8 @@ elif MODEL in ['dnabert2random'] and not config_nomodelrun:
     ]
 if config_checkm2:
     input_files += [os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "checkm2", f"{MODEL}_results")]
+if config_phenotype_mil:
+    input_files += [os.path.join(OUTDIR_MIL_RESULTS, DATASET, f"{MODEL}_results")]
 
 
 rule all:
