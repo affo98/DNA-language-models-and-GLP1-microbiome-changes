@@ -82,7 +82,7 @@ def add_arguments() -> ArgumentParser:
         help="Path to the sample labels file",
     )
     parser.add_argument(
-        "--abundances_path",
+        "--abundance_path",
         "-a",
         help="Path to the abundances file",
     )
