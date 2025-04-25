@@ -28,7 +28,7 @@ class Logger:
             log_file.write(message + "\n")
 
 
-def read_clusters(clusters_path: str) -> dict[str, set[str]]:
+def read_clusters(clusters_path: str, log: Logger) -> dict[str, set[str]]:
     """Read cluster file into a dict[clusterid, set[contigids]]."""
     with open(clusters_path, "r") as filehandle:
         clusters_dict = {}
@@ -51,6 +51,7 @@ def read_clusters(clusters_path: str) -> dict[str, set[str]]:
                 clusters_dict[clustername] = set()
             clusters_dict[clustername].add(contigname)
 
+    log.append(f"Read {len(clusters_dict)} clusters from {clusters_path}")
     return clusters_dict
 
 
@@ -63,7 +64,6 @@ def read_sample_labels(
     with open(sample_labels_path, "r") as file:
         reader = csv.reader(file, delimiter="\t")
         first_row = next(reader, None)  # Skip the header
-        print(first_row)
         if (
             first_row[0] == SAMPLE_HEADER.split("\t")[0]
             and first_row[1] == SAMPLE_HEADER.split("\t")[1]
