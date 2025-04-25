@@ -54,7 +54,7 @@ def read_clusters(clusters_path: str) -> dict[str, set[str]]:
 
 
 def read_sample_labels(
-    sample_labels_path: str, log:Logger, split_train_test: bool
+    sample_labels_path: str, log: Logger, split_train_test: bool
 ) -> tuple[list[str], list[str]]:
     sample_ids = []
     labels = []
@@ -72,14 +72,19 @@ def read_sample_labels(
     sample_ids_train, sample_ids_test, labels_train, labels_test = (
         split_samples_traintest(sample_ids, labels, proportion=0.3)
     )
-    return np.array(sample_ids_train), np.array(sample_ids_test), np.array(labels_train), np.array(labels_test)
+    return (
+        np.array(sample_ids_train),
+        np.array(sample_ids_test),
+        np.array(labels_train),
+        np.array(labels_test),
+    )
 
 
 def split_samples_traintest(
     sample_ids: list[str],
     labels: list[str],
-    proportion: int = 0.3,
-    log,
+    proportion: int,
+    log: Logger,
 ) -> tuple[list[str], list[str], list[str], list[str]]:
 
     assert len(sample_ids) == len(
@@ -118,7 +123,7 @@ def split_samples_traintest(
         f"Splitting into validation/test using proportion={proportion}\n"
         f"N total: {n_total}, N val: {n_test}, N test: {n_total - n_test}"
     )
-    
+
     return sample_ids_train, sample_ids_test, labels_train, labels_test
 
 
