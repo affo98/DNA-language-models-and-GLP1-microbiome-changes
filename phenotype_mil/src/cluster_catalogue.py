@@ -46,5 +46,6 @@ def get_seeds_centroid_catalogue(seeds_path: str, clusterids, log) -> np.array:
     log.append(f"Using {seeds.shape} seeds from {seeds_path}")
 
     cluster_catalogue = list(seeds.values())
+    print(cluster_catalogue.shape)
 
     return cluster_catalogue
