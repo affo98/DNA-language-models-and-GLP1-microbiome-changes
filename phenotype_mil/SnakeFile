@@ -297,7 +297,7 @@ rule checkm2:
 rule phenotype_mil:
     input:
         cluster_dir = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test"),
-        sample_labels = SAMPLE_LABELS_FILE
+        sample_labels = SAMPLE_LABELS_FILE,
         #abundance = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "abundance.tsv")
         abundance = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test")
     output:
