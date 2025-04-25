@@ -24,10 +24,11 @@ def get_cluster_catalogue(
     clusters = read_clusters(clusters_filtered_path, log)
 
     seeds_path = os.path.join(input_path, SEEDS_FILENAME)
-    cluster_catalogue = get_seeds_centroid_catalogue(seeds_path, clusters.keys(), log)
+    cluster_catalogue_seed = get_seeds_centroid_catalogue(
+        seeds_path, clusters.keys(), log
+    )
 
-    log.append(f"Cluster catalogue shape: {cluster_catalogue.shape}")
-    return cluster_catalogue
+    return cluster_catalogue_seed
 
 
 def get_seeds_centroid_catalogue(seeds_path: str, clusterids, log) -> np.array:
@@ -47,7 +48,7 @@ def get_seeds_centroid_catalogue(seeds_path: str, clusterids, log) -> np.array:
     print(seeds)
 
     cluster_catalogue = list(seeds.values())
-    print(len(cluster_catalogue))
-    print(cluster_catalogue[0])
+    log.append(f"Cluster catalogue shape: {len(cluster_catalogue)}")
+    print(cluster_catalogue)
 
     return cluster_catalogue
