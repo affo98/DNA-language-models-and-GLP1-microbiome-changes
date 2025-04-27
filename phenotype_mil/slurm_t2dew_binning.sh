@@ -12,7 +12,7 @@
 #SBATCH --partition=purrlab_students
 #SBATCH --exclusive
 
-
+#
 #chmod +x get_conda.sh
 # bash get_conda.sh
 # source ~/.bashrc
