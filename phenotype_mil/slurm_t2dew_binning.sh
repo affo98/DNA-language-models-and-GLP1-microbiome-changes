@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --job-name=t2dew # Job name
-#SBATCH --output=t2dew.out
+#SBATCH --output=t2dew%j.out
 #SBATCH --error=slurm%j.err 
 #SBATCH --nodes=1
 #SBATCH #--exclude=cn[3-18]
@@ -30,6 +30,6 @@ echo "CUDA devices:"
 nvidia-smi
 
 #Run the Snakemake pipeline
-snakemake --snakefile phenotype_mil/SnakeFile --config DATASET=T2D-EW MODEL=dnaberts --use-conda --cores all
+snakemake --snakefile phenotype_mil/SnakeFile --config DATASET=T2D-EW MODEL=dnaberts --use-conda --cores all -np
 
 echo "Job completed successfully."
