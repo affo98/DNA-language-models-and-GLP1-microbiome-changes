@@ -16,7 +16,7 @@
 chmod +x get_conda.sh
 bash get_conda.sh
 source ~/.bashrc
-
+conda --version
 
 #Load conda
 #module load Anaconda3
