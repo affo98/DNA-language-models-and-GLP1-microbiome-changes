@@ -10,7 +10,7 @@
 #SBATCH #--nodelist=cn19
 #SBATCH #--gres=gpu:l40s:4
 #SBATCH --partition=purrlab_students
-#SBATCH --exclusive
+#SBATCH #--exclusive
 
 #Conda setup---------------------------------------------------------------------------
 MINICONDA_DIR="$HOME/miniconda"
