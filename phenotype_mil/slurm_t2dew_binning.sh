@@ -14,16 +14,27 @@
 # #SBATCH --gres=gpu:l40s:4
 
 
-# 1. Download & install Anaconda3 if missing
-if [[ ! -d "$HOME/anaconda3" ]]; then
-    curl -sO https://repo.anaconda.com/archive/Anaconda3-2024.10-1-Linux-x86_64.sh
-    bash Anaconda3-2024.10-1-Linux-x86_64.sh -b -p "$HOME/anaconda3"
-    rm Anaconda3-2024.10-1-Linux-x86_64.sh
+# 1. Download & install Miniconda3 if missing
+if [[ ! -d "$HOME/miniconda" ]]; then
+    echo "Miniconda not found. Installing Miniconda..."
+
+    # Download Miniconda for Linux
+    URL="https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+    curl -sO "$URL"
+    bash Miniconda3-latest-Linux-x86_64.sh -b -p "$HOME/miniconda"
+    rm Miniconda3-latest-Linux-x86_64.sh
+
+    echo "Miniconda installed successfully."
 fi
 
 # 2. Initialize in-script
-export PATH="$HOME/anaconda3/bin:$PATH"
+export PATH="$HOME/miniconda/bin:$PATH"
 eval "$(conda shell.bash hook)" 2>/dev/null
+
+# 3. Install Mamba in the base environment
+conda install -n base -c conda-forge mamba --yes
+
+conda config --set channel_priority flexible
 
 # 3. Create & activate your env
 ENV_DIR="$HOME/envs/snakeenv"
