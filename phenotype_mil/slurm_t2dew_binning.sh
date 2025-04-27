@@ -4,13 +4,13 @@
 #SBATCH --output=t2dew%j.out
 #SBATCH --error=slurm%j.err 
 #SBATCH --nodes=1
-#SBATCH #--exclude=cn[3-18]
-#SBATCH #--exclude=desktop[1-16]
-#SBATCH #--time=5-00:00:00
-#SBATCH #--nodelist=cn19
-#SBATCH #--gres=gpu:l40s:4
+#SBATCH --exclude=cn[3-18]
+#SBATCH --exclude=desktop[1-16]
+#SBATCH --time=5-00:00:00
+#SBATCH --nodelist=cn19
+#SBATCH --gres=gpu:l40s:4
 #SBATCH --partition=purrlab_students
-#SBATCH #--exclusive
+#SBATCH --exclusive
 
 #Conda setup---------------------------------------------------------------------------
 MINICONDA_DIR="$HOME/miniconda"
