@@ -13,14 +13,13 @@
 #SBATCH --exclusive
 
 #
-#chmod +x get_conda.sh
-# bash get_conda.sh
-# source ~/.bashrc
+chmod +x get_conda.sh
+bash get_conda.sh
+source ~/.bashrc
 
 
 #Load conda
-module load Anaconda3
-module load CUDA/12.1.1
+#module load Anaconda3
 conda env create -f phenotype_mil/envs/snakeenv.yml --yes && source activate snakeenv
 pip uninstall -y triton
 
