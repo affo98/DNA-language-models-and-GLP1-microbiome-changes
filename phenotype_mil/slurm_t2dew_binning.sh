@@ -48,6 +48,9 @@ else
 fi
 
 # Initialize Conda
+source "$MINICONDA_DIR/bin/conda" init bash
+
+# Ensure Conda environment is activated
 source "$MINICONDA_DIR/bin/activate"
 #--------------------------------------------------------------------------
 
