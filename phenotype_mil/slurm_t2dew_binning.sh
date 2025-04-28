@@ -47,7 +47,7 @@ echo "Running on node: $(hostname)"; nvidia-smi
 
 
 #Run the Snakemake pipeline
-snakemake --snakefile phenotype_mil/SnakeFile --config DATASET=T2D-EW MODEL=dnaberts CHECKM2=True --unlock --use-conda --cores all
+snakemake --snakefile phenotype_mil/SnakeFile --config DATASET=T2D-EW MODEL=dnaberts CHECKM2=True --use-conda --cores all
 
 echo "Job completed successfully."
 
