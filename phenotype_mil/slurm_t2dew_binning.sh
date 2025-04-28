@@ -47,9 +47,8 @@ echo "Running on node: $(hostname)"; nvidia-smi
 
 
 #Run the Snakemake pipeline
-snakemake --rerun-incomplete
 
-snakemake --snakefile phenotype_mil/SnakeFile --config DATASET=T2D-EW MODEL=dnaberts CHECKM2=True --use-conda --cores all
+snakemake --snakefile phenotype_mil/Snakefile --config DATASET=T2D-EW MODEL=dnaberts CHECKM2=True --use-conda --cores all --rerun-incomplete
 
 echo "Job completed successfully."
 
