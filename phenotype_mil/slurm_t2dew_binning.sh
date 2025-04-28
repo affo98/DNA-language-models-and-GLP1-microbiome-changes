@@ -6,12 +6,12 @@
 #SBATCH --partition=purrlab_students
 #SBATCH --exclusive
 
-# #SBATCH --nodes=1
-# #SBATCH --exclude=cn[3-18]
-# #SBATCH --exclude=desktop[1-16]
-# #SBATCH --time=5-00:00:00
-# #SBATCH --nodelist=cn19
-# #SBATCH --gres=gpu:l40s:4
+#SBATCH --nodes=1
+#SBATCH --exclude=cn[3-18]
+#SBATCH --exclude=desktop[1-16]
+#SBATCH --time=5-00:00:00
+#SBATCH --nodelist=cn19
+#SBATCH --gres=gpu:l40s:4
 
 
 # 1. Download & install Miniconda3 if missing
@@ -48,7 +48,7 @@ echo "Running on node: $(hostname)"; nvidia-smi
 
 
 #Run the Snakemake pipeline
-snakemake --snakefile phenotype_mil/SnakeFile --config DATASET=T2D-EW MODEL=dnaberts CHECKM2=True --use-conda --cores all -np
+snakemake --snakefile phenotype_mil/SnakeFile --config DATASET=T2D-EW MODEL=dnaberts CHECKM2=True --use-conda --cores all
 
 echo "Job completed successfully."
 
