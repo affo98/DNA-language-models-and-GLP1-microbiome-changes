@@ -5,7 +5,6 @@
 #SBATCH --error=slurm%j.err 
 #SBATCH --partition=purrlab_students
 #SBATCH --exclusive
-
 #SBATCH --nodes=1
 #SBATCH --exclude=cn[3-18]
 #SBATCH --exclude=desktop[1-16]
