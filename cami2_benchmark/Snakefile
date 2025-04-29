@@ -40,7 +40,7 @@ BATCH_SIZES=None
 WEIGHT_PATH=None
 if MODEL in other_model_config.keys():
     MODEL_PATH = other_model_config[MODEL]["model_path"]
-    BATCH_SIZES = other_model_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnaberth_400k', 'dnabert2', 'dnabert2random'] else 0
+    BATCH_SIZES = other_model_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnaberth_400k', 'dnaberth_2m', 'dnabert2', 'dnabert2random'] else 0
     WEIGHT_PATH = other_model_config[MODEL]["weight_path"] if 'dnaberth' in  MODEL else None
 
 #processing flow of snakemake 
@@ -175,6 +175,18 @@ elif MODEL in ['dnaberts'] and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output", "test"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberts"),
+    ]
+
+elif MODEL in ['dnaberth_400k'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberth_400k_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberth_400k"),
+    ]
+
+elif MODEL in ['dnaberth_2m'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberth_2m_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberth_2m"),
     ]
 
 elif MODEL in ['dnabert2'] and not config_nomodelrun:
