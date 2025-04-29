@@ -5,12 +5,13 @@
 #SBATCH --error=slurm%j.err 
 #SBATCH --partition=purrlab_students
 #SBATCH --exclusive
-#SBATCH --nodes=1
-#SBATCH --exclude=cn[3-18]
-#SBATCH --exclude=desktop[1-16]
-#SBATCH --time=7-00:00:00
-#SBATCH --nodelist=cn19
-#SBATCH --gres=gpu:l40s:4
+
+# #SBATCH --nodes=1
+# #SBATCH --exclude=cn[3-18]
+# #SBATCH --exclude=desktop[1-16]
+# #SBATCH --time=7-00:00:00
+# #SBATCH --nodelist=cn19
+# #SBATCH --gres=gpu:l40s:4
 
 
 # 1. Download & install Miniconda3 if missing
