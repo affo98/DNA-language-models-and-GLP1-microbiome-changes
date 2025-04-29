@@ -49,7 +49,8 @@ echo "Running on node: $(hostname)"; nvidia-smi
 #Run the Snakemake pipeline
 
 snakemake --snakefile ~/l40_test/DNA-language-models-and-GLP1-microbiome-changes/phenotype_mil/Snakefile --config DATASET=T2D-EW MODEL=dnaberts CHECKM2=True --use-conda --cores all \
---rerun-incomplete --unlock
+--rerun-incomplete 
+#--unlock
 
 
 echo "Job completed successfully."
