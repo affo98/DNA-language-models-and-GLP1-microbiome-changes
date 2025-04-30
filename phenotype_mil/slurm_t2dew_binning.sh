@@ -3,9 +3,11 @@
 #SBATCH --job-name=t2dew # Job name
 #SBATCH --output=t2dew%j.out
 #SBATCH --error=slurm%j.err 
-#SBATCH --partition=purrlab_students
+#SBATCH --partition=scavenge
+#SBATCH --time=00:01:00
 
 
+# #SBATCH --partition=purrlab_students
 # #SBATCH --exclusive
 # #SBATCH --nodes=1
 # #SBATCH --exclude=cn[3-18]
