@@ -49,8 +49,7 @@ The list of models are specified in the file `config.yml`. They include:
 
 Create the environment for Snakemake and activate it.
 ```bash
-conda env create -f cami2_benchmark/envs/cami2_processing.yml
-conda activate cami2_processing
+conda env create -f cami2_benchmark/envs/cami2_processing.yml --yes && conda activate cami2_processing
 ```
 
 #### Output
@@ -69,7 +68,7 @@ python cami2_benchmark/src/parse_all_results.py
 The Snakemake file controls the workflow. It takes the following args:
 
 * `DATASET` Choose a dataset from the `config.yml`. Only one dataset can be used at a time.
-* `MODEL` Optional. Choose a model from the `contig.yml`. Only one model can be used at a time.
+* `MODEL` Optional. Choose a model from the `config.yml`. Only one model can be used at a time.
 * `DOWNLOAD` Optional. Set to `True` to download the dataset.
 * `CONCATENATE` Optional. Set to `True` to run `concatenate.py` from vamb on sample-contigs.
 * `ALIGNMENT` Optional. Set to `True` to run `strobealign`.
@@ -84,14 +83,14 @@ Run the following command to download, concatenate and align the airways short d
 ```bash
 snakemake --snakefile cami2_benchmark/Snakefile \
   --config DATASET=airways_short DOWNLOAD=True CONCATENATE=True ALIGNMENT=True \
-  --use-conda
+  --use-conda --cores all 
 ```
 
 Run the following command to run vamb and benchmark results with checkm2:
 ```bash
 snakemake --snakefile cami2_benchmark/Snakefile \
    --config DATASET=airways_short MODEL=vamb CHECKM2=True \
-   --use-conda
+   --use-conda --cores all 
 ```
 
 
