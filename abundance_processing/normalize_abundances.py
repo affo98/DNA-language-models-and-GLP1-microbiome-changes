@@ -240,7 +240,7 @@ def normalize_by_global_contig_abundances(
 
 if __name__ == "__main__":
 
-    path_to_abundances = sys.argv[1]  # "../../../../../Downloads/abundances.tsv"
+    path_to_abundances = sys.argv[1]
 
     path_to_normalized_abundances = sys.argv[2]
 
