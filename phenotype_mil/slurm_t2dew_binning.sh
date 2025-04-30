@@ -6,7 +6,7 @@
 
 
 #SBATCH --partition=scavenge
-#SBATCH --time=01:00:00
+#SBATCH --time=04:00:00
 
 # #SBATCH --partition=purrlab_students
 # #SBATCH --exclusive
@@ -50,7 +50,7 @@ conda activate "$ENV_DIR"
 # Print node and GPU info
 echo "Running on node: $(hostname)"; nvidia-smi
 
-conda clean --index-cache --packages --tarballs --yes
+#conda clean --index-cache --packages --tarballs --yes
 
 #Run the Snakemake pipeline
 SNAKEFILE=~/l40_test/DNA-language-models-and-GLP1-microbiome-changes/phenotype_mil/Snakefile
