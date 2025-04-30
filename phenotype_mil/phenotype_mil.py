@@ -2,9 +2,11 @@ import os
 from argparse import ArgumentParser
 from time import time
 
+import pandas as pd
+
 from sklearn.model_selection import StratifiedKFold
 
-from src.utils import Logger, read_sample_labels
+from src.utils import Logger, read_sample_labels, read_cluster_abundances
 from src.cluster_catalogue import get_cluster_catalogue
 
 from src.knn_model import KNNModel
@@ -22,11 +24,18 @@ def main(args, log):
     sample_ids, labels = read_sample_labels(
         args.sample_labels_path, log, split_train_test=False
     )
+    print(sample_ids, labels)
+
     cluster_catalogue_centroid = get_cluster_catalogue(args.input_path, log)
 
-    # read abundances that are ade in snakemake rule, maybe
-    # abundances = get_abundances(args.input_path, args.output_path, log)
-    # assert abundances is same as sample ids and labels
+    cluster_abundances = read_cluster_abundances(args.input_path)
+
+    assert cluster_abundances["cluster_id"].values.tolist() == list(
+        cluster_catalogue_centroid.keys()
+    ), log.append("Cluster catalogue and abundances do not match!")
+    assert (
+        cluster_abundances.columns[1:].values.tolist() == sample_ids
+    ), "Sample ids do not match!"
 
     # eval_metrics = {'metrics': []}
 
@@ -80,11 +89,6 @@ def add_arguments() -> ArgumentParser:
         "--sample_labels_path",
         "-s",
         help="Path to the sample labels file",
-    )
-    parser.add_argument(
-        "--abundance_path",
-        "-a",
-        help="Path to the abundances file",
     )
     parser.add_argument(
         "--output_path",

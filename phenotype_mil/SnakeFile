@@ -291,19 +291,39 @@ rule checkm2:
 # End Binning---------------------------------------------------------------------------------------------
 
 
+rule normalise_abundances:
+    input:
+        os.path.join(PROCESSED_DATA_DIR, "abdn_coverm", "abundances.tsv"),
+    output:
+        os.path.join(PROCESSED_DATA_DIR, "abdn_coverm", "normalized_abundances.tsv"),
+    log:
+        os.path.join(LOGS, DATASET, "{MODEL}_abundance.log")
+    conda:
+        "envs/phenotype_mil.yml",
+    shell:
+        """
+        python {SRC_DIR}/normalise_abundances.py {input} {output} --log {log}
+        """
 
 
-# rule process_abundances:
-#     ...
-
+rule get_cluster_abundances:
+    input:
+        norm_abun = os.path.join(PROCESSED_DATA_DIR, "abdn_coverm", "normalized_abundances.tsv"),
+        filtered_clusters = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "clusters_filtered.tsv"),
+    output:
+        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "cluster_abundances.tsv")
+    conda:
+        "envs/phenotype_mil.yml",
+    shell:
+        """
+        python {SRC_DIR}/get_cluster_abundance.py {input.filtered_clusters} {input.norm_abun} {output}
+        """
 
 
 rule phenotype_mil:
     input:
         cluster_dir = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test"),
         sample_labels = SAMPLE_LABELS_FILE,
-        #abundance = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "abundance.tsv")
-        abundance = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test")
     output:
         result_dir = directory(os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_results")),
     log:
@@ -318,7 +338,6 @@ rule phenotype_mil:
             --dataset_name {DATASET} \
             --input_path {input.cluster_dir} \
             --sample_labels_path {input.sample_labels} \
-            --abundance_path {input.abundance} \
             --output_path {output.result_dir} \
             --log {log} \
             --mil_methods {MIL_METHODS} \

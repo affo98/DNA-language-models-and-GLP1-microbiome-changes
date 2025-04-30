@@ -1,7 +1,9 @@
 import csv
+import os
 
 import torch
 import numpy as np
+import pandas as pd
 
 
 CLUSTERS_HEADER = "clustername\tcontigname"
@@ -26,6 +28,14 @@ class Logger:
         print(message)
         with open(self.log_path, "a") as log_file:
             log_file.write(message + "\n")
+
+def read_cluster_abundances(
+    abundance_path: str) -> pd.DataFrame:
+    
+    cluster_abundances = pd.read_csv(os.path.join(abundance_path "cluster_abundances.tsv"), sep="\t")
+    cluster_abundances.columns = cluster_abundances.columns.str.replace(".tsv", "")
+    
+    return cluster_abundances
 
 
 def read_clusters(clusters_path: str, log: Logger) -> dict[str, set[str]]:
@@ -70,10 +80,10 @@ def read_sample_labels(
         ):
             log.append(f"Header Skipped in sample labels file: {first_row}")
         else:
-            sample_ids.append(str(first_row[0]))
+            sample_ids.append(str(first_row[0].replace("SAMEA", "")))
             labels.append(str(first_row[1]))
         for row in reader:
-            sample_ids.append(str(row[0]))
+            sample_ids.append(str(row[0].replace("SAMEA", "")))
             labels.append(str(row[1]))
 
     if not split_train_test:

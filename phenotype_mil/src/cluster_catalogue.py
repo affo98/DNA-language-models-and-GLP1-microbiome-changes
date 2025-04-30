@@ -34,7 +34,7 @@ def get_cluster_catalogue(
     return cluster_catalogue_centroid
 
 
-def get_seeds_centroid_catalogue(seeds_path: str, clusterids, log) -> np.array:
+def get_seeds_centroid_catalogue(seeds_path: str, clusterids, log) -> dict:
     """Loads a seed-centroid npz file and filter only the seeds that are in the clusterids."""
     seeds_npz = np.load(seeds_path, allow_pickle=True)
     seed_labels = seeds_npz["seed_labels"]
