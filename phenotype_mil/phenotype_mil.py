@@ -52,10 +52,13 @@ def main(args, log):
         labels_train, labels_test = labels[train_idx], labels[test_idx]
         sample_ids_train, sample_ids_test = sample_ids[train_idx], sample_ids[test_idx]
 
-        print(set(cluster_abundances_train["sample"]))
-        print(set(sample_ids_train))
+        print(set(cluster_abundances_train["sample"]))  # Should be plain Python strings
+        print(
+            set(sample_ids_train.astype(str).tolist())
+        )  # Convert np.str_ to plain strings
+
         assert set(cluster_abundances_train["sample"].astype(str)) == set(
-            sample_ids_train.astype(str)
+            sample_ids_train.astype(str).tolist()
         )
 
         # assert len(cluster_abundances_train) == len(sample_ids_train)
