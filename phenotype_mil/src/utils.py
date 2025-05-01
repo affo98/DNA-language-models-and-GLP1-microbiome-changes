@@ -39,17 +39,21 @@ def read_cluster_abundances(
     )
     cluster_abundances.columns = cluster_abundances.columns.str.replace(".tsv", "")
 
+    # transpose
     cluster_abundances.set_index("cluster_id", inplace=True)
     cluster_abundances = cluster_abundances.T
     cluster_abundances.reset_index(inplace=True)
     cluster_abundances.rename(columns={"index": "sample"}, inplace=True)
 
+    # sort by sample ids from sample_labels
     cluster_abundances["sample"] = cluster_abundances["sample"].astype(str)
     cluster_abundances["sample"] = pd.Categorical(
         cluster_abundances["sample"], categories=sample_ids.astype(str), ordered=True
     )
     cluster_abundances = cluster_abundances.sort_values("sample")
     cluster_abundances.reset_index(drop=True, inplace=True)
+
+    cluster_abundances.columns = cluster_abundances.columns.astype(str)
     log.append(
         f"Abundances shape {cluster_abundances.shape}, Sample IDs: {cluster_abundances['sample'].values.tolist()}"
     )
