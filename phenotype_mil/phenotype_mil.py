@@ -42,7 +42,7 @@ def main(args, log):
     eval_metrics = {"metrics": []}
     skf = StratifiedKFold(n_splits=2, shuffle=True, random_state=42)
     for fold_idx, (train_idx, test_idx) in enumerate(
-        skf.split(cluster_abundances, labels)
+        skf.split(cluster_abundances, labels, sample_ids)
     ):
 
         cluster_abundances_train, cluster_abundances_test = (
