@@ -49,9 +49,10 @@ def read_cluster_abundances(
         cluster_abundances["sample"], categories=sample_ids.astype(str), ordered=True
     )
     cluster_abundances = cluster_abundances.sort_values("sample")
+    cluster_abundances.reset_index(inplace=True)
 
     log.append(
-        f"Abundances shape {cluster_abundances.shape}, Sample IDs: {cluster_abundances['sample']}"
+        f"Abundances shape {cluster_abundances.shape}, Sample IDs: {cluster_abundances['sample'].values.tolist()}"
     )
 
     return cluster_abundances
