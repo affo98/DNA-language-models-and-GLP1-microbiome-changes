@@ -94,15 +94,15 @@ def main(args, log):
                 eval_metrics, labels_test, predictions, mil_method, fold_idx + 1
             )
 
-        log.append(f"{eval_metrics}")
-        with open(
-            os.path.join(
-                args.output_path,
-                f"eval_metrics_{args.model_name}_{args.dataset_name}.json",
-            ),
-            "w",
-        ) as f:
-            json.dump(eval_metrics, f, indent=4)
+    log.append(f"{eval_metrics}")
+    with open(
+        os.path.join(
+            args.output_path,
+            f"eval_metrics_{args.model_name}_{args.dataset_name}.json",
+        ),
+        "w",
+    ) as f:
+        json.dump(eval_metrics, f, indent=4)
 
 
 def add_arguments() -> ArgumentParser:
