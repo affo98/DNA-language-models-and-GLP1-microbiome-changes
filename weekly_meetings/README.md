@@ -3,6 +3,7 @@
 [Overleaf report](https://www.overleaf.com/project/679796b5a02b660e4f96beff)
 
 #### Meeting Outline
+* [01 May 2025] (#date-30-may-2025)
 * [23 April 2025](#date-30-january-2025)
 * [09 April 2025](#date-30-january-2025)
 * [03 April 2025](#date-30-january-2025)
@@ -12,6 +13,66 @@
 * [27 February 2025](#date-30-january-2025)
 * [20 February 2025](#date-30-january-2025)
 * [06 February 2025](#date-30-january-2025)
+
+
+
+#### Date: 01 May 2025
+
+##### Who did you help this week?
+
+
+##### Who helped you this week?
+- Inna helped us with hpc batch jobs
+
+##### What did you achieve?
+- We almost finished uploading the newest dataset to ucloud ready for running through the bioinformatics pipeline
+- We trained a new model on more data - $2.000.000$ 
+   - Waiting for results on our models - expected to arrive friday/saturday
+- Binning results on model $400.000$ missing results on 5/8 datasets
+- We wrote some pages in the rapport
+
+
+##### What did you struggle with?
+- Lost access to the beloved l40 node on ucloud (quota reached from ITU)
+
+
+##### Where do you need help from Veronika?
+- Adding centroid information to MIL framework as comparison to KNN approach.
+
+
+
+
+
+
+
+#### Date: 09 April 2025
+
+##### Who did you help this week?
+
+
+##### Who helped you this week?
+Inna from the HPC.
+
+##### What did you achieve?
+* Got started a little on the MIL.
+* Got more results on Cami2; running with knn cross validation to determine threshold in k-mediod. And got correct results on comebin. We are soon done with this benchmark. See images below of results and similarity histograms from knn.
+
+![cami2results](images/cami2_9apr.png)
+![hist1](images/hist_9apr_1.png)
+![hist2](images/hist_9apr_2.png)
+
+##### What did you struggle with?
+
+##### Where do you need help from Veronika?
+
+
+
+
+
+
+
+
+
 
 #### Date: 23 April 2025
 
