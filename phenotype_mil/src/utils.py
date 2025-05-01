@@ -29,12 +29,14 @@ class Logger:
         with open(self.log_path, "a") as log_file:
             log_file.write(message + "\n")
 
-def read_cluster_abundances(
-    abundance_path: str) -> pd.DataFrame:
-    
-    cluster_abundances = pd.read_csv(os.path.join(abundance_path "cluster_abundances.tsv"), sep="\t")
+
+def read_cluster_abundances(abundance_path: str) -> pd.DataFrame:
+
+    cluster_abundances = pd.read_csv(
+        os.path.join(abundance_path, "cluster_abundances.tsv"), sep="\t"
+    )
     cluster_abundances.columns = cluster_abundances.columns.str.replace(".tsv", "")
-    
+
     return cluster_abundances
 
 
