@@ -2,7 +2,7 @@ import os
 import yaml
 import glob
 
-#dirs
+#dirs#
 CAMI2_DIR = os.path.join(os.getcwd(), "cami2_benchmark")
 BINNING_DIR = os.path.join(os.getcwd(), "binning")
 NGS_DIR = os.path.join(os.getcwd(), "ngs_pipeline")
@@ -297,7 +297,7 @@ rule normalise_abundances:
     output:
         os.path.join(PROCESSED_DATA_DIR, "abdn_coverm", "normalized_abundances.tsv"),
     log:
-        os.path.join(LOGS, DATASET, "{MODEL}_abundance.log")
+        os.path.join(LOGS, DATASET, "normalise_abundances.log")
     conda:
         "envs/phenotype_mil.yml",
     shell:
