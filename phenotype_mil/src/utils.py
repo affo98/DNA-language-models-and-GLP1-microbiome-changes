@@ -41,13 +41,19 @@ def read_cluster_abundances(abundance_path: str) -> pd.DataFrame:
 
     cluster_abundances = cluster_abundances.T
 
-    # cluster_abundances.reset_index(inplace=True)
-    # cluster_abundances.rename(columns={"index": "sample"}, inplace=True)
+    cluster_abundances.reset_index(inplace=True)
+    cluster_abundances.rename(columns={"index": "sample"}, inplace=True)
 
     print(cluster_abundances.columns)
     print(cluster_abundances.index)
     print(cluster_abundances.shape)
     print(cluster_abundances)
+
+    cluster_abundances.to_csv(
+        os.path.join(abundance_path, "cluster_abundances_transposed.tsv"),
+        sep="\t",
+        index=False,
+    )
 
     return cluster_abundances
 
