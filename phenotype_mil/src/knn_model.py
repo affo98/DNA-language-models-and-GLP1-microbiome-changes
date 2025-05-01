@@ -3,6 +3,8 @@ import os
 import matplotlib.pyplot as plt
 from sklearn.inspection import DecisionBoundaryDisplay
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.decomposition import PCA
+
 import numpy as np
 import pandas as pd
 
@@ -25,11 +27,12 @@ def fit_predict_knn(
     knn.fit(X_train, y_train)
     y_pred = knn.predict(X_test)
 
-    print(X_train.shape)
-    if X_train.shape[1] == 2 and output_path and fold_idx is not None:
+    pca = PCA(n_components=2)
+    X_train_pca = pca.fit_transform(X_train)
+    if X_train_pca.shape[1] == 2 and output_path and fold_idx is not None:
         print("si")
         plot_knn_decision_boundary(
-            X=X_train,
+            X=X_train_pca,
             y=y_train,
             k=k,
             weights=weights,
