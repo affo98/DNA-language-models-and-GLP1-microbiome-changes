@@ -30,9 +30,11 @@ def main(args, log):
 
     cluster_abundances = read_cluster_abundances(args.input_path, sample_ids, log)
 
+    print(cluster_abundances.columns[1:].to_list())
+    print(cluster_catalogue_centroid.keys())
     assert set(cluster_abundances.columns[1:].to_list()) == set(
         cluster_catalogue_centroid.keys()
-    ), log.append("CLuster catalogue and abundances do not match!")
+    ), log.append("Cluster catalogue and abundances do not match!")
 
     assert set(cluster_abundances["sample"].values.tolist()) == set(
         sample_ids
