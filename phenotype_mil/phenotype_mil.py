@@ -44,8 +44,6 @@ def main(args, log):
     for fold_idx, (train_idx, test_idx) in enumerate(
         skf.split(cluster_abundances, labels, sample_ids)
     ):
-        fold = f"fold_{fold_idx + 1}"
-        log.append(fold)
 
         cluster_abundances_train, cluster_abundances_test = (
             cluster_abundances.iloc[train_idx, :],
@@ -58,8 +56,8 @@ def main(args, log):
         # assert len(cluster_abundances_train) == len(sample_ids_train) & len(cluster_abundances_test) == len(sample_ids_test)
 
         log.append(
-            f"{'-'*20} Fold {fold} {'-'*20}\n"
-            f"- Train samples: n={len(labels_train)}, 0s={len(labels_train) - np.sum(labels_train)}, 1s={np.sum(labels_train)}\n{sample_ids_train}\n"
+            f"{'-'*20} Fold {fold_idx+1} {'-'*20}\n"
+            f"- Train samples: n={len(labels_train)}, 0s={len(labels_train) - np.sum(labels_train)}, 1s={np.sum(labels_train)}\n{sample_ids_train}\n\n"
             f"- Test samples:  n={len(labels_test)},  0s={len(labels_test) - np.sum(labels_test)}, 1s={np.sum(labels_test)}\n{sample_ids_test}"
         )
 
