@@ -46,12 +46,15 @@ def main(args, log):
     ):
         fold = f"fold_{fold_idx + 1}"
         log.append(fold)
+        print(train_idx, test_idx)
+
         abundances_train, abundances_test = (
             cluster_abundances[train_idx],
             cluster_abundances[test_idx],
         )
         labels_train, labels_test = labels[train_idx], labels[test_idx]
         sample_ids_train, sample_ids_test = sample_ids[train_idx], sample_ids[test_idx]
+
         log.append(
             f"Fold {fold} - Train samples: {len(sample_ids_train)}, Test samples: {len(sample_ids_test)}"
         )
