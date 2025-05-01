@@ -34,11 +34,11 @@ def main(args, log):
         cluster_catalogue_centroid.keys()
     ), log.append("CLuster catalogue and abundances do not match!")
 
+    print(cluster_abundances.columns[:1].to_list())
+    print(sample_ids)
     assert set(cluster_abundances.columns[:1].to_list()) == set(sample_ids), log.append(
         "Sample ids do not match!"
     )
-    print(cluster_abundances.columns[:1].to_list())
-    print(sample_ids)
 
     # eval_metrics = {'metrics': []}
 
