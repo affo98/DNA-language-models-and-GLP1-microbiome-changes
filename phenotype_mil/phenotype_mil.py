@@ -44,7 +44,7 @@ def main(args, log):
     for fold_idx, (train_idx, test_idx) in enumerate(
         skf.split(cluster_abundances, labels)
     ):
-
+        # ------------ split ------------
         cluster_abundances_train, cluster_abundances_test = (
             cluster_abundances.iloc[train_idx, :],
             cluster_abundances.iloc[test_idx, :],
@@ -70,6 +70,7 @@ def main(args, log):
             f"- Test samples:  n={len(labels_test)},  0s={len(labels_test) - np.sum(labels_test)}, 1s={np.sum(labels_test)}\n{sample_ids_test}"
         )
 
+        # ------------ MIL ------------
         for mil_method in args.mil_methods:
             log.append(f"Using MIL method: {mil_method}")
 
@@ -78,7 +79,6 @@ def main(args, log):
                     cluster_abundances_train,
                     cluster_abundances_test,
                     labels_train,
-                    labels_test,
                     k=KNN_K,
                 )
 

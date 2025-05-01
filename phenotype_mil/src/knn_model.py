@@ -12,8 +12,8 @@ from src.utils import Logger
 
 def fit_predict_knn(
     X_train: np.ndarray,
-    y_train: np.ndarray,
     X_test: np.ndarray,
+    y_train: np.ndarray,
     k: int,
     weights: str = "uniform",
 ) -> np.ndarray:
