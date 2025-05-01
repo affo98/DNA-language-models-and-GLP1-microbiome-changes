@@ -141,7 +141,9 @@ if config_phenotype_mil:
 rule all:
     input: input_files
 
-# ruleorder: other_model_val > create_fasta_bins_other_model_val > checkm2_val > parse_checkm2_val > other_model_test > create_fasta_bins_other_model_test
+if config_phenotype_mil:
+    ruleorder: normalise_abundances, get_cluster_abundance, phenotype_mil
+
 
 
 #BINNING---------------------------------------------------------------------------------------------
@@ -318,7 +320,7 @@ rule get_cluster_abundances:
         norm_abun = os.path.join(PROCESSED_DATA_DIR, "abdn_coverm", "normalized_abundances.tsv"),
         filtered_clusters = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "clusters_filtered.tsv"),
     output:
-        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "cluster_abundances.tsv")
+        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "cluster_abundances.tsv"),
     conda:
         "envs/phenotype_mil.yml",
     shell:
