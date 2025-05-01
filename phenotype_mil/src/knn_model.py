@@ -33,12 +33,12 @@ class KNNModel:
         distances = cdist(
             self.abundances_test, self.abundances_train, metric=distance_metric
         )
-        print(distances)
+        self.log.append(f"Distance matrix (test X train) {distances.shape()}")
         top_k_indices = np.argsort(distances, axis=1)[:, :k]
         top_k_labels = np.array(
             [np.array(self.labels_train)[indices] for indices in top_k_indices]
         )
-        print(top_k_labels)
+        self.log.append("topk labels", top_k_labels)
 
         predictions = []
         for labels in top_k_labels:
