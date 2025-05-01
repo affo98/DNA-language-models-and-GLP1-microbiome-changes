@@ -132,7 +132,7 @@ if config_checkm2:
 
 if config_process_abundances:
     input_files += [os.path.join(PROCESSED_DATA_DIR, "abdn_coverm", "normalized_abundances.tsv"),
-                    os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "cluster_abundances.tsv")],    
+                    os.path.join(OUTDIR_BINNING_RESULTS, DATASET, f"{MODEL}_output", "test", "cluster_abundances.tsv")],    
 
 if config_phenotype_mil:
     input_files += [os.path.join(OUTDIR_MIL_RESULTS, DATASET, f"{MODEL}_results")]
