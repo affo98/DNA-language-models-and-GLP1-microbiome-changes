@@ -58,7 +58,7 @@ def main(args, log):
         
     
         log.append(
-            f"{"-"*20} Fold {fold} {"-"*20} \n - Train samples: (n={len(sample_ids_train)}, 1={sum(sample_ids_train)}, 0={[i for i in sample_ids if i == 0]} \n{sample_ids_train}  \n Test samples: (n={len(sample_ids_test)}, 1={sum(sample_ids_test)}, 0={[i for i in sample_ids if i == 0]} \n{sample_ids_test}"
+            f"{"-"*20} Fold {fold} {"-"*20} \n - Train samples: (n={len(sample_ids_train)}, 1={sum(sample_ids_train)} 0={[i for i in sample_ids if i == 0]} \n{sample_ids_train}  \n Test samples: (n={len(sample_ids_test)} 1={sum(sample_ids_test)}, 0={[i for i in sample_ids if i == 0]} \n{sample_ids_test}"
         )
 
         # for mil_method in args.mil_method:
