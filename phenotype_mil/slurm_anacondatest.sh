@@ -14,7 +14,7 @@ ENV_DIR="$HOME/envs/snakeenv"
 if [[ ! -d "$ENV_DIR" ]]; then
     conda env create -p "$ENV_DIR" -f phenotype_mil/envs/snakeenv.yml --yes
 fi
-conda activate "$ENV_DIR"
+source activate "$ENV_DIR"
 
 echo "Running on node: $(hostname)"; nvidia-smi
 
