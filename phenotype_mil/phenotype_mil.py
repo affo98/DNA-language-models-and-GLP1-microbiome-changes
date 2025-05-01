@@ -3,6 +3,8 @@ from argparse import ArgumentParser
 from time import time
 import json
 
+
+import numpy as np
 from sklearn.model_selection import StratifiedKFold
 
 from src.utils import Logger, read_sample_labels, read_cluster_abundances
