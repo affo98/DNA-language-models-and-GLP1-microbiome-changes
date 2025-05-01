@@ -55,6 +55,7 @@ SAMPLE_LABELS_FILE = os.path.join(NGS_DIR, "raw_data", "sample_labels", f"{DATAS
 #processing flow of snakemake 
 config_checkm2 = bool(config.get("CHECKM2", False))
 config_nomodelrun = bool(config.get("NOMODELRUN", False))
+config_process_abundances = bool(config.get("PROCESS_ABUNDANCES", False))
 config_phenotype_mil = bool(config.get("PHENOTYPE_MIL", False))
 
 
@@ -127,6 +128,12 @@ elif MODEL in ['dnabert2random'] and not config_nomodelrun:
     ]
 if config_checkm2:
     input_files += [os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "checkm2", f"{MODEL}_results")]
+
+
+if config_process_abundances:
+    input_files += [os.path.join(PROCESSED_DATA_DIR, "abdn_coverm", "normalized_abundances.tsv"),
+                    os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "cluster_abundances.tsv")],    
+
 if config_phenotype_mil:
     input_files += [os.path.join(OUTDIR_MIL_RESULTS, DATASET, f"{MODEL}_results")]
 
