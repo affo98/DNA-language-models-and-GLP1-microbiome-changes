@@ -27,6 +27,7 @@ def fit_predict_knn(
 
     # plot decision boundary if input is 2D
     if X_train.shape[1] == 2 and output_path and fold_idx is not None:
+        print("si")
         plot_knn_decision_boundary(
             X=X_train,
             y=y_train,
