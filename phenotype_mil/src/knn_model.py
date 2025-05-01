@@ -1,27 +1,91 @@
-import numpy as np
-from collections import Counter
+import os
 
-
+import matplotlib.pyplot as plt
+from sklearn.inspection import DecisionBoundaryDisplay
 from sklearn.neighbors import KNeighborsClassifier
+import numpy as np
+import pandas as pd
 
-from src.utils import Logger
 
 # OTENTIAL USE
 # https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html
 
 
 def fit_predict_knn(
-    X_train: np.ndarray,
-    X_test: np.ndarray,
+    X_train: pd.DataFrame,
+    X_test: pd.DataFrame,
     y_train: np.ndarray,
     k: int,
     weights: str = "uniform",
+    fold_idx: int = None,
+    output_path: str = None,
 ) -> np.ndarray:
 
     knn = KNeighborsClassifier(n_neighbors=k, weights=weights)
     knn.fit(X_train, y_train)
     y_pred = knn.predict(X_test)
+
+    # plot decision boundary if input is 2D
+    if X_train.shape[1] == 2 and output_path and fold_idx is not None:
+        plot_knn_decision_boundary(
+            X=X_train,
+            y=y_train,
+            k=k,
+            weights=weights,
+            title=f"KNN Decision Boundary (Fold {fold_idx+1})",
+            save_path=os.path.join(output_path, f"knn_boundary_fold{fold_idx+1}.png"),
+        )
+
     return y_pred
+
+
+def plot_knn_decision_boundary(
+    X: pd.DataFrame,
+    y: np.ndarray,
+    k: int = 5,
+    weights: str = "uniform",
+    title: str = None,
+    save_path: str = None,
+):
+    """
+    Plots the decision boundary of a KNN classifier (2D only).
+
+    Parameters:
+    - X: 2D input features (pandas DataFrame or array-like of shape (n_samples, 2))
+    - y: Labels (array-like)
+    - k: Number of neighbors
+    - weights: 'uniform' or 'distance'
+    - title: Optional title
+    - save_path: Optional path to save the figure
+    """
+    # Ensure columns are string type if X is a DataFrame
+    if isinstance(X, pd.DataFrame):
+        X.columns = X.columns.astype(str)
+        xlabel, ylabel = X.columns[0], X.columns[1]
+    else:
+        X = np.array(X)
+        xlabel, ylabel = "Feature 1", "Feature 2"
+
+    knn = KNeighborsClassifier(n_neighbors=k, weights=weights)
+    knn.fit(X, y)
+
+    disp = DecisionBoundaryDisplay.from_estimator(
+        knn,
+        X,
+        response_method="predict",
+        plot_method="pcolormesh",
+        shading="auto",
+        alpha=0.4,
+    )
+    scatter = disp.ax_.scatter(X[:, 0], X[:, 1], c=y, edgecolor="k", cmap="viridis")
+    disp.ax_.set_xlabel(xlabel)
+    disp.ax_.set_ylabel(ylabel)
+    disp.ax_.set_title(title or f"KNN (k={k}, weights='{weights}')")
+    legend = disp.ax_.legend(*scatter.legend_elements(), title="Classes")
+
+    if save_path:
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+    plt.show()
 
 
 # class KNNModel:
