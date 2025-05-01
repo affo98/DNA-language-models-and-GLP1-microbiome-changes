@@ -1,4 +1,6 @@
 import sys
+from tqdm import tqdm
+
 
 import pandas as pd
 import numpy as np
@@ -213,7 +215,7 @@ if __name__ == "__main__":
 
     cluster_abundance_list = []
 
-    for sample in SAMPLES:
+    for sample in tqdm(SAMPLES, desc="Calculating cluster abundances"):
         sample_abundances = read_abundances_from_sample(
             PATH_TO_NORMALIZED_ABUNDANCES, sample
         )
