@@ -141,8 +141,8 @@ if config_phenotype_mil:
 rule all:
     input: input_files
 
-
-ruleorder: normalise_abundances, get_cluster_abundance, phenotype_mil
+if config_phenotype_mil:
+    ruleorder: normalise_abundances > get_cluster_abundance > phenotype_mil
 
 
 
