@@ -42,7 +42,7 @@ def main(args, log):
     eval_metrics = {"metrics": []}
     skf = StratifiedKFold(n_splits=2, shuffle=True, random_state=42)
     for fold_idx, (train_idx, test_idx) in enumerate(
-        skf.split(cluster_abundances, labels, sample_ids)
+        skf.split(cluster_abundances, labels)
     ):
 
         cluster_abundances_train, cluster_abundances_test = (
@@ -52,10 +52,8 @@ def main(args, log):
         labels_train, labels_test = labels[train_idx], labels[test_idx]
         sample_ids_train, sample_ids_test = sample_ids[train_idx], sample_ids[test_idx]
 
-        print(set(cluster_abundances_train["sample"]))  # Should be plain Python strings
-        print(
-            set(sample_ids_train.astype(str).tolist())
-        )  # Convert np.str_ to plain strings
+        print(set(cluster_abundances_train["sample"]))
+        print(set(sample_ids_train.astype(str).tolist()))
 
         assert set(cluster_abundances_train["sample"].astype(str)) == set(
             sample_ids_train.astype(str).tolist()
