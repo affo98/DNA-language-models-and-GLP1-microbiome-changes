@@ -28,7 +28,7 @@ def main(args, log):
 
     cluster_catalogue_centroid = get_cluster_catalogue(args.input_path, log)
 
-    cluster_abundances = read_cluster_abundances(args.input_path)
+    cluster_abundances = read_cluster_abundances(args.input_path, log)
 
     assert set(cluster_abundances["cluster_id"].values.tolist()) == set(
         cluster_catalogue_centroid.keys()
