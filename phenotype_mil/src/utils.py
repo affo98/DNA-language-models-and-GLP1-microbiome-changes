@@ -45,7 +45,7 @@ def read_cluster_abundances(abundance_path: str, log: Logger) -> pd.DataFrame:
     cluster_abundances.rename(columns={"index": "sample"}, inplace=True)
 
     log.append(
-        f"Abundances shape (cluster_abundances.shape), columns:\n {cluster_abundances.columns}"
+        f"Abundances shape {cluster_abundances.shape}, columns:\n {cluster_abundances.columns}"
     )
 
     return cluster_abundances
