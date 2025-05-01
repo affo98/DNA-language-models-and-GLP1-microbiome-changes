@@ -43,7 +43,7 @@ def get_seeds_centroid_catalogue(seeds_path: str, clusterids, log) -> dict:
     clusterids = set(int(cid) for cid in clusterids)
 
     seeds = {
-        int(label): np.array(seed)
+        str(label): np.array(seed)
         for label, seed in zip(seed_labels, seed_embeddings)
         if int(label) in clusterids
     }
