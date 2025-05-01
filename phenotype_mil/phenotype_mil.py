@@ -70,29 +70,29 @@ def main(args, log):
             f"- Test samples:  n={len(labels_test)},  0s={len(labels_test) - np.sum(labels_test)}, 1s={np.sum(labels_test)}\n{sample_ids_test}"
         )
 
-        # for mil_method in args.mil_method:
-        #     log.append(f"Using MIL method: {mil_method}")
+        for mil_method in args.mil_method:
+            log.append(f"Using MIL method: {mil_method}")
 
-        #     if mil_method == "knn":
-        #         knnmodel = KNNModel(
-        #             labels_train,
-        #             labels_test,
-        #             abundances_train,
-        #             abundances_test,
-        #             log=log,
-        #         )
-        #         predictions = knnmodel.predict(
-        #             k=KNN_K, distance_metric=DISTANCE_METRIC_BAG
-        #         )
+            if mil_method == "knn":
+                knnmodel = KNNModel(
+                    labels_train,
+                    labels_test,
+                    cluster_abundances_train,
+                    cluster_abundances_test,
+                    log=log,
+                )
+                predictions = knnmodel.predict(
+                    k=KNN_K, distance_metric=DISTANCE_METRIC_BAG
+                )
 
-        #     elif mil_method == "classifier":
-        #         pass
-        #     elif mil_method == "graph":
-        #         pass
+            elif mil_method == "classifier":
+                pass
+            elif mil_method == "graph":
+                pass
 
-        #     eval_metrics = append_eval_metrics(
-        #         eval_metrics, labels_test, predictions, mil_method, fold
-        #     )
+            eval_metrics = append_eval_metrics(
+                eval_metrics, labels_test, predictions, mil_method, fold_idx + 1
+            )
 
 
 def add_arguments() -> ArgumentParser:
