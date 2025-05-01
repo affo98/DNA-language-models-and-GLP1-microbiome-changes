@@ -1,4 +1,5 @@
 import sys
+import os
 from tqdm import tqdm
 
 
@@ -75,7 +76,11 @@ def plotting_cluster_contig_distribution(clusters_df: pd.DataFrame) -> None:
     ax.set_ylabel("n_contigs in cluster")
     ax.set_xlabel("clusters")
     ax.set_yscale("log")
-    plt.savefig("./cluster_contig_abundance_distribution.png")
+    plt.savefig(
+        os.path.join(
+            PATH_TO_CLUSTER_ABUNDANCES, "cluster_contig_abundance_distribution.png"
+        )
+    )
 
     return None
 
