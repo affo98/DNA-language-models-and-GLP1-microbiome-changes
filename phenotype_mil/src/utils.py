@@ -37,6 +37,13 @@ def read_cluster_abundances(abundance_path: str) -> pd.DataFrame:
     )
     cluster_abundances.columns = cluster_abundances.columns.str.replace(".tsv", "")
 
+    cluster_abundances.set_index("cluster_id", inplace=True)
+
+    cluster_abundances = cluster_abundances.T
+
+    print(cluster_abundances.columns)
+    print(cluster_abundances)
+
     return cluster_abundances
 
 

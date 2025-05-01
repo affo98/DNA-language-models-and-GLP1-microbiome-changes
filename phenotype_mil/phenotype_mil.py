@@ -38,9 +38,6 @@ def main(args, log):
         "Sample ids do not match!"
     )
 
-    print(cluster_abundances.columns)
-    print(cluster_abundances)
-
     eval_metrics = {"metrics": []}
 
     skf = StratifiedKFold(n_splits=1, shuffle=True, random_state=42)
