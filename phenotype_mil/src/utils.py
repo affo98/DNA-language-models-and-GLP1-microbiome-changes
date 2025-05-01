@@ -41,8 +41,8 @@ def read_cluster_abundances(abundance_path: str) -> pd.DataFrame:
 
     cluster_abundances = cluster_abundances.T
 
-    cluster_abundances.reset_index(inplace=True)
-    cluster_abundances.rename(columns={"index": "sample"}, inplace=True)
+    # cluster_abundances.reset_index(inplace=True)
+    # cluster_abundances.rename(columns={"index": "sample"}, inplace=True)
 
     print(cluster_abundances.columns)
     print(cluster_abundances.index)
