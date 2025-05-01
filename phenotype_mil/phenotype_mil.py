@@ -38,47 +38,47 @@ def main(args, log):
         sample_ids
     ), log.append("Sample ids do not match!")
 
-    # eval_metrics = {"metrics": []}
+    # Evaluate model
+    eval_metrics = {"metrics": []}
+    skf = StratifiedKFold(n_splits=1, shuffle=True, random_state=42)
+    for fold_idx, (train_idx, test_idx) in enumerate(
+        skf.split(cluster_abundances, labels)
+    ):
+        fold = f"fold_{fold_idx + 1}"
+        log.append(fold)
+        abundances_train, abundances_test = (
+            cluster_abundances[train_idx],
+            cluster_abundances[test_idx],
+        )
+        labels_train, labels_test = labels[train_idx], labels[test_idx]
+        sample_ids_train, sample_ids_test = sample_ids[train_idx], sample_ids[test_idx]
+        log.append(
+            f"Fold {fold} - Train samples: {len(sample_ids_train)}, Test samples: {len(sample_ids_test)}"
+        )
 
-    # skf = StratifiedKFold(n_splits=1, shuffle=True, random_state=42)
-    # for fold_idx, (train_idx, test_idx) in enumerate(
-    #     skf.split(cluster_abundances, labels)
-    # ):
-    #     fold = f"fold_{fold_idx + 1}"
-    #     print(fold)
-    #     abundances_train, abundances_test = (
-    #         cluster_abundances[train_idx],
-    #         cluster_abundances[test_idx],
-    #     )
-    #     labels_train, labels_test = labels[train_idx], labels[test_idx]
-    #     sample_ids_train, sample_ids_test = sample_ids[train_idx], sample_ids[test_idx]
-    #     log.append(
-    #         f"Fold {fold} - Train samples: {len(sample_ids_train)}, Test samples: {len(sample_ids_test)}"
-    #     )
+        # for mil_method in args.mil_method:
+        #     log.append(f"Using MIL method: {mil_method}")
 
-    #     for mil_method in args.mil_method:
-    #         log.append(f"Using MIL method: {mil_method}")
+        #     if mil_method == "knn":
+        #         knnmodel = KNNModel(
+        #             labels_train,
+        #             labels_test,
+        #             abundances_train,
+        #             abundances_test,
+        #             log=log,
+        #         )
+        #         predictions = knnmodel.predict(
+        #             k=KNN_K, distance_metric=DISTANCE_METRIC_BAG
+        #         )
 
-    #         if mil_method == "knn":
-    #             knnmodel = KNNModel(
-    #                 labels_train,
-    #                 labels_test,
-    #                 abundances_train,
-    #                 abundances_test,
-    #                 log=log,
-    #             )
-    #             predictions = knnmodel.predict(
-    #                 k=KNN_K, distance_metric=DISTANCE_METRIC_BAG
-    #             )
+        #     elif mil_method == "classifier":
+        #         pass
+        #     elif mil_method == "graph":
+        #         pass
 
-    #         elif mil_method == "classifier":
-    #             pass
-    #         elif mil_method == "graph":
-    #             pass
-
-    #         eval_metrics = append_eval_metrics(
-    #             eval_metrics, labels_test, predictions, mil_method, fold
-    #         )
+        #     eval_metrics = append_eval_metrics(
+        #         eval_metrics, labels_test, predictions, mil_method, fold
+        #     )
 
 
 def add_arguments() -> ArgumentParser:
