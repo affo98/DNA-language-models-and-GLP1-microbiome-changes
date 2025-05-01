@@ -30,7 +30,9 @@ class Logger:
             log_file.write(message + "\n")
 
 
-def read_cluster_abundances(abundance_path: str, log: Logger) -> pd.DataFrame:
+def read_cluster_abundances(
+    abundance_path: str, sample_ids: np.array, log: Logger
+) -> pd.DataFrame:
 
     cluster_abundances = pd.read_csv(
         os.path.join(abundance_path, "cluster_abundances.tsv"), sep="\t"
@@ -38,11 +40,15 @@ def read_cluster_abundances(abundance_path: str, log: Logger) -> pd.DataFrame:
     cluster_abundances.columns = cluster_abundances.columns.str.replace(".tsv", "")
 
     cluster_abundances.set_index("cluster_id", inplace=True)
-
     cluster_abundances = cluster_abundances.T
-
     cluster_abundances.reset_index(inplace=True)
     cluster_abundances.rename(columns={"index": "sample"}, inplace=True)
+
+    cluster_abundances["sample"] = cluster_abundances["sample"].astype(str)
+    cluster_abundances["sample"] = pd.Categorical(
+        cluster_abundances["sample"], categories=sample_ids.astype(str), ordered=True
+    )
+    cluster_abundances = cluster_abundances.sort_values("sample")
 
     log.append(
         f"Abundances shape {cluster_abundances.shape}, Sample IDs: {cluster_abundances['sample']}"
