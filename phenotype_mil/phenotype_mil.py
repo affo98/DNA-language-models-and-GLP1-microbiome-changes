@@ -10,11 +10,11 @@ from sklearn.model_selection import StratifiedKFold
 from src.utils import Logger, read_sample_labels, read_cluster_abundances
 from src.cluster_catalogue import get_cluster_catalogue
 
-from src.knn_model import KNNModel
+from src.knn_model import fit_predict_knn
 
 from src.eval import append_eval_metrics
 
-DISTANCE_METRIC_BAG = "cosine"
+# DISTANCE_METRIC_BAG = "cosine"
 
 # params knn
 KNN_K = 5
@@ -74,16 +74,24 @@ def main(args, log):
             log.append(f"Using MIL method: {mil_method}")
 
             if mil_method == "knn":
-                knnmodel = KNNModel(
-                    labels_train,
-                    labels_test,
+                predictions = fit_predict_knn(  # euclidian
                     cluster_abundances_train,
                     cluster_abundances_test,
-                    log=log,
+                    labels_train,
+                    labels_test,
+                    k=KNN_K,
                 )
-                predictions = knnmodel.predict(
-                    k=KNN_K, distance_metric=DISTANCE_METRIC_BAG
-                )
+
+            #             knnmodel = KNNModel(
+            #                 labels_train,
+            #                 labels_test,
+            #                 cluster_abundances_train,
+            #                 cluster_abundances_test,
+            #                 log=log,
+            #             )
+            #             predictions = knnmodel.predict(
+            #                 k=KNN_K, distance_metric=DISTANCE_METRIC_BAG
+            #             )
 
             elif mil_method == "classifier":
                 pass
