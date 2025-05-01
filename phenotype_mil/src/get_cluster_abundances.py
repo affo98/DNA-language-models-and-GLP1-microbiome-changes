@@ -146,7 +146,9 @@ def calculate_cluster_abundances(
     """
     cluster_abundances = np.zeros((len(cluster_to_array_index.keys()), 1))
 
-    for contig_name, contig_abundances in zip(contigs, contig_abundances):
+    for contig_name, contig_abundances in tqdm(
+        zip(contigs, contig_abundances), desc="Calculating cluster abundances"
+    ):
         try:
             cluster_id = contig_to_cluster[contig_name]
             cluster_sum_index = cluster_to_array_index[cluster_id]
