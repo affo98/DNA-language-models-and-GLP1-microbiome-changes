@@ -34,7 +34,7 @@ def main(args, log):
         cluster_catalogue_centroid.keys()
     ), log.append("CLuster catalogue and abundances do not match!")
 
-    assert set(cluster_abundances["cluster_id"].values.tolist()) == set(
+    assert set(cluster_abundances["sample"].values.tolist()) == set(
         sample_ids
     ), log.append("Sample ids do not match!")
 
