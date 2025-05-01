@@ -93,6 +93,7 @@ def main(args, log):
             eval_metrics = append_eval_metrics(
                 eval_metrics, labels_test, predictions, mil_method, fold_idx + 1
             )
+            log.append(f"{eval_metrics}")
 
 
 def add_arguments() -> ArgumentParser:
