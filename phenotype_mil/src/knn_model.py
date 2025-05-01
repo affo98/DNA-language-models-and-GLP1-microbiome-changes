@@ -33,16 +33,20 @@ class KNNModel:
         distances = cdist(
             self.abundances_test, self.abundances_train, metric=distance_metric
         )
+        print(distances)
         top_k_indices = np.argsort(distances, axis=1)[:, :k]
         top_k_labels = np.array(
             [np.array(self.labels_train)[indices] for indices in top_k_indices]
         )
+        print(top_k_labels)
 
         predictions = []
         for labels in top_k_labels:
+            print(labels)
             majority_label = Counter(labels).most_common(1)[0][
                 0
             ]  # majority voting pred
+            print(majority_label)
             predictions.append(majority_label)
 
         self.predictions = predictions
