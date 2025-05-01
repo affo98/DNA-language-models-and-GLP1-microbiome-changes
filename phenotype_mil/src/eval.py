@@ -11,9 +11,9 @@ def append_eval_metrics(
     eval_metrics_fold = {
         "fold": fold,
         "mil_method": mil_method,
-        "f1_score": f1_score(y_true, y_pred),
-        "auc_roc": roc_auc_score(y_true, y_pred),
-        "accuracy": accuracy_score(y_true, y_pred),
+        "f1_score": float(f1_score(y_true, y_pred)),
+        "auc_roc": float(roc_auc_score(y_true, y_pred)),
+        "accuracy": float(accuracy_score(y_true, y_pred)),
     }
 
     eval_metrics["metrics"].append(eval_metrics_fold)
