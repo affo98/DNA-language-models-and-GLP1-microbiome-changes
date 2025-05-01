@@ -141,8 +141,8 @@ if config_phenotype_mil:
 rule all:
     input: input_files
 
-if config_phenotype_mil:
-    ruleorder: normalise_abundances, get_cluster_abundance, phenotype_mil
+
+ruleorder: normalise_abundances, get_cluster_abundance, phenotype_mil
 
 
 
@@ -300,7 +300,7 @@ rule checkm2:
 # End Binning---------------------------------------------------------------------------------------------
 
 
-rule normalise_abundances:
+rule normalize_abundances:
     input:
         os.path.join(PROCESSED_DATA_DIR, "abdn_coverm", "abundances.tsv"),
     output:
