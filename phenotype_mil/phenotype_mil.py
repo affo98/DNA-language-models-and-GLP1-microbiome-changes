@@ -10,7 +10,7 @@ from sklearn.model_selection import StratifiedKFold
 from src.utils import Logger, read_sample_labels, read_cluster_abundances
 from src.cluster_catalogue import get_cluster_catalogue
 
-from src.knn_model import fit_predict_knn
+from src.knn_model import fit_predict_knn, plot_knn_decision_boundary
 
 from src.eval import append_eval_metrics
 
@@ -80,6 +80,8 @@ def main(args, log):
                     cluster_abundances_test,
                     labels_train,
                     k=KNN_K,
+                    fold_idx=fold_idx + 1,
+                    output_path=args.output_path,
                 )
 
             #             knnmodel = KNNModel(

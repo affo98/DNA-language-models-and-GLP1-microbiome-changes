@@ -16,9 +16,9 @@ def fit_predict_knn(
     X_test: pd.DataFrame,
     y_train: np.ndarray,
     k: int,
+    fold_idx: int,
+    output_path: str,
     weights: str = "uniform",
-    fold_idx: int = None,
-    output_path: str = None,
 ) -> np.ndarray:
 
     knn = KNeighborsClassifier(n_neighbors=k, weights=weights)
@@ -35,7 +35,6 @@ def fit_predict_knn(
             title=f"KNN Decision Boundary (Fold {fold_idx+1})",
             save_path=os.path.join(output_path, f"knn_boundary_fold{fold_idx+1}.png"),
         )
-
     return y_pred
 
 
@@ -47,17 +46,6 @@ def plot_knn_decision_boundary(
     title: str = None,
     save_path: str = None,
 ):
-    """
-    Plots the decision boundary of a KNN classifier (2D only).
-
-    Parameters:
-    - X: 2D input features (pandas DataFrame or array-like of shape (n_samples, 2))
-    - y: Labels (array-like)
-    - k: Number of neighbors
-    - weights: 'uniform' or 'distance'
-    - title: Optional title
-    - save_path: Optional path to save the figure
-    """
     # Ensure columns are string type if X is a DataFrame
     if isinstance(X, pd.DataFrame):
         X.columns = X.columns.astype(str)
