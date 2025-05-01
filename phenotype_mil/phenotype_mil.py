@@ -37,6 +37,8 @@ def main(args, log):
     assert set(cluster_abundances.columns[:1].to_list()) == set(sample_ids), log.append(
         "Sample ids do not match!"
     )
+    print(cluster_abundances.columns[:1].to_list())
+    print(sample_ids)
 
     # eval_metrics = {'metrics': []}
 
