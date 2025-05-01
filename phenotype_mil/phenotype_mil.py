@@ -53,7 +53,7 @@ def main(args, log):
         sample_ids_train, sample_ids_test = sample_ids[train_idx], sample_ids[test_idx]
 
         print(set(cluster_abundances_train["sample"]))
-        print(set(sample_ids_train))
+        print(set(sample_ids_train.astype(str)))
         assert set(cluster_abundances_train["sample"].astype(str)) == set(
             sample_ids_train.astype(str)
         )
