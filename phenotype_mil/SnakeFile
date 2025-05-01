@@ -142,7 +142,7 @@ rule all:
     input: input_files
 
 if config_phenotype_mil:
-    ruleorder: normalize_abundances > get_cluster_abundance > phenotype_mil
+    ruleorder: normalize_abundances > get_cluster_abundances > phenotype_mil
 
 
 
