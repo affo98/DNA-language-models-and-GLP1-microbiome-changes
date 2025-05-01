@@ -80,7 +80,7 @@ def read_clusters(clusters_path: str, log: Logger) -> dict[str, set[str]]:
 
 def read_sample_labels(
     sample_labels_path: str, log: Logger, split_train_test: bool
-) -> tuple[list[str], np.array]:
+) -> tuple[np.array, np.array]:
     sample_ids = []
     labels = []
 
@@ -102,7 +102,7 @@ def read_sample_labels(
     if not split_train_test:
         assert len(sample_ids) == len(labels)
         log.append(f"Sample Ids: {sample_ids} \n Labels: {labels}")
-        return sample_ids, np.array(labels)
+        return np.array(sample_ids), np.array(labels)
 
     sample_ids_train, sample_ids_test, labels_train, labels_test = (
         split_samples_traintest(sample_ids, labels, proportion=0.3)

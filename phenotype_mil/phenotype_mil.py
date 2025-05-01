@@ -54,7 +54,11 @@ def main(args, log):
 
         print(set(cluster_abundances_train["sample"]))
         print(set(sample_ids_train))
-        assert set(cluster_abundances_train["sample"]) == set(sample_ids_train)
+        assert set(cluster_abundances_train["sample"].astype(str)) == set(
+            sample_ids_train.astype(str)
+        )
+
+        # assert len(cluster_abundances_train) == len(sample_ids_train)
         # assert len(cluster_abundances_train) == len(sample_ids_train) & len(cluster_abundances_test) == len(sample_ids_test)
 
         log.append(
