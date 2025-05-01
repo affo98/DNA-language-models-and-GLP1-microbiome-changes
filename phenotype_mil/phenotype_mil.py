@@ -56,7 +56,7 @@ def main(args, log):
         sample_ids_train, sample_ids_test = sample_ids[train_idx], sample_ids[test_idx]
 
         log.append(
-            f"Fold {fold} - Train samples: {len(sample_ids_train)}, Test samples: {len(sample_ids_test)}"
+            f"{"-"*10}Fold {fold} \n - Train samples: {len(sample_ids_train)}, Test samples: {len(sample_ids_test)}"
         )
 
         # for mil_method in args.mil_method:
