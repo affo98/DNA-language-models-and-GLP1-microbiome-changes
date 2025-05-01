@@ -70,7 +70,7 @@ def main(args, log):
             f"- Test samples:  n={len(labels_test)},  0s={len(labels_test) - np.sum(labels_test)}, 1s={np.sum(labels_test)}\n{sample_ids_test}"
         )
 
-        for mil_method in args.mil_method:
+        for mil_method in args.mil_methods:
             log.append(f"Using MIL method: {mil_method}")
 
             if mil_method == "knn":
