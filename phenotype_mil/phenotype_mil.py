@@ -24,7 +24,7 @@ def main(args, log):
     sample_ids, labels = read_sample_labels(
         args.sample_labels_path, log, split_train_test=False
     )
-   
+
     cluster_catalogue_centroid = get_cluster_catalogue(args.input_path, log)
 
     cluster_abundances = read_cluster_abundances(args.input_path, log)
@@ -53,12 +53,13 @@ def main(args, log):
         labels_train, labels_test = labels[train_idx], labels[test_idx]
         sample_ids_train, sample_ids_test = sample_ids[train_idx], sample_ids[test_idx]
 
-        #assert set(cluster_abundances_train['sample']) == set(sample_ids_train) & set(cluster_abundances_test['sample']) == set(sample_ids_test)
-        #assert len(cluster_abundances_train) == len(sample_ids_train) & len(cluster_abundances_test) == len(sample_ids_test)
-        
-    
+        # assert set(cluster_abundances_train['sample']) == set(sample_ids_train) & set(cluster_abundances_test['sample']) == set(sample_ids_test)
+        # assert len(cluster_abundances_train) == len(sample_ids_train) & len(cluster_abundances_test) == len(sample_ids_test)
+
         log.append(
-            f"{"-"*20} Fold {fold} {"-"*20} \n - Train samples: (n={len(sample_ids_train)}, 1={sum(sample_ids_train)} 0={[i for i in sample_ids if i == 0]} \n{sample_ids_train}  \n Test samples: (n={len(sample_ids_test)} 1={sum(sample_ids_test)}, 0={[i for i in sample_ids if i == 0]} \n{sample_ids_test}"
+            f"{'-'*20} Fold {fold} {'-'*20}\n"
+            f"- Train samples: n={len(sample_ids_train)}, 1s={sum(labels_train)}, 0s={len(labels_train) - sum(labels_train)}\n{sample_ids_train}\n"
+            f"- Test samples:  n={len(sample_ids_test)}, 1s={sum(labels_test)}, 0s={len(labels_test) - sum(labels_test)}\n{sample_ids_test}"
         )
 
         # for mil_method in args.mil_method:
