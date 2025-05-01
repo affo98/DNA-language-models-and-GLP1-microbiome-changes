@@ -325,7 +325,7 @@ rule get_cluster_abundances:
         "envs/phenotype_mil.yml",
     shell:
         """
-        python {SRC_DIR}/get_cluster_abundance.py {input.filtered_clusters} {input.norm_abun} {output}
+        python {SRC_DIR}/get_cluster_abundances.py {input.filtered_clusters} {input.norm_abun} {output}
         """
 
 
