@@ -17,7 +17,7 @@ from src.eval import append_eval_metrics
 # DISTANCE_METRIC_BAG = "cosine"
 
 # params knn
-KNN_K = 5
+KNN_K = 2
 
 
 def main(args, log):
