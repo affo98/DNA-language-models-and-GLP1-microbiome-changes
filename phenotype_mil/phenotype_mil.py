@@ -53,7 +53,7 @@ def main(args, log):
         labels_train, labels_test = labels[train_idx], labels[test_idx]
         sample_ids_train, sample_ids_test = sample_ids[train_idx], sample_ids[test_idx]
 
-        assert set(cluster_abundances_train['sample']) == set(sample_ids_train) & set(cluster_abundances_test['sample']) == sample_ids_test
+        assert set(cluster_abundances_train['sample']) == set(sample_ids_train) & set(cluster_abundances_test['sample']) == set(sample_ids_test)
         assert len(cluster_abundances_train) == len(sample_ids_train) & len(cluster_abundances_test) == len(sample_ids_test)
         
     
