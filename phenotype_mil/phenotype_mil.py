@@ -1,7 +1,7 @@
 import os
 from argparse import ArgumentParser
 from time import time
-from collections import Counter
+
 
 import pandas as pd
 
@@ -59,8 +59,8 @@ def main(args, log):
 
         log.append(
             f"{'-'*20} Fold {fold} {'-'*20}\n"
-            f"- Train samples: n={len(sample_ids_train)}, label counts: {dict(Counter(labels_train))}\n{sample_ids_train}\n"
-            f"- Test samples:  n={len(sample_ids_test)}, label counts: {dict(Counter(labels_test))}\n{sample_ids_test}"
+            f"- Train samples: n={len(labels_train)}, 0s={len(labels_train) - np.sum(labels_train)}, 1s={np.sum(labels_train)}\n{sample_ids_train}\n"
+            f"- Test samples:  n={len(labels_test)},  0s={len(labels_test) - np.sum(labels_test)}, 1s={np.sum(labels_test)}\n{sample_ids_test}"
         )
 
         # for mil_method in args.mil_method:

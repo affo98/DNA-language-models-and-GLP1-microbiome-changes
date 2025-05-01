@@ -80,7 +80,7 @@ def read_clusters(clusters_path: str, log: Logger) -> dict[str, set[str]]:
 
 def read_sample_labels(
     sample_labels_path: str, log: Logger, split_train_test: bool
-) -> tuple[list[str], list[str]]:
+) -> tuple[list[str], np.array]:
     sample_ids = []
     labels = []
 
@@ -94,10 +94,10 @@ def read_sample_labels(
             log.append(f"Header Skipped in sample labels file: {first_row}")
         else:
             sample_ids.append(str(first_row[0].replace("SAMEA", "")))
-            labels.append(str(first_row[1]))
+            labels.append(int(first_row[1]))
         for row in reader:
             sample_ids.append(str(row[0].replace("SAMEA", "")))
-            labels.append(str(row[1]))
+            labels.append(int(row[1]))
 
     if not split_train_test:
         assert len(sample_ids) == len(labels)
