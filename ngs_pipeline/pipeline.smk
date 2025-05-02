@@ -9,8 +9,8 @@ CONDA_ENVS = config['CONDA_ENVS']
 DB = config['DB']
 FASTQC_PATH = config['FASTQC_PATH']
 
-STUDY_ID = config["studies"][4].get("id")
-STUDY_NAME = config["studies"][4].get("name")
+STUDY_ID = config["studies"][5].get("id")
+STUDY_NAME = config["studies"][5].get("name")
 
 
 OUTDIR = f"{STUDY_NAME}_{STUDY_ID}"
@@ -18,16 +18,18 @@ DATAPATH = os.path.join("raw_data", "reads", OUTDIR)
 BENCHMARKS = os.path.join(OUTDIR, "benchmarks")
 LOGS = os.path.join(OUTDIR,"logs")
 
-# samples = glob.glob(f"{DATAPATH}/*/1.fastq.gz")
+samples = glob.glob(f"{DATAPATH}/*/*_1.fastq.gz")
+print(samples)
 
 # # Construct Wildcards
-# READS = ["1","2"]
-# SAMPLES_LU = {}
-# SAMPLES = []
-# for sample in samples:
-#     sample_name = sample.split("/")[-2].split("_")[0][5:]
-#     SAMPLES_LU[sample_name] = sample
-#     SAMPLES.append(sample_name)
+READS = ["1","2"]
+SAMPLES_LU = {}
+SAMPLES = []
+for sample in samples:
+    print(sample)
+    sample_name = sample.split("/")[-2]
+    SAMPLES_LU[sample_name] = sample
+    SAMPLES.append(sample_name)
 
 # print("\n"*2)
 # print("\t"*1,"#"*100)
@@ -38,15 +40,15 @@ LOGS = os.path.join(OUTDIR,"logs")
 # print("\t"*1,"#"*100)
 # print("\n"*2)
 
-def get_samples(wildcards):
-    checkpoint_output = checkpoints.download.get().output[0]
-    samples = glob.glob(f"{checkpoint_output}/*/1.fastq.gz")
-    sample_names = []
-    for sample in samples:
-        # Customize logic based on your file structure
-        sample_name = sample.split("/")[-2].split("_")[0][5:]
-        sample_names.append(sample_name)
-    return sample_names
+# def get_samples(wildcards):
+#     checkpoint_output = checkpoints.download.get().output[0]
+#     samples = glob.glob(f"{checkpoint_output}/*/1.fastq.gz")
+#     sample_names = []
+#     for sample in samples:
+#         # Customize logic based on your file structure
+#         sample_name = sample.split("/")[-2].split("_")[0][5:]
+#         sample_names.append(sample_name)
+#     return sample_names
 
 
 # def get_samples(wildcards):
@@ -77,170 +79,170 @@ rule all:
         # os.path.join(DATAPATH, "SAMEA{sample}/1.fastq.gz"),
         # os.path.join(DATAPATH, "SAMEA{sample}/2.fastq.gz"),
 
-checkpoint download:
+# checkpoint download:
+#     output:
+#         directory(DATAPATH)
+#     conda:
+#         os.path.join(CONDA_ENVS, "get_phenotype_reads.yaml"),
+#     params:
+#         dataset_id = STUDY_ID,
+#         dataset_name = STUDY_NAME,
+#         get_reads_py = os.path.join(PY_SCRIPTS, "get_phenotype_reads.py"),
+#     shell:
+#         """
+#         python {params.get_reads_py} -i {params.dataset_id} -n {params.dataset_name}
+#         """
+
+
+rule fastqc:
+    input: 
+        r1 = lambda wildcards: SAMPLES_LU[wildcards.sample],
+        r2 = lambda wildcards: SAMPLES_LU[wildcards.sample].replace("_1.fastq.gz", "_2.fastq.gz")
+        # r1 = os.path.join(DATAPATH, "SAMEA{sample}/1.fastq.gz"),
+        # r2 = os.path.join(DATAPATH, "SAMEA{sample}/2.fastq.gz")
     output:
-        directory(DATAPATH)
-    conda:
-        os.path.join(CONDA_ENVS, "get_phenotype_reads.yaml"),
+        html1 = os.path.join(OUTDIR, "fastqc/{sample}/1_fastqc.html"),
+        zip1 = os.path.join(OUTDIR, "fastqc/{sample}/1_fastqc.zip"),
+        html2 = os.path.join(OUTDIR, "fastqc/{sample}/2_fastqc.html"),
+        zip2 = os.path.join(OUTDIR, "fastqc/{sample}/2_fastqc.zip")
     params:
-        dataset_id = STUDY_ID,
-        dataset_name = STUDY_NAME,
-        get_reads_py = os.path.join(PY_SCRIPTS, "get_phenotype_reads.py"),
-    shell:
-        """
-        python {params.get_reads_py} -i {params.dataset_id} -n {params.dataset_name}
-        """
-
-
-# rule fastqc:
-#     input: 
-#         # r1 = lambda wildcards: SAMPLES_LU[wildcards.sample],
-#         # r2 = lambda wildcards: SAMPLES_LU[wildcards.sample].replace("_1.fastq.gz", "_2.fastq.gz")
-#         r1 = os.path.join(DATAPATH, "SAMEA{sample}/1.fastq.gz"),
-#         r2 = os.path.join(DATAPATH, "SAMEA{sample}/2.fastq.gz")
-#     output:
-#         html1 = os.path.join(OUTDIR, "fastqc/{sample}/1_fastqc.html"),
-#         zip1 = os.path.join(OUTDIR, "fastqc/{sample}/1_fastqc.zip"),
-#         html2 = os.path.join(OUTDIR, "fastqc/{sample}/2_fastqc.html"),
-#         zip2 = os.path.join(OUTDIR, "fastqc/{sample}/2_fastqc.zip")
-#     params:
-#         output_dir = os.path.join(OUTDIR, "fastqc"),
-#         tmp_dir = os.path.join(OUTDIR, "tmp/{sample}", "fastqc")
-#     log:
-#         os.path.join(LOGS, "fastqc/{sample}.log")
-#     threads:
-#         12
-#     conda:
-#         os.path.join(CONDA_ENVS, "fastqc.yaml")
-#     shell:
-#         """
-#         mkdir -p {params.tmp_dir}
-
-#         (fastqc -t {threads} {input.r1} {input.r2} -o {params.tmp_dir}) 2> {log}
-        
-#         cp {params.tmp_dir}/1_fastqc.html {output.html1}
-#         cp {params.tmp_dir}/1_fastqc.zip {output.zip1}
-#         cp {params.tmp_dir}/2_fastqc.html {output.html2}
-#         cp {params.tmp_dir}/2_fastqc.zip {output.zip2}
-
-#         rm -rf tmp
-#         """
-
-
-# rule detect_adapter:
-#     input: 
-#         os.path.join(OUTDIR, "fastqc/{sample}/1_fastqc.zip")
-#     output: 
-#         os.path.join(OUTDIR, "fastqc/{sample}/adapters.txt")
-#     log: 
-#         os.path.join(LOGS, "detect_adapter/{sample}.log")
-#     params:
-#         detect_adapters = os.path.join(PY_SCRIPTS, "detect_adapters.py")    
-#     shell:
-#         """
-#         python {params.detect_adapters} {input} > {output}
-#         """
-
-
-# rule kneaddata:
-#     input:
-#         # r1 = lambda wildcards: SAMPLES_LU[wildcards.sample],
-#         # r2 = lambda wildcards: SAMPLES_LU[wildcards.sample].replace("_1.fastq.gz", "_2.fastq.gz"),
-#         r1 = os.path.join(DATAPATH, "SAMEA{sample}/1.fastq.gz"),
-#         r2 = os.path.join(DATAPATH, "SAMEA{sample}/2.fastq.gz"),
-#         adapter=os.path.join(OUTDIR, "fastqc/{sample}/adapters.txt")
-#     output:
-#         # dir = temp(directory(os.path.join(OUTDIR, "knead/{sample}/tmp"))),
-#         p1 = os.path.join(OUTDIR, "knead/{sample}/paired_1.fastq"),
-#         p2 = os.path.join(OUTDIR, "knead/{sample}/paired_2.fastq"),
-#     log:
-#         os.path.join(LOGS, "knead/{sample}.log")
-#     threads: 48
-#     conda:
-#         os.path.join(CONDA_ENVS, "kneaddata.yaml"),
-#     benchmark:
-#         os.path.join(BENCHMARKS, "kneaddata", "{sample}.txt"),
-#     params:
-#         tmp_dir = os.path.join(OUTDIR, "knead/{sample}/tmp"),
-#         phred="phred33",
-#         trim="SLIDINGWINDOW:5:20",
-#         fastqc_path=FASTQC_PATH,
-#         db_path=DB # path to human genome bowtie index
-#     shell:
-#          """
-#          mkdir -p {params.tmp_dir}
-
-#          kneaddata\
-#          --input1 {input.r1}\
-#          --input2 {input.r2}\
-#          -db {params.db_path}\
-#          --sequencer-source $(cat {input.adapter})\
-#          --fastqc {params.fastqc_path}\
-#          --run-fastqc-end\
-#          --run-trim-repetitive\
-#          --quality-scores {params.phred}\
-#          --trimmomatic-options {params.trim}\
-#          --threads {threads}\
-#          -o {params.tmp_dir}\
-
-#          cp {params.tmp_dir}/1_kneaddata_paired_1.fastq {output.p1}
-#          cp {params.tmp_dir}/1_kneaddata_paired_2.fastq {output.p2}
-        
-#          rm -rf {params.tmp_dir}
-#          """
-
-# rule metaspades: 
-#     input:
-#         r1=os.path.join(OUTDIR, "knead/{sample}/paired_1.fastq"),
-#         r2=os.path.join(OUTDIR, "knead/{sample}/paired_2.fastq")
-#     output:
-#         contigs=os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"),
-#     benchmark:
-#         os.path.join(BENCHMARKS, "assembly", "{sample}.txt"),
-#     params:
-#         k="auto", #k-mer size
-#         m="100", #memory 100gb vamb
-#         tmp_dir = os.path.join(OUTDIR, "spades/asm_{sample}/tmp"),
-#     log:
-#         os.path.join(LOGS, "metaspades/{sample}.log")
-#     threads: 48 # 24 vamb
-#     conda:
-#         os.path.join(CONDA_ENVS, "metaspades.yaml")
-#     shell:
-#         """
-#         spades.py --meta -1 {input.r1} -2 {input.r2} -m {params.m} -o {params.tmp_dir} -k {params.k} -t {threads} --only-assembler
-        
-#         cp {params.tmp_dir}/contigs.fasta {output.contigs}
-
-#         rm -rf {params.tmp_dir}
-#         """ 
-
-rule rename_contigs:
-    input:
-        os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"),
-    output:
-        renamed_contigs=os.path.join(OUTDIR, "spades/asm_{sample}/contigs_renamed.fasta"),
-        contigs_lookup=os.path.join(OUTDIR, "spades/asm_{sample}/contigs_lu.json")
+        output_dir = os.path.join(OUTDIR, "fastqc"),
+        tmp_dir = os.path.join(OUTDIR, "tmp/{sample}", "fastqc")
+    log:
+        os.path.join(LOGS, "fastqc/{sample}.log")
     threads:
         12
-    params:
-        clean_contigs = os.path.join(PY_SCRIPTS, "clean_contig_names.py")
+    conda:
+        os.path.join(CONDA_ENVS, "fastqc.yaml")
     shell:
         """
-        python {params.clean_contigs} {input} {output.renamed_contigs} {output.contigs_lookup}
+        mkdir -p {params.tmp_dir}
+
+        (fastqc -t {threads} {input.r1} {input.r2} -o {params.tmp_dir}) 2> {log}
+        
+        cp {params.tmp_dir}/1_fastqc.html {output.html1}
+        cp {params.tmp_dir}/1_fastqc.zip {output.zip1}
+        cp {params.tmp_dir}/2_fastqc.html {output.html2}
+        cp {params.tmp_dir}/2_fastqc.zip {output.zip2}
+
+        rm -rf tmp
         """
+
+
+rule detect_adapter:
+    input: 
+        os.path.join(OUTDIR, "fastqc/{sample}/1_fastqc.zip")
+    output: 
+        os.path.join(OUTDIR, "fastqc/{sample}/adapters.txt")
+    log: 
+        os.path.join(LOGS, "detect_adapter/{sample}.log")
+    params:
+        detect_adapters = os.path.join(PY_SCRIPTS, "detect_adapters.py")    
+    shell:
+        """
+        python {params.detect_adapters} {input} > {output}
+        """
+
+
+rule kneaddata:
+    input:
+        r1 = lambda wildcards: SAMPLES_LU[wildcards.sample],
+        r2 = lambda wildcards: SAMPLES_LU[wildcards.sample].replace("_1.fastq.gz", "_2.fastq.gz"),
+        # r1 = os.path.join(DATAPATH, "SAMEA{sample}/1.fastq.gz"),
+        # r2 = os.path.join(DATAPATH, "SAMEA{sample}/2.fastq.gz"),
+        adapter=os.path.join(OUTDIR, "fastqc/{sample}/adapters.txt")
+    output:
+        # dir = temp(directory(os.path.join(OUTDIR, "knead/{sample}/tmp"))),
+        p1 = os.path.join(OUTDIR, "knead/{sample}/paired_1.fastq"),
+        p2 = os.path.join(OUTDIR, "knead/{sample}/paired_2.fastq"),
+    log:
+        os.path.join(LOGS, "knead/{sample}.log")
+    threads: 48
+    conda:
+        os.path.join(CONDA_ENVS, "kneaddata.yaml"),
+    benchmark:
+        os.path.join(BENCHMARKS, "kneaddata", "{sample}.txt"),
+    params:
+        tmp_dir = os.path.join(OUTDIR, "knead/{sample}/tmp"),
+        phred="phred33",
+        trim="SLIDINGWINDOW:5:20",
+        fastqc_path=FASTQC_PATH,
+        db_path=DB # path to human genome bowtie index
+    shell:
+         """
+         mkdir -p {params.tmp_dir}
+
+         kneaddata\
+         --input1 {input.r1}\
+         --input2 {input.r2}\
+         -db {params.db_path}\
+         --sequencer-source $(cat {input.adapter})\
+         --fastqc {params.fastqc_path}\
+         --run-fastqc-end\
+         --run-trim-repetitive\
+         --quality-scores {params.phred}\
+         --trimmomatic-options {params.trim}\
+         --threads {threads}\
+         -o {params.tmp_dir}\
+
+         cp {params.tmp_dir}/1_kneaddata_paired_1.fastq {output.p1}
+         cp {params.tmp_dir}/1_kneaddata_paired_2.fastq {output.p2}
+        
+         rm -rf {params.tmp_dir}
+         """
+
+rule metaspades: 
+    input:
+        r1=os.path.join(OUTDIR, "knead/{sample}/paired_1.fastq"),
+        r2=os.path.join(OUTDIR, "knead/{sample}/paired_2.fastq")
+    output:
+        contigs=os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"),
+    benchmark:
+        os.path.join(BENCHMARKS, "assembly", "{sample}.txt"),
+    params:
+        k="auto", #k-mer size
+        m="100", #memory 100gb vamb
+        tmp_dir = os.path.join(OUTDIR, "spades/asm_{sample}/tmp"),
+    log:
+        os.path.join(LOGS, "metaspades/{sample}.log")
+    threads: 48 # 24 vamb
+    conda:
+        os.path.join(CONDA_ENVS, "metaspades.yaml")
+    shell:
+        """
+        spades.py --meta -1 {input.r1} -2 {input.r2} -m {params.m} -o {params.tmp_dir} -k {params.k} -t {threads} --only-assembler
+        
+        cp {params.tmp_dir}/contigs.fasta {output.contigs}
+
+        rm -rf {params.tmp_dir}
+        """ 
+
+# rule rename_contigs:
+#     input:
+#         os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"),
+#     output:
+#         renamed_contigs=os.path.join(OUTDIR, "spades/asm_{sample}/contigs_renamed.fasta"),
+#         contigs_lookup=os.path.join(OUTDIR, "spades/asm_{sample}/contigs_lu.json")
+#     threads:
+#         12
+#     params:
+#         clean_contigs = os.path.join(PY_SCRIPTS, "clean_contig_names.py")
+#     shell:
+#         """
+#         python {params.clean_contigs} {input} {output.renamed_contigs} {output.contigs_lookup}
+#         """
 
     
 
 
 rule concatenate:
-    # input:
-    #     os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta")
     input:
-        lambda wildcards: expand(
-            os.path.join(OUTDIR, "spades/asm_{sample}/contigs_renamed.fasta"),
-            sample=get_samples(wildcards)
-        )
+        expand(os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"), sample=SAMPLES)
+    # input:
+    #     lambda wildcards: expand(
+    #         os.path.join(OUTDIR, "spades/asm_{sample}/contigs_renamed.fasta"),
+    #         sample=get_samples(wildcards)
+    #     )
     output:
         os.path.join(OUTDIR, "global_contig_catalogue.fna.gz")
     conda:
@@ -254,31 +256,31 @@ rule concatenate:
         python {params.concatenate} {output} {input} -m 94
         """
 
-rule build_index:
-    input:
-        os.path.join(OUTDIR, "global_contig_catalogue.fna.gz")
-    output:
-        os.path.join(OUTDIR, "minimap/catalogue.mmi")
-    conda:
-        os.path.join(CONDA_ENVS, "minimap2.yaml")
-    params:
-        concatenate = os.path.join(PY_SCRIPTS, "concatenate.py")
-    threads:
-        48
-    resources:
-        mem_gb=100
-    shell:
-        """
-        mkdir -p minimap
-        minimap2 -I 100G -d {output} {input}
-        """
+# rule build_index:
+#     input:
+#         os.path.join(OUTDIR, "global_contig_catalogue.fna.gz")
+#     output:
+#         os.path.join(OUTDIR, "minimap/catalogue.mmi")
+#     conda:
+#         os.path.join(CONDA_ENVS, "minimap2.yaml")
+#     params:
+#         concatenate = os.path.join(PY_SCRIPTS, "concatenate.py")
+#     threads:
+#         48
+#     resources:
+#         mem_gb=100
+#     shell:
+#         """
+#         mkdir -p minimap
+#         minimap2 -I 100G -d {output} {input}
+#         """
 
 rule alignment:
     input:
         r1=os.path.join(OUTDIR, "knead/{sample}/paired_1.fastq"),
         r2=os.path.join(OUTDIR, "knead/{sample}/paired_2.fastq"),
-        # contig_catalouge=os.path.join(OUTDIR,"global_contig_catalogue.fna.gz")
-        contig_catalogue_index = os.path.join(OUTDIR, "minimap/catalogue.mmi")
+        contig_catalouge=os.path.join(OUTDIR,"global_contig_catalogue.fna.gz")
+        # contig_catalogue_index = os.path.join(OUTDIR, "minimap/catalogue.mmi")
     output:
         os.path.join(OUTDIR, "algn/{sample}_sorted.bam"),
     benchmark:
@@ -291,12 +293,12 @@ rule alignment:
         os.path.join(CONDA_ENVS, "minimap2.yaml")
         # os.path.join(CONDA_ENVS, "strobealign.yaml")
     shell:
-        """
-        minimap2 -t {threads} -ax sr {input.contig_catalogue_index} {input.r1} {input.r2} | samtools view -bS | samtools sort -o {output}
-        """
         # """
-        # strobealign -t {threads} {input.contig_catalouge} {input.r1} {input.r2} | samtools sort -o {output}
-        # """    
+        # minimap2 -t {threads} -ax sr {input.contig_catalogue_index} {input.r1} {input.r2} | samtools view -bS | samtools sort -o {output}
+        # """
+        """
+        strobealign -t {threads} {input.contig_catalouge} {input.r1} {input.r2} | samtools sort -o {output}
+        """    
 rule get_coverage:
     input:
         os.path.join(OUTDIR, "algn/{sample}_sorted.bam"),
@@ -314,13 +316,13 @@ rule get_coverage:
         """
 
 rule merge_abundances:
-    # input:
-    #     os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv")
     input:
-        lambda wildcards: expand(
-            os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv"),
-            sample=get_samples(wildcards)
-        )
+        expand(os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv"),sample=SAMPLES)
+    # input:
+    #     lambda wildcards: expand(
+    #         os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv"),
+    #         sample=get_samples(wildcards)
+    #     )
     output:
         os.path.join(OUTDIR, "abdn_coverm/abundances.tsv")
     params:
