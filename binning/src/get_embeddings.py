@@ -212,9 +212,15 @@ class Embedder:
             )
 
             # Process in 10.000 sequences at a time to avoid OOM errors
-            n_dna_sequences_filtered_mini_processing = 10000
-            for start in range(
-                0, len(dna_sequences_filtered), n_dna_sequences_filtered_mini_processing
+            n_dna_sequences_filtered_mini_processing = 5000
+            for start in tqdm(
+                range(
+                    0,
+                    len(dna_sequences_filtered),
+                    n_dna_sequences_filtered_mini_processing,
+                ),
+                desc=f"Outer: Processing sequences: {sequence_length_min} to {sequence_length_max}",
+                position=0,
             ):
                 end = min(
                     start + n_dna_sequences_filtered_mini_processing,
@@ -298,7 +304,9 @@ class Embedder:
         if log_tokenlengths:
             all_token_lengths = []
 
-        for i, batch in enumerate(tqdm(data_loader)):
+        for i, batch in enumerate(
+            tqdm(data_loader), desc="Inner: Processing batches", position=1, leave=False
+        ):
 
             input_ids, attention_mask = batch["input_ids"].to(self.device), batch[
                 "attention_mask"
