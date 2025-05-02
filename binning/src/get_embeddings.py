@@ -89,9 +89,7 @@ class Embedder:
             self.log.append(f"Embeddings shape: {embeddings.shape}")
             if self.normalize_embeddings:
                 embeddings = normalize(embeddings)
-            save_path = (
-                os.path.join(self.save_path, "embeddings", f"{self.model_name}.npz"),
-            )
+            save_path = (os.path.join(self.save_path, "embeddings", f"embeddings.npy"),)
             np.savez(save_path, embeddings=embeddings, contig_names=self.contig_names)
             torch.cuda.empty_cache()
             return embeddings
@@ -157,13 +155,11 @@ class Embedder:
         N = len(self.dna_sequences)
         D = self.llm_inference([self.dna_sequences[0]], batch_size=1).shape[1]
         self.log.append(f"Embeddings memmap shape: {N} x {D}")
-        emb_path = os.path.join(
-            self.save_path, "embeddings", f"{self.model_name}_embeddings.npy"
-        )
+        emb_path = os.path.join(self.save_path, "embeddings", f"embeddings.npy")
         mmap = np.memmap(emb_path, dtype="float32", mode="w+", shape=(N, D))
 
         names_path = os.path.join(
-            self.save_path, "embeddings", f"{self.model_name}_contignames.npy"
+            self.save_path, "embeddings", f"contignames.npy"
         )  # save contig names seperately
         np.save(names_path, np.array(self.contig_names, dtype="<U"))
 
