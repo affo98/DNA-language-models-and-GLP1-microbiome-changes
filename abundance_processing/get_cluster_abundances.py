@@ -1,3 +1,11 @@
+"""Should be executed from snakemake with:
+python get_cluster_abundances.py path/to/filtered_cluster_results\n
+path/to/normalized/abundances path/to/output.tsv
+
+In snakemake:
+python get_cluster_abundances.py {input.clusters_filtered} {input.norm_abundances} {output}
+"""
+
 import sys
 
 import pandas as pd
@@ -190,14 +198,6 @@ def write_cluster_abundances(
 
 
 if __name__ == "__main__":
-
-    """Should be executed from snakemake with:
-    python get_cluster_abundances.py path/to/filtered_cluster_results\n
-    path/to/normalized/abundances path/to/output.tsv
-
-    In snakemake:
-    python get_cluster_abundances.py {input.clusters_filtered} {input.norm_abundances} {output}
-    """
 
     PATH_TO_CLUSTERS = sys.argv[1]
     PATH_TO_NORMALIZED_ABUNDANCES = sys.argv[2]
