@@ -218,7 +218,7 @@ class Embedder:
 
                 embeddings = self.llm_inference(list(mini_seqs), batch_size)
                 if self.normalize_embeddings:
-                    embeddings = normalize(embeddings).astype("float16")
+                    embeddings = normalize(embeddings).astype("float32")
 
                 for j, orig_idx in enumerate(mini_idxs):
                     mmap[orig_idx, :] = embeddings[j]
