@@ -207,9 +207,9 @@ class Embedder:
             )
             if len(dna_sequences_filtered) == 0:
                 continue
-            self.log.append(
-                f"Running {len(dna_sequences_filtered)} sequences with len between {sequence_length_min} to {sequence_length_max}"
-            )
+            # self.log.append(
+            #     f"Running {len(dna_sequences_filtered)} sequences with len between {sequence_length_min} to {sequence_length_max}"
+            # )
 
             # Process in 5000 sequences at a time to avoid OOM errors
             n_dna_sequences_filtered_mini_processing = 5000
