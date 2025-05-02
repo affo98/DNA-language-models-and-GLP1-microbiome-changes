@@ -120,10 +120,10 @@ rule fastqc:
 
         (fastqc -t {threads} {input.r1} {input.r2} -o {params.tmp_dir}) 2> {log}
         
-        cp {params.tmp_dir}/{sample}_1_fastqc.html {output.html1}
-        cp {params.tmp_dir}/{sample}_1_fastqc.zip {output.zip1}
-        cp {params.tmp_dir}/{sample}_2_fastqc.html {output.html2}
-        cp {params.tmp_dir}/{sample}_2_fastqc.zip {output.zip2}
+        cp {params.tmp_dir}/{wildcards.sample}_1_fastqc.html {output.html1}
+        cp {params.tmp_dir}/{wildcards.sample}_1_fastqc.zip {output.zip1}
+        cp {params.tmp_dir}/{wildcards.sample}_2_fastqc.html {output.html2}
+        cp {params.tmp_dir}/{wildcards.sample}_2_fastqc.zip {output.zip2}
 
         rm -rf tmp
         """
