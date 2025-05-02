@@ -5,7 +5,7 @@ import json
 def main():
     with open("unseen_bio_lookup.json") as file:
         id_map = json.load(file)
-    print(id_map)
+
     base_dir = "UNSEEN_BIO"
 
     for old_id, new_id in id_map.items():
