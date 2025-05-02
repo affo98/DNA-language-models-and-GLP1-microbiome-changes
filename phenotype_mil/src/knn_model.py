@@ -18,7 +18,7 @@ def fit_predict_knn(
     X_test: pd.DataFrame,
     y_train: np.ndarray,
     k: int,
-    fold_idx: int,
+    fold: int,
     output_path: str,
     weights: str = "uniform",
 ) -> np.ndarray:
@@ -27,17 +27,18 @@ def fit_predict_knn(
     knn.fit(X_train, y_train)
     y_pred = knn.predict(X_test)
 
+    ###Z SCALE
     pca = PCA(n_components=2)
     X_train_pca = pca.fit_transform(X_train)
-    if X_train_pca.shape[1] == 2 and output_path and fold_idx is not None:
-        print("si")
+
+    if X_train_pca.shape[1] == 2 and output_path and fold is not None:
         plot_knn_decision_boundary(
             X=X_train_pca,
             y=y_train,
             k=k,
             weights=weights,
-            title=f"KNN Decision Boundary (Fold {fold_idx+1})",
-            save_path=os.path.join(output_path, f"knn_boundary_fold{fold_idx+1}.png"),
+            title=f"KNN Decision Boundary (Fold {fold})",
+            save_path=os.path.join(output_path, f"knn_boundary_fold{fold}.png"),
         )
     return y_pred
 
