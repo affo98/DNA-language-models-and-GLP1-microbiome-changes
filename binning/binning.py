@@ -59,7 +59,7 @@ def main(args, log):
             args.model_name,
             args.model_path,
             args.weight_path,
-            os.path.join(args.save_path, "embeddings", f"{args.model_name}.npz"),
+            args.save_path,
             normalize_embeddings=True,
             log=log,
         )
@@ -109,7 +109,7 @@ def main(args, log):
             args.model_name,
             args.model_path,
             args.weight_path,
-            os.path.join(args.save_path, "embeddings", f"{args.model_name}.npz"),
+            args.save_path,
             normalize_embeddings=True,
             log=log,
         )
