@@ -385,16 +385,16 @@ def parse_heatmaps(model_results_dir: str) -> pd.DataFrame:
 if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    # cami2_results = process_all_reports(MODEL_RESULTS_DIR)
+    cami2_results = process_all_reports(MODEL_RESULTS_DIR)
 
-    # knn_histograms = parse_knn_histograms(MODEL_RESULTS_DIR)
+    knn_histograms = parse_knn_histograms(MODEL_RESULTS_DIR)
 
     contig_summary, contig_lengths = parse_contig_lengths(PROCESSED_DATA_DIR)
 
-    # runtimes = parse_runtimes(BASE_DIR)
+    runtimes = parse_runtimes(BASE_DIR)
 
-    # bin_postprocess = parse_bin_postprocess(LOG_DIR)
+    bin_postprocess = parse_bin_postprocess(LOG_DIR)
 
-    # n_valtest = parse_nvaltest(MODEL_RESULTS_DIR)
+    n_valtest = parse_nvaltest(MODEL_RESULTS_DIR)
 
-    # heatmaps = parse_heatmaps(MODEL_RESULTS_DIR)
+    heatmaps = parse_heatmaps(MODEL_RESULTS_DIR)
