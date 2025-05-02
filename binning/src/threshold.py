@@ -18,9 +18,9 @@ class Threshold:
         n_bins: int,
         block_size: int,
     ):
-        if embeddings.dtype != np.float64:
-            embeddings = embeddings.astype(np.float64)
-            print("Embeddings changed to dtype float64")
+        # if embeddings.dtype != np.float64:
+        #     embeddings = embeddings.astype(np.float64)
+        #     print("Embeddings changed to dtype float64")
         if block_size < 1:
             raise ValueError("Block size must be at least 1")
         if n_bins < 1:

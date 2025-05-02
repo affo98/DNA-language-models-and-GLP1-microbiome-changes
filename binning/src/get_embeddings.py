@@ -116,6 +116,7 @@ class Embedder:
             "dnabert2random",
         ]:
             embeddings = self.calculate_llm_embedding()
+            return embeddings
 
     def calculate_llm_embedding(self) -> np.array:
         """Get llm embeddings. Process dna sequences based on their length to increase efficiency, i.e. use a large batch size"""

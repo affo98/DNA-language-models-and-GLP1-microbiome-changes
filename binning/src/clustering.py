@@ -19,9 +19,9 @@ class KMediod:
         num_steps: int,
         max_iter: int,
     ):
-        if embeddings.dtype != np.float64:
-            embeddings = embeddings.astype(np.float64)
-            print("Embeddings changed to dtype float64")
+        # if embeddings.dtype != np.float64:
+        #     embeddings = embeddings.astype(np.float64)
+        #     print("Embeddings changed to dtype float64")
         if min_bin_size < 1:
             raise ValueError("Minimum bin size must be at least 1")
         if num_steps < 1:
