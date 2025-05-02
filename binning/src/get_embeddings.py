@@ -169,7 +169,7 @@ class Embedder:
         emb_path = os.path.join(
             self.save_path, "embeddings", f"{self.model_name}_embeddings.npy"
         )
-        mmap = np.memmap(emb_path, dtype="float16", mode="w+", shape=(N, D))
+        mmap = np.memmap(emb_path, dtype="float32", mode="w+", shape=(N, D))
 
         names_path = os.path.join(
             self.save_path, "embeddings", f"{self.model_name}_contignames.npy"
@@ -219,7 +219,7 @@ class Embedder:
                     len(dna_sequences_filtered),
                     n_dna_sequences_filtered_mini_processing,
                 ),
-                desc=f"Outer: Processing {len(dna_sequences_filtered)} in mini-batches of {n_dna_sequences_filtered_mini_processing}: length: {sequence_length_min} to {sequence_length_max}",
+                desc=f"Outer: Processing {len(dna_sequences_filtered)} contigs in mini-batches of {n_dna_sequences_filtered_mini_processing}, length: {sequence_length_min} to {sequence_length_max}",
                 position=0,
             ):
                 end = min(
@@ -240,7 +240,7 @@ class Embedder:
         self.log.append(
             f"Wrote embeddings memmap to {self.save_path} and names to {names_path}"
         )
-        return np.memmap(emb_path, dtype="float16", mode="r", shape=(N, D))
+        return np.memmap(emb_path, dtype="float32", mode="r", shape=(N, D))
 
         # processed_embeddings.append(embeddings)
 
