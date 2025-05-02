@@ -219,7 +219,7 @@ class Embedder:
                     len(dna_sequences_filtered),
                     n_dna_sequences_filtered_mini_processing,
                 ),
-                desc=f"Outer: Processing sequences: {sequence_length_min} to {sequence_length_max}",
+                desc=f"Outer: Processing {len(dna_sequences_filtered)} in mini-batches of {n_dna_sequences_filtered_mini_processing}: length: {sequence_length_min} to {sequence_length_max}",
                 position=0,
             ):
                 end = min(
@@ -307,7 +307,7 @@ class Embedder:
 
         for i, batch in tqdm(
             enumerate(data_loader),
-            desc="Inner: Processing batches",
+            desc="Inner: Running LLM Inference",
             position=1,
             leave=False,
         ):
