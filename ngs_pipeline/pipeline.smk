@@ -111,7 +111,7 @@ rule fastqc:
     log:
         os.path.join(LOGS, "fastqc/{sample}.log")
     threads:
-        16
+        64
     conda:
         os.path.join(CONDA_ENVS, "fastqc.yaml")
     shell:
