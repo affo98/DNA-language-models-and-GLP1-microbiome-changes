@@ -76,17 +76,6 @@ class Embedder:
 
         """
 
-        # if os.path.exists(os.path.join(self.save_path, "embeddings")):
-        #     self.log.append(f"Load embeddings from file {self.save_path}\n")
-        #     embeddings = np.load(self.save_path)
-
-        #     if embeddings.shape[0] == len(self.dna_sequences):
-        #         return embeddings
-        #     else:
-        #         self.log.append(
-        #             f"Mismatch in number of embeddings from {self.save_path} and DNA sequences.\nRecalculating embeddings."
-        #         )
-        # else:
         os.makedirs(os.path.join(self.save_path, "embeddings"), exist_ok=True)
 
         if self.model_name == "tnf":
@@ -116,6 +105,7 @@ class Embedder:
             "dnabert2random",
         ]:
             embeddings = self.calculate_llm_embedding()
+            torch.cuda.empty_cache()
             return embeddings
 
     def calculate_llm_embedding(self) -> np.array:
@@ -166,6 +156,7 @@ class Embedder:
         ### Saving on memmap file to avoid OOM errors ###
         N = len(self.dna_sequences)
         D = self.llm_inference([self.dna_sequences[0]], batch_size=1).shape[1]
+        self.log.append(f"Embeddings memmap shape: {N} x {D}")
         emb_path = os.path.join(
             self.save_path, "embeddings", f"{self.model_name}_embeddings.npy"
         )
@@ -238,7 +229,7 @@ class Embedder:
 
         mmap.flush()
         self.log.append(
-            f"Wrote embeddings memmap to {self.save_path} and names to {names_path}"
+            f"Wrote embeddings memmap to {emb_path} and names to {names_path}"
         )
         return np.memmap(emb_path, dtype="float32", mode="r", shape=(N, D))
 
