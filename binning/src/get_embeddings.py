@@ -76,18 +76,18 @@ class Embedder:
 
         """
 
-        if os.path.exists(self.save_path):
-            self.log.append(f"Load embeddings from file {self.save_path}\n")
-            embeddings = np.load(self.save_path)
+        # if os.path.exists(os.path.join(self.save_path, "embeddings")):
+        #     self.log.append(f"Load embeddings from file {self.save_path}\n")
+        #     embeddings = np.load(self.save_path)
 
-            if embeddings.shape[0] == len(self.dna_sequences):
-                return embeddings
-            else:
-                self.log.append(
-                    f"Mismatch in number of embeddings from {self.save_path} and DNA sequences.\nRecalculating embeddings."
-                )
-        else:
-            os.makedirs(os.path.join(self.save_path, "embeddings"), exist_ok=True)
+        #     if embeddings.shape[0] == len(self.dna_sequences):
+        #         return embeddings
+        #     else:
+        #         self.log.append(
+        #             f"Mismatch in number of embeddings from {self.save_path} and DNA sequences.\nRecalculating embeddings."
+        #         )
+        # else:
+        os.makedirs(os.path.join(self.save_path, "embeddings"), exist_ok=True)
 
         if self.model_name == "tnf":
             embeddings = self.calculate_tnf()
