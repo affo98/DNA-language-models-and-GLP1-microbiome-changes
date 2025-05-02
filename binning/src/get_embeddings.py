@@ -304,8 +304,11 @@ class Embedder:
         if log_tokenlengths:
             all_token_lengths = []
 
-        for i, batch in enumerate(
-            tqdm(data_loader), desc="Inner: Processing batches", position=1, leave=False
+        for i, batch in tqdm(
+            enumerate(data_loader),
+            desc="Inner: Processing batches",
+            position=1,
+            leave=False,
         ):
 
             input_ids, attention_mask = batch["input_ids"].to(self.device), batch[
