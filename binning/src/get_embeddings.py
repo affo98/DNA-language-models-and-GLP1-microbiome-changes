@@ -211,7 +211,7 @@ class Embedder:
                 f"Running {len(dna_sequences_filtered)} sequences with len between {sequence_length_min} to {sequence_length_max}"
             )
 
-            # Process in 10.000 sequences at a time to avoid OOM errors
+            # Process in 5000 sequences at a time to avoid OOM errors
             n_dna_sequences_filtered_mini_processing = 5000
             for start in tqdm(
                 range(
