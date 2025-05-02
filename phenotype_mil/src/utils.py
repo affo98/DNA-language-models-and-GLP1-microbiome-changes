@@ -62,22 +62,22 @@ def read_cluster_abundances(
     return cluster_abundances
 
 
-def read_embeddings(
-    input_path: str, log: Logger)-> tuple[np.mmap, list[str]]: 
-    
-    n_test = with open(os.path.join(input_path, 'n_total_val_test.json')) as f:
-        n_val_test_data = json.load(f)
-        
-    n_test = n_val_test_data['n_test']
-    log.append(f"Number of test contigs: {n_test}")
-        
-    ##################FILL IN CORRECTLY#######################
-    embeddings = np.memmap(os.path.join(input_path, 'embeddings','embeddings.npy'), dtype="float32", mode="r", shape=(n_test, 768))
-    #embeddings_array = np.array(embeddings) #may be too large to handle
-    contig_names = np.load('contignames.npy', allow_pickle=True)
+# def read_embeddings(
+#     input_path: str, log: Logger)-> tuple[np.mmap, list[str]]:
+
+#     n_test = with open(os.path.join(input_path, 'n_total_val_test.json')) as f:
+#         n_val_test_data = json.load(f)
+
+#     n_test = n_val_test_data['n_test']
+#     log.append(f"Number of test contigs: {n_test}")
+
+#     ##################FILL IN CORRECTLY#######################
+#     embeddings = np.memmap(os.path.join(input_path, 'embeddings','embeddings.npy'), dtype="float32", mode="r", shape=(n_test, 768))
+#     #embeddings_array = np.array(embeddings) #may be too large to handle
+#     contig_names = np.load('contignames.npy', allow_pickle=True)
 
 
-    return embeddings, contig_names
+#     return embeddings, contig_names
 
 
 def read_clusters(clusters_path: str, log: Logger) -> dict[str, set[str]]:
