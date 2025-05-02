@@ -262,6 +262,7 @@ class Embedder:
             padding="longest",  # pad up to longest in this batch
             truncation=True,  # truncate if too long
             return_tensors="pt",
+            max_length=1000000,
         )
 
         return {
