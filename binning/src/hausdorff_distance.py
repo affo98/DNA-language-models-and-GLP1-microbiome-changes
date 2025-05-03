@@ -67,7 +67,7 @@ def read_embeddings(
         )
     except:
         embedding_data = np.load(
-            os.path.join(input_path, "embeddings", f"{model_name}.npy")
+            os.path.join(input_path, "embeddings", f"{model_name}.npz")
         )
         embeddings = embedding_data["embeddings"]
         contig_names = embedding_data["contig_names"]
