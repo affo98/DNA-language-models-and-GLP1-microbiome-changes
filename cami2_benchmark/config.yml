@@ -49,5 +49,7 @@ models:
   - name: dna2vec
   - name: dnaberts
   - name: dnaberth_400k
+  - name: dnaberth_2mv1
+  - name: dnaberth_2mv2
   - name: dnabert2
   - name: dnabert2random

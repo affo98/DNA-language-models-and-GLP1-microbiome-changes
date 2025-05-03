@@ -33,7 +33,7 @@ sample_str = ' '.join(SAMPLES.get(DATASET, []))
 
 ALL_MODELS  = [d["name"] for d in datasets_model_config["models"]]
 MODEL = config.get("MODEL", None)
-assert MODEL==None or MODEL in ALL_MODELS, f"Error: Selected model '{MODEL}' is not in the available DATASET: {ALL_MODELS}"
+assert MODEL==None or MODEL in ALL_MODELS, f"Error: Selected model '{MODEL}' is not in the available MODELS: {ALL_MODELS}"
 
 MODEL_PATH=None
 BATCH_SIZES=None
