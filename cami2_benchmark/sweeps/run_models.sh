@@ -32,8 +32,7 @@ for dataset in "${datasets[@]}"; do
 
         snakemake --snakefile cami2_benchmark/Snakefile \
                   --config DATASET=$dataset MODEL=$model CHECKM2=True \
-                  --use-conda --cores all \ 
-                  --rerun-incomplete 
+                  --use-conda --cores all 
 
         if [ $? -ne 0 ]; then
             echo "Snakemake failed for model: $model in dataset: $dataset"
