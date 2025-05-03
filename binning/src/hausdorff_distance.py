@@ -237,5 +237,5 @@ if __name__ == "__main__":
     end_time = time()
     elapsed_time = end_time - start_time
     log.append(
-        f"Hausdorff distances of {args.model_name} ran in {elapsed_time:.2f} Seconds"
+        f"Hausdorff distances of {args.model_name} on dataset {args.dataset_name} ran in {elapsed_time:.2f} Seconds"
     )
