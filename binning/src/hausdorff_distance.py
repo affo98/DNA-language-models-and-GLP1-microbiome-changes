@@ -180,7 +180,12 @@ def main(args, log):
     embeddings, contig_names = read_embeddings(args.input_path, args.model_name, log)
 
     distance_matrix, clusters_array = compute_hausdorff_matrix(
-        embeddings, contig_names, clusters, device=device
+        embeddings,
+        contig_names,
+        clusters,
+        device=device,
+        save_path=args.save_path,
+        log=log,
     )
 
 
