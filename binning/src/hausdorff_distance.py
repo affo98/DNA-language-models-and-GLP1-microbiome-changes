@@ -47,7 +47,7 @@ def read_clusters(input_path: str, log: Logger) -> dict[str, set[str]]:
 
 def read_embeddings(
     input_path: str, model_name, log: Logger
-) -> tuple[np.memmap | np.array, list[str]]:
+) -> tuple[np.memmap | np.ndarray, list[str]]:
     """Read embeddings from file and return as numpy array and list of contig names."""
 
     with open(os.path.join(input_path, "n_total_val_test.json")) as f:
