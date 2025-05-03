@@ -101,10 +101,10 @@ rule fastqc:
         # r1 = os.path.join(DATAPATH, "SAMEA{sample}/1.fastq.gz"),
         # r2 = os.path.join(DATAPATH, "SAMEA{sample}/2.fastq.gz")
     output:
-        html1 = os.path.join(OUTDIR, "fastqc/{sample}/1_fastqc.html"),
-        zip1 = os.path.join(OUTDIR, "fastqc/{sample}/1_fastqc.zip"),
-        html2 = os.path.join(OUTDIR, "fastqc/{sample}/2_fastqc.html"),
-        zip2 = os.path.join(OUTDIR, "fastqc/{sample}/2_fastqc.zip")
+        html1 = os.path.join(OUTDIR, "tmp/{sample}/fastqc/{sample}_1_fastqc.html"),
+        zip1 = os.path.join(OUTDIR, "tmp/{sample}/fastqc/{sample}_1_fastqc.zip"),
+        html2 = os.path.join(OUTDIR, "tmp/{sample}/fastqc/{sample}_2_fastqc.html"),
+        zip2 = os.path.join(OUTDIR, "tmp/{sample}/fastqc/{sample}_2_fastqc.zip")
     params:
         output_dir = os.path.join(OUTDIR, "fastqc"),
         tmp_dir = os.path.join(OUTDIR, "tmp/{sample}", "fastqc")
@@ -119,15 +119,14 @@ rule fastqc:
         mkdir -p {params.tmp_dir}
 
         (fastqc -t {threads} {input.r1} {input.r2} -o {params.tmp_dir}) 2> {log}
-        
-        cp {params.tmp_dir}/{wildcards.sample}_1_fastqc.html {output.html1}
-        cp {params.tmp_dir}/{wildcards.sample}_1_fastqc.zip {output.zip1}
-        cp {params.tmp_dir}/{wildcards.sample}_2_fastqc.html {output.html2}
-        cp {params.tmp_dir}/{wildcards.sample}_2_fastqc.zip {output.zip2}
-
-        rm -rf tmp
         """
 
+        # cp {params.tmp_dir}/{wildcards.sample}_1_fastqc.html {output.html1}
+        # cp {params.tmp_dir}/{wildcards.sample}_1_fastqc.zip {output.zip1}
+        # cp {params.tmp_dir}/{wildcards.sample}_2_fastqc.html {output.html2}
+        # cp {params.tmp_dir}/{wildcards.sample}_2_fastqc.zip {output.zip2}
+
+        # rm -rf tmp
 
 rule detect_adapter:
     input: 
