@@ -130,7 +130,7 @@ rule fastqc:
 
 rule detect_adapter:
     input: 
-        os.path.join(OUTDIR, "fastqc/{sample}/1_fastqc.zip")
+        os.path.join(OUTDIR, "tmp/{sample}/fastqc/{sample}_1_fastqc.zip")
     output: 
         os.path.join(OUTDIR, "fastqc/{sample}/adapters.txt")
     log: 
