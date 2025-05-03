@@ -222,12 +222,11 @@ if __name__ == "__main__":
     start_time = time()
     args = add_arguments()
 
+    os.makedirs(args.save_path)
     log = Logger(args.log)
-
     for arg, value in vars(args).items():
         log.append(f"{arg}: {value}")
 
-    os.makedirs(args.save_path)
     main(args, log)
 
     end_time = time()
