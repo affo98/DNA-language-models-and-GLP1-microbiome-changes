@@ -33,7 +33,6 @@ for dataset in "${datasets[@]}"; do
         snakemake --snakefile cami2_benchmark/Snakefile \
                   --config DATASET=$dataset MODEL=$model CHECKM2=True \
                   --use-conda --cores all \ 
-                  --conda-cleanup-pkgs cache \
                   --conda-frontend conda \
                   --rerun-incomplete \
                   --forceall \
