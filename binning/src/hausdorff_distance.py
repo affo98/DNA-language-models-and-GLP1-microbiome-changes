@@ -7,6 +7,7 @@ from tqdm import tqdm
 import numpy as np
 import torch
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from src.utils import Logger, get_available_device
 
 CLUSTERS_HEADER = "clustername\tcontigname"
