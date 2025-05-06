@@ -118,6 +118,7 @@ def main():
         log,
         CONVERT_MILLION_EMB_GPU_SECONDS,
     )
+    threshold = thresholder_test.get_knn_threshold(KNN_K, KNN_P)
 
     kmediod_test = KMediod(
         embeddings_test,
@@ -132,8 +133,6 @@ def main():
         MAX_ITER,
         BLOCK_SIZE,
     )
-
-    threshold = thresholder_test.get_knn_threshold(KNN_K, KNN_P)
     _, _ = kmediod_test.fit(threshold, KNN_K, KNN_P)
 
 
