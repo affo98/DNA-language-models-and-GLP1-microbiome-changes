@@ -5,7 +5,7 @@ import json
 import os
 import sys
 import subprocess
-import tqdm
+from tqdm import tqdm
 
 import numpy as np
 import torch
