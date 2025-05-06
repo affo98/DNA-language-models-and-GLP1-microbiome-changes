@@ -93,7 +93,7 @@ class Threshold:
             centroids = centroids.transpose(
                 1, 2
             )  # Shape: (block_size, embedding_dim, 1)
-            print(top_k_embeddings)
+            # print(top_k_embeddings)
 
             centroid_similarities = torch.bmm(top_k_embeddings, centroids).squeeze(-1)
             centroid_similarities_flat = centroid_similarities.flatten().to(
