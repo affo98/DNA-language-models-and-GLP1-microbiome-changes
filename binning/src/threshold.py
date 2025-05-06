@@ -188,7 +188,6 @@ class Threshold:
         self.save_histogram(knn=True)
         self.save_to_json()
 
-        del partial_index
         torch.cuda.empty_cache()
         return self.knn_threshold
 
