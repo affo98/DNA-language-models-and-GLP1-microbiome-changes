@@ -98,6 +98,7 @@ class Threshold:
 
             centroid_similarities = torch.bmm(top_k_embeddings, centroids).squeeze(-1)
             centroid_similarities_flat = centroid_similarities.flatten()
+            print(centroid_similarities)
 
             global_min = torch.min(global_min, centroid_similarities_flat.min())
             global_max = torch.max(global_max, centroid_similarities_flat.max())
