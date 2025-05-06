@@ -56,7 +56,7 @@ def to_fp16_tensor(
         del block_cpu, slice_np
 
     # Wait for all copies to finish
-    if device.type == "cuda":
+    if device == "cuda":
         torch.cuda.synchronize()
 
     print(f"[After streaming] GPU mem used: {get_gpu_mem()} MiB")
