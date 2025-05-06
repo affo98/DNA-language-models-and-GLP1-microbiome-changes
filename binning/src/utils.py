@@ -48,49 +48,49 @@ def get_gpu_mem(log: Logger) -> int | None:
         return None
 
 
-def to_fp16_tensor(
-    embeddings: np.ndarray,
-    device,
-    log,
-    chunk_size: int = 100_000,
-) -> torch.Tensor:
-    """
-    Convert a large NumPy array or memmap of shape (N, D) to a single
-    torch.cuda.FloatTensor in float16, streaming in chunk_size rows at a time.
+# def to_fp16_tensor(
+#     embeddings: np.ndarray,
+#     device,
+#     log,
+#     chunk_size: int = 100_000,
+# ) -> torch.Tensor:
+#     """
+#     Convert a large NumPy array or memmap of shape (N, D) to a single
+#     torch.cuda.FloatTensor in float16, streaming in chunk_size rows at a time.
 
-    Returns:
-        emb_fp16 (torch.Tensor): the full (N, D) tensor on GPU in float16.
-    """
-    if not isinstance(embeddings, np.ndarray):
-        raise TypeError("embeddings must be a NumPy ndarray or memmap")
+#     Returns:
+#         emb_fp16 (torch.Tensor): the full (N, D) tensor on GPU in float16.
+#     """
+#     if not isinstance(embeddings, np.ndarray):
+#         raise TypeError("embeddings must be a NumPy ndarray or memmap")
 
-    N, D = embeddings.shape
-    log.append(f"Using device: {device}")
-    log.append(f"[Before allocation] GPU mem used: {get_gpu_mem(log)} MiB")
+#     N, D = embeddings.shape
+#     log.append(f"Using device: {device}")
+#     log.append(f"[Before allocation] GPU mem used: {get_gpu_mem(log)} MiB")
 
-    # Allocate the target FP16 tensor on GPU
-    emb_fp16 = torch.empty((N, D), dtype=torch.float16, device=device)
-    log.append(f"[After empty allococation] GPU mem used: {get_gpu_mem(log)} MiB")
+#     # Allocate the target FP16 tensor on GPU
+#     emb_fp16 = torch.empty((N, D), dtype=torch.float16, device=device)
+#     log.append(f"[After empty allococation] GPU mem used: {get_gpu_mem(log)} MiB")
 
-    # Stream in chunk_size rows at a time
-    for start in tqdm(
-        range(0, N, chunk_size), desc="Converting numpy embeddings to FP16 GPU"
-    ):
-        end = min(start + chunk_size, N)
-        slice_np = embeddings[start:end]
-        if not slice_np.flags.writeable:
-            slice_np = slice_np.copy()
-        block_cpu = torch.from_numpy(slice_np)  # CPU float32
-        emb_fp16[start:end].copy_(block_cpu.to(device).half())  # GPU float16
-        del block_cpu, slice_np
+#     # Stream in chunk_size rows at a time
+#     for start in tqdm(
+#         range(0, N, chunk_size), desc="Converting numpy embeddings to FP16 GPU"
+#     ):
+#         end = min(start + chunk_size, N)
+#         slice_np = embeddings[start:end]
+#         if not slice_np.flags.writeable:
+#             slice_np = slice_np.copy()
+#         block_cpu = torch.from_numpy(slice_np)  # CPU float32
+#         emb_fp16[start:end].copy_(block_cpu.to(device).half())  # GPU float16
+#         del block_cpu, slice_np
 
-    # Wait for all copies to finish
-    if device == "cuda":
-        torch.cuda.synchronize()
+#     # Wait for all copies to finish
+#     if device == "cuda":
+#         torch.cuda.synchronize()
 
-    log.append(f"[After streaming] GPU mem used: {get_gpu_mem(log)} MiB")
+#     log.append(f"[After streaming] GPU mem used: {get_gpu_mem(log)} MiB")
 
-    return emb_fp16
+#     return emb_fp16
 
 
 def read_contigs(

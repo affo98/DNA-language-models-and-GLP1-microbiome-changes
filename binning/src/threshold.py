@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 import torch
 
-from src.utils import get_available_device, Logger, to_fp16_tensor, get_gpu_mem
+from src.utils import get_available_device, Logger, get_gpu_mem
 
 
 class Threshold:
@@ -98,7 +98,6 @@ class Threshold:
 
             centroid_similarities = torch.bmm(top_k_embeddings, centroids).squeeze(-1)
             centroid_similarities_flat = centroid_similarities.flatten()
-            print(centroid_similarities_flat)
 
             global_min = torch.min(global_min, centroid_similarities_flat.min())
             global_max = torch.max(global_max, centroid_similarities_flat.max())

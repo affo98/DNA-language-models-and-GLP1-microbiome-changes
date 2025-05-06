@@ -6,7 +6,7 @@ import numpy as np
 from tqdm import tqdm
 
 
-from src.utils import get_available_device, Logger, to_fp16_tensor, get_gpu_mem
+from src.utils import get_available_device, Logger, get_gpu_mem
 
 
 class KMediod:
