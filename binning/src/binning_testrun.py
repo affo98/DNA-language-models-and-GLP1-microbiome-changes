@@ -19,12 +19,35 @@ from src.clustering import KMediod
 from src.threshold import Threshold
 
 
+def generate_synthetic_embeddings(embeddings, n_samples):
+    """
+    Generate synthetic embeddings that follow the distribution
+    of the original embeddings.
+    """
+    # Compute the empirical mean and covariance of a sample of embeddings
+    sample = embeddings[
+        np.random.choice(
+            len(embeddings), size=min(100_000, len(embeddings)), replace=False
+        )
+    ]
+    mean = np.mean(sample, axis=0)
+    cov = np.cov(sample, rowvar=False)
+
+    # Sample new embeddings from a multivariate normal distribution
+    synthetic = np.random.multivariate_normal(mean, cov, size=n_samples)
+
+    # Normalize to match the original embeddings' norm
+    synthetic = normalize(synthetic.astype(np.float32))
+
+    return synthetic
+
+
 def main():
     save_path = "./binning_testrun/"
     os.makedirs(save_path, exist_ok=True)
 
-    embeddings_file = "./dnaberts_metahit.npz"
-    # embeddings_file = f"{save_path}embeddings.npy"
+    # embeddings_file = "./dnaberts_metahit.npz"
+    embeddings_file = f"{save_path}embeddings.npy"
 
     N, D = 29_458_443, 768  # number of embeddings × dim #size of T2D-EW contigs
     chunk_size = 5_000  # rows per write/load chunk
@@ -42,34 +65,34 @@ def main():
     log.append(f"[Before any allocation] GPU memory used: {get_gpu_mem(log)} MiB")
 
     # generate normalized embeddings
-    # if not os.path.exists(embeddings_file):
-    #     log.append(f"Generating {embeddings_file} with shape ({N},{D}) ...")
-    #     mm = np.lib.format.open_memmap(
-    #         embeddings_file, mode="w+", dtype=np.float32, shape=(N, D)
-    #     )
+    if not os.path.exists(embeddings_file):
+        log.append(f"Generating {embeddings_file} with shape ({N},{D}) ...")
+        mm = np.lib.format.open_memmap(
+            embeddings_file, mode="w+", dtype=np.float32, shape=(N, D)
+        )
 
-    #     for start in tqdm(range(0, N, chunk_size), desc="Writing chunks"):
-    #         end = min(start + chunk_size, N)
-    #         # Generate random embeddings for the current chunk
-    #         embeddings_chunk = np.random.randn(end - start, D).astype(np.float32)
-    #         embeddings_chunk = normalize(embeddings_chunk)
+        for start in tqdm(range(0, N, chunk_size), desc="Writing chunks"):
+            end = min(start + chunk_size, N)
+            # Generate random embeddings for the current chunk
+            embeddings_chunk = np.random.randn(end - start, D).astype(np.float32)
+            embeddings_chunk = normalize(embeddings_chunk)
 
-    #         mm[start:end] = embeddings_chunk
+            mm[start:end] = embeddings_chunk
 
-    #     # Flush & close
-    #     del mm
-    #     log.append("Done writing embeddings.npy")
+        # Flush & close
+        del mm
+        log.append("Done writing embeddings.npy")
 
-    # embeddings_mm = np.memmap(
-    #     embeddings_file,
-    #     dtype="float32",
-    #     mode="r",
-    #     shape=(N, D),
-    # )
-    # assert embeddings_mm.shape == (N, D), "Shape mismatch loading memmap!"
+    embeddings_mm = np.memmap(
+        embeddings_file,
+        dtype="float32",
+        mode="r",
+        shape=(N, D),
+    )
+    assert embeddings_mm.shape == (N, D), "Shape mismatch loading memmap!"
 
-    embeddings_mm_file = np.load(embeddings_file)
-    embeddings_mm = embeddings_mm_file["embeddings"]
+    # embeddings_mm_file = np.load(embeddings_file)
+    # embeddings_mm = embeddings_mm_file["embeddings"]
 
     # Create contig names
     N = embeddings_mm.shape[0]
