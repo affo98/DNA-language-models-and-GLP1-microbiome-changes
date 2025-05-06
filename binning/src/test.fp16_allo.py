@@ -48,10 +48,12 @@ def to_fp16_tensor(
     # Stream in chunk_size rows at a time
     for start in tqdm(range(0, N, chunk_size)):
         end = min(start + chunk_size, N)
-        # slice from NumPy (memmap or in-memory)
-        block_cpu = torch.from_numpy(embeddings[start:end])  # CPU float32
+        slice_np = embeddings[start:end]
+        if not slice_np.flags.writeable:
+            slice_np = slice_np.copy()
+        block_cpu = torch.from_numpy(slice_np)  # CPU float32
         emb_fp16[start:end].copy_(block_cpu.to(device).half())  # GPU float16
-        del block_cpu
+        del block_cpu, slice_np
 
     # Wait for all copies to finish
     if device.type == "cuda":
