@@ -162,7 +162,6 @@ class Threshold:
                 bins=self.n_bins,
                 min=global_min.item(),
                 max=global_max.item(),
-                device=self.device,
             )
             del topk_embs, centroids, csims, emb_i
             torch.cuda.empty_cache()
@@ -175,7 +174,6 @@ class Threshold:
                 global_min.item(),
                 global_max.item(),
                 steps=self.n_bins,
-                device=self.device,
             )
             .cpu()
             .numpy()
