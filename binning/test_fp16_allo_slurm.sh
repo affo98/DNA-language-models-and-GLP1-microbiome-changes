@@ -9,9 +9,9 @@
 #SBATCH --nodes=1
 #SBATCH --exclude=cn[3-18]
 #SBATCH --exclude=desktop[1-16]
-#SBATCH --time=7-00:00:00
+#SBATCH --time=01:00:00
 #SBATCH --nodelist=cn19
-#SBATCH --gres=gpu:l40s:4
+#SBATCH --gres=gpu:l40s:1
 
 # #SBATCH --partition=scavenge
 # #SBATCH --time=04:00:00
