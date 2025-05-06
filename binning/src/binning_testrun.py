@@ -38,16 +38,22 @@ def main():
 
     log.append(f"[Before any allocation] GPU memory used: {get_gpu_mem(log)} MiB")
 
-    # 1) Generate embeddings.npy if missing, in a memory-safe way#
+    # generate normalized embeddings
     if not os.path.exists(embeddings_file):
         log.append(f"Generating {embeddings_file} with shape ({N},{D}) ...")
         mm = np.lib.format.open_memmap(
             embeddings_file, mode="w+", dtype=np.float32, shape=(N, D)
         )
+
         for start in tqdm(range(0, N, chunk_size), desc="Writing chunks"):
             end = min(start + chunk_size, N)
-            mm[start:end] = np.random.randn(end - start, D).astype(np.float32)
-        # flush & close
+            # Generate random embeddings for the current chunk
+            embeddings_chunk = np.random.randn(end - start, D).astype(np.float32)
+            embeddings_chunk = normalize(embeddings_chunk)
+
+            mm[start:end] = embeddings_chunk
+
+        # Flush & close
         del mm
         log.append("Done writing embeddings.npy")
 
@@ -75,7 +81,6 @@ def main():
     log.append(f"[After allocation of memmap] GPU memory used: {get_gpu_mem(log)} MiB")
 
     embeddings_test = embeddings_test[:1_000_000]
-    embeddings_test = normalize(embeddings_test)
     contig_names_test = contig_names_test[:1_000_000]
 
     thresholder_test = Threshold(
