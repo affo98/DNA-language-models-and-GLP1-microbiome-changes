@@ -30,7 +30,7 @@ def main():
     MIN_BIN_SIZE = 2  # changed from 10 to 2, because bins less than MINSIZE_BINS (250000) will be removed in postprocessing.
     NUM_STEPS = 3
     MAX_ITER = 2000  # increased from 1000
-    KNN_K = 300
+    KNN_K = 10
     KNN_P = 25
     CONVERT_MILLION_EMB_GPU_SECONDS = 6
 
