@@ -74,6 +74,7 @@ def main():
 
     # ------- Test heavy memory operations -------
     embeddings_test = embeddings_mm
+    print(embeddings_test[:2])
     log.append(f"[After allocation of memmap] GPU memory used: {get_gpu_mem(log)} MiB")
 
     embeddings_test = embeddings_test[:1_000_00]
