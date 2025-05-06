@@ -72,6 +72,7 @@ def main():
     log.append(f"[After allocation of memmap] GPU memory used: {get_gpu_mem(log)} MiB")
 
     embeddings_test = embeddings_test[:1_000_000]
+    contig_names_test = contig_names_test[:1_000_000]
 
     thresholder_test = Threshold(
         embeddings_test,
