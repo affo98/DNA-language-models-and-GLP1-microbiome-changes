@@ -1,20 +1,39 @@
 #!/bin/bash
 
 #SBATCH --job-name=t2dew # Job name
-#SBATCH --output=t2dew%j.out
-#SBATCH --error=slurm%j.err 
-
 #SBATCH --partition=purrlab_students
 #SBATCH --exclusive
 #SBATCH --nodes=1
+#SBATCH --time=7-00:00:00
+
+
+#----Pick one of the three below options by uncommenting----
+
+#1. For 4 L40s
+#SBATCH --output=t2dew_l40_%j.out
+#SBATCH --error=slurm_l40_%j.err 
 #SBATCH --exclude=cn[3-18]
 #SBATCH --exclude=desktop[1-16]
-#SBATCH --time=7-00:00:00
 #SBATCH --nodelist=cn19
 #SBATCH --gres=gpu:l40s:4
 
+
+#2. For small testing
+#SBATCH --output=t2dew_small_%j.out
+#SBATCH --error=slurm_small_%j.err 
 # #SBATCH --partition=scavenge
 # #SBATCH --time=04:00:00
+
+
+#3. Using 2x H100 
+#SBATCH --output=t2dew_h100_%j.out
+#SBATCH --error=slurm_h100_%j.err 
+# #SBATCH --exclude=cn[1-10]
+# #SBATCH --exclude=cn[12-19]
+# #SBATCH --exclude=desktop[1-16]
+# #SBATCH --nodelist=cn11                        
+# #SBATCH --gres=gpu:h100:2
+
 
 
 # 1. Download & install Miniconda3 if missing
