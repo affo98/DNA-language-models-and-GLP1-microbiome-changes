@@ -40,18 +40,18 @@ class Threshold:
 
         device, gpu_count = get_available_device()
 
-        log.append(
-            f"[Before embeddings GPU16 allocation]; {get_gpu_mem(log)} MIB"
-            f"Converting embeddings to GPU16. Estimated time: "
-            f"{embeddings.shape[0] / 1_000_000 * convert_million_emb_gpu_seconds:.1f} seconds",
-        )
+        # log.append(
+        #     f"[Before embeddings GPU16 allocation]; {get_gpu_mem(log)} MIB"
+        #     f"Converting embeddings to GPU16. Estimated time: "
+        #     f"{embeddings.shape[0] / 1_000_000 * convert_million_emb_gpu_seconds:.1f} seconds",
+        # )
 
-        embeddings_torch = torch.from_numpy(embeddings).half().to(device)
-        log.append(
-            f"[After embedding GPU16 allocation] GPU mem used: {get_gpu_mem(log)} MiB"
-        )
+        # embeddings_torch = torch.from_numpy(embeddings).half().to(device)
+        # log.append(
+        #     f"[After embedding GPU16 allocation] GPU mem used: {get_gpu_mem(log)} MiB"
+        # )
 
-        self.embeddings = embeddings_torch
+        self.embeddings_np = embeddings
         self.n_bins = n_bins
         self.block_size = block_size
         self.save_path = save_path
@@ -62,85 +62,121 @@ class Threshold:
         self.log.append(f"Using {device} for Threshold calculations")
 
     def get_knn_threshold(self, knn_k, knn_p) -> float:
-
         self.knn_k = knn_k
         self.knn_p = knn_p
 
-        n_samples = self.embeddings.shape[0]
+        n_samples, _ = self.embeddings_np.shape
         bin_vector = torch.zeros(self.n_bins, dtype=torch.float32, device=self.device)
+        global_min = torch.tensor(1.0, dtype=torch.float32, device=self.device)
+        global_max = torch.tensor(-1.0, dtype=torch.float32, device=self.device)
 
-        # first, find min/max
-        global_min = torch.tensor([1], dtype=torch.float32, device=self.device)
-        global_max = torch.tensor([-1], dtype=torch.float32, device=self.device)
+        # two-dimensional chunking for global min/max using top-k centroids
         for i in tqdm(
             range(0, n_samples, self.block_size), desc="Calculating global min/max"
         ):
-            block_start = i
-            block_end = min(i + self.block_size, n_samples)
-            block_embeddings = self.embeddings[block_start:block_end]
+            i_end = min(i + self.block_size, n_samples)
+            emb_i = torch.from_numpy(self.embeddings_np[i:i_end]).to(self.device)
+            # compute similarities row-wise in j-chunks
+            for j in range(0, n_samples, self.block_size):
+                j_end = min(j + self.block_size, n_samples)
+                emb_j = torch.from_numpy(self.embeddings_np[j:j_end]).to(self.device)
+                sims_block = torch.mm(emb_i, emb_j.T).float()
 
-            block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
-            top_k_similarities, top_k_indices = torch.topk(
-                block_sim_matrix, self.knn_k, dim=-1
-            )
+                # collect full row sims in memory-chunked fashion
+                # for each row in this block, get top-k indices across all j-chunks
+                # accumulate partial topk per row
+                if j == 0:
+                    partial_vals, partial_idx = torch.topk(
+                        sims_block, self.knn_k, dim=1
+                    )
+                else:
+                    vals, idx = torch.topk(sims_block, self.knn_k, dim=1)
+                    combined_vals = torch.cat([partial_vals, vals], dim=1)
+                    combined_idx = torch.cat([partial_idx, idx + j], dim=1)
+                    partial_vals, sel = torch.topk(combined_vals, self.knn_k, dim=1)
+                    partial_idx = combined_idx.gather(1, sel)
+                del sims_block, emb_j
+                torch.cuda.empty_cache()
 
-            top_k_embeddings = self.embeddings[
-                top_k_indices
-            ]  # shape: (block_size, knn_k, embedding_dim)
-            centroids = top_k_embeddings.mean(
-                dim=1, keepdim=True
-            )  # shape: (block_size, 1, embedding_dim)
-
-            centroids = centroids.transpose(
+            # now partial_idx holds top-k global neighbor indices for each emb_i row
+            topk_embs = torch.from_numpy(
+                self.embeddings_np[partial_idx.cpu().numpy()]
+            ).to(
+                self.device
+            )  # shape (bs_i, knn_k, D)
+            centroids = topk_embs.mean(dim=1, keepdim=True).transpose(
                 1, 2
-            )  # Shape: (block_size, embedding_dim, 1)
+            )  # (bs_i, 1, D)→(bs_i, D, 1)
+            csims = torch.bmm(topk_embs, centroids).squeeze(-1).float().flatten()
+            global_min = torch.min(global_min, csims.min())
+            global_max = torch.max(global_max, csims.max())
 
-            centroid_similarities = torch.bmm(top_k_embeddings, centroids).squeeze(-1)
-            centroid_similarities_flat = centroid_similarities.flatten().to(
-                dtype=torch.float32
-            )
+            del topk_embs, centroids, csims, emb_i
+            torch.cuda.empty_cache()
 
-            global_min = torch.min(global_min, centroid_similarities_flat.min())
-            global_max = torch.max(global_max, centroid_similarities_flat.max())
-
-        # loop through again to get histogram
+        # histogram pass (same top-k centroid sim logic)
         for i in tqdm(range(0, n_samples, self.block_size), desc="Calculating knns"):
-            block_start = i
-            block_end = min(i + self.block_size, n_samples)
-            block_embeddings = self.embeddings[block_start:block_end]
+            i_end = min(i + self.block_size, n_samples)
+            emb_i = torch.from_numpy(self.embeddings_np[i:i_end]).to(self.device)
 
-            block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
-            top_k_similarities, top_k_indices = torch.topk(
-                block_sim_matrix, self.knn_k, dim=-1
-            )
+            # compute top-k indices per row same as above
+            for j in range(0, n_samples, self.block_size):
+                j_end = min(j + self.block_size, n_samples)
+                emb_j = torch.from_numpy(self.embeddings_np[j:j_end]).to(self.device)
+                sims_block = torch.mm(emb_i, emb_j.T).float()
+                if j == 0:
+                    partial_vals, partial_idx = torch.topk(
+                        sims_block, self.knn_k, dim=1
+                    )
+                else:
+                    vals, idx = torch.topk(sims_block, self.knn_k, dim=1)
+                    combined_vals = torch.cat([partial_vals, vals], dim=1)
+                    combined_idx = torch.cat([partial_idx, idx + j], dim=1)
+                    partial_vals, sel = torch.topk(combined_vals, self.knn_k, dim=1)
+                    partial_idx = combined_idx.gather(1, sel)
+                del sims_block, emb_j
+                torch.cuda.empty_cache()
 
-            top_k_embeddings = self.embeddings[
-                top_k_indices
-            ]  # shape: (block_size, knn_k, embedding_dim)
-            centroids = top_k_embeddings.mean(
-                dim=1, keepdim=True
-            )  # shape: (block_size, 1, embedding_dim)
-            centroids = centroids.transpose(
+            # gather embeddings and compute centroid sims, update histogram
+            for row in range(partial_idx.size(0)):
+                idxs = partial_idx[row].cpu().numpy()
+                topk_emb = (
+                    torch.from_numpy(self.embeddings_np[idxs]).half().to(self.device)
+                )
+                centroid = topk_emb.mean(dim=0, keepdim=True).transpose(1, 2)
+                csims = torch.bmm(topk_emb.unsqueeze(0), centroid).squeeze().float()
+
+            topk_embs = torch.from_numpy(
+                self.embeddings_np[partial_idx.cpu().numpy()]
+            ).to(
+                self.device
+            )  # shape (bs_i, knn_k, D)
+            centroids = topk_embs.mean(dim=1, keepdim=True).transpose(
                 1, 2
-            )  # Shape: (block_size, embedding_dim, 1)
+            )  # (bs_i, 1, D)→(bs_i, D, 1)
 
-            centroid_similarities = torch.bmm(top_k_embeddings, centroids).squeeze(-1)
-            centroid_similarities_flat = centroid_similarities.flatten().to(
-                dtype=torch.float32
-            )
+            csims = torch.bmm(topk_embs, centroids).squeeze(-1).float().flatten()
 
             bin_vector += torch.histc(
-                centroid_similarities_flat,
+                csims,
                 bins=self.n_bins,
                 min=global_min.item(),
                 max=global_max.item(),
+                device=self.device,
             )
+            del topk_embs, centroids, csims, emb_i
+            torch.cuda.empty_cache()
 
-        bin_vector = bin_vector / bin_vector.sum()
+        # finalize
+        bin_vector /= bin_vector.sum()
         bin_vector = bin_vector.cpu().numpy()
-
         pairsim_vector = (
-            torch.linspace(global_min.item(), global_max.item(), self.n_bins)
+            torch.linspace(
+                global_min.item(),
+                global_max.item(),
+                steps=self.n_bins,
+                device=self.device,
+            )
             .cpu()
             .numpy()
         )
@@ -158,12 +194,112 @@ class Threshold:
         self.save_histogram(knn=True)
         self.save_to_json()
 
-        # cleanup
-        del self.embeddings
-        del embeddings_torch
         torch.cuda.empty_cache()
+        return self.knn_threshold
 
-        return knn_threshold
+    # def get_knn_threshold(self, knn_k, knn_p) -> float:
+
+    #     self.knn_k = knn_k
+    #     self.knn_p = knn_p
+
+    #     n_samples = self.embeddings_np.shape[0]
+    #     bin_vector = torch.zeros(self.n_bins, dtype=torch.float32, device=self.device)
+
+    #     # first, find min/max
+    #     global_min = torch.tensor([1], dtype=torch.float32, device=self.device)
+    #     global_max = torch.tensor([-1], dtype=torch.float32, device=self.device)
+    #     for i in tqdm(
+    #         range(0, n_samples, self.block_size), desc="Calculating global min/max"
+    #     ):
+    #         block_start = i
+    #         block_end = min(i + self.block_size, n_samples)
+    #         block_embeddings = self.embeddings_np[block_start:block_end]
+
+    #         block_sim_matrix = torch.mm(block_embeddings, self.embeddings_np.T)
+    #         top_k_similarities, top_k_indices = torch.topk(
+    #             block_sim_matrix, self.knn_k, dim=-1
+    #         )
+
+    #         top_k_embeddings = self.embeddings_np[
+    #             top_k_indices
+    #         ]  # shape: (block_size, knn_k, embedding_dim)
+    #         centroids = top_k_embeddings.mean(
+    #             dim=1, keepdim=True
+    #         )  # shape: (block_size, 1, embedding_dim)
+
+    #         centroids = centroids.transpose(
+    #             1, 2
+    #         )  # Shape: (block_size, embedding_dim, 1)
+
+    #         centroid_similarities = torch.bmm(top_k_embeddings, centroids).squeeze(-1)
+    #         centroid_similarities_flat = centroid_similarities.flatten().to(
+    #             dtype=torch.float32
+    #         )
+
+    #         global_min = torch.min(global_min, centroid_similarities_flat.min())
+    #         global_max = torch.max(global_max, centroid_similarities_flat.max())
+
+    #     # loop through again to get histogram
+    #     for i in tqdm(range(0, n_samples, self.block_size), desc="Calculating knns"):
+    #         block_start = i
+    #         block_end = min(i + self.block_size, n_samples)
+    #         block_embeddings = self.embeddings_np[block_start:block_end]
+
+    #         block_sim_matrix = torch.mm(block_embeddings, self.embeddings_np.T)
+    #         top_k_similarities, top_k_indices = torch.topk(
+    #             block_sim_matrix, self.knn_k, dim=-1
+    #         )
+
+    #         top_k_embeddings = self.embeddings_np[
+    #             top_k_indices
+    #         ]  # shape: (block_size, knn_k, embedding_dim)
+    #         centroids = top_k_embeddings.mean(
+    #             dim=1, keepdim=True
+    #         )  # shape: (block_size, 1, embedding_dim)
+    #         centroids = centroids.transpose(
+    #             1, 2
+    #         )  # Shape: (block_size, embedding_dim, 1)
+
+    #         centroid_similarities = torch.bmm(top_k_embeddings, centroids).squeeze(-1)
+    #         centroid_similarities_flat = centroid_similarities.flatten().to(
+    #             dtype=torch.float32
+    #         )
+
+    #         bin_vector += torch.histc(
+    #             centroid_similarities_flat,
+    #             bins=self.n_bins,
+    #             min=global_min.item(),
+    #             max=global_max.item(),
+    #         )
+
+    #     bin_vector = bin_vector / bin_vector.sum()
+    #     bin_vector = bin_vector.cpu().numpy()
+
+    #     pairsim_vector = (
+    #         torch.linspace(global_min.item(), global_max.item(), self.n_bins)
+    #         .cpu()
+    #         .numpy()
+    #     )
+
+    #     cumulative_sum = np.cumsum(bin_vector)
+    #     index = np.argmax(cumulative_sum >= (self.knn_p / 100))
+    #     knn_threshold = pairsim_vector[index]
+
+    #     self.knn_threshold, self.pairsim_vector, self.bin_vector = (
+    #         knn_threshold,
+    #         pairsim_vector,
+    #         bin_vector,
+    #     )
+
+    #     self.save_histogram(knn=True)
+    #     self.save_to_json()
+
+    #     # cleanup
+    #     del self.embeddings_np
+    #     del embeddings_torch
+    #     torch.cuda.empty_cache()
+
+    #     return knn_threshold
 
     def save_to_json(self) -> None:
         """Saves the knn_threshold, pairsim_vector, and bin_vector to a JSON file."""
@@ -228,7 +364,7 @@ class Threshold:
     #     Calculates pairwise similarities of embeddings and returns a histogram of similarities.
     #     """
 
-    #     n_samples = self.embeddings.shape[0]
+    #     n_samples = self.embeddings_np.shape[0]
     #     bin_vector = torch.zeros(self.n_bins, dtype=torch.float32, device=self.device)
 
     #     # loop through to get global min/max pairwise similarity
@@ -239,9 +375,9 @@ class Threshold:
     #     ):
     #         block_start = i
     #         block_end = min(i + self.block_size, n_samples)
-    #         block_embeddings = self.embeddings[block_start:block_end]
+    #         block_embeddings = self.embeddings_np[block_start:block_end]
 
-    #         block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
+    #         block_sim_matrix = torch.mm(block_embeddings, self.embeddings_np.T)
     #         local_min = block_sim_matrix.flatten().min()
     #         local_max = block_sim_matrix.flatten().max()
     #         global_min = torch.min(global_min, local_min)
@@ -253,9 +389,9 @@ class Threshold:
     #     ):
     #         block_start = i
     #         block_end = min(i + self.block_size, n_samples)
-    #         block_embeddings = self.embeddings[block_start:block_end]
+    #         block_embeddings = self.embeddings_np[block_start:block_end]
 
-    #         block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
+    #         block_sim_matrix = torch.mm(block_embeddings, self.embeddings_np.T)
 
     #         block_sim_flatten = block_sim_matrix.flatten()
 
