@@ -26,18 +26,18 @@ def main():
     N_BINS = 1000
     BLOCK_SIZE = 20
     model_name = "binning_testrun"
-    log = Logger(os.path.join((save_path, "log.txt")))
+    log = Logger(os.path.join(save_path, "log.txt"))
     MIN_BIN_SIZE = 2  # changed from 10 to 2, because bins less than MINSIZE_BINS (250000) will be removed in postprocessing.
     NUM_STEPS = 3
     MAX_ITER = 2000  # increased from 1000
     KNN_K = 300
     KNN_P = 25
 
-    print(f"[Before any allocation] GPU memory used: {get_gpu_mem(log)} MiB")
+    log.append(f"[Before any allocation] GPU memory used: {get_gpu_mem(log)} MiB")
 
     # 1) Generate embeddings.npy if missing, in a memory-safe way#
     if not os.path.exists(embeddings_file):
-        print(f"Generating {embeddings_file} with shape ({N},{D}) ...")
+        log.append(f"Generating {embeddings_file} with shape ({N},{D}) ...")
         mm = np.lib.format.open_memmap(
             embeddings_file, mode="w+", dtype=np.float32, shape=(N, D)
         )
@@ -46,7 +46,7 @@ def main():
             mm[start:end] = np.random.randn(end - start, D).astype(np.float32)
         # flush & close
         del mm
-        print("Done writing embeddings.npy")
+        log.append("Done writing embeddings.npy")
 
     # Load embeddings
     embeddings_mm = np.load(embeddings_file, mmap_mode="r")
