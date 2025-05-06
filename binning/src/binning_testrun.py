@@ -23,7 +23,7 @@ def main():
     save_path = "./binning_testrun/"
     os.makedirs(save_path, exist_ok=True)
 
-    embeddings_file = "./dnaberts.npz"
+    embeddings_file = "./dnaberts_metahit.npz"
     embeddings_file = f"{save_path}embeddings.npy"
     N, D = 29_458_443, 768  # number of embeddings × dim #size of T2D-EW contigs
     chunk_size = 5_000  # rows per write/load chunk
@@ -34,7 +34,7 @@ def main():
     MIN_BIN_SIZE = 2  # changed from 10 to 2, because bins less than MINSIZE_BINS (250000) will be removed in postprocessing.
     NUM_STEPS = 3
     MAX_ITER = 2000  # increased from 1000
-    KNN_K = 2
+    KNN_K = 400
     KNN_P = 25
     CONVERT_MILLION_EMB_GPU_SECONDS = 6
 
