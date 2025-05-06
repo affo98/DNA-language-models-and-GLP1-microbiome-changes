@@ -66,11 +66,11 @@ def to_fp16_tensor(
 
     N, D = embeddings.shape
     log.append(f"Using device: {device}")
-    log.append(f"[Before allocation] GPU mem used: {get_gpu_mem()} MiB")
+    log.append(f"[Before allocation] GPU mem used: {get_gpu_mem(log)} MiB")
 
     # Allocate the target FP16 tensor on GPU
     emb_fp16 = torch.empty((N, D), dtype=torch.float16, device=device)
-    log.append(f"[After empty allococation] GPU mem used: {get_gpu_mem()} MiB")
+    log.append(f"[After empty allococation] GPU mem used: {get_gpu_mem(log)} MiB")
 
     # Stream in chunk_size rows at a time
     for start in tqdm(range(0, N, chunk_size)):
@@ -86,7 +86,7 @@ def to_fp16_tensor(
     if device == "cuda":
         torch.cuda.synchronize()
 
-    log.append(f"[After streaming] GPU mem used: {get_gpu_mem()} MiB")
+    log.append(f"[After streaming] GPU mem used: {get_gpu_mem(log)} MiB")
 
     return emb_fp16
 
