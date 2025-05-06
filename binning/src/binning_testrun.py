@@ -8,6 +8,8 @@ import sys
 import os
 from tqdm import tqdm
 
+from sklearn.preprocessing import normalize
+
 
 sys.path.insert(0, os.path.abspath(os.path.join(__file__, "..")))
 sys.path.insert(0, os.path.abspath(os.path.join(__file__, "..", "..")))
@@ -68,7 +70,7 @@ def main():
     )
 
     # ------- Test heavy memory operations -------
-    embeddings_test = embeddings_mm
+    embeddings_test = normalize(embeddings_mm)
     log.append(f"[After allocation of memmap] GPU memory used: {get_gpu_mem(log)} MiB")
 
     embeddings_test = embeddings_test[:1_000_000]
