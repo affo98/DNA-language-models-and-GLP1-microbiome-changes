@@ -10,9 +10,9 @@ import sys
 import os
 from tqdm import tqdm
 
-from utils import Logger, get_gpu_mem
-from clustering import KMediod
-from threshold import Threshold
+from src.utils import Logger, get_gpu_mem
+from src.clustering import KMediod
+from src.threshold import Threshold
 
 
 def main():
