@@ -70,7 +70,7 @@ class Threshold:
         global_min = torch.tensor(1.0, dtype=torch.float32, device=self.device)
         global_max = torch.tensor(-1.0, dtype=torch.float32, device=self.device)
 
-        # two-dimensional chunking for global min/max using top-k centroids
+        # ---------------- Global min/max pass ----------------
         for i in tqdm(
             range(0, n_samples, self.block_size), desc="Calculating global min/max"
         ):
@@ -114,7 +114,7 @@ class Threshold:
             del topk_embs, centroids, csims, emb_i
             torch.cuda.empty_cache()
 
-        # histogram pass (same top-k centroid sim logic)
+        # ---------------- Histogram pass ----------------
         for i in tqdm(range(0, n_samples, self.block_size), desc="Calculating knns"):
             i_end = min(i + self.block_size, n_samples)
             emb_i = torch.from_numpy(self.embeddings_np[i:i_end]).to(self.device)
@@ -138,13 +138,13 @@ class Threshold:
                 torch.cuda.empty_cache()
 
             # gather embeddings and compute centroid sims, update histogram
-            for row in range(partial_idx.size(0)):
-                idxs = partial_idx[row].cpu().numpy()
-                topk_emb = (
-                    torch.from_numpy(self.embeddings_np[idxs]).half().to(self.device)
-                )
-                centroid = topk_emb.mean(dim=0, keepdim=True).transpose(1, 2)
-                csims = torch.bmm(topk_emb.unsqueeze(0), centroid).squeeze().float()
+            # for row in range(partial_idx.size(0)):
+            #     idxs = partial_idx[row].cpu().numpy()
+            #     topk_emb = (
+            #         torch.from_numpy(self.embeddings_np[idxs]).half().to(self.device)
+            #     )
+            #     centroid = topk_emb.mean(dim=0, keepdim=True).transpose(1, 2)
+            #     csims = torch.bmm(topk_emb.unsqueeze(0), centroid).squeeze().float()
 
             topk_embs = torch.from_numpy(
                 self.embeddings_np[partial_idx.cpu().numpy()]
@@ -167,7 +167,7 @@ class Threshold:
             del topk_embs, centroids, csims, emb_i
             torch.cuda.empty_cache()
 
-        # finalize
+        # finalize histogram
         bin_vector /= bin_vector.sum()
         bin_vector = bin_vector.cpu().numpy()
         pairsim_vector = (
