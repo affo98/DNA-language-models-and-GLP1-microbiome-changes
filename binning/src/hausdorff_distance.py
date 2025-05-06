@@ -45,6 +45,7 @@ def read_clusters(input_path: str, log: Logger) -> dict[str, set[str]]:
     return clusters_dict
 
 
+# see new func in UTILS ----------------------------------------------------------------
 def read_embeddings(
     input_path: str, model_name, log: Logger
 ) -> tuple[np.memmap | np.ndarray, list[str]]:
