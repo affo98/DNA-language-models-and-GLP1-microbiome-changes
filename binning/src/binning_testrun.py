@@ -21,7 +21,7 @@ def main():
     save_path = "./binning_testrun/"
     os.makedirs(save_path, exist_ok=True)
     embeddings_file = f"{save_path}embeddings.npy"
-    N, D = 29_458_443, 768  # number of embeddings × dim
+    N, D = 30_000_000, 768  # number of embeddings × dim
     chunk_size = 5_000  # rows per write/load chunk
     N_BINS = 1000
     BLOCK_SIZE = 20
