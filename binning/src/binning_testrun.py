@@ -19,29 +19,6 @@ from src.clustering import KMediod
 from src.threshold import Threshold
 
 
-def generate_synthetic_embeddings(embeddings, n_samples):
-    """
-    Generate synthetic embeddings that follow the distribution
-    of the original embeddings.
-    """
-    # Compute the empirical mean and covariance of a sample of embeddings
-    sample = embeddings[
-        np.random.choice(
-            len(embeddings), size=min(100_000, len(embeddings)), replace=False
-        )
-    ]
-    mean = np.mean(sample, axis=0)
-    cov = np.cov(sample, rowvar=False)
-
-    # Sample new embeddings from a multivariate normal distribution
-    synthetic = np.random.multivariate_normal(mean, cov, size=n_samples)
-
-    # Normalize to match the original embeddings' norm
-    synthetic = normalize(synthetic.astype(np.float32))
-
-    return synthetic
-
-
 def main():
     save_path = "./binning_testrun/"
     os.makedirs(save_path, exist_ok=True)
