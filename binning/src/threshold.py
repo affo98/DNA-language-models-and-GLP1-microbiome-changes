@@ -71,8 +71,8 @@ class Threshold:
         bin_vector = torch.zeros(self.n_bins, dtype=torch.float32, device=self.device)
 
         # first, find min/max
-        global_min = torch.tensor([1], dtype=torch.float32, device=self.device)
-        global_max = torch.tensor([-1], dtype=torch.float32, device=self.device)
+        global_min = torch.tensor([1], dtype=torch.float16, device=self.device)
+        global_max = torch.tensor([-1], dtype=torch.float16, device=self.device)
         for i in tqdm(
             range(0, n_samples, self.block_size), desc="Calculating global min/max"
         ):
@@ -126,9 +126,7 @@ class Threshold:
             )  # Shape: (block_size, embedding_dim, 1)
 
             centroid_similarities = torch.bmm(top_k_embeddings, centroids).squeeze(-1)
-            centroid_similarities_flat = centroid_similarities.flatten().to(
-                torch.float32
-            )
+            centroid_similarities_flat = centroid_similarities.flatten()
 
             bin_vector += torch.histc(
                 centroid_similarities_flat,
