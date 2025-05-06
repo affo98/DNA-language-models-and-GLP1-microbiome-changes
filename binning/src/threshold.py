@@ -99,6 +99,7 @@ class Threshold:
                 torch.cuda.empty_cache()
 
             # now partial_idx holds top-k global neighbor indices for each emb_i row
+            print("Partial IDx SHape: ", partial_idx.shape)
             topk_embs = torch.from_numpy(
                 self.embeddings_np[partial_idx.cpu().numpy()]
             ).to(
@@ -187,6 +188,7 @@ class Threshold:
         self.save_histogram(knn=True)
         self.save_to_json()
 
+        del partial_index
         torch.cuda.empty_cache()
         return self.knn_threshold
 
