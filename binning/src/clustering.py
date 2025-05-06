@@ -81,6 +81,7 @@ class KMediod:
         if not 0 < min_similarity < 1:
             raise ValueError("Minimum similarity must be between 0 and 1")
 
+        N, _ = self.embeddings_np.shape
         self.log.append("=========================================\n")
         self.log.append(f"Running KMedoid on {N} contigs\n")
         self.log.append("=========================================\n")
@@ -88,7 +89,6 @@ class KMediod:
             f"Using {self.device} and threshold {min_similarity} for k-medoid clustering"
         )
 
-        N, _ = self.embeddings_np.shape
         density_vector = torch.zeros(N, device=self.device)
         seeds = []
         seed_labels = []
