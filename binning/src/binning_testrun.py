@@ -26,7 +26,7 @@ def main():
     N_BINS = 1000
     BLOCK_SIZE = 20
     model_name = "binning_testrun"
-    log = Logger(save_path)
+    log = Logger(os.path.join((save_path, "log.txt")))
     MIN_BIN_SIZE = 2  # changed from 10 to 2, because bins less than MINSIZE_BINS (250000) will be removed in postprocessing.
     NUM_STEPS = 3
     MAX_ITER = 2000  # increased from 1000
