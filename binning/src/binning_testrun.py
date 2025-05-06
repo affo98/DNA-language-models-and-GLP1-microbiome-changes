@@ -22,6 +22,8 @@ from src.threshold import Threshold
 def main():
     save_path = "./binning_testrun/"
     os.makedirs(save_path, exist_ok=True)
+
+    embeddings_file = "./dnaberts.npz"
     embeddings_file = f"{save_path}embeddings.npy"
     N, D = 29_458_443, 768  # number of embeddings × dim #size of T2D-EW contigs
     chunk_size = 5_000  # rows per write/load chunk
@@ -57,13 +59,16 @@ def main():
         del mm
         log.append("Done writing embeddings.npy")
 
-    embeddings_mm = np.memmap(
-        embeddings_file,
-        dtype="float32",
-        mode="r",
-        shape=(N, D),
-    )
-    assert embeddings_mm.shape == (N, D), "Shape mismatch loading memmap!"
+    # embeddings_mm = np.memmap(
+    #     embeddings_file,
+    #     dtype="float32",
+    #     mode="r",
+    #     shape=(N, D),
+    # )
+    # assert embeddings_mm.shape == (N, D), "Shape mismatch loading memmap!"
+
+    embeddings_mm = np.load(embeddings_file, mmap_mode="r")
+    embeddings_mm = embeddings_mm["embeddings"]
 
     # Create contig names
     N = embeddings_mm.shape[0]
