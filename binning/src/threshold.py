@@ -159,6 +159,7 @@ class Threshold:
 
         # cleanup
         del self.embeddings
+        del embeddings_torch
         torch.cuda.empty_cache()
 
         return knn_threshold
