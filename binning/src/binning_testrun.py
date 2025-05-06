@@ -70,10 +70,12 @@ def main():
     )
 
     # ------- Test heavy memory operations -------
-    embeddings_test = normalize(embeddings_mm)
+    # embeddings_test = normalize(embeddings_mm)
+    embeddings_test = embeddings_mm
     log.append(f"[After allocation of memmap] GPU memory used: {get_gpu_mem(log)} MiB")
 
     embeddings_test = embeddings_test[:1_000_000]
+    embeddings_test = normalize(embeddings_test)
     contig_names_test = contig_names_test[:1_000_000]
 
     thresholder_test = Threshold(
