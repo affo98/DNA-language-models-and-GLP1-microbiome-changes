@@ -187,7 +187,7 @@ class KMediod:
 
         # clean-up
         del self.embeddings
-        del.embeddings_torch
+        del embeddings_torch
         torch.cuda.empty_cache()
 
         return predictions, contig_names
