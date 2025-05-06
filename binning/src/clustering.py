@@ -94,7 +94,7 @@ class KMediod:
         seed_labels = []
         cluster_id = 0
 
-        # compute initial density via 2D chunking, load blocks on demand
+        # compute initial density via 2D chunking
         for i in tqdm(range(0, N, self.block_size), desc="Density i-loop"):
             i_end = min(i + self.block_size, N)
             block_i_np = self.embeddings_np[i:i_end]
@@ -150,17 +150,6 @@ class KMediod:
                 emb_candidates = torch.from_numpy(emb_candicates_np).to(self.device)
                 seed = torch.mean(emb_candidates, dim=0)
 
-                # load candidate embeddings in chunks to update seed
-                # emb_cats = []
-                # for c0 in range(0, len(candidates), self.block_size):
-                #     c1 = min(len(candidates), c0 + self.block_size)
-                #     cat_np = self.embeddings_np[candidates[c0:c1]]
-                #     cat = torch.from_numpy(cat_np).half().to(self.device)
-                #     emb_cats.append(cat)
-                # seed = torch.mean(torch.cat(emb_cats), dim=0)
-                # del emb_cats, sim_vec
-                # torch.cuda.empty_cache()
-
             predictions[candidates] = cluster_id
             seeds.append(seed.cpu().numpy())
             seed_labels.append(cluster_id)
@@ -208,12 +197,10 @@ class KMediod:
 
         predictions = predictions.cpu().numpy()
         assert (
-            len(predictions) == len(self.embeddings) == len(self.contig_names)
-        ), f"Len of predictions {len(predictions)} does not match embeddings {len(self.embeddings)} and contig_names {len(self.contig_names)}"
+            len(predictions) == len(self.embeddings_np) == len(self.contig_names)
+        ), f"Len of predictions {len(predictions)} does not match embeddings {len(self.embeddings_np)} and contig_names {len(self.contig_names)}"
 
         predictions, contig_names = self.remove_unassigned_sequences(predictions)
-        self.save_clusters(knn_k, knn_p, predictions, contig_names)
-
         self.save_clusters(knn_k, knn_p, predictions, contig_names)
 
         # clean-up
