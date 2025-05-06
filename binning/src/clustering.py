@@ -74,6 +74,8 @@ class KMediod:
         self.device = device
         self.block_size = block_size
 
+        self.log.append(f"Using {device} for K-medoid Clustering")
+
     def fit(self, min_similarity: float, knn_k: int, knn_p: float) -> np.array:
         """Runs the Iterative k-mediod algorithm, and saves the output predictions."""
 
