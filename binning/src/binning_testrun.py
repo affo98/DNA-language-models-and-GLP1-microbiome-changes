@@ -83,8 +83,8 @@ def main():
     log.append(f"[After allocation of memmap] GPU memory used: {get_gpu_mem()} MiB")
     log.append(f"Running Testrun with {embeddings_test.shape[0]} embeddings")
 
-    embeddings_test = embeddings_test[:5_000_00]
-    contig_names_test = contig_names_test[:5_000_00]
+    embeddings_test = embeddings_test[:5_000_000]
+    contig_names_test = contig_names_test[:5_000_000]
 
     thresholder_test = Threshold(
         embeddings_test,
