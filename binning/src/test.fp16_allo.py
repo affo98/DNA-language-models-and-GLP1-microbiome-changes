@@ -30,7 +30,8 @@ def main():
 
     print(f"[Before any allocation] GPU memory used: {get_gpu_mem()} MiB")
 
-    # 1) Generate embeddings.npy if missing, in a memory-safe way
+    # 1) Generate embeddings.npy if missing, in a memory-safe way#
+    print("checkking if file exists")
     if not os.path.exists(embeddings_file):
         print(f"Generating {embeddings_file} with shape ({N},{D}) ...")
         mm = np.lib.format.open_memmap(
