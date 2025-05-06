@@ -192,7 +192,6 @@ rule kneaddata:
 
 rule metaspades: 
     input:
-        
         r1=os.path.join(OUTDIR, "knead/{sample}/tmp/{sample}_1_kneaddata_paired_1.fastq"),
         r2=os.path.join(OUTDIR, "knead/{sample}/tmp/{sample}_1_kneaddata_paired_2.fastq"),
     output:
