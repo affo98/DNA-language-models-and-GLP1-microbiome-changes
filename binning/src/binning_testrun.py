@@ -39,7 +39,7 @@ def main():
     KNN_P = 25
     CONVERT_MILLION_EMB_GPU_SECONDS = 6
 
-    log.append(f"[Before any allocation] GPU memory used: {get_gpu_mem(log)} MiB")
+    log.append(f"[Before any allocation] GPU memory used: {get_gpu_mem()} MiB")
 
     # generate normalized embeddings
     if not os.path.exists(embeddings_file):
@@ -80,7 +80,7 @@ def main():
 
     # ------- Test heavy memory operations -------
     embeddings_test = embeddings_mm
-    log.append(f"[After allocation of memmap] GPU memory used: {get_gpu_mem(log)} MiB")
+    log.append(f"[After allocation of memmap] GPU memory used: {get_gpu_mem()} MiB")
     log.append(f"Running Testrun with {embeddings_test.shape[0]} embeddings")
 
     embeddings_test = embeddings_test[:1_000_00]

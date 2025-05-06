@@ -33,7 +33,7 @@ class Logger:
             log_file.write(message + "\n")
 
 
-def get_gpu_mem(log: Logger) -> int | None:
+def get_gpu_mem() -> int | None:
     """Return current GPU memory usage in MiB (as int)."""
     try:
         out = subprocess.check_output(
@@ -44,7 +44,7 @@ def get_gpu_mem(log: Logger) -> int | None:
         used = int(out.strip().split("\n")[0])
         return used
     except Exception as e:
-        log.append("Warning: could not query nvidia-smi:", e, file=sys.stderr)
+        print("Warning: could not query nvidia-smi:", e, file=sys.stderr)
         return None
 
 
