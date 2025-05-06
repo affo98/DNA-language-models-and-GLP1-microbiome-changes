@@ -114,6 +114,10 @@ class Threshold:
             del topk_embs, centroids, csims, emb_i
             torch.cuda.empty_cache()
 
+        # RM!!
+        global_min = torch.tensor(1.0, dtype=torch.float32, device=self.device)
+        global_max = torch.tensor(-1.0, dtype=torch.float32, device=self.device)
+
         # ---------------- Histogram pass ----------------
         for i in tqdm(range(0, n_samples, self.block_size), desc="Calculating knns"):
             i_end = min(i + self.block_size, n_samples)
