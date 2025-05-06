@@ -10,7 +10,7 @@ import sys
 import os
 from tqdm import tqdm
 
-from utils import Logger, get_available_device, to_fp16_tensor, get_gpu_mem
+from utils import Logger, get_gpu_mem
 from clustering import KMediod
 from threshold import Threshold
 
