@@ -23,7 +23,7 @@ def main():
     save_path = "./binning_testrun/"
     os.makedirs(save_path, exist_ok=True)
     embeddings_file = f"{save_path}embeddings.npy"
-    N, D = 29_458_443, 768  # number of embeddings × dim
+    N, D = 29_458_443, 768  # number of embeddings × dim #size of T2D-EW contigs
     chunk_size = 5_000  # rows per write/load chunk
     N_BINS = 1000
     BLOCK_SIZE = 2000  # use 20 after
@@ -57,9 +57,6 @@ def main():
         del mm
         log.append("Done writing embeddings.npy")
 
-    # Load embeddings
-    # embeddings_mm = np.load(embeddings_file, mmap_mode="r")
-
     embeddings_mm = np.memmap(
         embeddings_file,
         dtype="float32",
@@ -76,7 +73,6 @@ def main():
     )
 
     # ------- Test heavy memory operations -------
-    # embeddings_test = normalize(embeddings_mm)
     embeddings_test = embeddings_mm
     log.append(f"[After allocation of memmap] GPU memory used: {get_gpu_mem(log)} MiB")
 

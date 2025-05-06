@@ -19,15 +19,15 @@
 
 
 #2. For small testing
-#SBATCH --output=t2dew_small_%j.out
-#SBATCH --error=slurm_small_%j.err 
+# #SBATCH --output=t2dew_small_%j.out
+# #SBATCH --error=slurm_small_%j.err 
 # #SBATCH --partition=scavenge
 # #SBATCH --time=04:00:00
 
 
 #3. Using 2x H100 
-#SBATCH --output=t2dew_h100_%j.out
-#SBATCH --error=slurm_h100_%j.err 
+# #SBATCH --output=t2dew_h100_%j.out
+# #SBATCH --error=slurm_h100_%j.err 
 # #SBATCH --exclude=cn[1-10]
 # #SBATCH --exclude=cn[12-19]
 # #SBATCH --exclude=desktop[1-16]
@@ -68,7 +68,7 @@ conda activate "$ENV_DIR"
 # Print node and GPU info
 echo "Running on node: $(hostname)"; nvidia-smi
 
-#conda clean --index-cache --packages --tarballs --yes
+#conda clean --index-cache --packages --tarballs --yes #uncomment if problems with conda envs
 
 #Run the Snakemake pipeline
 SNAKEFILE=~/l40_test/DNA-language-models-and-GLP1-microbiome-changes/phenotype_mil/Snakefile
@@ -78,10 +78,6 @@ CONFIG="--config DATASET=T2D-EW MODEL=dnaberts CHECKM2=True"
 #snakemake --snakefile "$SNAKEFILE" --directory "$WORKDIR" --unlock || true
 
 snakemake --snakefile "$SNAKEFILE" --directory "$WORKDIR" $CONFIG --use-conda --cores all --rerun-incomplete
-
-#snakemake --snakefile ~/l40_test/DNA-language-models-and-GLP1-microbiome-changes/phenotype_mil/Snakefile --config DATASET=T2D-EW MODEL=dnaberts CHECKM2=True --use-conda --cores all \
-#--rerun-incomplete 
-#--unlock
 
 
 echo "Job completed successfully."
