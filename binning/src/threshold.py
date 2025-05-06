@@ -47,12 +47,12 @@ class Threshold:
             f"{embeddings.shape[0] / 1_000_000 * convert_million_emb_gpu_seconds:.1f} seconds"
         )
 
-        embeddings = torch.from_numpy(embeddings).half().to(device)
+        embeddings_torch = torch.from_numpy(embeddings).half().to(device)
         log.append(
             f"[After embedding GPU16 allocation] GPU mem used: {get_gpu_mem(log)} MiB"
         )
 
-        self.embeddings = embeddings
+        self.embeddings = embeddings_torch
         self.n_bins = n_bins
         self.block_size = block_size
         self.save_path = save_path
