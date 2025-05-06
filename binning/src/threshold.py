@@ -40,9 +40,19 @@ class Threshold:
         device, gpu_count = get_available_device()
 
         # embeddings = to_fp16_tensor(embeddings, device=device, log=log)
-        embeddings = torch.from_numpy(embeddings).half().to(device)
+        import time
+
+        log.append("Converting embeddings to GPU16...")
+        start = time.perf_counter()
+
+        embeddings = torch.from_numpy(embeddings[:1_000_000]).half().to(device)
+
+        end = time.perf_counter()
+        elapsed = end - start
+
+        log.append(f"[Time taken for conversion to GPU16] {elapsed:.2f} seconds")
         log.append(
-            f"[After embedding GPU16 allococation] GPU mem used: {get_gpu_mem(log)} MiB"
+            f"[After embedding GPU16 allocation] GPU mem used: {get_gpu_mem(log)} MiB"
         )
 
         self.embeddings = embeddings
