@@ -204,7 +204,7 @@ class KMediod:
         self.save_clusters(knn_k, knn_p, predictions, contig_names)
 
         # clean-up
-        del predictions, density_vector, seed
+        del density_vector, seed
         torch.cuda.empty_cache()
 
         return predictions, contig_names
