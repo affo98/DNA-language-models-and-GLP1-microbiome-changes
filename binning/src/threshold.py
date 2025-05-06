@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 import torch
 
-from src.utils import get_available_device, Logger
+from src.utils import get_available_device, Logger, to_fp16_tensor
 
 
 class Threshold:
@@ -38,7 +38,11 @@ class Threshold:
         self.check_params(embeddings, n_bins, block_size)
 
         device, gpu_count = get_available_device()
-        embeddings = torch.from_numpy(embeddings).to(device)  # Caused OOM on T2d-EW
+
+        embeddings = to_fp16_tensor(
+            embeddings, chunk_size=5_000, device=device, log=log
+        )
+        # embeddings = torch.from_numpy(embeddings).to(device)  # Caused OOM on T2d-EW
 
         self.embeddings = embeddings
         self.n_bins = n_bins
@@ -67,7 +71,6 @@ class Threshold:
             block_start = i
             block_end = min(i + self.block_size, n_samples)
             block_embeddings = self.embeddings[block_start:block_end]
-            # block_embeddings = torch.from_numpy(block_embeddings_np).to(self.device)
 
             block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
             top_k_similarities, top_k_indices = torch.topk(
@@ -96,7 +99,6 @@ class Threshold:
             block_start = i
             block_end = min(i + self.block_size, n_samples)
             block_embeddings = self.embeddings[block_start:block_end]
-            # block_embeddings = torch.from_numpy(block_embeddings_np).to(self.device)
 
             block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
             top_k_similarities, top_k_indices = torch.topk(

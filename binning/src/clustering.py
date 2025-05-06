@@ -6,7 +6,7 @@ import numpy as np
 from tqdm import tqdm
 
 
-from src.utils import get_available_device, Logger
+from src.utils import get_available_device, Logger, to_fp16_tensor
 
 
 class KMediod:
@@ -50,7 +50,11 @@ class KMediod:
         self.check_params(embeddings, contig_names, min_bin_size, num_steps, max_iter)
 
         device, gpu_count = get_available_device()
-        embeddings = torch.from_numpy(embeddings).to(device)
+
+        embeddings = to_fp16_tensor(
+            embeddings, chunk_size=5_000, device=device, log=log
+        )
+        # embeddings = torch.from_numpy(embeddings).to(device)
 
         self.embeddings = embeddings
         self.contig_names = contig_names
