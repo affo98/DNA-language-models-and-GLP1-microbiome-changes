@@ -52,8 +52,6 @@ class KMediod:
 
         device, gpu_count = get_available_device()
 
-        # embeddings = to_fp16_tensor(embeddings, device=device, log=log)
-
         log.append(
             f"Converting embeddings to GPU16. Estimated time: "
             f"{embeddings.shape[0] / 1_000_000 * convert_million_emb_gpu_seconds:.1f} seconds"
