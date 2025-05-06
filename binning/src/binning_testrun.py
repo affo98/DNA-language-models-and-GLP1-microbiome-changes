@@ -32,6 +32,7 @@ def main():
     MAX_ITER = 2000  # increased from 1000
     KNN_K = 300
     KNN_P = 25
+    CONVERT_MILLION_EMB_GPU_SECONDS = 6
 
     log.append(f"[Before any allocation] GPU memory used: {get_gpu_mem(log)} MiB")
 
@@ -79,6 +80,7 @@ def main():
         save_path,
         model_name,
         log,
+        CONVERT_MILLION_EMB_GPU_SECONDS,
     )
 
     kmediod_test = KMediod(
@@ -88,6 +90,7 @@ def main():
         log,
         True,
         "test",
+        CONVERT_MILLION_EMB_GPU_SECONDS,
         MIN_BIN_SIZE,
         NUM_STEPS,
         MAX_ITER,
