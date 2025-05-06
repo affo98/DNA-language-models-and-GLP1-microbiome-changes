@@ -18,9 +18,9 @@ from src.threshold import Threshold
 
 
 def main():
-    save_path = "./fp16test"
+    save_path = "./binning_testrun/"
     os.makedirs(save_path, exist_ok=True)
-    embeddings_file = "./fp16_test/embeddings.npy"
+    embeddings_file = f"{save_path}embeddings.npy"
     N, D = 29_458_443, 768  # number of embeddings × dim
     chunk_size = 5_000  # rows per write/load chunk
     N_BINS = 1000
