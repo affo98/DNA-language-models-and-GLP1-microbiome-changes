@@ -142,10 +142,11 @@ class KMediod:
 
                 candidate_mask = (sim_vec >= min_similarity) & available_mask
                 candidates = torch.where(candidate_mask)[0]
+
                 if len(candidates) == 0:
                     break
 
-                emb_candicates_np = self.embeddings_np[candidates]
+                emb_candicates_np = self.embeddings_np[candidates.cpu().numpy()]
                 emb_candidates = torch.from_numpy(emb_candicates_np).to(self.device)
                 seed = torch.mean(emb_candidates, dim=0)
 
@@ -172,7 +173,7 @@ class KMediod:
 
                 for c0 in range(0, len(candidates), self.block_size):
                     c1 = min(len(candidates), c0 + self.block_size)
-                    cand_np = self.embeddings_np[candidates[c0:c1]]
+                    cand_np = self.embeddings_np[candidates[c0:c1].cpu().numpy()]
                     block_c = torch.from_numpy(cand_np).to(self.device)
 
                     sim = torch.mm(block_i, block_c.T)
