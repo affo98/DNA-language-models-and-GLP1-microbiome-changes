@@ -51,8 +51,9 @@ class KMediod:
 
         device, gpu_count = get_available_device()
 
-        embeddings = to_fp16_tensor(embeddings, device=device, log=log)
-        # embeddings = torch.from_numpy(embeddings).to(device)
+        # embeddings = to_fp16_tensor(embeddings, device=device, log=log)
+
+        embeddings = torch.from_numpy(embeddings).half().to(device)
 
         self.embeddings = embeddings
         self.contig_names = contig_names

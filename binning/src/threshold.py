@@ -39,8 +39,8 @@ class Threshold:
 
         device, gpu_count = get_available_device()
 
-        embeddings = to_fp16_tensor(embeddings, device=device, log=log)
-        # embeddings = torch.from_numpy(embeddings).to(device)  # Caused OOM on T2d-EW
+        # embeddings = to_fp16_tensor(embeddings, device=device, log=log)
+        embeddings = torch.from_numpy(embeddings).half().to(device)
 
         self.embeddings = embeddings
         self.n_bins = n_bins
