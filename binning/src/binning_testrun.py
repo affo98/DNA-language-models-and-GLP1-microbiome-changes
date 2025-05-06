@@ -49,9 +49,9 @@ def main():
         log.append("Done writing embeddings.npy")
 
     # Load embeddings
-    embeddings_mm = np.load(embeddings_file, mmap_mode="r")
+    # embeddings_mm = np.load(embeddings_file, mmap_mode="r")
 
-    embeddings__ = np.memmap(
+    embeddings_mm = np.memmap(
         embeddings_file,
         dtype="float32",
         mode="r",
