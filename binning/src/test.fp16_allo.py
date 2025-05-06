@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import subprocess
 import sys
+import os
 
 
 def get_gpu_mem():
@@ -21,24 +22,33 @@ def get_gpu_mem():
 
 
 def main():
-    # --- adjust these for your real embeddings file ---
-    embeddings_file = "embeddings.dat"  # raw float32 🌐
-    N, D = 29_458_443, 768  # rows, cols
-    chunk_size = 5_000  # how many rows to convert at once
-    block_size = 20  # small block for test matmul
+    # --- user settings: adjust as needed ---
+    embeddings_file = "embeddings.npy"
+    N, D = 29_458_443, 768  # number of embeddings × dim
+    chunk_size = 5_000  # rows per write/load chunk
+    block_size = 20  # rows in test matmul
 
     print(f"[Before any allocation] GPU memory used: {get_gpu_mem()} MiB")
 
-    # 1) memory-map the on-disk embeddings as float32, read-only
-    embeddings_mm = np.memmap(
-        embeddings_file,
-        dtype=np.float32,
-        mode="r",
-        shape=(N, D),
-    )
+    # 1) Generate embeddings.npy if missing, in a memory-safe way
+    if not os.path.exists(embeddings_file):
+        print(f"Generating {embeddings_file} with shape ({N},{D}) ...")
+        mm = np.lib.format.open_memmap(
+            embeddings_file, mode="w+", dtype=np.float32, shape=(N, D)
+        )
+        for start in range(0, N, chunk_size):
+            end = min(start + chunk_size, N)
+            mm[start:end] = np.random.randn(end - start, D).astype(np.float32)
+        # flush & close
+        del mm
+        print("Done writing embeddings.npy")
 
-    # 2) allocate an empty FP16 tensor of the right shape on GPU
+    # 2) Memory-map the .npy as float32, read-only
+    embeddings_mm = np.load(embeddings_file, mmap_mode="r")
+    assert embeddings_mm.shape == (N, D), "Shape mismatch loading memmap!"
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(device)
     emb_fp16 = torch.empty((N, D), dtype=torch.float16, device=device)
     print(f"[After empty FP16 allocation] GPU memory used: {get_gpu_mem()} MiB")
 
