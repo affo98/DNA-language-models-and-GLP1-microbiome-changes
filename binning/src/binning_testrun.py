@@ -29,7 +29,7 @@ def main():
     N, D = 29_458_443, 768  # number of embeddings × dim #size of T2D-EW contigs
     chunk_size = 5_000  # rows per write/load chunk
     N_BINS = 1000
-    BLOCK_SIZE = 1_000_0
+    BLOCK_SIZE = 1_000_000
     model_name = "binning_testrun"
     log = Logger(os.path.join(save_path, "log.txt"))
     MIN_BIN_SIZE = 2  # changed from 10 to 2, because bins less than MINSIZE_BINS (250000) will be removed in postprocessing.
@@ -83,8 +83,8 @@ def main():
     log.append(f"[After allocation of memmap] GPU memory used: {get_gpu_mem()} MiB")
     log.append(f"Running Testrun with {embeddings_test.shape[0]} embeddings")
 
-    embeddings_test = embeddings_test[:1_000_00]
-    contig_names_test = contig_names_test[:1_000_00]
+    embeddings_test = embeddings_test[:5_000_00]
+    contig_names_test = contig_names_test[:5_000_00]
 
     thresholder_test = Threshold(
         embeddings_test,
