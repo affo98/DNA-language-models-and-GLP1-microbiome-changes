@@ -185,6 +185,7 @@ class KMediod:
         predictions, contig_names = self.remove_unassigned_sequences(predictions)
         self.save_clusters(knn_k, knn_p, predictions, contig_names)
 
+        torch.cuda.empty_cache()
         return predictions, contig_names
 
     def remove_unassigned_sequences(self, predictions) -> np.array:
