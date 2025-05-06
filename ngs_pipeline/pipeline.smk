@@ -192,8 +192,8 @@ rule kneaddata:
 
 rule metaspades: 
     input:
-        r1=os.path.join(OUTDIR, "knead/{sample}/paired_1.fastq"),
-        r2=os.path.join(OUTDIR, "knead/{sample}/paired_2.fastq")
+        r1=os.path.join(OUTDIR, "knead/{sample}/tmp/paired_1.fastq"),
+        r2=os.path.join(OUTDIR, "knead/{sample}/tmp/paired_2.fastq")
     output:
         contigs=os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"),
     benchmark:
