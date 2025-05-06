@@ -22,6 +22,46 @@ def get_gpu_mem():
         return None
 
 
+def to_fp16_tensor(
+    embeddings: np.ndarray,
+    chunk_size: int = 5_000,
+    device: str = "cuda" if torch.cuda.is_available() else "cpu",
+) -> torch.Tensor:
+    """
+    Convert a large NumPy array or memmap of shape (N, D) to a single
+    torch.cuda.FloatTensor in float16, streaming in chunk_size rows at a time.
+
+    Returns:
+        emb_fp16 (torch.Tensor): the full (N, D) tensor on GPU in float16.
+    """
+    if not isinstance(embeddings, np.ndarray):
+        raise TypeError("embeddings must be a NumPy ndarray or memmap")
+
+    N, D = embeddings.shape
+    print(f"Using device: {device}")
+    print(f"[Before allocation] GPU mem used: {get_gpu_mem()} MiB")
+
+    # Allocate the target FP16 tensor on GPU
+    emb_fp16 = torch.empty((N, D), dtype=torch.float16, device=device)
+    print(f"[After empty alloc] GPU mem used: {get_gpu_mem()} MiB")
+
+    # Stream in chunk_size rows at a time
+    for start in tqdm(range(0, N, chunk_size)):
+        end = min(start + chunk_size, N)
+        # slice from NumPy (memmap or in-memory)
+        block_cpu = torch.from_numpy(embeddings[start:end])  # CPU float32
+        emb_fp16[start:end].copy_(block_cpu.to(device).half())  # GPU float16
+        del block_cpu
+
+    # Wait for all copies to finish
+    if device.type == "cuda":
+        torch.cuda.synchronize()
+
+    print(f"[After streaming] GPU mem used: {get_gpu_mem()} MiB")
+
+    return emb_fp16
+
+
 def main():
     # --- user settings: adjust as needed ---
     embeddings_file = "embeddings.npy"
@@ -48,28 +88,14 @@ def main():
     embeddings_mm = np.load(embeddings_file, mmap_mode="r")
     assert embeddings_mm.shape == (N, D), "Shape mismatch loading memmap!"
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(device)
-    emb_fp16 = torch.empty((N, D), dtype=torch.float16, device=device)
-    print(f"[After empty FP16 allocation] GPU memory used: {get_gpu_mem()} MiB")
-
-    # 3) fill the GPU tensor in chunks (never holds both full float32+float16 in VRAM)
-    for start in range(0, N, chunk_size):
-        end = min(start + chunk_size, N)
-        # slice from memmap (this never loads everything into RAM at once)
-        block_cpu = torch.from_numpy(embeddings_mm[start:end])
-        # move and downcast
-        emb_fp16[start:end].copy_(block_cpu.to(device).half())
-        del block_cpu
-    torch.cuda.synchronize()
-    print(f"[After chunked conversion] GPU memory used: {get_gpu_mem()} MiB")
+    embeddings = to_fp16_tensor(embeddings_mm, chunk_size=chunk_size)
 
     # 4) do a single block-wise matmul to test peak memory
-    block = emb_fp16[:block_size]  # shape (block_size, D)
+    block = embeddings[:block_size]  # shape (block_size, D)
     torch.cuda.synchronize()
     before_mm = get_gpu_mem()
 
-    sim = torch.mm(block, emb_fp16.T)  # big operation in FP16
+    sim = torch.mm(block, embeddings.T)  # big operation in FP16
     torch.cuda.synchronize()
     after_mm = get_gpu_mem()
 
