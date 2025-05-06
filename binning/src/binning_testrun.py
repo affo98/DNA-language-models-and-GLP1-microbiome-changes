@@ -33,7 +33,7 @@ def main():
     KNN_K = 300
     KNN_P = 25
 
-    print(f"[Before any allocation] GPU memory used: {get_gpu_mem()} MiB")
+    print(f"[Before any allocation] GPU memory used: {get_gpu_mem(log)} MiB")
 
     # 1) Generate embeddings.npy if missing, in a memory-safe way#
     if not os.path.exists(embeddings_file):
