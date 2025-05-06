@@ -152,8 +152,8 @@ rule kneaddata:
         adapter=os.path.join(OUTDIR, "fastqc/{sample}/adapters.txt")
     output:
         # dir = temp(directory(os.path.join(OUTDIR, "knead/{sample}/tmp"))),
-        p1 = os.path.join(OUTDIR, "knead/{sample}/paired_1.fastq"),
-        p2 = os.path.join(OUTDIR, "knead/{sample}/paired_2.fastq"),
+        p1 = os.path.join(OUTDIR, "knead/{sample}/tmp/{sample}_1_kneaddata_paired_1.fastq"),
+        p2 = os.path.join(OUTDIR, "knead/{sample}/tmp/{sample}_1_kneaddata_paired_2.fastq"),
     log:
         os.path.join(LOGS, "knead/{sample}.log")
     threads: 64
@@ -192,8 +192,9 @@ rule kneaddata:
 
 rule metaspades: 
     input:
-        r1=os.path.join(OUTDIR, "knead/{sample}/tmp/paired_1.fastq"),
-        r2=os.path.join(OUTDIR, "knead/{sample}/tmp/paired_2.fastq")
+        
+        r1=os.path.join(OUTDIR, "knead/{sample}/tmp/{sample}_1_kneaddata_paired_1.fastq"),
+        r2=os.path.join(OUTDIR, "knead/{sample}/tmp/{sample}_1_kneaddata_paired_2.fastq"),
     output:
         contigs=os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"),
     benchmark:
