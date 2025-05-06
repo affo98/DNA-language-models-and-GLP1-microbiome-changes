@@ -70,6 +70,8 @@ def main():
     embeddings_test = embeddings_mm
     log.append(f"[After allocation of memmap] GPU memory used: {get_gpu_mem(log)} MiB")
 
+    embeddings_test = embeddings_test[:1_000_000]
+
     thresholder_test = Threshold(
         embeddings_test,
         N_BINS,

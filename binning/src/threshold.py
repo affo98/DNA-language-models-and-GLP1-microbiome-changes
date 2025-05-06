@@ -34,23 +34,20 @@ class Threshold:
         save_path: str,
         model_name: str,
         log: Logger,
+        convert_million_emb_gpu_seconds: int,
     ):
         self.check_params(embeddings, n_bins, block_size)
 
         device, gpu_count = get_available_device()
 
-        # embeddings = to_fp16_tensor(embeddings, device=device, log=log)
-        import time
+        # embeddings = to_fp16_tensor(embeddings, device=device
 
-        log.append("Converting embeddings to GPU16...")
-        start = time.perf_counter()
+        log.append(
+            f"Converting embeddings to GPU16. Estimated time: "
+            f"{embeddings.shape[0] / 1_000_000 * convert_million_emb_gpu_seconds:.1f} seconds"
+        )
 
-        embeddings = torch.from_numpy(embeddings[:1_000_000]).half().to(device)
-
-        end = time.perf_counter()
-        elapsed = end - start
-
-        log.append(f"[Time taken for conversion to GPU16] {elapsed:.2f} seconds")
+        embeddings = torch.from_numpy(embeddings).half().to(device)
         log.append(
             f"[After embedding GPU16 allocation] GPU mem used: {get_gpu_mem(log)} MiB"
         )
@@ -127,7 +124,9 @@ class Threshold:
             )  # Shape: (block_size, embedding_dim, 1)
 
             centroid_similarities = torch.bmm(top_k_embeddings, centroids).squeeze(-1)
-            centroid_similarities_flat = centroid_similarities.flatten()
+            centroid_similarities_flat = centroid_similarities.flatten().to(
+                torch.float32
+            )
 
             bin_vector += torch.histc(
                 centroid_similarities_flat,

@@ -25,6 +25,8 @@ MIN_BIN_SIZE = 2  # changed from 10 to 2, because bins less than MINSIZE_BINS (2
 NUM_STEPS = 3
 MAX_ITER = 2000  # increased from 1000
 
+CONVERT_MILLION_EMB_GPU_SECONDS = 6
+
 
 def main(args, log):
 
@@ -72,6 +74,7 @@ def main(args, log):
             histogram_dir,
             args.model_name,
             log,
+            CONVERT_MILLION_EMB_GPU_SECONDS,
         )
 
         kmediod_val = KMediod(
@@ -81,6 +84,7 @@ def main(args, log):
             log,
             False,
             "val",
+            CONVERT_MILLION_EMB_GPU_SECONDS,
             MIN_BIN_SIZE,
             NUM_STEPS,
             MAX_ITER,
@@ -122,6 +126,7 @@ def main(args, log):
             args.save_path,
             args.model_name,
             log,
+            CONVERT_MILLION_EMB_GPU_SECONDS,
         )
 
         kmediod_test = KMediod(
@@ -131,6 +136,7 @@ def main(args, log):
             log,
             True,
             "test",
+            CONVERT_MILLION_EMB_GPU_SECONDS,
             MIN_BIN_SIZE,
             NUM_STEPS,
             MAX_ITER,
