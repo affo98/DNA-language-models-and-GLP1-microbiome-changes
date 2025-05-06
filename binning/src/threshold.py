@@ -101,6 +101,7 @@ class Threshold:
 
             global_min = torch.min(global_min, centroid_similarities_flat.min())
             global_max = torch.max(global_max, centroid_similarities_flat.max())
+        print(global_min.item(), global_max.item())
 
         # loop through again to get histogram
         for i in tqdm(range(0, n_samples, self.block_size), desc="Calculating knns"):
