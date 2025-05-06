@@ -157,7 +157,10 @@ class Threshold:
         self.save_histogram(knn=True)
         self.save_to_json()
 
+        # cleanup
+        del self.embeddings
         torch.cuda.empty_cache()
+
         return knn_threshold
 
     def save_to_json(self) -> None:
