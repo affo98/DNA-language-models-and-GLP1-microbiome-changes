@@ -4,11 +4,13 @@ This script is a test run for the binning process using KMediod and Threshold cl
 
 #!/usr/bin/env python3
 import numpy as np
-import torch
-import subprocess
 import sys
 import os
 from tqdm import tqdm
+
+
+sys.path.insert(0, os.path.abspath(os.path.join(__file__, "..")))
+sys.path.insert(0, os.path.abspath(os.path.join(__file__, "..", "..")))
 
 from src.utils import Logger, get_gpu_mem
 from src.clustering import KMediod
