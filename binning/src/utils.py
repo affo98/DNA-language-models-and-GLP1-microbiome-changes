@@ -52,7 +52,7 @@ def to_fp16_tensor(
     embeddings: np.ndarray,
     device,
     log,
-    chunk_size: int = 5_000,
+    chunk_size: int = 100_000,
 ) -> torch.Tensor:
     """
     Convert a large NumPy array or memmap of shape (N, D) to a single
