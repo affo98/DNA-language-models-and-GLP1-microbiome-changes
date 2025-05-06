@@ -276,8 +276,8 @@ rule concatenate:
 
 rule alignment:
     input:
-        r1=os.path.join(OUTDIR, "knead/{sample}/paired_1.fastq"),
-        r2=os.path.join(OUTDIR, "knead/{sample}/paired_2.fastq"),
+        r1=os.path.join(OUTDIR, "knead/{sample}/tmp/{sample}_1_kneaddata_paired_1.fastq"),
+        r2=os.path.join(OUTDIR, "knead/{sample}/tmp/{sample}_1_kneaddata_paired_2.fastq"),
         contig_catalouge=os.path.join(OUTDIR,"global_contig_catalogue.fna.gz")
         # contig_catalogue_index = os.path.join(OUTDIR, "minimap/catalogue.mmi")
     output:
