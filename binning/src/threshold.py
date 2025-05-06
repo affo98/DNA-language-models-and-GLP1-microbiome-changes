@@ -115,8 +115,8 @@ class Threshold:
             torch.cuda.empty_cache()
 
         # RM!!
-        global_min = torch.tensor(-1.0, dtype=torch.float32, device=self.device)
-        global_max = torch.tensor(1.0, dtype=torch.float32, device=self.device)
+        # global_min = torch.tensor(-1.0, dtype=torch.float32, device=self.device)
+        # global_max = torch.tensor(1.0, dtype=torch.float32, device=self.device)
 
         # ---------------- Histogram pass ----------------
         for i in tqdm(range(0, n_samples, self.block_size), desc="Calculating knns"):
@@ -140,15 +140,6 @@ class Threshold:
                     partial_idx = combined_idx.gather(1, sel)
                 del sims_block, emb_j
                 torch.cuda.empty_cache()
-
-            # gather embeddings and compute centroid sims, update histogram
-            # for row in range(partial_idx.size(0)):
-            #     idxs = partial_idx[row].cpu().numpy()
-            #     topk_emb = (
-            #         torch.from_numpy(self.embeddings_np[idxs]).half().to(self.device)
-            #     )
-            #     centroid = topk_emb.mean(dim=0, keepdim=True).transpose(1, 2)
-            #     csims = torch.bmm(topk_emb.unsqueeze(0), centroid).squeeze().float()
 
             topk_embs = torch.from_numpy(
                 self.embeddings_np[partial_idx.cpu().numpy()]
