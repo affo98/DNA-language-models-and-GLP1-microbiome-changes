@@ -6,7 +6,7 @@ import numpy as np
 from tqdm import tqdm
 
 
-from src.utils import get_available_device, Logger, to_fp16_tensor
+from src.utils import get_available_device, Logger, to_fp16_tensor, get_gpu_mem
 
 
 class KMediod:
@@ -54,6 +54,9 @@ class KMediod:
         # embeddings = to_fp16_tensor(embeddings, device=device, log=log)
 
         embeddings = torch.from_numpy(embeddings).half().to(device)
+        log.append(
+            f"[After embedding GPU16 allococation] GPU mem used: {get_gpu_mem(log)} MiB"
+        )
 
         self.embeddings = embeddings
         self.contig_names = contig_names

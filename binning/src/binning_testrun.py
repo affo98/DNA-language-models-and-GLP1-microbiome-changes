@@ -50,6 +50,13 @@ def main():
 
     # Load embeddings
     embeddings_mm = np.load(embeddings_file, mmap_mode="r")
+
+    embeddings__ = np.memmap(
+        embeddings_file,
+        dtype="float32",
+        mode="r",
+        shape=(N, D),
+    )
     assert embeddings_mm.shape == (N, D), "Shape mismatch loading memmap!"
 
     # Create contig names

@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 import torch
 
-from src.utils import get_available_device, Logger, to_fp16_tensor
+from src.utils import get_available_device, Logger, to_fp16_tensor, get_gpu_mem
 
 
 class Threshold:
@@ -41,6 +41,9 @@ class Threshold:
 
         # embeddings = to_fp16_tensor(embeddings, device=device, log=log)
         embeddings = torch.from_numpy(embeddings).half().to(device)
+        log.append(
+            f"[After embedding GPU16 allococation] GPU mem used: {get_gpu_mem(log)} MiB"
+        )
 
         self.embeddings = embeddings
         self.n_bins = n_bins
