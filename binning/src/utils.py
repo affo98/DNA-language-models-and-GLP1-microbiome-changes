@@ -73,7 +73,9 @@ def to_fp16_tensor(
     log.append(f"[After empty allococation] GPU mem used: {get_gpu_mem(log)} MiB")
 
     # Stream in chunk_size rows at a time
-    for start in tqdm(range(0, N, chunk_size)):
+    for start in tqdm(
+        range(0, N, chunk_size), desc="Converting numpy embeddings to FP16 GPU"
+    ):
         end = min(start + chunk_size, N)
         slice_np = embeddings[start:end]
         if not slice_np.flags.writeable:
