@@ -24,7 +24,7 @@ def main():
     # --- adjust these for your real embeddings ---
     N, D = 29458443, 768  # e.g. 20k × 1k dims; ~80 MiB in float32
     chunk_size = 5000  # move 5k rows at a time
-    block_size = 1000  # one test matmul block
+    block_size = 20  # one test matmul block
 
     print(f"[Before any allocation] GPU memory used: {get_gpu_mem()} MiB")
 
