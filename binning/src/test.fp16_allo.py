@@ -4,6 +4,7 @@ import torch
 import subprocess
 import sys
 import os
+from tqdm import tqdm
 
 
 def get_gpu_mem():
@@ -31,13 +32,12 @@ def main():
     print(f"[Before any allocation] GPU memory used: {get_gpu_mem()} MiB")
 
     # 1) Generate embeddings.npy if missing, in a memory-safe way#
-    print("checkking if file exists")
     if not os.path.exists(embeddings_file):
         print(f"Generating {embeddings_file} with shape ({N},{D}) ...")
         mm = np.lib.format.open_memmap(
             embeddings_file, mode="w+", dtype=np.float32, shape=(N, D)
         )
-        for start in range(0, N, chunk_size):
+        for start in tqdm(range(0, N, chunk_size), desc="Writing chunks"):
             end = min(start + chunk_size, N)
             mm[start:end] = np.random.randn(end - start, D).astype(np.float32)
         # flush & close
