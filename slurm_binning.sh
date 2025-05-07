@@ -7,9 +7,9 @@
 #SBATCH --time=7-00:00:00
 
 
-#----Pick one of the three below options by uncommenting----
+#-----------------1. Pick Node-----------------------
 
-#1. For 4 L40s
+#1a For 4 L40s
 # #SBATCH --output=t2dew_l40_%j.out
 # #SBATCH --error=slurm_l40_%j.err 
 # #SBATCH --exclude=cn[3-18]
@@ -18,14 +18,14 @@
 # #SBATCH --gres=gpu:l40s:4
 
 
-#2. For small testing
+#1b For small testing
 #SBATCH --output=t2dew_small_%j.out
 #SBATCH --error=slurm_small_%j.err 
 #SBATCH --partition=scavenge
 #SBATCH --time=04:00:00
 
 
-#3. Using 2x H100 
+#1c Using 2x H100 
 # #SBATCH --output=t2dew_h100_%j.out
 # #SBATCH --error=slurm_h100_%j.err 
 # #SBATCH --exclude=cn[1-10]
@@ -35,8 +35,8 @@
 # #SBATCH --gres=gpu:h100:2
 
 
-
-# 1. Download & install Miniconda3 if missing
+#---------------------Setup-------------------------
+# Download & install Miniconda3 if missing
 if [[ ! -d "$HOME/miniconda" ]]; then
     echo "Miniconda not found. Installing Miniconda..."
 
@@ -71,18 +71,20 @@ echo "Running on node: $(hostname)"; nvidia-smi
 #conda clean --index-cache --packages --tarballs --yes #uncomment if problems with conda envs
 
 
-#Run sweeps on cami2_benchmark
+
+#--------------------------2. Pick job-------------------------
+
+
+#2a Run sweeps on cami2_benchmark
 chmod +x cami2_benchmark/sweeps/run_models.sh
 cami2_benchmark/sweeps/run_models.sh airways_short gastro_short oral_short skin_short urogenital_short marine_short plant_short metahit -- dnaberth_2mv1_150k
 
 
-#Run the Snakemake pipeline
+#2b Run the Snakemake pipeline
 # SNAKEFILE=~/l40_test/DNA-language-models-and-GLP1-microbiome-changes/phenotype_mil/Snakefile
 # WORKDIR=~/l40_test/DNA-language-models-and-GLP1-microbiome-changes
 # CONFIG="--config DATASET=T2D-EW MODEL=dnaberts CHECKM2=True"
-
 # #snakemake --snakefile "$SNAKEFILE" --directory "$WORKDIR" --unlock || true
-
 # snakemake --snakefile "$SNAKEFILE" --directory "$WORKDIR" $CONFIG --use-conda --cores all --rerun-incomplete
 
 
