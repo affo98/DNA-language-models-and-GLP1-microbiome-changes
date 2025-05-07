@@ -51,7 +51,7 @@ OTHER_MODELS = [
 def parse_quality_report(file_path):
     """Parses a CheckM2 quality report and extracts completeness & contamination."""
     df = pd.read_csv(file_path, sep="\t")
-    df = df[df["Contamination"] < 5]
+    df = df[df["Contamination"] < 20]
     return df["Completeness"].values
 
 
@@ -390,14 +390,14 @@ if __name__ == "__main__":
 
     cami2_results = process_all_reports(MODEL_RESULTS_DIR)
 
-    knn_histograms = parse_knn_histograms(MODEL_RESULTS_DIR)
+    # knn_histograms = parse_knn_histograms(MODEL_RESULTS_DIR)
 
-    runtimes = parse_runtimes(BASE_DIR)
+    # runtimes = parse_runtimes(BASE_DIR)
 
-    bin_postprocess = parse_bin_postprocess(LOG_DIR)
+    # bin_postprocess = parse_bin_postprocess(LOG_DIR)
 
-    n_valtest = parse_nvaltest(MODEL_RESULTS_DIR)
+    # n_valtest = parse_nvaltest(MODEL_RESULTS_DIR)
 
-    heatmaps = parse_heatmaps(MODEL_RESULTS_DIR)
+    # heatmaps = parse_heatmaps(MODEL_RESULTS_DIR)
 
-    contig_summary, contig_lengths = parse_contig_lengths(PROCESSED_DATA_DIR)
+    # contig_summary, contig_lengths = parse_contig_lengths(PROCESSED_DATA_DIR)
