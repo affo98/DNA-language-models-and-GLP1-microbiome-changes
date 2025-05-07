@@ -245,7 +245,7 @@ def add_arguments() -> ArgumentParser:
     parser.add_argument(
         "--log",
         "-l",
-        help="Path to save logfile",
+        help="Filename for logfile",
     )
 
     args = parser.parse_args()
@@ -259,7 +259,7 @@ if __name__ == "__main__":
     args = add_arguments()
 
     os.makedirs(args.save_path)
-    log = Logger(args.log)
+    log = Logger(os.path.join(args.save_path, args.log))
     for arg, value in vars(args).items():
         log.append(f"{arg}: {value}")
 
