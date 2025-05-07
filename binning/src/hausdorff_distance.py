@@ -14,7 +14,7 @@ from src.utils import Logger, get_available_device
 CLUSTERS_HEADER = "clustername\tcontigname"
 CLUSTERS_FILENAME = "clusters_filtered.tsv"
 
-BLOCK_SIZE = 1000
+BLOCK_SIZE = 10000
 PERCENTILE = 95.0
 
 
@@ -45,7 +45,6 @@ def read_clusters(input_path: str, log: Logger) -> dict[str, set[str]]:
     return clusters_dict
 
 
-# see new func in UTILS ----------------------------------------------------------------
 def read_embeddings(
     input_path: str, model_name, log: Logger
 ) -> tuple[np.memmap | np.ndarray, list[str]]:
@@ -78,9 +77,38 @@ def read_embeddings(
     return embeddings, contig_names
 
 
+def directed_percentile_hausdorff(X, Y, device, block_size, percentile):
+    min_dists_all = []
+    NX = X.shape[0]
+    NY = Y.shape[0]
+    for i in range(0, NX, block_size):
+        i_end = min(i + block_size, NX)
+        block_i_np = X[i:i_end]
+        block_i = torch.from_numpy(block_i_np).to(device)
+        min_dist_block = None
+
+        for j in range(0, NY, block_size):
+            j_end = min(j + block_size, NY)
+            block_j_np = Y[j:j_end]
+            block_j = torch.from_numpy(block_j_np).to(device)
+            sim = torch.mm(block_i, block_j.T)
+            dist = 1 - sim
+
+            if min_dist_block is None:
+                min_dist_block = dist.min(dim=1).values  # (block_size, )
+            else:
+                min_dist_block = torch.minimum(min_dist_block, dist.min(dim=1).values)
+
+        min_dists_all.append(min_dist_block)  # list of (block_size, ) tensors
+
+    min_dists_all = torch.cat(min_dists_all)
+    return torch.quantile(min_dists_all, percentile / 100.0).item()
+
+
 def compute_hausdorff_distance(
-    A: torch.Tensor,
-    B: torch.Tensor,
+    A: np.ndarray,
+    B: np.ndarray,
+    device,
     block_size: int = BLOCK_SIZE,
     percentile: float = PERCENTILE,
 ) -> float:
@@ -98,19 +126,8 @@ def compute_hausdorff_distance(
         float: Percentile Hausdorff distance
     """
 
-    def directed_percentile_hausdorff(X, Y, block_size, percentile):
-        min_dists_all = []
-        for i in range(0, X.size(0), block_size):
-            x_block = X[i : i + block_size]  # (block_size, d)
-            sim = torch.mm(x_block, Y.T)  # (block_size, n_y)
-            dist = 1 - sim  # cosine distance
-            min_dist, _ = dist.min(dim=1)  # (block_size,)
-            min_dists_all.append(min_dist)
-        min_dists_all = torch.cat(min_dists_all)
-        return torch.quantile(min_dists_all, percentile / 100.0).item()
-
-    h_ab = directed_percentile_hausdorff(A, B, block_size, percentile)
-    h_ba = directed_percentile_hausdorff(B, A, block_size, percentile)
+    h_ab = directed_percentile_hausdorff(A, B, device, block_size, percentile)
+    h_ba = directed_percentile_hausdorff(B, A, device, block_size, percentile)
     bidirectional_distance = max(h_ab, h_ba)
     return bidirectional_distance
 
@@ -142,23 +159,22 @@ def compute_hausdorff_matrix(
     log.append(f"Computing Hausdorff distances for {n_clusters} clusters...")
 
     cluster_embeddings = {}
-    torch_embeddings = torch.tensor(embeddings, device=device)
 
     for cname in cluster_names:
         indices = [name_to_index[n] for n in clusters[cname] if n in name_to_index]
         if not indices:
             raise ValueError(f"No contigs from cluster {cname} found in embeddings.")
-        cluster_embeddings[cname] = torch_embeddings[indices]
+        cluster_embeddings[cname] = embeddings[indices]
 
     distance_matrix = np.zeros((n_clusters, n_clusters), dtype=np.float32)
 
-    for i, name_i in enumerate(tqdm(cluster_names, desc="Hausdorff matrix")):
+    for i, name_i in tqdm(enumerate(cluster_names), desc="Hausdorff matrix"):
         A = cluster_embeddings[name_i]
         for j in range(i, n_clusters):
             name_j = cluster_names[j]
             B = cluster_embeddings[name_j]
 
-            d = compute_hausdorff_distance(A, B)
+            d = compute_hausdorff_distance(A, B, device, BLOCK_SIZE, PERCENTILE)
 
             distance_matrix[i, j] = d
             distance_matrix[j, i] = d
