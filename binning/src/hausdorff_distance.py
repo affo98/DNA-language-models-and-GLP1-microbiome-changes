@@ -150,7 +150,6 @@ def compute_hausdorff_matrix(
     contig_names: list[str],
     clusters: dict[str, set[str]],
     device,
-    save_path: str,
     log,
 ):
     """
@@ -194,22 +193,17 @@ def compute_hausdorff_matrix(
 
     cluster_array = np.array(cluster_names)
 
-    output_file = os.path.join(save_path, "hausdorff_distances.npz")
-    np.savez(output_file, distance_matrix=distance_matrix, cluster_names=cluster_array)
-
-    log.append(f"Saved Hausdorff distance matrix to {output_file}")
-
     return distance_matrix, cluster_array
 
 
-def main(model_name, dataset_name, input_path, log):
+def main(model_name, dataset_name, input_path, save_path, log):
 
     device, _ = get_available_device()
     log.append(f"Using {device} for Hausdorff distance calculation")
     clusters = read_clusters(os.path.join(input_path, CLUSTERS_FILENAME), log)
     embeddings, contig_names = read_embeddings(input_path, model_name, log)
 
-    distance_matrix, clusters_array = compute_hausdorff_matrix(
+    distance_matrix, cluster_array = compute_hausdorff_matrix(
         embeddings,
         contig_names,
         clusters,
@@ -217,6 +211,10 @@ def main(model_name, dataset_name, input_path, log):
         save_path=args.save_path,
         log=log,
     )
+
+    output_file = os.path.join(save_path, f"{model_name}_{dataset_name}.npz")
+    np.savez(output_file, distance_matrix=distance_matrix, cluster_names=cluster_array)
+    log.append(f"Saved Hausdorff distance matrix to {output_file}")
 
 
 def add_arguments() -> ArgumentParser:
