@@ -23,8 +23,8 @@ def main():
     save_path = "./binning_testrun/"
     os.makedirs(save_path, exist_ok=True)
 
-    # embeddings_file = "./dnaberts_metahit.npz"
-    embeddings_file = f"{save_path}embeddings.npy"
+    embeddings_file = "./cami2_processing/model_results/metahit/dnaberts_output/test/embeddings/embeddings.npy"
+    # embeddings_file = f"{save_path}embeddings.npy"
 
     N, D = 29_458_443, 768  # number of embeddings × dim #size of T2D-EW contigs
     chunk_size = 5_000  # rows per write/load chunk
@@ -68,8 +68,8 @@ def main():
     # )
     # assert embeddings_mm.shape == (N, D), "Shape mismatch loading memmap!"
 
-    embeddings_mm_file = np.load(embeddings_file)
-    embeddings_mm = embeddings_mm_file["embeddings"]
+    embeddings_mm = np.load(embeddings_file)
+    # embeddings_mm = embeddings_mm_file["embeddings"]
 
     # Create contig names
     N = embeddings_mm.shape[0]
