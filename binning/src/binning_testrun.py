@@ -107,20 +107,20 @@ def main():
 
     # threshold = 0.749390721321106
 
-    # kmediod_test = KMediod(
-    #     embeddings_test,
-    #     contig_names_test,
-    #     save_path,
-    #     log,
-    #     True,
-    #     "test",
-    #     CONVERT_MILLION_EMB_GPU_SECONDS,
-    #     MIN_BIN_SIZE,
-    #     NUM_STEPS,
-    #     MAX_ITER,
-    #     BLOCK_SIZE,
-    # )
-    # _, _ = kmediod_test.fit(threshold, KNN_K, KNN_P)
+    kmediod_test = KMediod(
+        embeddings_test,
+        contig_names_test,
+        save_path,
+        log,
+        True,
+        "test",
+        CONVERT_MILLION_EMB_GPU_SECONDS,
+        MIN_BIN_SIZE,
+        NUM_STEPS,
+        MAX_ITER,
+        BLOCK_SIZE,
+    )
+    _, _ = kmediod_test.fit(threshold, KNN_K, KNN_P)
 
 
 if __name__ == "__main__":
