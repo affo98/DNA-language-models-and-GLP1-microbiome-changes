@@ -17,6 +17,19 @@ CLUSTERS_FILENAME = "clusters_filtered.tsv"
 BLOCK_SIZE = 10000
 PERCENTILE = 95.0
 
+DATASETS = [
+    "airways_short",
+    "gastro_short",
+    "oral_short",
+    "urogenital_short",
+    "skin_short",
+    "plant_short",
+    "marine_short",
+    "metahit",
+]
+
+MODELS = ["dnaberts"]
+
 
 def read_clusters(input_path: str, log: Logger) -> dict[str, set[str]]:
     """Read cluster file into a dict[clusterid, set[contigids]]."""
@@ -189,12 +202,12 @@ def compute_hausdorff_matrix(
     return distance_matrix, cluster_array
 
 
-def main(args, log):
+def main(model_name, dataset_name, input_path, log):
 
     device, _ = get_available_device()
     log.append(f"Using {device} for Hausdorff distance calculation")
-    clusters = read_clusters(os.path.join(args.input_path, CLUSTERS_FILENAME), log)
-    embeddings, contig_names = read_embeddings(args.input_path, args.model_name, log)
+    clusters = read_clusters(os.path.join(input_path, CLUSTERS_FILENAME), log)
+    embeddings, contig_names = read_embeddings(input_path, model_name, log)
 
     distance_matrix, clusters_array = compute_hausdorff_matrix(
         embeddings,
@@ -212,16 +225,19 @@ def add_arguments() -> ArgumentParser:
         "--model_name",
         "-mn",
         help="Name of the model to get embeddings from",
+        default=None,
     )
     parser.add_argument(
         "--dataset_name",
         "-d",
         help="Name of the dataset",
+        default=None,
     )
     parser.add_argument(
         "--input_path",
         "-mp",
-        help="Path to the embeddings file",
+        help="Path to the embeddings file (skips model/dataset lookup)",
+        default=None,
     )
     parser.add_argument(
         "--save_path",
@@ -249,7 +265,23 @@ if __name__ == "__main__":
     for arg, value in vars(args).items():
         log.append(f"{arg}: {value}")
 
-    main(args, log)
+    # If model name is given as input, only run that model. Otherwise run all models on all datasets.
+    if bool(args.model_name and args.dataset_name and args.input_path):
+        log.append(f"Running Hausdorff on single model and dataset")
+        main(args.model_name, args.dataset_name, args.input_path, log)
+    else:
+        log.append(f"Running Hausdorff on {MODELS} and {DATASETS}")
+
+        for model_name in MODELS:
+            for dataset_name in DATASETS:
+                input_path = os.path.join(
+                    "cami2_benchmark",
+                    "model_results",
+                    f"{dataset_name}",
+                    f"{model_name}_output",
+                    "test",
+                )
+                main(model_name, dataset_name, input_path, log)
 
     end_time = time()
     elapsed_time = end_time - start_time
