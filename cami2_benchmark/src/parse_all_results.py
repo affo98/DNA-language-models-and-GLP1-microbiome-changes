@@ -51,7 +51,7 @@ OTHER_MODELS = [
 def parse_quality_report(file_path):
     """Parses a CheckM2 quality report and extracts completeness & contamination."""
     df = pd.read_csv(file_path, sep="\t")
-    df = df[df["Contamination"] < 20]
+    df = df[df["Contamination"] < 10]
     return df["Completeness"].values
 
 
