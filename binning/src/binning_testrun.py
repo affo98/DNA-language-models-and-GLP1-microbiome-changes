@@ -23,7 +23,7 @@ def main():
     save_path = "./binning_testrun/"
     os.makedirs(save_path, exist_ok=True)
 
-    embeddings_file = "./cami2_processing/model_results/metahit/dnaberts_output/test/embeddings/embeddings.npy"
+    embeddings_file = "cami2_processing/model_results/metahit/dnaberts_output/test/embeddings/embeddings.npy"
     # embeddings_file = f"{save_path}embeddings.npy"
 
     N, D = 29_458_443, 768  # number of embeddings × dim #size of T2D-EW contigs
