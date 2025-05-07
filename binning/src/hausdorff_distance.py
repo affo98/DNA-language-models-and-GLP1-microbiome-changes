@@ -266,7 +266,7 @@ if __name__ == "__main__":
     # If model name is given as input, only run that model. Otherwise run all models on all datasets.
     if bool(args.model_name and args.dataset_name and args.input_path):
         log.append(f"Running Hausdorff on single model and dataset")
-        main(args.model_name, args.dataset_name, args.input_path, log)
+        main(args.model_name, args.dataset_name, args.input_path, args.save_path, log)
     else:
         log.append(f"Running Hausdorff on {MODELS} and {DATASETS}")
 
@@ -279,7 +279,7 @@ if __name__ == "__main__":
                     f"{model_name}_output",
                     "test",
                 )
-                main(model_name, dataset_name, input_path, log)
+                main(model_name, dataset_name, input_path, args.save_path, log)
 
     end_time = time()
     elapsed_time = end_time - start_time
