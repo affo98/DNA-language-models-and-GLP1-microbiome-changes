@@ -118,7 +118,7 @@ class Threshold:
         # global_min = torch.tensor(-1.0, dtype=torch.float32, device=self.device)
         # global_max = torch.tensor(1.0, dtype=torch.float32, device=self.device)
 
-        # ---------------- Histogram pass ----------------
+        # ---------------- Histogram pass ----------------a
         for i in tqdm(range(0, n_samples, self.block_size), desc="Calculating knns"):
             i_end = min(i + self.block_size, n_samples)
             emb_i = torch.from_numpy(self.embeddings_np[i:i_end]).to(self.device)
