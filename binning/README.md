@@ -102,4 +102,4 @@ python binning.py \
 
 
 
-Note: the binning script is used in the Snakemake file in the `cami2_processing` directory.
+Note: the binning script is used in the Snakemake files in the `cami2_processing` and `phenotype_mil` directories.
