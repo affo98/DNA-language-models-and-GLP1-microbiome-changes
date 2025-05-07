@@ -65,6 +65,7 @@ if [[ ! -d "$ENV_DIR" ]]; then
 fi
 conda activate "$ENV_DIR"
 
+
 # Print node and GPU info
 echo "Running on node: $(hostname)"; nvidia-smi
 
@@ -76,11 +77,11 @@ echo "Running on node: $(hostname)"; nvidia-smi
 
 
 #2a Run sweeps on cami2_benchmark
-chmod +x cami2_benchmark/sweeps/run_models.sh
-cami2_benchmark/sweeps/run_models.sh airways_short gastro_short oral_short skin_short urogenital_short marine_short plant_short metahit -- dnaberth_2mv1_150k
-
+#chmod +x cami2_benchmark/sweeps/run_models.sh
+#cami2_benchmark/sweeps/run_models.sh airways_short gastro_short oral_short skin_short urogenital_short marine_short plant_short metahit -- dnaberth_2mv1_150k
 
 #2b Run the Snakemake pipeline
+
 # SNAKEFILE=~/l40_test/DNA-language-models-and-GLP1-microbiome-changes/phenotype_mil/Snakefile
 # WORKDIR=~/l40_test/DNA-language-models-and-GLP1-microbiome-changes
 # CONFIG="--config DATASET=T2D-EW MODEL=dnaberts CHECKM2=True"
