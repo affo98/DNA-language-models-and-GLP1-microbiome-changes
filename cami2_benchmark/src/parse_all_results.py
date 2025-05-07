@@ -21,6 +21,7 @@ PROCESSED_DATA_DIR = os.path.join("cami2_benchmark", "processed_data")
 OUTPUT_DIR = os.path.join("cami2_benchmark", "model_results", "parsed_results")
 
 COMPLETENESS_BINS = [90, 80, 70, 60, 50]
+CONTAMINATION = 5
 
 BINNER_MODELS = ["vamb", "taxvamb", "comebin"]
 
@@ -51,7 +52,7 @@ OTHER_MODELS = [
 def parse_quality_report(file_path):
     """Parses a CheckM2 quality report and extracts completeness & contamination."""
     df = pd.read_csv(file_path, sep="\t")
-    df = df[df["Contamination"] < 10]
+    df = df[df["Contamination"] < CONTAMINATION]
     return df["Completeness"].values
 
 
