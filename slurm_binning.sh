@@ -67,7 +67,7 @@ conda activate "$ENV_DIR"
 
 
 # Print node and GPU info
-echo "Running on node: $(hostname)"; nvidia-smi
+#echo "Running on node: $(hostname)"; nvidia-smi
 
 #conda clean --index-cache --packages --tarballs --yes #uncomment if problems with conda envs
 
