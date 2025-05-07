@@ -89,7 +89,7 @@ class Embedder:
             self.log.append(f"Embeddings shape: {embeddings.shape}")
             if self.normalize_embeddings:
                 embeddings = normalize(embeddings)
-            save_path = (os.path.join(self.save_path, "embeddings", f"embeddings.npy"),)
+            save_path = os.path.join(self.save_path, "embeddings", f"embeddings.npy")
             np.savez(save_path, embeddings=embeddings, contig_names=self.contig_names)
             torch.cuda.empty_cache()
             return embeddings
@@ -99,6 +99,7 @@ class Embedder:
             "dnaberth_400k",
             "dnaberth_2mv1",
             "dnaberth_2mv2",
+            "dnaberth_2mv1_150k",
             "dnabert2",
             "dnabert2random",
         ]:

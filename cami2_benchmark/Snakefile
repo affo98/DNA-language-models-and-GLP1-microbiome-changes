@@ -40,7 +40,7 @@ BATCH_SIZES=None
 WEIGHT_PATH=None
 if MODEL in other_model_config.keys():
     MODEL_PATH = other_model_config[MODEL]["model_path"]
-    BATCH_SIZES = other_model_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnaberth_400k', 'dnaberth_2mv1', 'dnaberth_2mv2', 'dnabert2', 'dnabert2random'] else 0
+    BATCH_SIZES = other_model_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnaberth_400k', 'dnaberth_2mv1', 'dnaberth_2mv2', 'dnaberth2mv1_150k', 'dnabert2', 'dnabert2random'] else 0
     WEIGHT_PATH = other_model_config[MODEL]["weight_path"] if 'dnaberth' in  MODEL else None
 
 #processing flow of snakemake 

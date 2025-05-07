@@ -26,6 +26,11 @@ dnaberth_2mv2:
   batch_sizes: [32, 8, 1]
   weight_path: "train/dnaberth_weights/dnaberth_2mv2"
 
+dnaberth_2mv1_150k:
+  model_path: "zhihan1996/DNABERT-S"
+  batch_sizes: [32, 8, 1]
+  weight_path: "train/dnaberth_weights/dnaberth_2mv1_150k"
+
 dnabert2:
   model_path: "zhihan1996/DNABERT-2-117M"
   batch_sizes: [32, 8, 1]
