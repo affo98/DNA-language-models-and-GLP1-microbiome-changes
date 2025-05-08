@@ -226,7 +226,7 @@ def get_args(argv):
     # Training parameters
     parser.add_argument('--max_length', type=int, default=2000, help="Max length of tokens")
     parser.add_argument('--batch_size', type=int, default=18, help="Batch size used for training/validating dataset")
-    parser.add_argument('--lr', type=float, default=7e-07, help="Learning rate")
+    parser.add_argument('--lr', type=float, default=8e-06, help="Learning rate")
     parser.add_argument('--lr_scale', type=int, default=100, help="")
     parser.add_argument('--min_lr', type=float, default=0.0, help='Minimum learning rate for cosine scheduler')
     parser.add_argument('--warmup_epochs', type=float, default=0.3, help='Number of warmup epochs for learning rate')

@@ -60,7 +60,7 @@ class HMLC(nn.Module):
         mask = torch.ones(labels.shape).to(device)
         cumulative_loss = torch.tensor(0.0).to(device)
         max_loss_lower_layer = torch.tensor(float('-inf'))
-        for l in range(1,labels.shape[1]):
+        for l in range(labels.shape[1]):
             mask[:, labels.shape[1]-l:] = 0
             layer_labels = labels * mask
             mask_labels = torch.stack([torch.all(torch.eq(layer_labels[i], layer_labels), dim=1)
@@ -68,14 +68,14 @@ class HMLC(nn.Module):
             layer_loss = self.sup_con_loss(features, mask=mask_labels)
             if self.loss_type == 'hmc':
                 cumulative_loss += self.layer_penalty(torch.tensor(
-                  1/(l)).type(torch.float)) * layer_loss
+                  1/(l+1)).type(torch.float)) * layer_loss
             elif self.loss_type == 'hce':
                 layer_loss = torch.max(max_loss_lower_layer.to(layer_loss.device), layer_loss)
                 cumulative_loss += layer_loss
             elif self.loss_type == 'hmce':
                 layer_loss = torch.max(max_loss_lower_layer.to(layer_loss.device), layer_loss)
                 cumulative_loss += self.layer_penalty(torch.tensor(
-                    1/l).type(torch.float)) * layer_loss
+                    1/(l+1)).type(torch.float)) * layer_loss
             else:
                 raise NotImplementedError('Unknown loss')
             _, unique_indices = unique(layer_labels, dim=0)

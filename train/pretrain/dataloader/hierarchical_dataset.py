@@ -83,14 +83,14 @@ class GenomeHierarchihcalDataset(Dataset):
         sequences1, sequences2, labels = [], [], []
         if self.train:
             for i in index:
-                label = [self.species[i], self.genus[i], self.family[i], self.order[i], self.class_[i], self.phylum[i], self.kingdom[i], self.superkingdom[i]]
+                label = [self.superkingdom[i], self.kingdom[i], self.phylum[i], self.class_[i], self.order[i], self.family[i], self.genus[i], self.species[i]]
                 rand_i = random.choice(list(range(200)))
                 sequences1.append(self.seq1[i][rand_i:])
                 sequences2.append(self.seq2[i][rand_i:])
                 labels.append(label)
         else:
             for i in index:
-                label = [self.species[i], self.genus[i], self.family[i], self.order[i], self.class_[i], self.phylum[i], self.kingdom[i], self.superkingdom[i]]
+                label = [self.superkingdom[i], self.kingdom[i], self.phylum[i], self.class_[i], self.order[i], self.family[i], self.genus[i], self.species[i]]
                 sequences1.append(self.seq1[i])
                 sequences2.append(self.seq2[i])
                 labels.append(label)
@@ -206,7 +206,7 @@ class HierarchicalBatchSampler(Sampler):
             
             # Create hierarchical path with corresponding label dictionaries
             hierarchy_path = [
-                (superkingdom, self.dataset.labels),
+                #(superkingdom, self.dataset.labels),
                 (kingdom, self.dataset.labels[superkingdom]),
                 (phylum, self.dataset.labels[superkingdom][kingdom]),
                 (class_, self.dataset.labels[superkingdom][kingdom][phylum]),
@@ -242,7 +242,7 @@ class HierarchicalBatchSampler(Sampler):
 class TrainDataset(Dataset):
     def __init__(self, args):
         # Set chunk size (multiple of batch size is efficient)
-        self.chunk_size = args.batch_size * 31
+        self.chunk_size = args.batch_size * 3881
 
         self.datapath = args.datapath
         self.file_pattern = "train_2m_{}.tsv"
@@ -400,14 +400,14 @@ class TrainDataset(Dataset):
         
         # Fast numpy array indexing for numerical values
         label = [
-            int(self.current_data['species'][relative_idx]),
-            int(self.current_data['genus'][relative_idx]),
-            int(self.current_data['family'][relative_idx]),
-            int(self.current_data['order'][relative_idx]),
-            int(self.current_data['class_'][relative_idx]),
-            int(self.current_data['phylum'][relative_idx]),
+            int(self.current_data['superkingdom'][relative_idx]),
             int(self.current_data['kingdom'][relative_idx]),
-            int(self.current_data['superkingdom'][relative_idx])
+            int(self.current_data['phylum'][relative_idx]),
+            int(self.current_data['class_'][relative_idx]),
+            int(self.current_data['order'][relative_idx]),
+            int(self.current_data['family'][relative_idx]),
+            int(self.current_data['genus'][relative_idx]),
+            int(self.current_data['species'][relative_idx]),
         ]
         
         # For training data, cut from random position
@@ -520,8 +520,8 @@ class ValidationBatchSampler(Sampler):
         return self.num_samples // self.batch_size
     
 def load_deep_genome_hierarchical(args):
-    #train_dataset = GenomeHierarchihcalDataset(args, load_train=True)
-    train_dataset = TrainDataset(args)
+    #train_dataset = TrainDataset(args)
+    train_dataset = GenomeHierarchihcalDataset(args, load_train=True)
     val_dataset = GenomeHierarchihcalDataset(args, load_train=False)
     
     sequence_datasets = {'train': train_dataset,
