@@ -292,7 +292,7 @@ rule vamb:
     shell:
         """
         mkdir -p {OUTDIR_BINNING_RESULTS}/{DATASET}
-        vamb bin default --outdir {output.dirs} --fasta {input.catalogue} --bamfiles {input.bams}
+        vamb bin default --outdir {output.dirs} --fasta {input.catalogue} --bamdir {input.bams}
         """
 
 rule move_cluster_outputs_vamb:
