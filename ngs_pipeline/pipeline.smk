@@ -285,12 +285,12 @@ rule alignment:
     benchmark:
         os.path.join(BENCHMARKS, "alignment", "{sample}.txt")
     threads:
-        64
+        192
     resources:
         mem_gb=220
     conda:
-        os.path.join(CONDA_ENVS, "minimap2.yaml")
-        # os.path.join(CONDA_ENVS, "strobealign.yaml")
+        # os.path.join(CONDA_ENVS, "minimap2.yaml")
+        os.path.join(CONDA_ENVS, "strobealign.yaml")
     shell:
         # """
         # minimap2 -t {threads} -ax sr {input.contig_catalogue_index} {input.r1} {input.r2} | samtools view -bS | samtools sort -o {output}
