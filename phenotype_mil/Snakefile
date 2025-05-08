@@ -316,7 +316,7 @@ rule create_fasta_bins_vamb:
     log:
         log_file=os.path.join(LOGS, DATASET, "vamb_bin_postprocessing.log")
     params:
-        minsize_bins = MINSIZE_BINS
+        minsize_bins = MINSIZE_BINS,
         clusters_filtered = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_output", "clusters_filtered.tsv")
     conda: 
         os.path.join(CAMI2_DIR, "envs/vamb.yml")
