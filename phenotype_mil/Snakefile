@@ -60,7 +60,7 @@ config_phenotype_mil = bool(config.get("PHENOTYPE_MIL", False))
 
 #contig params
 MINSIZE_BINS=200000 #changed from 250000 in cami2, could potentially be smaller, e.g. 150.000
-MINSIZE_CONTIGS=2000 #do we need this?
+MINSIZE_CONTIGS=2000 #do we need this?<
 
 #knn/binning params
 KNN_K = [100,200,300,400,500,600,700,800,900,1000]
@@ -125,9 +125,9 @@ elif MODEL in ['dnabert2random'] and not config_nomodelrun:
     ]
 elif MODEL=='vamb' and not config_nomodelrun:
     input_files += [
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_postprocess"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "vamb"),
+        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_output"),
+        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_postprocess"),
+        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "vamb"),
     ]
 if config_checkm2:
     input_files += [os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "checkm2", f"{MODEL}_results")]
@@ -291,7 +291,7 @@ rule vamb:
         os.path.join(CAMI2_DIR, "envs/vamb.yml")
     shell:
         """
-        mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
+        mkdir -p {OUTDIR_BINNING_RESULTS}/{DATASET}
         vamb bin default --outdir {output.dirs} --fasta {input.catalogue} --bamfiles {input.bams}
         """
 
