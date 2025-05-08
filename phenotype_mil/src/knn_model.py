@@ -21,26 +21,29 @@ def fit_predict_knn(
     fold: int,
     output_path: str,
     weights: str = "uniform",
-) -> np.ndarray:
+) -> tuple[np.ndarray, np.ndarray]:
 
     knn = KNeighborsClassifier(n_neighbors=k, weights=weights)
     knn.fit(X_train, y_train)
+
     y_pred = knn.predict(X_test)
+    y_predprob = knn.predict_proba(X_test)[:, 1]  # Probability of class 1
 
-    ###Z SCALE
-    pca = PCA(n_components=2)
-    X_train_pca = pca.fit_transform(X_train)
+    # PCA for decision boundary visualization
+    # pca = PCA(n_components=2)
+    # X_train_pca = pca.fit_transform(X_train)
 
-    if X_train_pca.shape[1] == 2 and output_path and fold is not None:
-        plot_knn_decision_boundary(
-            X=X_train_pca,
-            y=y_train,
-            k=k,
-            weights=weights,
-            title=f"KNN Decision Boundary (Fold {fold})",
-            save_path=os.path.join(output_path, f"knn_boundary_fold{fold}.png"),
-        )
-    return y_pred
+    # if X_train_pca.shape[1] == 2 and output_path and fold is not None:
+    #     plot_knn_decision_boundary(
+    #         X=X_train_pca,
+    #         y=y_train,
+    #         k=k,
+    #         weights=weights,
+    #         title=f"KNN Decision Boundary (Fold {fold})",
+    #         save_path=os.path.join(output_path, f"knn_boundary_fold{fold}.png"),
+    #     )
+
+    return y_pred, y_predprob
 
 
 def plot_knn_decision_boundary(

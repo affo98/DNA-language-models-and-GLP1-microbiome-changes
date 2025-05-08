@@ -57,6 +57,7 @@ config_checkm2 = bool(config.get("CHECKM2", False))
 config_nomodelrun = bool(config.get("NOMODELRUN", False))
 config_process_abundances = bool(config.get("PROCESS_ABUNDANCES", False))
 config_phenotype_mil = bool(config.get("PHENOTYPE_MIL", False))
+config_hausdorff = bool(config.get("HAUSDORFF", False))
 
 
 #contig params
@@ -87,45 +88,18 @@ print(f"  - No model run:             {config_nomodelrun}")
 print(f"  - KNN params:               K:{KNN_K}, P:{KNN_P}")
 print(f"  - Phenotype MIL:            {config_phenotype_mil}")
 print(f"  - MIL Method:               {MIL_METHODS}")
+print(f"  - Hausdorff:                {config_hausdorff}")
 
 
 
 input_files = []
-#OTHER MODELS
-if MODEL in ['tnf'] and not config_nomodelrun:
-    input_files += [
-        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "tnf_output", "test"),
-        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "tnf"),
-    ]
-elif MODEL in ['tnfkernel'] and not config_nomodelrun:
-    input_files += [
-        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "tnfkernel_output", "test"),
-        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "tnfkernel"),
-    ]
 
-elif MODEL in ['dna2vec'] and not config_nomodelrun:
-    input_files += [
-        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "dna2vec_output", "test"),
-        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "dna2vec"),
-    ]
-
-
-elif MODEL in ['dnaberts'] and not config_nomodelrun:
+if MODEL in ['dnaberts'] and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "dnaberts_output", "test"),
         os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "dnaberts"),
     ]
 
-elif MODEL in ['dnabert2'] and not config_nomodelrun:
-    input_files += [
-        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "dnabert2_output", "test"),
-        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "dnabert2"),
-    ]
-elif MODEL in ['dnabert2random'] and not config_nomodelrun:
-    input_files += [
-        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "dnabert2random_output", "test"),
-        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "dnabert2random"),
-    ]
 if config_checkm2:
     input_files += [os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "checkm2", f"{MODEL}_results")]
 
@@ -133,6 +107,9 @@ if config_checkm2:
 if config_process_abundances:
     input_files += [os.path.join(PROCESSED_DATA_DIR, "abdn_coverm", "normalized_abundances.tsv"),
                     os.path.join(OUTDIR_BINNING_RESULTS, DATASET, f"{MODEL}_output", "test", "cluster_abundances.tsv")],    
+
+if config_hausdorff:
+    input_files += [os.path.join(OUTDIR_BINNING_RESULTS, DATASET, f"{MODEL}_output", "hausdorff")]
 
 if config_phenotype_mil:
     input_files += [os.path.join(OUTDIR_MIL_RESULTS, DATASET, f"{MODEL}_results")]
@@ -326,6 +303,26 @@ rule get_cluster_abundances:
     shell:
         """
         python {SRC_DIR}/get_cluster_abundances.py {input.filtered_clusters} {input.norm_abun} {output}
+        """
+
+
+rule get_hausdorff_distances:
+    input:
+        cluster_dir = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test")
+    output:
+        result_dir = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "hausdorff")
+    log:
+        os.path.join(LOGS, DATASET, "{MODEL}_hausdorff.log"),
+    conda:
+        "envs/phenotype_mil.yml",
+    shell:
+        """
+        python {SRC_DIR}/hausdorff_distance.py \
+            --model_name {MODEL} \
+            --dataset_name {DATASET} \
+            --input_path {input.cluster_dir} \
+            --save_path {output.result_dir} \
+            --log {log}
         """
 
 

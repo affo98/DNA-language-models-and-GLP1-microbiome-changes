@@ -31,6 +31,28 @@ class Logger:
             log_file.write(message + "\n")
 
 
+def read_hausdorff(path: str, log: Logger) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Reads a saved Hausdorff distance matrix and cluster names from a .npz file.
+
+
+    Returns:
+    - Tuple of (distance_matrix, cluster_names)
+    """
+    log.append(f"Loading Hausdorff distance matrix from {path}")
+    data = np.load(path, allow_pickle=True)
+
+    distance_matrix = data["distance_matrix"]
+    cluster_names = data["cluster_names"]
+
+    assert distance_matrix.shape[0] == distance_matrix.shape[1] == len(cluster_names)
+
+    log.append(f"Loaded distance matrix with shape {distance_matrix.shape}")
+    log.append(f"Loaded {len(cluster_names)} cluster names")
+
+    return distance_matrix, cluster_names
+
+
 def read_cluster_abundances(
     abundance_path: str, sample_ids: np.array, log: Logger
 ) -> pd.DataFrame:
@@ -60,24 +82,6 @@ def read_cluster_abundances(
     )
 
     return cluster_abundances
-
-
-# def read_embeddings(
-#     input_path: str, log: Logger)-> tuple[np.mmap, list[str]]:
-
-#     n_test = with open(os.path.join(input_path, 'n_total_val_test.json')) as f:
-#         n_val_test_data = json.load(f)
-
-#     n_test = n_val_test_data['n_test']
-#     log.append(f"Number of test contigs: {n_test}")
-
-#     ##################FILL IN CORRECTLY#######################
-#     embeddings = np.memmap(os.path.join(input_path, 'embeddings','embeddings.npy'), dtype="float32", mode="r", shape=(n_test, 768))
-#     #embeddings_array = np.array(embeddings) #may be too large to handle
-#     contig_names = np.load('contignames.npy', allow_pickle=True)
-
-
-#     return embeddings, contig_names
 
 
 def read_clusters(clusters_path: str, log: Logger) -> dict[str, set[str]]:
