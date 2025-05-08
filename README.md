@@ -11,7 +11,7 @@ By Anders Hjulmand, Andreas Flensted, Eisuke Okuda.
 - [Welcome to Shinkansen's Msc in Data Science Project](#welcome-to-shinkansens-msc-in-data-science-project)
   - [Contents](#contents)
   - [1. Introduction](#1-introduction)
-  - [2. Model and Training Data](#2-model-and-training-data)
+  - [2. Model](#2-model)
   - [3. Setup environment](#3-setup-environment)
   - [4. Quick start](#4-quick-start)
   - [5. Training](#5-training)
@@ -33,15 +33,11 @@ DNABERT-H is beneficial for application in metagenomics, including metagenomics 
 
 
 
-## 2. Model and Training Data
+## 2. Model
 
 The pre-trained model is available at [insert link]. 
 
 Place the model in the directory `train/dnaberth_weights/`.
-
-The training data is available at [insert link].
-
-The evaluation data is available at [insert link].
 
 
 ## 3. Setup environment
