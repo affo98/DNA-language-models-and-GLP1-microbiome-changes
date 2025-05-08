@@ -30,7 +30,7 @@ DATASET_ID = [d["id"] for d in datasets_model_config["studies"] if d["name"] == 
 
 ALL_MODELS  = models_config.keys()
 MODEL = config.get("MODEL", None)
-assert MODEL==None or MODEL in ALL_MODELS+['vamb'], f"Error: Selected model '{MODEL}' is not in the available DATASET: {ALL_MODELS}"
+assert MODEL==None or MODEL in list(ALL_MODELS)+['vamb'], f"Error: Selected model '{MODEL}' is not in the available DATASET: {ALL_MODELS}"
 
 
 MODEL_PATH=None
