@@ -237,7 +237,7 @@ rule parse_checkm2_val:
         """
 # #-end val
 
-# #-start test
+# #-start test#
 rule other_model_test:
     input:  
         catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
