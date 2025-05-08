@@ -279,6 +279,7 @@ rule create_fasta_bins_other_model_test:
         """
 #End Other model
 
+#VAMB
 rule vamb:
     input:
         catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
