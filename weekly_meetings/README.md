@@ -3,7 +3,8 @@
 [Overleaf report](https://www.overleaf.com/project/679796b5a02b660e4f96beff)
 
 #### Meeting Outline
-* [01 May 2025] (#date-30-may-2025)
+* [08 May 2025](#date-30-january-2025)
+* [01 May 2025](#date-30-january-2025)
 * [23 April 2025](#date-30-january-2025)
 * [09 April 2025](#date-30-january-2025)
 * [03 April 2025](#date-30-january-2025)
@@ -13,6 +14,36 @@
 * [27 February 2025](#date-30-january-2025)
 * [20 February 2025](#date-30-january-2025)
 * [06 February 2025](#date-30-january-2025)
+
+
+
+#### Date: 08 May 2025
+
+##### Who did you help this week?
+
+
+##### Who helped you this week?
+- Inna helped us with hpc batch jobs
+
+##### What did you achieve?
+
+- Processing Novo Data.
+- Wrote 7 pages on the paper.
+
+
+##### What did you struggle with?
+- Out of memory errors on HPC in the embeddings calculations, we have 30M embeddings. Started new job that should work.
+- We tested 3 versions of our model (DNABERT-H) on CAMI2 and results were terrible. It turns out that there is a small error in our pre-training code which caused the bad results. We have fixed that code and are now training again.
+
+
+![cami2results](images/cami2_8may.png)
+
+
+##### Where do you need help from Veronika?
+
+- In sparse group lasso we need to assign each cluster to a group. We have an idea to get these groups of clusters: 1) compute Hausdorff distances between clusters, 2) then use clustering algorithm (e.g. HDBSCAN) on the Hausdorff Matrix. 
+
+
 
 
 
