@@ -184,8 +184,8 @@ rule kneaddata:
          --threads {threads}\
          -o {params.tmp_dir}\
 
-         cp {params.tmp_dir}/1_kneaddata_paired_1.fastq {output.p1}
-         cp {params.tmp_dir}/1_kneaddata_paired_2.fastq {output.p2}
+         cp {params.tmp_dir}/{wildcards.sample}_1_kneaddata_paired_1.fastq {output.p1}
+         cp {params.tmp_dir}/{wildcards.sample}_1_kneaddata_paired_2.fastq {output.p2}
         
          rm -rf {params.tmp_dir}
          """
