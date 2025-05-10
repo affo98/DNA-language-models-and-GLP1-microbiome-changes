@@ -248,7 +248,7 @@ if __name__ == "__main__":
     start_time = time()
     args = add_arguments()
 
-    os.makedirs(args.save_path)
+    os.makedirs(args.save_path, exist_ok=True)
     log = Logger(os.path.join(args.save_path, args.log))
     for arg, value in vars(args).items():
         log.append(f"{arg}: {value}")
