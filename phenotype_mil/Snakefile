@@ -280,51 +280,51 @@ rule create_fasta_bins_other_model_test:
 #End Other model
 
 #VAMB
-rule vamb:
-    input:
-        catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
-        bams = os.path.join(PROCESSED_DATA_DIR, "algn")
-        #bams=expand(os.path.join(PROCESSED_DATA_DIR, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
-    output:
-        dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_output"))
-    conda:
-        os.path.join(CAMI2_DIR, "envs/vamb.yml")
-    shell:
-        """
-        mkdir -p {OUTDIR_BINNING_RESULTS}/{DATASET}
-        vamb bin default --outdir {output.dirs} --fasta {input.catalogue} --bamdir {input.bams}
-        """
+# rule vamb:
+#     input:
+#         catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
+#         bams = os.path.join(PROCESSED_DATA_DIR, "algn")
+#         #bams=expand(os.path.join(PROCESSED_DATA_DIR, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+#     output:
+#         dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_output"))
+#     conda:
+#         os.path.join(CAMI2_DIR, "envs/vamb.yml")
+#     shell:
+#         """
+#         mkdir -p {OUTDIR_BINNING_RESULTS}/{DATASET}
+#         vamb bin default --outdir {output.dirs} --fasta {input.catalogue} --bamdir {input.bams}
+#         """
 
-rule move_cluster_outputs_vamb:
-    input:
-        model_outputs=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_output")
-    output:
-        cluster_results=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_postprocess"))
-    conda:
-        "envs/snakeenv.yml"
-    shell:
-        """
-        python {SRC_DIR_CAMI2}/move_cluster_outputs_vamb.py {output.cluster_results} {input.model_outputs}
-        """
+# rule move_cluster_outputs_vamb:
+#     input:
+#         model_outputs=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_output")
+#     output:
+#         cluster_results=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_postprocess"))
+#     conda:
+#         "envs/snakeenv.yml"
+#     shell:
+#         """
+#         python {SRC_DIR_CAMI2}/move_cluster_outputs_vamb.py {output.cluster_results} {input.model_outputs}
+#         """
 
-rule create_fasta_bins_vamb:
-    input:
-        catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
-        cluster_results=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_postprocess")
-    output:
-        dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "vamb"))
-    log:
-        log_file=os.path.join(LOGS, DATASET, "vamb_bin_postprocessing.log")
-    params:
-        minsize_bins = MINSIZE_BINS,
-        clusters_filtered = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_output", "clusters_filtered.tsv"),
-    conda: 
-        os.path.join(CAMI2_DIR, "envs/vamb.yml")
-    shell:
-        """
-        python {SRC_DIR_CAMI2}/create_fasta.py {input.catalogue} {input.cluster_results}/vamb_output_clusters.tsv {params.minsize_bins} {output.dirs} \
-        --log {log.log_file} --outtsv {params.clusters_filtered}
-        """
+# rule create_fasta_bins_vamb:
+#     input:
+#         catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
+#         cluster_results=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_postprocess")
+#     output:
+#         dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "vamb"))
+#     log:
+#         log_file=os.path.join(LOGS, DATASET, "vamb_bin_postprocessing.log")
+#     params:
+#         minsize_bins = MINSIZE_BINS,
+#         clusters_filtered = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_output", "clusters_filtered.tsv"),
+#     conda: 
+#         os.path.join(CAMI2_DIR, "envs/vamb.yml")
+#     shell:
+#         """
+#         python {SRC_DIR_CAMI2}/create_fasta.py {input.catalogue} {input.cluster_results}/vamb_output_clusters.tsv {params.minsize_bins} {output.dirs} \
+#         --log {log.log_file} --outtsv {params.clusters_filtered}
+#         """
 #END VAMB
 
 rule checkm2:
