@@ -19,10 +19,10 @@
 
 
 #1b For small testing
-#SBATCH --output=t2dew_small_%j.out
-#SBATCH --error=slurm_small_%j.err 
-#SBATCH --partition=scavenge
-#SBATCH --time=04:00:00
+# #SBATCH --output=t2dew_small_%j.out
+# #SBATCH --error=slurm_small_%j.err 
+# #SBATCH --partition=scavenge
+# #SBATCH --time=04:00:00
 
 
 #1c Using 2x H100 
@@ -36,13 +36,13 @@
 
 
 #1b Using 4x A100 (40gb) 
-# #SBATCH --output=t2dew_a100_%j.out
-# #SBATCH --error=slurm_a100_%j.err 
-# #SBATCH --exclude=cn[1-12]
-# #SBATCH --exclude=cn[14-19]
-# #SBATCH --exclude=desktop[1-16]
-# #SBATCH --nodelist=cn13                        
-# #SBATCH --gres=gpu:a100:4
+#SBATCH --output=t2dew_a100_%j.out
+#SBATCH --error=slurm_a100_%j.err 
+#SBATCH --exclude=cn[1-12]
+#SBATCH --exclude=cn[14-19]
+#SBATCH --exclude=desktop[1-16]
+#SBATCH --nodelist=cn13                        
+#SBATCH --gres=gpu:a100:4
 
 
 #---------------------Setup-------------------------
