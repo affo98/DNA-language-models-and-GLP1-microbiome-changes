@@ -41,8 +41,8 @@
 #SBATCH --exclude=cn[3-12]
 #SBATCH --exclude=cn[14-19]
 #SBATCH --exclude=desktop[1-16]
-##SBATCH --nodelist=cn13                        
-#SBATCH --gres=gpu:a100:4
+#SBATCH --nodelist=cn13                        
+##SBATCH --gres=gpu:a100:4
 
 
 #---------------------Setup-------------------------
