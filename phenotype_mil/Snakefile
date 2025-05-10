@@ -300,7 +300,8 @@ rule move_cluster_outputs_vamb:
     output:
         cluster_results=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_postprocess"))
     conda:
-        "envs/snakeenv.yml"
+        #envs/snakeenv.yml"
+        os.path.join(CAMI2_DIR, "envs/vamb.yml")
     shell:
         """
         python {SRC_DIR_CAMI2}/move_cluster_outputs_vamb.py {output.cluster_results} {input.model_outputs}
