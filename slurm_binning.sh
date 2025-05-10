@@ -6,14 +6,6 @@
 #SBATCH --nodes=1
 #SBATCH --time=7-00:00:00
 
-#1b Using 4x A100 (40gb) 
-#SBATCH --output=t2dew_a100_%j.out
-#SBATCH --error=slurm_a100_%j.err 
-#SBATCH --exclude=cn[3-12]
-#SBATCH --exclude=cn[14-19]
-#SBATCH --exclude=desktop[1-16]
-#SBATCH --nodelist=cn13                        
-#SBATCH --gres=gpu:a100:4
 
 #-----------------1. Pick Node-----------------------
 
@@ -43,14 +35,14 @@
 # #SBATCH --gres=gpu:h100:2
 
 
-# #1b Using 4x A100 (40gb) 
-# #SBATCH --output=t2dew_a100_%j.out
-# #SBATCH --error=slurm_a100_%j.err 
-# #SBATCH --exclude=cn[3-12]
-# #SBATCH --exclude=cn[14-19]
-# #SBATCH --exclude=desktop[1-16]
-# #SBATCH --nodelist=cn13                        
-# #SBATCH --gres=gpu:a100:4
+#1b Using 4x A100 (40gb) 
+#SBATCH --output=t2dew_a100_%j.out
+#SBATCH --error=slurm_a100_%j.err 
+#SBATCH --exclude=cn[3-12]
+#SBATCH --exclude=cn[14-19]
+#SBATCH --exclude=desktop[1-16]
+#SBATCH --nodelist=cn13                        
+#SBATCH --gres=gpu:a100_40gb:4
 
 
 #---------------------Setup-------------------------
