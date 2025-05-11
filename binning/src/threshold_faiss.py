@@ -59,7 +59,7 @@ class ThresholdFAISS:
         gpu_index = faiss.index_cpu_to_gpu(res, 0, cpu_index)
 
         # Train on a subset (convert to float32 temporarily)
-        gpu_index.train(embeddings[:10_000].astype(np.float32))
+        gpu_index.train(embeddings[:20_000].astype(np.float32))
 
         # Add data in batches
         batch_size = 1_000_000
