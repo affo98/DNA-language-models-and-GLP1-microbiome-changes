@@ -82,7 +82,7 @@ class Threshold:
                 emb_j = (
                     torch.from_numpy(self.embeddings_np[j:j_end]).to(self.device).half()
                 )
-                sims_block = torch.mm(emb_i, emb_j.T).float()
+                sims_block = torch.mm(emb_i, emb_j.T)
 
                 # collect full row sims in memory-chunked fashion
                 # for each row in this block, get top-k indices across all j-chunks
@@ -110,8 +110,8 @@ class Threshold:
                 1, 2
             )  # (bs_i, 1, D)→(bs_i, D, 1)
             csims = torch.bmm(topk_embs, centroids).squeeze(-1).float().flatten()
-            global_min = torch.min(global_min, csims.min())
-            global_max = torch.max(global_max, csims.max())
+            global_min = torch.min(global_min, csims.min()).float()
+            global_max = torch.max(global_max, csims.max()).float()
 
             del topk_embs, centroids, csims, emb_i
             torch.cuda.empty_cache()
@@ -131,7 +131,7 @@ class Threshold:
                 emb_j = (
                     torch.from_numpy(self.embeddings_np[j:j_end]).to(self.device).half()
                 )
-                sims_block = torch.mm(emb_i, emb_j.T).float()
+                sims_block = torch.mm(emb_i, emb_j.T)
                 if j == 0:
                     partial_vals, partial_idx = torch.topk(
                         sims_block, self.knn_k, dim=1
