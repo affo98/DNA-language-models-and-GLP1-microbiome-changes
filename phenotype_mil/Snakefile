@@ -63,7 +63,8 @@ MINSIZE_BINS=200000 #changed from 250000 in cami2, could potentially be smaller,
 MINSIZE_CONTIGS=2000 #do we need this?<
 
 #knn/binning params
-KNN_K = [100,200,300,400,500,600,700,800,900,1000]
+#KNN_K = [100,200,300,400,500,600,700,800,900,1000]
+KNN_K = [100,200,300,400,500,600,700,800,900] #oom in threshold faiss w. 1000
 KNN_P = [25,50,75]
 
 if DATASET == 'T2D-EW': 
