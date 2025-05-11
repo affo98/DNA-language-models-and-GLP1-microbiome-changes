@@ -76,7 +76,8 @@ class ThresholdFAISS:
 
         # flat index
         cpu_index = faiss.IndexFlatIP(d)
-        self.index = faiss.index_cpu_to_all_gpus(res, 0, cpu_index)
+        # self.index = faiss.index_cpu_to_gpu(res, 0, cpu_index)
+        self.index = faiss.index_cpu_to_all_gpus(cpu_index)  # build the index
         self.index.add(embeddings)
         self.N = embeddings.shape[0]
         self.log.append(
