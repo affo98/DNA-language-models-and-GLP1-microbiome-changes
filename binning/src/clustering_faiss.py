@@ -51,7 +51,7 @@ class KMediodFAISS:
     ):
         self.check_params(embeddings, contig_names, min_bin_size, num_steps, max_iter)
 
-        device, gpu_count = get_available_device()
+        device, _ = get_available_device()
 
         self.embeddings_np = embeddings
         self.contig_names = contig_names
