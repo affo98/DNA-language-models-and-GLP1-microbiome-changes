@@ -13,6 +13,17 @@ class ThresholdFAISS:
     then finalizes histogram and saves outputs exactly like the original implementation.
     """
 
+    def check_params(
+        self,
+        embeddings: np.ndarray,
+        n_bins: int,
+    ):
+        if embeddings.dtype != np.float32:
+            embeddings = embeddings.astype(np.float32)
+            print("Embeddings changed to dtype float32")
+        if n_bins < 1:
+            raise ValueError("Number of bins must be at least 1")
+
     def __init__(
         self,
         embeddings: np.ndarray,
@@ -21,12 +32,7 @@ class ThresholdFAISS:
         model_name: str,
         log: Logger,
     ):
-        # Validate
-        if embeddings.dtype != np.float32:
-            embeddings = embeddings.astype(np.float32)
-            print("Embeddings cast to float32.")
-        # Assume embeddings are already L2-normalized
-        emb = embeddings
+        self.check_params(embeddings, n_bins)
 
         # Setup
         device, _ = get_available_device()
@@ -37,13 +43,12 @@ class ThresholdFAISS:
         self.model_name = model_name
 
         # Build FAISS GPU index for inner product search
-        d = emb.shape[1]
-        # Manage GPU resources for FAISS
+        d = embeddings.shape[1]
         res = faiss.StandardGpuResources()
         cpu_index = faiss.IndexFlatIP(d)
         self.index = faiss.index_cpu_to_gpu(res, 0, cpu_index)
-        self.index.add(emb)
-        self.N = emb.shape[0]
+        self.index.add(embeddings)
+        self.N = embeddings.shape[0]
         self.log.append(
             f"FAISS GPU index built: {self.N} normalized vectors of dim {d}"
         )
