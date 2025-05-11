@@ -8,6 +8,7 @@ import sys
 import os
 from tqdm import tqdm
 import time
+import torch
 
 
 from sklearn.preprocessing import normalize
@@ -94,6 +95,16 @@ def main():
 
     # embeddings_test = embeddings_test[:5_000_000]
     # contig_names_test = contig_names_test[:5_000_000]
+
+    free_mem, _ = torch.cuda.mem_get_info()  # bytes available
+    print(free_mem)
+    # each block_i @ block_jᵀ uses ~ 2 × (block_size × D) elements,
+    # at 2 bytes/elem in fp16. Solve: 2*block_size*D*2 <= free_mem * margin
+    margin = 0.9
+    D = embeddings_mm.shape[1]
+    max_bs = int((free_mem * margin / (4 * D)) ** 0.5)
+    print(max_bs)
+    block_size = min(block_size, max_bs, N)
 
     thresholder_test = Threshold(
         embeddings_test,
