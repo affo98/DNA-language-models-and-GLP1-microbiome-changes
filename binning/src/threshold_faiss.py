@@ -28,6 +28,7 @@ class ThresholdFAISS:
         self,
         embeddings: np.ndarray,
         n_bins: int,
+        block_size: int,
         save_path: str,
         model_name: str,
         log: Logger,
@@ -39,6 +40,7 @@ class ThresholdFAISS:
         self.device = device
         self.log = log
         self.n_bins = n_bins
+        self.block_size = block_size
         self.save_path = save_path
         self.model_name = model_name
 
@@ -55,18 +57,22 @@ class ThresholdFAISS:
 
     def get_knn_threshold(self, knn_k: int, knn_p: float) -> float:
         """
-        Query top-(k+1) neighbors (including self) via FAISS,
+        Query top-(k+1) neighbors (including self) via FAISS in batches,
         then finalize histogram and threshold exactly like the original code.
         """
         self.knn_k = knn_k
         self.knn_p = knn_p
 
-        # Step 1: retrieve top-(k+1) for all points
-        queries = self.index.reconstruct_n(0, self.N)
-        distances, _ = self.index.search(queries, knn_k + 1)
+        all_distances = []
 
-        # Step 2: drop self-match
-        sims_all = distances[:, 1:].reshape(-1)
+        for start in range(0, self.N, self.block_size):
+            end = min(start + self.block_size, self.N)
+            queries = self.index.reconstruct_n(start, end - start)
+            distances, _ = self.index.search(queries, knn_k + 1)
+            sims = distances[:, 1:].reshape(-1)
+            all_distances.append(sims)
+
+        sims_all = np.concatenate(all_distances)
 
         # compute histogram
         bin_vector = torch.tensor(

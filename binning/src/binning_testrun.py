@@ -123,6 +123,7 @@ def main():
     thresholder_test = ThresholdFAISS(
         embeddings_test,
         N_BINS,
+        BLOCK_SIZE,
         save_path,
         model_name,
         log,
