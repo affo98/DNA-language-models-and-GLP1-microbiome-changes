@@ -104,6 +104,7 @@ def main():
     D = embeddings_mm.shape[1]
     max_bs = int((free_mem * margin / (4 * D)) ** 0.5)
     print(max_bs)
+    max_bs = 200000
     block_size = min(BLOCK_SIZE, max_bs, N)
     print(block_size)
 
