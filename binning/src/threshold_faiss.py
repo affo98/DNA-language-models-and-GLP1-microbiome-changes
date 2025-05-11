@@ -106,21 +106,29 @@ class ThresholdFAISS:
         self.knn_k = knn_k
         self.knn_p = knn_p
 
-        bin_vector = torch.zeros(
-            self.n_bins, dtype=torch.float32, device=self.device
-        )  #
+        bin_vector = torch.zeros(self.n_bins, dtype=torch.float32, device=self.device)
 
         batch_size = 10000  # Adjust based on available memory
         n_samples = self.embeddings_np.shape[0]
-        neighbor_ids = []
 
-        for start_idx in range(0, n_samples, batch_size):
+        # Create memory-mapped array
+        mmap_file = os.path.join(self.save_path, "neighbor_ids.dat")
+        neighbor_ids = np.memmap(
+            mmap_file,
+            dtype=np.int32,  # FAISS indices are typically 32-bit
+            mode="w+",
+            shape=(n_samples, knn_k),
+        )
+
+        for batch_idx, start_idx in enumerate(range(0, n_samples, batch_size)):
             end_idx = min(start_idx + batch_size, n_samples)
             batch = self.embeddings_np[start_idx:end_idx]
-            distances, indices = self.index.search(batch, knn_k + 1)
-            neighbor_ids.append(indices[:, 1:])  # Exclude self
 
-        neighbor_ids = np.vstack(neighbor_ids)  # Combine batches
+            # Search in FAISS index
+            distances, indices = self.index.search(batch, knn_k + 1)
+
+            # Write directly to memmap
+            neighbor_ids[start_idx:end_idx, :] = indices[:, 1:]
 
         # for start in tqdm(
         #     range(0, self.N, self.block_size), desc="Calculating Threshold"
