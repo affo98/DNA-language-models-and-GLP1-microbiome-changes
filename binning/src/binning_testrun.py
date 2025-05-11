@@ -7,6 +7,8 @@ import numpy as np
 import sys
 import os
 from tqdm import tqdm
+import time
+
 
 from sklearn.preprocessing import normalize
 
@@ -102,7 +104,11 @@ def main():
         log,
         CONVERT_MILLION_EMB_GPU_SECONDS,
     )
+
+    start = time.perf_counter()
     threshold = thresholder_test.get_knn_threshold(KNN_K, KNN_P)
+    elapsed = time.perf_counter() - start
+    print(f"\n>> Total runtime Threshold: {elapsed:.2f} seconds")
     print(threshold)
 
     # threshold = 0.749390721321106
@@ -120,7 +126,10 @@ def main():
         MAX_ITER,
         BLOCK_SIZE,
     )
+    start = time.perf_counter()
     _, _ = kmediod_test.fit(threshold, KNN_K, KNN_P)
+    elapsed = time.perf_counter() - start
+    print(f"\n>> Total runtime K-MEDOID: {elapsed:.2f} seconds")
 
 
 if __name__ == "__main__":
