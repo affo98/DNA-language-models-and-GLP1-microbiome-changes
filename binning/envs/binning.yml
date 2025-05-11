@@ -1,25 +1,48 @@
 name: binning
 channels:
-  - pytorch
   - conda-forge
+  - pytorch
   - bioconda
   - defaults
 dependencies:
-  - python
-  - pip
+  - python=3.10 # or your required version
   - numpy
   - scikit-learn
   - biopython
   - tqdm
-  - faiss-gpu
+  - matplotlib
+  - seaborn
+  - pandas
+  - faiss-gpu # GPU version of FAISS from conda-forge
+  - pytorch # GPU-compatible PyTorch
+  - torchvision
+  - torchaudio
+  - pip
   - pip:
-      - torch
-      - torchvision
-      - torchaudio
-      - --extra-index-url https://download.pytorch.org/whl/cu118
       - transformers==4.50.3
       - einops
-      - matplotlib
-      - seaborn
-      - pandas
-      # - git+https://github.com/VarIr/scikit-hubness.git #hubness reduction
+# name: binning
+# channels:
+#   - pytorch
+#   - conda-forge
+#   - bioconda
+#   - defaults
+# dependencies:
+#   - python
+#   - pip
+#   - numpy
+#   - scikit-learn
+#   - biopython
+#   - tqdm
+#   - faiss-gpu
+#   - pip:
+#       - torch
+#       - torchvision
+#       - torchaudio
+#       - --extra-index-url https://download.pytorch.org/whl/cu118
+#       - transformers==4.50.3
+#       - einops
+#       - matplotlib
+#       - seaborn
+#       - pandas
+#       # - git+https://github.com/VarIr/scikit-hubness.git #hubness reduction
