@@ -117,7 +117,9 @@ class ThresholdFAISS:
             shape=(self.N, knn_k),
         )
 
-        for batch_idx, start_idx in enumerate(range(0, self.N, self.block_size)):
+        for start_idx in tqdm(
+            range(0, self.N, self.block_size), desc="Calculating Threshold"
+        ):
             end_idx = min(start_idx + self.block_size, self.N)
             batch = self.embeddings_np[start_idx:end_idx]
 
