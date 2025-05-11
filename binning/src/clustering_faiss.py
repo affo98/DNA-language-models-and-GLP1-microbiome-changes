@@ -124,7 +124,7 @@ class KMediodFAISS:
             medoid_idx = torch.argmax(density_vector).item()
             density_vector[medoid_idx] = -100  # rm seed contig
             # seed = torch.from_numpy(self.embeddings_np[medoid_idx]).to(self.device)
-            seed = self.embeddings[medoid_idx]
+            seed = self.embeddings_np[medoid_idx]
             available_mask = predictions == -1
 
             for _ in range(self.num_steps):
