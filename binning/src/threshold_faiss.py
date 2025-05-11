@@ -43,6 +43,7 @@ class ThresholdFAISS:
         self.block_size = block_size
         self.save_path = save_path
         self.model_name = model_name
+        self.embeddings_np = embeddings  # store for later use
 
         # Build FAISS GPU index for inner product search
         d = embeddings.shape[1]
@@ -58,21 +59,34 @@ class ThresholdFAISS:
     def get_knn_threshold(self, knn_k: int, knn_p: float) -> float:
         """
         Query top-(k+1) neighbors (including self) via FAISS in batches,
-        then finalize histogram and threshold exactly like the original code.
+        then compute similarity of each neighbor to the centroid of its k-NN.
+        Assumes embeddings are already normalized.
         """
         self.knn_k = knn_k
         self.knn_p = knn_p
 
-        all_distances = []
+        all_csims = []
 
         for start in range(0, self.N, self.block_size):
             end = min(start + self.block_size, self.N)
             queries = self.index.reconstruct_n(start, end - start)
-            distances, _ = self.index.search(queries, knn_k + 1)
-            sims = distances[:, 1:].reshape(-1)
-            all_distances.append(sims)
 
-        sims_all = np.concatenate(all_distances)
+            # Get top-k+1 (self + k neighbors)
+            distances, indices = self.index.search(queries, knn_k + 1)
+
+            # Remove self (assume at index 0)
+            neighbor_ids = indices[:, 1:]  # (block_size, k)
+            topk_embs = self.embeddings_np[neighbor_ids]  # (block_size, k, D)
+
+            # Compute centroids (mean of normalized vectors)
+            centroids = np.mean(topk_embs, axis=1, keepdims=True)  # (block_size, 1, D)
+
+            # Cosine similarity (dot product since already normalized)
+            csims = np.matmul(topk_embs, centroids.transpose(0, 2, 1)).squeeze(-1)
+            csims_flat = csims.flatten()
+            all_csims.append(csims_flat)
+
+        sims_all = np.concatenate(all_csims)
 
         # compute histogram
         bin_vector = torch.tensor(
@@ -103,7 +117,6 @@ class ThresholdFAISS:
         self.pairsim_vector = pairsim_vector
         self.bin_vector = bin_vector
 
-        # use original save methods
         self.save_histogram(knn=True)
         self.save_to_json()
 

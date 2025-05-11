@@ -1,5 +1,6 @@
 name: binning
 channels:
+  - pytorch
   - conda-forge
   - bioconda
   - defaults
