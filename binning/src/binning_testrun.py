@@ -126,10 +126,10 @@ def main():
         MAX_ITER,
         BLOCK_SIZE,
     )
-    start = time.perf_counter()
-    _, _ = kmediod_test.fit(threshold, KNN_K, KNN_P)
-    elapsed = time.perf_counter() - start
-    print(f"\n>> Total runtime K-MEDOID: {elapsed:.2f} seconds")
+    # start = time.perf_counter()
+    # _, _ = kmediod_test.fit(threshold, KNN_K, KNN_P)
+    # elapsed = time.perf_counter() - start
+    # print(f"\n>> Total runtime K-MEDOID: {elapsed:.2f} seconds")
 
 
 if __name__ == "__main__":

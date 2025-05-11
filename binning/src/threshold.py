@@ -75,11 +75,13 @@ class Threshold:
             range(0, n_samples, self.block_size), desc="Calculating global min/max"
         ):
             i_end = min(i + self.block_size, n_samples)
-            emb_i = torch.from_numpy(self.embeddings_np[i:i_end]).to(self.device)
+            emb_i = torch.from_numpy(self.embeddings_np[i:i_end]).half().to(self.device)
             # compute similarities row-wise in j-chunks
             for j in range(0, n_samples, self.block_size):
                 j_end = min(j + self.block_size, n_samples)
-                emb_j = torch.from_numpy(self.embeddings_np[j:j_end]).to(self.device)
+                emb_j = (
+                    torch.from_numpy(self.embeddings_np[j:j_end]).half().to(self.device)
+                )
                 sims_block = torch.mm(emb_i, emb_j.T).float()
 
                 # collect full row sims in memory-chunked fashion
@@ -121,12 +123,14 @@ class Threshold:
         # ---------------- Histogram pass ----------------
         for i in tqdm(range(0, n_samples, self.block_size), desc="Calculating knns"):
             i_end = min(i + self.block_size, n_samples)
-            emb_i = torch.from_numpy(self.embeddings_np[i:i_end]).to(self.device)
+            emb_i = torch.from_numpy(self.embeddings_np[i:i_end]).half().to(self.device)
 
             # compute top-k indices per row same as above
             for j in range(0, n_samples, self.block_size):
                 j_end = min(j + self.block_size, n_samples)
-                emb_j = torch.from_numpy(self.embeddings_np[j:j_end]).to(self.device)
+                emb_j = (
+                    torch.from_numpy(self.embeddings_np[j:j_end]).half().to(self.device)
+                )
                 sims_block = torch.mm(emb_i, emb_j.T).float()
                 if j == 0:
                     partial_vals, partial_idx = torch.topk(
