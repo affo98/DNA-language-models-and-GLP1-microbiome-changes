@@ -20,6 +20,7 @@ from src.utils import (
     sort_sequences,
     get_available_device,
     Logger,
+    read_embeddings,
 )
 from src.dataset import ContigDataset
 
@@ -75,6 +76,12 @@ class Embedder:
         np.array: Array of embeddings with shape (num_sequences, embedding_dimension).
 
         """
+
+        try:
+            embeddings, _ = read_embeddings(self.save_path, self.model_name, self.log)
+            return embeddings
+        except:
+            pass
 
         os.makedirs(os.path.join(self.save_path, "embeddings"), exist_ok=True)
 
