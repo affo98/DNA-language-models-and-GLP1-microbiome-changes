@@ -1,7 +1,7 @@
 name: binning
 channels:
-  - conda-forge
   - pytorch
+  - conda-forge
   - bioconda
   - defaults
 dependencies:
