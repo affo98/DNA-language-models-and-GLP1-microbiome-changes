@@ -116,8 +116,8 @@ def main(args, log):
             args.model_name,
             args.model_path,
             args.weight_path,
-            # args.save_path,
-            os.path.join("11may", "T2D-EW", "dnaberts_output", "test"),
+            args.save_path,
+            # os.path.join("11may", "T2D-EW", "dnaberts_output", "test"),
             normalize_embeddings=True,
             log=log,
         )
@@ -140,8 +140,8 @@ def main(args, log):
             MAX_ITER,
             BLOCK_SIZE,
         )
-        threshold = 0.6714885830879211
-        # threshold = thresholder_test.get_knn_threshold(knnk, knnp)
+        # threshold = 0.6714885830879211 #gastroshort dnaberts
+        threshold = thresholder_test.get_knn_threshold(knnk, knnp)
         _, _ = kmediod_test.fit(threshold, knnp, knnk)
 
 
