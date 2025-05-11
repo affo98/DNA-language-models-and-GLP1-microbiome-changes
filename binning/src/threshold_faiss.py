@@ -44,7 +44,7 @@ class ThresholdFAISS:
         self.block_size = block_size
         self.save_path = save_path
         self.model_name = model_name
-        self.embeddings_np = embeddings.astype(np.float16)  # store for later use
+        self.embeddings_np = embeddings  # store for later use
         self.N = embeddings.shape[0]
 
         # Build FAISS GPU index for inner product search
@@ -108,27 +108,37 @@ class ThresholdFAISS:
 
         bin_vector = torch.zeros(self.n_bins, dtype=torch.float32, device=self.device)
 
-        batch_size = 10000  # Adjust based on available memory
-        n_samples = self.embeddings_np.shape[0]
-
         # Create memory-mapped array
         mmap_file = os.path.join(self.save_path, "neighbor_ids.dat")
         neighbor_ids = np.memmap(
             mmap_file,
             dtype=np.int32,  # FAISS indices are typically 32-bit
             mode="w+",
-            shape=(n_samples, knn_k),
+            shape=(self.N, knn_k),
         )
 
-        for batch_idx, start_idx in enumerate(range(0, n_samples, batch_size)):
-            end_idx = min(start_idx + batch_size, n_samples)
+        for batch_idx, start_idx in enumerate(range(0, self.N, self.block_size)):
+            end_idx = min(start_idx + self.block_size, self.N)
             batch = self.embeddings_np[start_idx:end_idx]
 
             # Search in FAISS index
-            distances, indices = self.index.search(batch, knn_k + 1)
+            _, indices = self.index.search(batch, knn_k + 1)
 
             # Write directly to memmap
-            neighbor_ids[start_idx:end_idx, :] = indices[:, 1:]
+            # neighbor_ids[start_idx:end_idx, :] = indices[:, 1:]
+
+            topk_embs = (
+                torch.from_numpy(self.embeddings_np[indices]).to(self.device).half()
+            )  # (block_size, k, D)
+
+            centroids = topk_embs.mean(dim=1, keepdim=True).transpose(
+                1, 2
+            )  # (bs, D, 1)
+            csims = (
+                torch.bmm(topk_embs, centroids).squeeze(-1).float().flatten()
+            )  # (bs * k,)
+
+            bin_vector += torch.histc(csims, bins=self.n_bins, min=0.0, max=1.0)
 
         # for start in tqdm(
         #     range(0, self.N, self.block_size), desc="Calculating Threshold"
