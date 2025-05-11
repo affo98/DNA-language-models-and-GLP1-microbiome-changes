@@ -81,6 +81,7 @@ echo "Running on node: $(hostname)"; nvidia-smi
 
 #conda clean --index-cache --packages --tarballs --yes #uncomment if problems with conda envs
 
+cp phenotype_mil/binning_results/T2D-EW/dnaberts_output/ ./11may/T2D-EW/dnaberts_output/
 
 #--------------------------2. Pick job-------------------------
 
@@ -89,12 +90,12 @@ echo "Running on node: $(hostname)"; nvidia-smi
 #cami2_benchmark/sweeps/run_models.sh airways_short gastro_short oral_short skin_short urogenital_short marine_short plant_short metahit -- dnaberth_2mv1_150k
 
 #2b Run the Snakemake pipeline
-SNAKEFILE=~/l40_test/DNA-language-models-and-GLP1-microbiome-changes/phenotype_mil/Snakefile
-WORKDIR=~/l40_test/DNA-language-models-and-GLP1-microbiome-changes
-CONFIG="--config DATASET=T2D-EW MODEL=vamb CHECKM2=True"
+# SNAKEFILE=~/l40_test/DNA-language-models-and-GLP1-microbiome-changes/phenotype_mil/Snakefile
+# WORKDIR=~/l40_test/DNA-language-models-and-GLP1-microbiome-changes
+# CONFIG="--config DATASET=T2D-EW MODEL=vamb CHECKM2=True"
 
-#snakemake --snakefile "$SNAKEFILE" --unlock 
-snakemake --snakefile "$SNAKEFILE" --directory "$WORKDIR" $CONFIG --use-conda --cores all --rerun-incomplete --rerun-triggers mtime --unlock #add --unlock here if necessary
+# #snakemake --snakefile "$SNAKEFILE" --unlock 
+# snakemake --snakefile "$SNAKEFILE" --directory "$WORKDIR" $CONFIG --use-conda --cores all --rerun-incomplete --rerun-triggers mtime --unlock #add --unlock here if necessary
 
 echo "Job completed successfully."
 
