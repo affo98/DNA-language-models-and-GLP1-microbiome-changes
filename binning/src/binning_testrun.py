@@ -104,7 +104,7 @@ def main():
     # solve b^2 + D*b - M/4 = 0 for b:
     max_bs = int((-D + (D**2 + M) ** 0.5) / 2)
 
-    block_size = min(BLOCK_SIZE, max_bs, N)
+    block_size = max_bs
     print(f"free_mem={free_mem}, max_bs={max_bs}, chosen block_size={block_size}")
 
     thresholder_test = Threshold(
