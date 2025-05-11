@@ -50,37 +50,37 @@ class ThresholdFAISS:
         d = embeddings.shape[1]
         res = faiss.StandardGpuResources()
 
-        # IVF16384 + PQ48
-        nlist = 16384  # Number of Voronoi cells
-        M = 48  # Subquantizers (768/48=16)
-        nbits = 8  # Bits per subquantizer
+        # # IVF16384 + PQ48
+        # nlist = 16384  # Number of Voronoi cells
+        # M = 48  # Subquantizers (768/48=16)
+        # nbits = 8  # Bits per subquantizer
 
-        quantizer = faiss.IndexFlatIP(d)  # <- Inner product matches cosine similarity
-        cpu_index = faiss.IndexIVFPQ(quantizer, d, nlist, M, nbits)
-        gpu_index = faiss.index_cpu_to_gpu(res, 0, cpu_index)
+        # quantizer = faiss.IndexFlatIP(d)  # <- Inner product matches cosine similarity
+        # cpu_index = faiss.IndexIVFPQ(quantizer, d, nlist, M, nbits)
+        # gpu_index = faiss.index_cpu_to_gpu(res, 0, cpu_index)
 
-        # Train on a subset (convert to float32 temporarily)
-        gpu_index.train(embeddings[:20_000].astype(np.float32))
+        # # Train on a subset (convert to float32 temporarily)
+        # gpu_index.train(embeddings[:20_000].astype(np.float32))
 
-        # Add data in batches
-        batch_size = 1_000_000
-        for i in range(0, len(embeddings), batch_size):
-            gpu_index.add(embeddings[i : i + batch_size])
+        # # Add data in batches
+        # batch_size = 1_000_000
+        # for i in range(0, len(embeddings), batch_size):
+        #     gpu_index.add(embeddings[i : i + batch_size])
 
-        self.index = gpu_index
-        self.log.append(
-            f"FAISS IVF16384_PQ48 (IP quantizer) GPU index built: {embeddings.shape[0]} normalized vectors, "
-            f"dim {d}, GPU mem: {get_gpu_mem()} MiB"
-        )
+        # self.index = gpu_index
+        # self.log.append(
+        #     f"FAISS IVF16384_PQ48 (IP quantizer) GPU index built: {embeddings.shape[0]} normalized vectors, "
+        #     f"dim {d}, GPU mem: {get_gpu_mem()} MiB"
+        # )
 
         # flat index
-        # cpu_index = faiss.IndexFlatIP(d)
-        # self.index = faiss.index_cpu_to_gpu(res, 0, cpu_index)
-        # self.index.add(embeddings)
-        # self.N = embeddings.shape[0]
-        # self.log.append(
-        #     f"FAISS GPU index built: {self.N} normalized vectors of dim {d}, using MiB: {get_gpu_mem()}"
-        # )
+        cpu_index = faiss.IndexFlatIP(d)
+        self.index = faiss.index_cpu_to_gpu(res, 0, cpu_index)
+        self.index.add(embeddings)
+        self.N = embeddings.shape[0]
+        self.log.append(
+            f"FAISS GPU index built: {self.N} normalized vectors of dim {d}, using MiB: {get_gpu_mem()}"
+        )
 
     def get_knn_threshold(self, knn_k: int, knn_p: float) -> float:
         """
