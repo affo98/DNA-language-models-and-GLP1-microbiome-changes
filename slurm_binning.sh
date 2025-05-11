@@ -15,7 +15,7 @@
 #SBATCH --exclude=cn[3-18]
 #SBATCH --exclude=desktop[1-16]
 #SBATCH --nodelist=cn19
-#SBATCH --gres=gpu:l40s:4
+#SBATCH --gres=gpu:l40s:2
 
 
 #1b For small testing
