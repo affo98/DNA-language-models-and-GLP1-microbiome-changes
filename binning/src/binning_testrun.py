@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(__file__, "..", "..")))
 from src.utils import Logger, get_gpu_mem
 from src.clustering import KMediod
 from src.threshold import Threshold
+from src.threshold_faiss import ThresholdFAISS
 
 
 def main():
@@ -83,10 +84,10 @@ def main():
 
     # Create contig names
     N = embeddings_mm.shape[0]
-    contig_names_test = np.array(
-        [f"contig_{i:06d}" for i in range(N)],
-        dtype="<U12",  # enough width for your numbering
-    )
+    # contig_names_test = np.array(
+    #     [f"contig_{i:06d}" for i in range(N)],
+    #     dtype="<U12",  # enough width for your numbering
+    # )
 
     # ------- Test heavy memory operations -------
     embeddings_test = embeddings_mm
@@ -96,26 +97,35 @@ def main():
     # embeddings_test = embeddings_test[:5_000_000]
     # contig_names_test = contig_names_test[:5_000_000]
 
-    free_mem, _ = torch.cuda.mem_get_info()  # bytes available, e.g. ~2.3e10
-    margin = 0.9
-    M = free_mem * margin
+    # free_mem, _ = torch.cuda.mem_get_info()  # bytes available, e.g. ~2.3e10
+    # margin = 0.9
+    # M = free_mem * margin
 
-    D = embeddings_mm.shape[1]  # embedding dim
-    # solve b^2 + D*b - M/4 = 0 for b:
-    max_bs = int((-D + (D**2 + M) ** 0.5) / 2)
+    # D = embeddings_mm.shape[1]  # embedding dim
+    # # solve b^2 + D*b - M/4 = 0 for b:
+    # max_bs = int((-D + (D**2 + M) ** 0.5) / 2)
 
-    block_size = max_bs
-    # block_size = BLOCK_SIZE
-    print(f"free_mem={free_mem}, max_bs={max_bs}, chosen block_size={block_size}")
+    # block_size = max_bs
+    # # block_size = BLOCK_SIZE
+    # print(f"free_mem={free_mem}, max_bs={max_bs}, chosen block_size={block_size}")
 
-    thresholder_test = Threshold(
+    # thresholder_test = Threshold(
+    #     embeddings_test,
+    #     N_BINS,
+    #     block_size,
+    #     save_path,
+    #     model_name,
+    #     log,
+    #     CONVERT_MILLION_EMB_GPU_SECONDS,
+    # )
+    # threshold = thresholder_test.get_knn_threshold(KNN_K, KNN_P)
+
+    thresholder_test = ThresholdFAISS(
         embeddings_test,
         N_BINS,
-        block_size,
         save_path,
         model_name,
         log,
-        CONVERT_MILLION_EMB_GPU_SECONDS,
     )
 
     start = time.perf_counter()
@@ -137,7 +147,7 @@ def main():
         MIN_BIN_SIZE,
         NUM_STEPS,
         MAX_ITER,
-        block_size,
+        BLOCK_SIZE,
     )
     # start = time.perf_counter()
     # _, _ = kmediod_test.fit(threshold, KNN_K, KNN_P)
