@@ -128,8 +128,17 @@ class KMediodFAISS:
             available_mask = predictions == -1
 
             for _ in range(self.num_steps):
+                # full embedding block-by-block for mv
+                sims_full = []
+                for i in range(0, N, self.block_size):
+                    i_end = min(i + self.block_size, N)
+                    block_np = self.embeddings_np[i:i_end]
+                    block = torch.from_numpy(block_np).to(self.device)
+                    sims_part = torch.mv(block, seed)
+                    sims_full.append(sims_part)
+                sim_vec = torch.cat(sims_full)
                 # Search with current seed using Faiss
-                similarities, _ = self.cpu_index.search(seed, N)
+                # similarities, _ = self.cpu_index.search(seed, N)
                 sim_vec = torch.from_numpy(similarities.flatten()).to(self.device)
 
                 candidate_mask = (sim_vec >= min_similarity) & available_mask
