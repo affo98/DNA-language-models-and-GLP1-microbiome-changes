@@ -3,10 +3,11 @@ from argparse import ArgumentParser
 
 from time import time
 
-from src.clustering import KMediod
 from src.get_embeddings import Embedder
 from src.threshold import Threshold
 from src.threshold_faiss import ThresholdFAISS
+from src.clustering import KMediod
+from src.clustering_faiss import KMediodFAISS
 from src.utils import read_contigs, Logger, split_contigs_valtest
 
 # uncomment to use hubness reducion
@@ -68,17 +69,16 @@ def main(args, log):
         )
         embeddings_val = embedder_val.get_embeddings()
 
-        thresholder_val = Threshold(
+        thresholder_val = ThresholdFAISS(
             embeddings_val,
             N_BINS,
             BLOCK_SIZE,
             histogram_dir,
             args.model_name,
             log,
-            CONVERT_MILLION_EMB_GPU_SECONDS,
         )
 
-        kmediod_val = KMediod(
+        kmediod_val = KMediodFAISS(
             embeddings_val,
             contig_names_val,
             results_dir,
@@ -114,43 +114,33 @@ def main(args, log):
             args.model_name,
             args.model_path,
             args.weight_path,
-            # args.save_path,
-            os.path.join("11may", "T2D-EW", "dnaberts_output", "test"),
+            args.save_path,
+            # os.path.join("11may", "T2D-EW", "dnaberts_output", "test"),
             normalize_embeddings=True,
             log=log,
         )
         embeddings_test = embedder_test.get_embeddings()
 
-        # thresholder_test = Threshold(
-        #     embeddings_test,
-        #     N_BINS,
-        #     BLOCK_SIZE,
-        #     args.save_path,
-        #     args.model_name,
-        #     log,
-        #     CONVERT_MILLION_EMB_GPU_SECONDS,
-        # )
-
         thresholder_test = ThresholdFAISS(
             embeddings_test, N_BINS, BLOCK_SIZE, args.save_path, args.model_name, log
         )
 
-        # kmediod_test = KMediod(
-        #     embeddings_test,
-        #     contig_names_test,
-        #     args.save_path,
-        #     log,
-        #     True,
-        #     "test",
-        #     CONVERT_MILLION_EMB_GPU_SECONDS,
-        #     MIN_BIN_SIZE,
-        #     NUM_STEPS,
-        #     MAX_ITER,
-        #     BLOCK_SIZE,
-        # )
+        kmediod_test = KMediodFAISS(
+            embeddings_test,
+            contig_names_test,
+            args.save_path,
+            log,
+            True,
+            "test",
+            CONVERT_MILLION_EMB_GPU_SECONDS,
+            MIN_BIN_SIZE,
+            NUM_STEPS,
+            MAX_ITER,
+            BLOCK_SIZE,
+        )
 
         threshold = thresholder_test.get_knn_threshold(knnk, knnp)
-        # _, _ = kmediod_test.fit(threshold, knnp, knnk)
+        _, _ = kmediod_test.fit(threshold, knnp, knnk)
 
 
 def add_arguments() -> ArgumentParser:

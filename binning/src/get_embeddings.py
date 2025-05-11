@@ -80,8 +80,10 @@ class Embedder:
         try:
             embeddings, _ = read_embeddings(self.save_path, self.model_name, self.log)
             return embeddings
-        except:
-            pass
+        except FileNotFoundError:
+            self.log.append(
+                f"Embeddings not found at {self.save_path}, generating new ones"
+            )
 
         os.makedirs(os.path.join(self.save_path, "embeddings"), exist_ok=True)
 
