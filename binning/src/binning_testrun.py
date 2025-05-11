@@ -84,10 +84,10 @@ def main():
 
     # Create contig names
     N = embeddings_mm.shape[0]
-    # contig_names_test = np.array(
-    #     [f"contig_{i:06d}" for i in range(N)],
-    #     dtype="<U12",  # enough width for your numbering
-    # )
+    contig_names_test = np.array(
+        [f"contig_{i:06d}" for i in range(N)],
+        dtype="<U12",  # enough width for your numbering
+    )
 
     # ------- Test heavy memory operations -------
     embeddings_test = embeddings_mm
