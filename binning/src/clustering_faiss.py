@@ -131,14 +131,15 @@ class KMediodFAISS:
                 sims_full = []  # potential oom
                 for i in range(0, N, self.block_size):
                     i_end = min(i + self.block_size, N)
-                    block_np = self.embeddings_np[i:i_end]
-                    block = torch.from_numpy(block_np).to(self.device)
+                    block = torch.from_numpy(self.embeddings_np[i:i_end]).to(
+                        self.device
+                    )
                     sims_part = torch.mv(block, seed)
                     sims_full.append(sims_part)
                 sim_vec = torch.cat(sims_full)
                 # Search with current seed using Faiss
                 # similarities, _ = self.cpu_index.search(seed, N)
-                sim_vec = torch.from_numpy(similarities.flatten()).to(self.device)
+                sim_vec = torch.from_numpy(sim_vec.flatten()).to(self.device)
 
                 candidate_mask = (sim_vec >= min_similarity) & available_mask
                 candidates = torch.where(candidate_mask)[0]
@@ -162,7 +163,7 @@ class KMediodFAISS:
                 batch = self.embeddings_np[i:i_end]
 
                 # Search only the candidates to update density
-                sim_cand, _ = self.index.search(batch, len(candidates))
+                sim_cand, _ = self.cpu_index.search(batch, len(candidates))
                 sim_matrix = torch.from_numpy(sim_cand).to(self.device)
                 mask = sim_matrix >= min_similarity
                 density_update = torch.where(
