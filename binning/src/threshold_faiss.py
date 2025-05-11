@@ -65,6 +65,8 @@ class ThresholdFAISS:
         self.knn_k = knn_k
         self.knn_p = knn_p
 
+        bin_vector = torch.zeros(self.n_bins, dtype=torch.float32, device=self.device)
+
         for start in range(0, self.N, self.block_size):
             end = min(start + self.block_size, self.N)
             queries = self.index.reconstruct_n(start, end - start)
@@ -73,8 +75,10 @@ class ThresholdFAISS:
             distances, indices = self.index.search(queries, knn_k + 1)
             neighbor_ids = indices[:, 1:]  # (block_size, k)
 
-            topk_embs = torch.from_numpy(self.embeddings_np[neighbor_ids]).to(
-                self.device
+            topk_embs = (
+                torch.from_numpy(self.embeddings_np[neighbor_ids])
+                .to(self.device)
+                .half()
             )  # (block_size, k, D)
 
             centroids = topk_embs.mean(dim=1, keepdim=True).transpose(
