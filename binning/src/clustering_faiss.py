@@ -72,10 +72,11 @@ class KMediodFAISS:
         co = faiss.GpuMultipleClonerOptions()
         co.shard = True
         co.useFloat16 = True
-        gpu_index = faiss.index_cpu_to_all_gpus(cpu_index, co)
-        self.index = faiss.index_gpu_to_cpu(gpu_index)
+        self.gpu_index = faiss.index_cpu_to_all_gpus(cpu_index, co)
+        self.cpu_index = faiss.index_gpu_to_cpu(self.gpu_index)
 
-        self.index.add(embeddings)
+        self.gpu_index.add(embeddings)
+        self.cpu_index.add(embeddings)
         self.N = embeddings.shape[0]
         self.log.append(
             f"FAISS GPU index built: {self.N} normalized vectors of dim {d}, using MiB: {get_gpu_mem()}"
@@ -100,7 +101,9 @@ class KMediodFAISS:
             batch = self.embeddings_np[i:i_end]
 
             # Search batch_size points to compute density
-            similarities, _ = self.index.search(batch, self.block_size)
+            similarities, _ = self.gpu_index.search(
+                batch, 2048
+            )  # gpu only supports k=2048
             sim_matrix = torch.from_numpy(similarities).to(self.device)
             mask = sim_matrix >= min_similarity
             density_vector[i:i_end] = torch.where(
@@ -126,7 +129,7 @@ class KMediodFAISS:
 
             for _ in range(self.num_steps):
                 # Search with current seed using Faiss
-                similarities, _ = self.index.search(seed.reshape(1, -1), N)
+                similarities, _ = self.cpu_index.search(seed, N)
                 sim_vec = torch.from_numpy(similarities.flatten()).to(self.device)
 
                 candidate_mask = (sim_vec >= min_similarity) & available_mask
