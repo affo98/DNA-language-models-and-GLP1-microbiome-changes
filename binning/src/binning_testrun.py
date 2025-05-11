@@ -19,6 +19,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(__file__, "..", "..")))
 
 from src.utils import Logger, get_gpu_mem
 from src.clustering import KMediod
+from src.clustering_faiss import KMediodFAISS
 from src.threshold import Threshold
 from src.threshold_faiss import ThresholdFAISS
 
@@ -27,8 +28,8 @@ def main():
     save_path = "./binning_testrun/"
     os.makedirs(save_path, exist_ok=True)
 
-    # embeddings_file = "cami2_benchmark/model_results/metahit/dnaberts_output/test/embeddings/embeddings.npy"
-    embeddings_file = f"{save_path}embeddings.npy"
+    embeddings_file = "cami2_benchmark/model_results/metahit/dnaberts_output/test/embeddings/embeddings.npy"
+    # embeddings_file = f"{save_path}embeddings.npy"
 
     N, D = 29_458_443, 768  # number of embeddings × dim #size of T2D-EW contigs
     chunk_size = 5_000  # rows per write/load chunk
@@ -64,15 +65,15 @@ def main():
     #     del mm
     #     log.append("Done writing embeddings.npy")
 
-    embeddings_mm = np.memmap(
-        embeddings_file,
-        dtype="float32",
-        mode="r",
-        shape=(N, D),
-    )
+    # embeddings_mm = np.memmap(
+    #     embeddings_file,
+    #     dtype="float32",
+    #     mode="r",
+    #     shape=(N, D),
+    # )
 
-    # embeddings_mm = np.load(embeddings_file)
-    # n_test = 161581
+    embeddings_mm = np.load(embeddings_file)
+    n_test = 161581
     # embeddings_mm = np.memmap(
     #     embeddings_file,
     #     dtype="float32",
@@ -136,7 +137,7 @@ def main():
 
     # threshold = 0.749390721321106
 
-    kmediod_test = KMediod(
+    kmediod_test = KMediodFAISS(
         embeddings_test,
         contig_names_test,
         save_path,

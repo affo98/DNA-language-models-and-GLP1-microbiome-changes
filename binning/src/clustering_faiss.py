@@ -10,7 +10,7 @@ from tqdm import tqdm
 from src.utils import get_available_device, Logger, get_gpu_mem
 
 
-class KMediod:
+class KMediodFAISS:
 
     def check_params(
         self,
@@ -44,10 +44,10 @@ class KMediod:
         log_verbose: bool,
         mode: str,
         convert_million_emb_gpu_seconds: int,
-        min_bin_size: int = 10,
-        num_steps: int = 3,
-        max_iter: int = 1000,
-        block_size: int = 1000,
+        min_bin_size: int,
+        num_steps: int,
+        max_iter: int,
+        block_size: int,
     ):
         self.check_params(embeddings, contig_names, min_bin_size, num_steps, max_iter)
 
@@ -67,12 +67,17 @@ class KMediod:
 
         # Initialize Faiss index
         d = embeddings.shape[1]
-        res = faiss.StandardGpuResources()
+        log.append(f"N GPUs Faiss: {faiss.get_num_gpus()}")
         cpu_index = faiss.IndexFlatIP(d)
-        self.index = faiss.index_cpu_to_gpu(res, 0, cpu_index)
+        co = faiss.GpuMultipleClonerOptions()
+        co.shard = True
+        co.useFloat16 = True
+        self.index = faiss.index_cpu_to_all_gpus(cpu_index, co)
+
         self.index.add(embeddings)
+        self.N = embeddings.shape[0]
         self.log.append(
-            f"FAISS GPU index built: {embeddings.shape[0]} normalized vectors of dim {d}, using MiB: {get_gpu_mem()}"
+            f"FAISS GPU index built: {self.N} normalized vectors of dim {d}, using MiB: {get_gpu_mem()}"
         )
 
     def fit(self, min_similarity: float, knn_k: int, knn_p: float) -> np.array:
@@ -91,17 +96,15 @@ class KMediod:
         density_vector = torch.zeros(N, device=self.device)
         for i in tqdm(range(0, N, self.block_size), desc="Computing density"):
             i_end = min(i + self.block_size, N)
-            query = self.embeddings_np[i:i_end]
+            batch = self.embeddings_np[i:i_end]
 
-            # Search all points to compute density
-            D, I = self.index.search(query, N)
-            sim_matrix = torch.from_numpy(D).to(self.device)
+            # Search batch_size points to compute density
+            similarities, _ = self.index.search(batch, self.batch_size * 10)
+            sim_matrix = torch.from_numpy(similarities).to(self.device)
             mask = sim_matrix >= min_similarity
             density_vector[i:i_end] = torch.where(
                 mask, sim_matrix, torch.zeros_like(sim_matrix)
             ).sum(dim=1)
-            del D, I, sim_matrix, mask
-            torch.cuda.empty_cache()
 
         predictions = torch.full((N,), -1, dtype=torch.long, device=self.device)
         seeds = []
@@ -116,14 +119,13 @@ class KMediod:
             # select medoid
             medoid_idx = torch.argmax(density_vector).item()
             density_vector[medoid_idx] = -100  # rm seed contig
-            seed_np = self.embeddings_np[medoid_idx]
-            seed = torch.from_numpy(seed_np).to(self.device)
+            seed = torch.from_numpy(self.embeddings_np[medoid_idx]).to(self.device)
             available_mask = predictions == -1
 
             for _ in range(self.num_steps):
                 # Search with current seed using Faiss
-                D, I = self.index.search(seed_np.reshape(1, -1), N)
-                sim_vec = torch.from_numpy(D.flatten()).to(self.device)
+                similarities, _ = self.index.search(seed.reshape(1, -1), N)
+                sim_vec = torch.from_numpy(similarities.flatten()).to(self.device)
 
                 candidate_mask = (sim_vec >= min_similarity) & available_mask
                 candidates = torch.where(candidate_mask)[0]
@@ -136,28 +138,24 @@ class KMediod:
                     self.embeddings_np[candidates.cpu().numpy()]
                 ).to(self.device)
                 seed = torch.mean(emb_candidates, dim=0)
-                seed_np = seed.cpu().numpy()
 
             predictions[candidates] = cluster_id
-            seeds.append(seed_np)
+            seeds.append(seed.cpu().numpy())
             seed_labels.append(cluster_id)
 
             # Update density vector for affected points
             for i in range(0, N, self.block_size):
                 i_end = min(i + self.block_size, N)
-                query = self.embeddings_np[i:i_end]
+                batch = self.embeddings_np[i:i_end]
 
                 # Search only the candidates to update density
-                D_cand, _ = self.index.search(query, len(candidates))
-                sim_matrix = torch.from_numpy(D_cand).to(self.device)
+                sim_cand, _ = self.index.search(batch, len(candidates))
+                sim_matrix = torch.from_numpy(sim_cand).to(self.device)
                 mask = sim_matrix >= min_similarity
                 density_update = torch.where(
                     mask, sim_matrix, torch.zeros_like(sim_matrix)
                 ).sum(dim=1)
                 density_vector[i:i_end] -= density_update
-
-                del D_cand, sim_matrix, mask, density_update
-                torch.cuda.empty_cache()
 
             density_vector[candidates] = -100
             pbar.update(1)
@@ -197,12 +195,18 @@ class KMediod:
 
     def remove_unassigned_sequences(self, predictions) -> np.array:
         idx_to_keep = np.where(predictions != -1)[0]
+
         predictions = predictions[idx_to_keep]
         contig_names = [self.contig_names[i] for i in idx_to_keep]
-        assert len(predictions) == len(contig_names)
+
+        assert len(predictions) == len(
+            contig_names
+        ), f"Mismatch between predictions {len(predictions)} and contig names {len(contig_names)} after removing unassigned seqs."
         return predictions, contig_names
 
     def save_clusters(self, knn_k, knn_p, predictions, contig_names) -> None:
+        """save predictions in save_path in format: clustername \\t contigname, and cluster-seeds in a separate file."""
+
         if self.mode == "val":
             output_file = os.path.join(
                 self.save_path, f"clusters_k{knn_k}_p{knn_p}.tsv"
@@ -211,14 +215,21 @@ class KMediod:
             output_file = os.path.join(self.save_path, f"clusters.tsv")
 
         with open(output_file, "w") as file:
-            file.write("clustername\tcontigname\n")
+            file.write("clustername\tcontigname\n")  # header
+
             for cluster, contig in zip(predictions, contig_names):
                 file.write(f"{cluster}\t{contig}\n")
 
-        self.log.append(f"Predictions file written to {self.save_path}")
+        self.log.append(f"Predictions file written successfully to {self.save_path}")
+        return
 
     def save_seeds(self, seeds, seed_labels) -> None:
-        if self.mode == "test":
+        """Save seeds and corresponding labels in a compressed .npz file. Only saved in test-mode."""
+
+        if self.mode == "val":
+            return
+        elif self.mode == "test":
             output_file = os.path.join(self.save_path, f"seeds.npz")
             np.savez(output_file, seeds=seeds, seed_labels=seed_labels)
             self.log.append(f"Seeds saved to {output_file}")
+            return

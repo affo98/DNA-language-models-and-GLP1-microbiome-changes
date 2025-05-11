@@ -47,11 +47,6 @@ class ThresholdFAISS:
         self.embeddings_np = embeddings  # store for later use
         self.N = embeddings.shape[0]
 
-        # Build FAISS GPU index for inner product search
-        d = embeddings.shape[1]
-        res = faiss.StandardGpuResources()
-        log.append(f"N GPUs Faiss: {faiss.get_num_gpus()}")
-
         # # IVF16384 + PQ48
         # nlist = 16384  # Number of Voronoi cells
         # M = 48  # Subquantizers (768/48=16)
@@ -75,22 +70,15 @@ class ThresholdFAISS:
         #     f"dim {d}, GPU mem: {get_gpu_mem()} MiB"
         # )
 
-        # flat index
+        # flat index on GPU with shards
+        d = embeddings.shape[1]
+        log.append(f"N GPUs Faiss: {faiss.get_num_gpus()}")
         cpu_index = faiss.IndexFlatIP(d)
-        # self.index = faiss.index_cpu_to_gpu(res, 0, cpu_index)
         co = faiss.GpuMultipleClonerOptions()
-        co.shard = True  # Split data across GPUs
-        co.useFloat16 = True  # Optional: reduce memory further
-
-        # Distribute across all GPUs
+        co.shard = True
+        co.useFloat16 = True
         self.index = faiss.index_cpu_to_all_gpus(cpu_index, co)
 
-        # Add data (automatically sharded)
-        # batch_size = 5_000_000  # Adjust based on GPU memory
-        # for i in tqdm(range(0, len(embeddings), batch_size)):
-        #    self.index.add(embeddings[i : i + batch_size])
-
-        # self.index = faiss.index_cpu_to_all_gpus(cpu_index)  # build the index
         self.index.add(embeddings)
         self.N = embeddings.shape[0]
         self.log.append(
@@ -108,26 +96,12 @@ class ThresholdFAISS:
 
         bin_vector = torch.zeros(self.n_bins, dtype=torch.float32, device=self.device)
 
-        # Create memory-mapped array
-        mmap_file = os.path.join(self.save_path, "neighbor_ids.dat")
-        neighbor_ids = np.memmap(
-            mmap_file,
-            dtype=np.int32,  # FAISS indices are typically 32-bit
-            mode="w+",
-            shape=(self.N, knn_k),
-        )
-
-        for start_idx in tqdm(
-            range(0, self.N, self.block_size), desc="Calculating Threshold"
-        ):
-            end_idx = min(start_idx + self.block_size, self.N)
-            batch = self.embeddings_np[start_idx:end_idx]
+        for i in tqdm(range(0, self.N, self.block_size), desc="Calculating Threshold"):
+            i_end = min(i + self.block_size, self.N)
+            batch = self.embeddings_np[i:i_end]
 
             # Search in FAISS index
             _, indices = self.index.search(batch, knn_k + 1)
-
-            # Write directly to memmap
-            # neighbor_ids[start_idx:end_idx, :] = indices[:, 1:]
 
             topk_embs = (
                 torch.from_numpy(self.embeddings_np[indices]).to(self.device).half()
@@ -141,31 +115,6 @@ class ThresholdFAISS:
             )  # (bs * k,)
 
             bin_vector += torch.histc(csims, bins=self.n_bins, min=0.0, max=1.0)
-
-        # for start in tqdm(
-        #     range(0, self.N, self.block_size), desc="Calculating Threshold"
-        # ):
-        #     end = min(start + self.block_size, self.N)
-        #     queries = self.index.reconstruct_n(start, end - start)
-
-        #     # Get top-k+1 (self + k neighbors)
-        #     distances, indices = self.index.search(queries, knn_k + 1)
-        #     neighbor_ids = indices[:, 1:]  # (block_size, k)
-
-        #     topk_embs = (
-        #         torch.from_numpy(self.embeddings_np[neighbor_ids])
-        #         .to(self.device)
-        #         .half()
-        #     )  # (block_size, k, D)
-
-        #     centroids = topk_embs.mean(dim=1, keepdim=True).transpose(
-        #         1, 2
-        #     )  # (bs, D, 1)
-        #     csims = (
-        #         torch.bmm(topk_embs, centroids).squeeze(-1).float().flatten()
-        #     )  # (bs * k,)
-
-        #     bin_vector += torch.histc(csims, bins=self.n_bins, min=0.0, max=1.0)
 
         bin_vector /= bin_vector.sum()
         bin_vector = bin_vector.cpu().numpy()
