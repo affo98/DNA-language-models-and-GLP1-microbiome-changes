@@ -114,24 +114,24 @@ class ThresholdFAISS:
             end = min(start + self.block_size, self.N)
             queries = self.index.reconstruct_n(start, end - start)
 
-            # Get top-k+1 (self + k neighbors)
-            distances, indices = self.index.search(queries, knn_k + 1)
-            neighbor_ids = indices[:, 1:]  # (block_size, k)
+            # # Get top-k+1 (self + k neighbors)
+            # distances, indices = self.index.search(queries, knn_k + 1)
+            # neighbor_ids = indices[:, 1:]  # (block_size, k)
 
-            topk_embs = (
-                torch.from_numpy(self.embeddings_np[neighbor_ids])
-                .to(self.device)
-                .half()
-            )  # (block_size, k, D)
+            # topk_embs = (
+            #     torch.from_numpy(self.embeddings_np[neighbor_ids])
+            #     .to(self.device)
+            #     .half()
+            # )  # (block_size, k, D)
 
-            centroids = topk_embs.mean(dim=1, keepdim=True).transpose(
-                1, 2
-            )  # (bs, D, 1)
-            csims = (
-                torch.bmm(topk_embs, centroids).squeeze(-1).float().flatten()
-            )  # (bs * k,)
+            # centroids = topk_embs.mean(dim=1, keepdim=True).transpose(
+            #     1, 2
+            # )  # (bs, D, 1)
+            # csims = (
+            #     torch.bmm(topk_embs, centroids).squeeze(-1).float().flatten()
+            # )  # (bs * k,)
 
-            bin_vector += torch.histc(csims, bins=self.n_bins, min=0.0, max=1.0)
+            # bin_vector += torch.histc(csims, bins=self.n_bins, min=0.0, max=1.0)
 
         bin_vector /= bin_vector.sum()
         bin_vector = bin_vector.cpu().numpy()
