@@ -35,6 +35,40 @@ class KMediodFAISS:
             embeddings
         ), f"Number of embeddings {len(embeddings)} does not match number of contig names {len(contig_names)}"
 
+    def build_faiss(self, IVF_index):
+        d = self.embeddings_np.shape[1]
+        self.log.append(f"N GPUs Faiss: {faiss.get_num_gpus()}")
+
+        co = faiss.GpuMultipleClonerOptions()
+        co.shard = True
+        co.useFloat16 = True
+
+        if IVF_index == False:
+            cpu_index = faiss.IndexFlatIP(d)
+            index = faiss.index_cpu_to_all_gpus(cpu_index, co)
+            index.add(self.embeddings_np)
+            self.log.append(f"FLAT FAISS GPU index built using MiB: {get_gpu_mem()}")
+
+        else:
+            nlist = (
+                4096  # Number of Voronoi cells/clusters (tune based on dataset size)
+            )
+            nprobe = 32  # Number of clusters to search (balance speed/accuracy)
+            quantizer = faiss.IndexFlatIP(d)  # Inner product for cosine similarity
+            cpu_index = faiss.IndexIVFFlat(
+                quantizer, d, nlist, faiss.METRIC_INNER_PRODUCT
+            )
+            index = faiss.index_cpu_to_all_gpus(cpu_index, co)
+            index.train(self.embeddings_np)
+            index.add(self.embeddings_np)
+            index.nprobe = nprobe
+
+            self.log.append(
+                f"IVF--FLAT FAISS GPU index built using MiB: {get_gpu_mem()}; nlist={nlist}, nprobe={nprobe}"
+            )
+
+        return index
+
     def __init__(
         self,
         embeddings: np.ndarray,
@@ -65,19 +99,7 @@ class KMediodFAISS:
         self.device = device
         self.block_size = block_size
 
-        # Initialize Faiss index
-        d = embeddings.shape[1]
-        log.append(f"N GPUs Faiss: {faiss.get_num_gpus()}")
-        cpu_index = faiss.IndexFlatIP(d)
-        co = faiss.GpuMultipleClonerOptions()
-        co.shard = True
-        co.useFloat16 = True
-        self.gpu_index = faiss.index_cpu_to_all_gpus(cpu_index, co)
-        self.gpu_index.add(embeddings)
-        self.N = embeddings.shape[0]
-        self.log.append(
-            f"FAISS GPU index built: {self.N} normalized vectors of dim {d}, using MiB: {get_gpu_mem()}"
-        )
+        self.gpu_index = self.build_faiss(IVF_index=False)
 
     def fit(self, min_similarity: float, knn_k: int, knn_p: float) -> np.array:
         if not 0 < min_similarity < 1:

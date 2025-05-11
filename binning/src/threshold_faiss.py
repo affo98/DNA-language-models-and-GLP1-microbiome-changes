@@ -25,8 +25,39 @@ class ThresholdFAISS:
         if n_bins < 1:
             raise ValueError("Number of bins must be at least 1")
 
-    def init_faiss(self):
-        pass
+    def build_faiss(self, IVF_index):
+        d = self.embeddings_np.shape[1]
+        self.log.append(f"N GPUs Faiss: {faiss.get_num_gpus()}")
+
+        co = faiss.GpuMultipleClonerOptions()
+        co.shard = True
+        co.useFloat16 = True
+
+        if IVF_index == False:
+            cpu_index = faiss.IndexFlatIP(d)
+            index = faiss.index_cpu_to_all_gpus(cpu_index, co)
+            index.add(self.embeddings_np)
+            self.log.append(f"FLAT FAISS GPU index built using MiB: {get_gpu_mem()}")
+
+        else:
+            nlist = (
+                4096  # Number of Voronoi cells/clusters (tune based on dataset size)
+            )
+            nprobe = 32  # Number of clusters to search (balance speed/accuracy)
+            quantizer = faiss.IndexFlatIP(d)  # Inner product for cosine similarity
+            cpu_index = faiss.IndexIVFFlat(
+                quantizer, d, nlist, faiss.METRIC_INNER_PRODUCT
+            )
+            index = faiss.index_cpu_to_all_gpus(cpu_index, co)
+            index.train(self.embeddings_np)
+            index.add(self.embeddings_np)
+            index.nprobe = nprobe
+
+            self.log.append(
+                f"IVF--FLAT FAISS GPU index built using MiB: {get_gpu_mem()}; nlist={nlist}, nprobe={nprobe}"
+            )
+
+        return index
 
     def __init__(
         self,
@@ -47,47 +78,10 @@ class ThresholdFAISS:
         self.block_size = block_size
         self.save_path = save_path
         self.model_name = model_name
-        self.embeddings_np = embeddings  # store for later use
+        self.embeddings_np = embeddings
         self.N = embeddings.shape[0]
 
-        # # IVF16384 + PQ48
-        # nlist = 16384  # Number of Voronoi cells
-        # M = 48  # Subquantizers (768/48=16)
-        # nbits = 8  # Bits per subquantizer
-
-        # quantizer = faiss.IndexFlatIP(d)  # <- Inner product matches cosine similarity
-        # cpu_index = faiss.IndexIVFPQ(quantizer, d, nlist, M, nbits)
-        # gpu_index = faiss.index_cpu_to_gpu(res, 0, cpu_index)
-
-        # # Train on a subset (convert to float32 temporarily)
-        # gpu_index.train(embeddings[:20_000].astype(np.float32))
-
-        # # Add data in batches
-        # batch_size = 1_000_000
-        # for i in range(0, len(embeddings), batch_size):
-        #     gpu_index.add(embeddings[i : i + batch_size])
-
-        # self.index = gpu_index
-        # self.log.append(
-        #     f"FAISS IVF16384_PQ48 (IP quantizer) GPU index built: {embeddings.shape[0]} normalized vectors, "
-        #     f"dim {d}, GPU mem: {get_gpu_mem()} MiB"
-        # )
-
-        self.index = self.init_faiss()
-
-        d = self.embeddings_np.shape[1]
-        log.append(f"N GPUs Faiss: {faiss.get_num_gpus()}")
-        cpu_index = faiss.IndexFlatIP(d)
-        co = faiss.GpuMultipleClonerOptions()
-        co.shard = True
-        co.useFloat16 = True
-        self.index = faiss.index_cpu_to_all_gpus(cpu_index, co)
-
-        self.index.add(embeddings)
-        self.N = embeddings.shape[0]
-        self.log.append(
-            f"FAISS GPU index built: {self.N} normalized vectors of dim {d}, using MiB: {get_gpu_mem()}"
-        )
+        self.index = self.build_faiss(IVF_index=False)
 
     def get_knn_threshold(self, knn_k: int, knn_p: float) -> float:
         """
