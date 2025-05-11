@@ -65,8 +65,6 @@ class ThresholdFAISS:
         self.knn_k = knn_k
         self.knn_p = knn_p
 
-        all_csims = []
-
         for start in range(0, self.N, self.block_size):
             end = min(start + self.block_size, self.N)
             queries = self.index.reconstruct_n(start, end - start)
@@ -79,39 +77,20 @@ class ThresholdFAISS:
                 self.device
             )  # (block_size, k, D)
 
-            # Compute centroids (mean of normalized vectors)
-            centroids = topk_embs.mean(dim=1, keepdim=True)  # (block_size, 1, D)
-
-            # Cosine similarity (dot product between normalized vectors)
             centroids = topk_embs.mean(dim=1, keepdim=True).transpose(
                 1, 2
             )  # (bs, D, 1)
             csims = (
                 torch.bmm(topk_embs, centroids).squeeze(-1).float().flatten()
             )  # (bs * k,)
-            all_csims.append(csims.cpu().numpy())
 
-        sims_all = np.concatenate(all_csims)
+            bin_vector += torch.histc(csims, bins=self.n_bins, min=0.0, max=1.0)
 
-        # compute histogram
-        bin_vector = torch.tensor(
-            np.histogram(
-                sims_all,
-                bins=self.n_bins,
-                range=(float(sims_all.min()), float(sims_all.max())),
-            )[0],
-            dtype=torch.float32,
-            device=self.device,
-        )
         bin_vector /= bin_vector.sum()
         bin_vector = bin_vector.cpu().numpy()
 
         pairsim_vector = (
-            torch.linspace(
-                float(sims_all.min()), float(sims_all.max()), steps=self.n_bins
-            )
-            .cpu()
-            .numpy()
+            torch.linspace(float(0), float(1), steps=self.n_bins).cpu().numpy()
         )
 
         cumulative_sum = np.cumsum(bin_vector)
