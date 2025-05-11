@@ -81,6 +81,7 @@ echo "Running on node: $(hostname)"; nvidia-smi
 
 #conda clean --index-cache --packages --tarballs --yes #uncomment if problems with conda envs
 
+mkdir -p ./11may/T2D-EW/dnaberts_output/
 cp -r phenotype_mil/binning_results/T2D-EW/dnaberts_output/ ./11may/T2D-EW/dnaberts_output/
 
 #--------------------------2. Pick job-------------------------
