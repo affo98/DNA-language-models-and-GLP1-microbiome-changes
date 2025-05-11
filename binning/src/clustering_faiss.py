@@ -99,7 +99,7 @@ class KMediodFAISS:
         self.device = device
         self.block_size = block_size
 
-        self.gpu_index = self.build_faiss(IVF_index=False)
+        self.gpu_index = self.build_faiss(IVF_index=True)
 
     def fit(self, min_similarity: float, knn_k: int, knn_p: float) -> np.array:
         if not 0 < min_similarity < 1:

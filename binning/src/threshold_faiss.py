@@ -81,7 +81,7 @@ class ThresholdFAISS:
         self.embeddings_np = embeddings
         self.N = embeddings.shape[0]
 
-        self.index = self.build_faiss(IVF_index=False)
+        self.index = self.build_faiss(IVF_index=True)
 
     def get_knn_threshold(self, knn_k: int, knn_p: float) -> float:
         """
