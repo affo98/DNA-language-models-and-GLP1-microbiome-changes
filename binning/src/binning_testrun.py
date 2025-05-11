@@ -28,7 +28,7 @@ def main():
     save_path = "./binning_testrun/"
     os.makedirs(save_path, exist_ok=True)
 
-    embeddings_file = "cami2_benchmark/model_results/metahit/dnaberts_output/test/embeddings/dnaberts.npz"
+    embeddings_file = "cami2_benchmark/model_results/metahit/dnaberts_output/test/embeddings/embeddings.npy"
     # embeddings_file = f"{save_path}embeddings.npy"
 
     N, D = 29_458_443, 768  # number of embeddings × dim #size of T2D-EW contigs
@@ -71,15 +71,15 @@ def main():
     #     mode="r",
     #     shape=(N, D),
     # )
+    # embeddings_mm = np.load(embeddings_file)
 
-    embeddings_mm = np.load(embeddings_file)
     n_test = 161581
-    # embeddings_mm = np.memmap(
-    #     embeddings_file,
-    #     dtype="float32",
-    #     mode="r",
-    #     shape=(n_test, 768),
-    # )  # embeddings_array = np.array(embeddings)
+    embeddings_mm = np.memmap(
+        embeddings_file,
+        dtype="float32",
+        mode="r",
+        shape=(n_test, 768),
+    )  # embeddings_array = np.array(embeddings)
     N = embeddings_mm.shape[0]
 
     # Create contig names
