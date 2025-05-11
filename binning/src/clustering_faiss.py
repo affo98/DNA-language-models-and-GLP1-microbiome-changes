@@ -100,7 +100,7 @@ class KMediodFAISS:
             batch = self.embeddings_np[i:i_end]
 
             # Search batch_size points to compute density
-            similarities, _ = self.index.search(batch, self.block_size * 10)
+            similarities, _ = self.index.search(batch, self.block_size)
             sim_matrix = torch.from_numpy(similarities).to(self.device)
             mask = sim_matrix >= min_similarity
             density_vector[i:i_end] = torch.where(
