@@ -78,8 +78,20 @@ class ThresholdFAISS:
         # flat index
         cpu_index = faiss.IndexFlatIP(d)
         # self.index = faiss.index_cpu_to_gpu(res, 0, cpu_index)
-        self.index = faiss.index_cpu_to_all_gpus(cpu_index)  # build the index
-        self.index.add(embeddings)
+        co = faiss.GpuMultipleClonerOptions()
+        co.shard = True  # Split data across GPUs
+        co.useFloat16 = True  # Optional: reduce memory further
+
+        # Distribute across all GPUs
+        self.index = faiss.index_cpu_to_all_gpus(cpu_index, co)
+
+        # Add data (automatically sharded)
+        batch_size = 5_000_000  # Adjust based on GPU memory
+        for i in tqdm(range(0, len(embeddings), batch_size)):
+            self.index.add(embeddings[i : i + batch_size])
+
+        # self.index = faiss.index_cpu_to_all_gpus(cpu_index)  # build the index
+        # self.index.add(embeddings)
         self.N = embeddings.shape[0]
         self.log.append(
             f"FAISS GPU index built: {self.N} normalized vectors of dim {d}, using MiB: {get_gpu_mem()}"
