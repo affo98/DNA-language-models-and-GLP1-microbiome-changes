@@ -70,21 +70,50 @@ class ThresholdFAISS:
         for start in range(0, self.N, self.block_size):
             end = min(start + self.block_size, self.N)
             queries = self.index.reconstruct_n(start, end - start)
+            queries_tensor = torch.tensor(
+                queries, dtype=torch.float32, device=self.device
+            )
+
+            # Get top-k+1 (self + k neighbors)
+            _, indices = self.index.search(queries, knn_k + 1)
+            neighbor_ids = indices[:, 1:]  # (block_size, k)
+
+            # Use torch for gathering embeddings
+            neighbor_ids_tensor = torch.tensor(neighbor_ids, device=self.device)
+            topk_embs = self.embeddings_tensor[neighbor_ids_tensor]  # (bs, k, D)
+
+            # Compute centroids and similarity
+            centroids = topk_embs.mean(dim=1, keepdim=True).transpose(
+                1, 2
+            )  # (bs, D, 1)
+            csims = (
+                torch.bmm(topk_embs, centroids).squeeze(-1).float().flatten()
+            )  # (bs * k,)
+            all_csims.append(csims.cpu().numpy())
+
+        for start in range(0, self.N, self.block_size):
+            end = min(start + self.block_size, self.N)
+            queries = self.index.reconstruct_n(start, end - start)
 
             # Get top-k+1 (self + k neighbors)
             distances, indices = self.index.search(queries, knn_k + 1)
-
-            # Remove self (assume at index 0)
             neighbor_ids = indices[:, 1:]  # (block_size, k)
-            topk_embs = self.embeddings_np[neighbor_ids]  # (block_size, k, D)
+
+            topk_embs = self.embeddings_np[neighbor_ids].to(
+                self.device
+            )  # (block_size, k, D)
 
             # Compute centroids (mean of normalized vectors)
-            centroids = np.mean(topk_embs, axis=1, keepdims=True)  # (block_size, 1, D)
+            centroids = topk_embs.mean(dim=1, keepdim=True)  # (block_size, 1, D)
 
-            # Cosine similarity (dot product since already normalized)
-            csims = np.matmul(topk_embs, centroids.transpose(0, 2, 1)).squeeze(-1)
-            csims_flat = csims.flatten()
-            all_csims.append(csims_flat)
+            # Cosine similarity (dot product between normalized vectors)
+            centroids = topk_embs.mean(dim=1, keepdim=True).transpose(
+                1, 2
+            )  # (bs, D, 1)
+            csims = (
+                torch.bmm(topk_embs, centroids).squeeze(-1).float().flatten()
+            )  # (bs * k,)
+            all_csims.append(csims.cpu().numpy())
 
         sims_all = np.concatenate(all_csims)
 
