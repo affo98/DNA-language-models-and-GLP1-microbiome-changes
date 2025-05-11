@@ -106,7 +106,9 @@ class ThresholdFAISS:
         self.knn_k = knn_k
         self.knn_p = knn_p
 
-        bin_vector = torch.zeros(self.n_bins, dtype=torch.float32, device=self.device)
+        bin_vector = torch.zeros(
+            self.n_bins, dtype=torch.float32, device=self.device
+        )  #
 
         distances, indices = self.index.search(self.embeddings_np, knn_k + 1)
         neighbor_ids = indices[:, 1:]  # (N, k)
