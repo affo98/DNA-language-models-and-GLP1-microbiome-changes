@@ -123,13 +123,12 @@ class KMediodFAISS:
             # select medoid
             medoid_idx = torch.argmax(density_vector).item()
             density_vector[medoid_idx] = -100  # rm seed contig
-            # seed = torch.from_numpy(self.embeddings_np[medoid_idx]).to(self.device)
-            seed = self.embeddings_np[medoid_idx]
+            seed = torch.from_numpy(self.embeddings_np[medoid_idx]).to(self.device)
             available_mask = predictions == -1
 
             for _ in range(self.num_steps):
                 # full embedding block-by-block for mv
-                sims_full = []
+                sims_full = []  # potential oom
                 for i in range(0, N, self.block_size):
                     i_end = min(i + self.block_size, N)
                     block_np = self.embeddings_np[i:i_end]
