@@ -99,8 +99,10 @@ def main(args, log):
                 _, _ = kmediod_val.fit(threshold, knnk, knnp)
 
     elif args.mode == "test":
-        knnk = args.knnk[0]
-        knnp = args.knnp[0]
+        # knnk = args.knnk[0]
+        # knnp = args.knnp[0]
+        knnk = 1000
+        knnp = 25
         log.append(
             f"{'='*60}\n"
             f"=== Running Binning Test with K: {knnk} P: {knnp} ===\n"
