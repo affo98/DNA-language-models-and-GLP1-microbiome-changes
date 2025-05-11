@@ -53,7 +53,7 @@ class ThresholdFAISS:
         self.index.add(embeddings)
         self.N = embeddings.shape[0]
         self.log.append(
-            f"FAISS GPU index built: {self.N} normalized vectors of dim {d}"
+            f"FAISS GPU index built: {self.N} normalized vectors of dim {d}, using MEM {get_gpu_mem()}"
         )
 
     def get_knn_threshold(self, knn_k: int, knn_p: float) -> float:
