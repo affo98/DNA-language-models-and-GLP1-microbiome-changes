@@ -200,7 +200,6 @@ class KMediodFAISS:
         # clean-up
         del density_vector, seed
         torch.cuda.empty_cache()
-        self.index.reset()
 
         return predictions, contig_names
 
