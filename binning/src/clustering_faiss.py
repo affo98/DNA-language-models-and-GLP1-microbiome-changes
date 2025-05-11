@@ -20,9 +20,9 @@ class KMediodFAISS:
         num_steps: int,
         max_iter: int,
     ):
-        if embeddings.dtype != np.float32:
-            embeddings = embeddings.astype(np.float32)
-            print("Embeddings changed to dtype float32")
+        if embeddings.dtype != np.float16:
+            embeddings = embeddings.astype(np.float16)
+            print("Embeddings changed to dtype float16")
         if min_bin_size < 1:
             raise ValueError("Minimum bin size must be at least 1")
         if num_steps < 1:
@@ -104,7 +104,7 @@ class KMediodFAISS:
             similarities, _ = self.gpu_index.search(
                 batch, 2048
             )  # gpu only supports k=2048
-            sim_matrix = torch.from_numpy(similarities).to(self.device)
+            sim_matrix = torch.from_numpy(similarities).to(self.device).half()
             mask = sim_matrix >= min_similarity
             density_vector[i:i_end] = torch.where(
                 mask, sim_matrix, torch.zeros_like(sim_matrix)
@@ -123,15 +123,19 @@ class KMediodFAISS:
             # select medoid O(N)
             medoid_idx = torch.argmax(density_vector).item()
             density_vector[medoid_idx] = -100  # rm seed contig
-            seed = torch.from_numpy(self.embeddings_np[medoid_idx]).to(self.device)
+            seed = (
+                torch.from_numpy(self.embeddings_np[medoid_idx]).to(self.device).half()
+            )
             available_mask = predictions == -1
 
             for _ in range(self.num_steps):
                 sims_full = []  # potential oom
                 for i in range(0, N, self.block_size):
                     i_end = min(i + self.block_size, N)
-                    block = torch.from_numpy(self.embeddings_np[i:i_end]).to(
-                        self.device
+                    block = (
+                        torch.from_numpy(self.embeddings_np[i:i_end])
+                        .to(self.device)
+                        .half()
                     )
                     sims_part = torch.mv(block, seed)
                     sims_full.append(sims_part)
@@ -144,9 +148,11 @@ class KMediodFAISS:
                     break
 
                 # Update seed as mean of candidates
-                emb_candidates = torch.from_numpy(
-                    self.embeddings_np[candidates.cpu().numpy()]
-                ).to(self.device)
+                emb_candidates = (
+                    torch.from_numpy(self.embeddings_np[candidates.cpu().numpy()])
+                    .to(self.device)
+                    .half()
+                )
                 seed = torch.mean(emb_candidates, dim=0)
 
             predictions[candidates] = cluster_id
@@ -157,12 +163,12 @@ class KMediodFAISS:
             for i in range(0, N, self.block_size):
                 i_end = min(i + self.block_size, N)
                 block_i_np = self.embeddings_np[i:i_end]
-                block_i = torch.from_numpy(block_i_np).to(self.device)
+                block_i = torch.from_numpy(block_i_np).to(self.device).half()
 
                 for c0 in range(0, len(candidates), self.block_size):
                     c1 = min(len(candidates), c0 + self.block_size)
                     cand_np = self.embeddings_np[candidates[c0:c1].cpu().numpy()]
-                    block_c = torch.from_numpy(cand_np).to(self.device)
+                    block_c = torch.from_numpy(cand_np).to(self.device).half()
 
                     sim = torch.mm(block_i, block_c.T)
                     sim = torch.where(sim >= min_similarity, sim, torch.zeros_like(sim))

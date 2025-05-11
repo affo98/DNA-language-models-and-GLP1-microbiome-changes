@@ -19,9 +19,9 @@ class ThresholdFAISS:
         embeddings: np.ndarray,
         n_bins: int,
     ):
-        if embeddings.dtype != np.float32:
-            embeddings = embeddings.astype(np.float32)
-            print("Embeddings changed to dtype float32")
+        if embeddings.dtype != np.float16:
+            embeddings = embeddings.astype(np.float16)
+            print("Embeddings changed to dtype float16")
         if n_bins < 1:
             raise ValueError("Number of bins must be at least 1")
 
