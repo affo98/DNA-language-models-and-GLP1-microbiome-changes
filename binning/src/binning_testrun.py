@@ -96,17 +96,16 @@ def main():
     # embeddings_test = embeddings_test[:5_000_000]
     # contig_names_test = contig_names_test[:5_000_000]
 
-    free_mem, _ = torch.cuda.mem_get_info()  # bytes available
-    print(free_mem)
-    # each block_i @ block_jᵀ uses ~ 2 × (block_size × D) elements,
-    # at 2 bytes/elem in fp16. Solve: 2*block_size*D*2 <= free_mem * margin
+    free_mem, _ = torch.cuda.mem_get_info()  # bytes available, e.g. ~2.3e10
     margin = 0.9
-    D = embeddings_mm.shape[1]
-    max_bs = int((free_mem * margin / (4 * D)) ** 0.5)
-    print(max_bs)
-    max_bs = 200000
+    M = free_mem * margin
+
+    D = embeddings_mm.shape[1]  # embedding dim
+    # solve b^2 + D*b - M/4 = 0 for b:
+    max_bs = int((-D + (D**2 + M) ** 0.5) / 2)
+
     block_size = min(BLOCK_SIZE, max_bs, N)
-    print(block_size)
+    print(f"free_mem={free_mem}, max_bs={max_bs}, chosen block_size={block_size}")
 
     thresholder_test = Threshold(
         embeddings_test,
