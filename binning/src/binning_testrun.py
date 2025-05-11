@@ -104,12 +104,13 @@ def main():
     D = embeddings_mm.shape[1]
     max_bs = int((free_mem * margin / (4 * D)) ** 0.5)
     print(max_bs)
-    block_size = min(block_size, max_bs, N)
+    block_size = min(BLOCK_SIZE, max_bs, N)
+    print(block_size)
 
     thresholder_test = Threshold(
         embeddings_test,
         N_BINS,
-        BLOCK_SIZE,
+        block_size,
         save_path,
         model_name,
         log,
@@ -135,7 +136,7 @@ def main():
         MIN_BIN_SIZE,
         NUM_STEPS,
         MAX_ITER,
-        BLOCK_SIZE,
+        block_size,
     )
     # start = time.perf_counter()
     # _, _ = kmediod_test.fit(threshold, KNN_K, KNN_P)
