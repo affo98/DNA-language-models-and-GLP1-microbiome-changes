@@ -49,6 +49,7 @@ class ThresholdFAISS:
         # Build FAISS GPU index for inner product search
         d = embeddings.shape[1]
         res = faiss.StandardGpuResources()
+        log.append(f"N GPUs Faiss: {faiss.get_num_gpus()}")
 
         # # IVF16384 + PQ48
         # nlist = 16384  # Number of Voronoi cells
@@ -75,7 +76,7 @@ class ThresholdFAISS:
 
         # flat index
         cpu_index = faiss.IndexFlatIP(d)
-        self.index = faiss.index_cpu_to_gpu(res, 0, cpu_index)
+        self.index = faiss.index_cpu_to_all_gpus(res, 0, cpu_index)
         self.index.add(embeddings)
         self.N = embeddings.shape[0]
         self.log.append(
