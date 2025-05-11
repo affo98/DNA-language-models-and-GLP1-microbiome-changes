@@ -110,9 +110,18 @@ class ThresholdFAISS:
             self.n_bins, dtype=torch.float32, device=self.device
         )  #
 
-        distances, indices = self.index.search(self.embeddings_np, knn_k + 1)
-        neighbor_ids = indices[:, 1:]  # (N, k)
-        print(distances.shape)
+        batch_size = 10000  # Adjust based on available memory
+        n_samples = self.embeddings_np.shape[0]
+        neighbor_ids = []
+
+        for start_idx in range(0, n_samples, batch_size):
+            end_idx = min(start_idx + batch_size, n_samples)
+            batch = self.embeddings_np[start_idx:end_idx]
+            distances, indices = self.index.search(batch, knn_k + 1)
+            neighbor_ids.append(indices[:, 1:])  # Exclude self
+
+        neighbor_ids = np.vstack(neighbor_ids)  # Combine batches
+
         # for start in tqdm(
         #     range(0, self.N, self.block_size), desc="Calculating Threshold"
         # ):
