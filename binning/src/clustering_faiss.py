@@ -157,19 +157,35 @@ class KMediodFAISS:
             seeds.append(seed.cpu().numpy())
             seed_labels.append(cluster_id)
 
+            print(f"Done with seed update")
             # Update density vector for affected points
-            for i in range(0, N, self.block_size):
-                i_end = min(i + self.block_size, N)
-                batch = self.embeddings_np[i:i_end]
 
-                # Search only the candidates to update density
-                sim_cand, _ = self.cpu_index.search(batch, len(candidates))
-                sim_matrix = torch.from_numpy(sim_cand).to(self.device)
-                mask = sim_matrix >= min_similarity
-                density_update = torch.where(
-                    mask, sim_matrix, torch.zeros_like(sim_matrix)
-                ).sum(dim=1)
-                density_vector[i:i_end] -= density_update
+            for i in tqdm(range(0, N, self.block_size), desc="cands"):
+                i_end = min(i + self.block_size, N)
+                block_i_np = self.embeddings_np[i:i_end]
+                block_i = torch.from_numpy(block_i_np).to(self.device)
+
+                for c0 in range(0, len(candidates), self.block_size):
+                    c1 = min(len(candidates), c0 + self.block_size)
+                    cand_np = self.embeddings_np[candidates[c0:c1].cpu().numpy()]
+                    block_c = torch.from_numpy(cand_np).to(self.device)
+
+                    sim = torch.mm(block_i, block_c.T)
+                    sim = torch.where(sim >= min_similarity, sim, torch.zeros_like(sim))
+                    density_vector[i:i_end] -= sim.sum(dim=1)
+
+            # for i in range(0, N, self.block_size):
+            #     i_end = min(i + self.block_size, N)
+            #     batch = self.embeddings_np[i:i_end]
+
+            #     # Search only the candidates to update density
+            #     sim_cand, _ = self.cpu_index.search(batch, len(candidates))
+            #     sim_matrix = torch.from_numpy(sim_cand).to(self.device)
+            #     mask = sim_matrix >= min_similarity
+            #     density_update = torch.where(
+            #         mask, sim_matrix, torch.zeros_like(sim_matrix)
+            #     ).sum(dim=1)
+            #     density_vector[i:i_end] -= density_update
 
             density_vector[candidates] = -100
             pbar.update(1)
