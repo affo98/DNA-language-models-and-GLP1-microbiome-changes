@@ -48,12 +48,9 @@ class KMediodFAISS:
             index = faiss.index_cpu_to_all_gpus(cpu_index, co)
             index.add(self.embeddings_np)
             self.log.append(f"FLAT FAISS GPU index built using MiB: {get_gpu_mem()}")
-
         else:
-            nlist = (
-                4096  # Number of Voronoi cells/clusters (tune based on dataset size)
-            )
-            nprobe = 32  # Number of clusters to search (balance speed/accuracy)
+            nlist = 4096  # Number of Voronoi cells/clusters
+            nprobe = 32  # Number of clusters to search
             quantizer = faiss.IndexFlatIP(d)  # Inner product for cosine similarity
             cpu_index = faiss.IndexIVFFlat(
                 quantizer, d, nlist, faiss.METRIC_INNER_PRODUCT
