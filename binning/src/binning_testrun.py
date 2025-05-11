@@ -27,13 +27,13 @@ def main():
     save_path = "./binning_testrun/"
     os.makedirs(save_path, exist_ok=True)
 
-    embeddings_file = "cami2_benchmark/model_results/metahit/dnaberts_output/test/embeddings/embeddings.npy"
-    # embeddings_file = f"{save_path}embeddings.npy"
+    # embeddings_file = "cami2_benchmark/model_results/metahit/dnaberts_output/test/embeddings/embeddings.npy"
+    embeddings_file = f"{save_path}embeddings.npy"
 
     N, D = 29_458_443, 768  # number of embeddings × dim #size of T2D-EW contigs
     chunk_size = 5_000  # rows per write/load chunk
     N_BINS = 1000
-    BLOCK_SIZE = 12_000
+    BLOCK_SIZE = 10_000
     model_name = "binning_testrun"
     log = Logger(os.path.join(save_path, "log.txt"))
     MIN_BIN_SIZE = 2  # changed from 10 to 2, because bins less than MINSIZE_BINS (250000) will be removed in postprocessing.
@@ -64,22 +64,21 @@ def main():
     #     del mm
     #     log.append("Done writing embeddings.npy")
 
-    # embeddings_mm = np.memmap(
-    #     embeddings_file,
-    #     dtype="float32",
-    #     mode="r",
-    #     shape=(N, D),
-    # )
-    # assert embeddings_mm.shape == (N, D), "Shape mismatch loading memmap!"
-
-    # embeddings_mm = np.load(embeddings_file)
-    n_test = 161581
     embeddings_mm = np.memmap(
         embeddings_file,
         dtype="float32",
         mode="r",
-        shape=(n_test, 768),
-    )  # embeddings_array = np.array(embeddings)
+        shape=(N, D),
+    )
+
+    # embeddings_mm = np.load(embeddings_file)
+    # n_test = 161581
+    # embeddings_mm = np.memmap(
+    #     embeddings_file,
+    #     dtype="float32",
+    #     mode="r",
+    #     shape=(n_test, 768),
+    # )  # embeddings_array = np.array(embeddings)
     N = embeddings_mm.shape[0]
 
     # Create contig names
