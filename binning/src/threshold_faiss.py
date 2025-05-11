@@ -44,6 +44,7 @@ class ThresholdFAISS:
         self.save_path = save_path
         self.model_name = model_name
         self.embeddings_np = embeddings  # store for later use
+        self.N = embeddings.shape[0]
 
         # Build FAISS GPU index for inner product search
         d = embeddings.shape[1]
