@@ -25,6 +25,9 @@ class ThresholdFAISS:
         if n_bins < 1:
             raise ValueError("Number of bins must be at least 1")
 
+    def init_faiss(self):
+        pass
+
     def __init__(
         self,
         embeddings: np.ndarray,
@@ -70,8 +73,9 @@ class ThresholdFAISS:
         #     f"dim {d}, GPU mem: {get_gpu_mem()} MiB"
         # )
 
-        # flat index on GPU with shards
-        d = embeddings.shape[1]
+        self.index = self.init_faiss()
+
+        d = self.embeddings_np.shape[1]
         log.append(f"N GPUs Faiss: {faiss.get_num_gpus()}")
         cpu_index = faiss.IndexFlatIP(d)
         co = faiss.GpuMultipleClonerOptions()

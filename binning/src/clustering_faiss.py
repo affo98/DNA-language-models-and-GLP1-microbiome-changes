@@ -73,10 +73,7 @@ class KMediodFAISS:
         co.shard = True
         co.useFloat16 = True
         self.gpu_index = faiss.index_cpu_to_all_gpus(cpu_index, co)
-        self.cpu_index = faiss.index_gpu_to_cpu(self.gpu_index)
-
         self.gpu_index.add(embeddings)
-        self.cpu_index.add(embeddings)
         self.N = embeddings.shape[0]
         self.log.append(
             f"FAISS GPU index built: {self.N} normalized vectors of dim {d}, using MiB: {get_gpu_mem()}"
