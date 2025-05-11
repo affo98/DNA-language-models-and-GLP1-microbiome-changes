@@ -75,7 +75,7 @@ class ThresholdFAISS:
             distances, indices = self.index.search(queries, knn_k + 1)
             neighbor_ids = indices[:, 1:]  # (block_size, k)
 
-            topk_embs = self.embeddings_np[neighbor_ids].to(
+            topk_embs = torch.from_numpy(self.embeddings_np[neighbor_ids]).to(
                 self.device
             )  # (block_size, k, D)
 
