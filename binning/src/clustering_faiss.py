@@ -72,7 +72,8 @@ class KMediodFAISS:
         co = faiss.GpuMultipleClonerOptions()
         co.shard = True
         co.useFloat16 = True
-        self.index = faiss.index_cpu_to_all_gpus(cpu_index, co)
+        gpu_index = faiss.index_cpu_to_all_gpus(cpu_index, co)
+        self.index = faiss.index_gpu_to_cpu(gpu_index)
 
         self.index.add(embeddings)
         self.N = embeddings.shape[0]
