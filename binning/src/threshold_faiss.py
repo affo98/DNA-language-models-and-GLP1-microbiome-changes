@@ -89,6 +89,7 @@ class ThresholdFAISS:
             )  # (bs * k,)
 
             bin_vector += torch.histc(csims, bins=self.n_bins, min=0.0, max=1.0)
+            torch.cuda.empty_cache()
 
         bin_vector /= bin_vector.sum()
         bin_vector = bin_vector.cpu().numpy()
