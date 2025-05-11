@@ -10,6 +10,7 @@ dependencies:
   - scikit-learn
   - biopython
   - tqdm
+  - faiss-gpu
   - pip:
       - torch
       - torchvision
@@ -20,5 +21,4 @@ dependencies:
       - matplotlib
       - seaborn
       - pandas
-      - faiss-gpu
       # - git+https://github.com/VarIr/scikit-hubness.git #hubness reduction
