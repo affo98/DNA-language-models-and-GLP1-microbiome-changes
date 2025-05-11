@@ -94,7 +94,7 @@ class KMediodFAISS:
             f"Using {self.device} and threshold {min_similarity} for k-medoid clustering"
         )
 
-        # Compute density vector using Faiss
+        # Compute density vector using Faiss O(Nx2028) with FAISS
         density_vector = torch.zeros(N, device=self.device)
         for i in tqdm(range(0, N, self.block_size), desc="Computing density"):
             i_end = min(i + self.block_size, N)
@@ -120,7 +120,7 @@ class KMediodFAISS:
         while torch.any(predictions == -1) and cluster_id < self.max_iter:
             cluster_id += 1
 
-            # select medoid
+            # select medoid O(N)
             medoid_idx = torch.argmax(density_vector).item()
             density_vector[medoid_idx] = -100  # rm seed contig
             seed = torch.from_numpy(self.embeddings_np[medoid_idx]).to(self.device)
@@ -136,10 +136,6 @@ class KMediodFAISS:
                     sims_part = torch.mv(block, seed)
                     sims_full.append(sims_part)
                 sim_vec = torch.cat(sims_full)
-
-                # Search with current seed using Faiss
-                # similarities, _ = self.cpu_index.search(seed, N)
-                # sim_vec = torch.from_numpy(similarities.flatten()).to(self.device)
 
                 candidate_mask = (sim_vec >= min_similarity) & available_mask
                 candidates = torch.where(candidate_mask)[0]
@@ -157,10 +153,8 @@ class KMediodFAISS:
             seeds.append(seed.cpu().numpy())
             seed_labels.append(cluster_id)
 
-            print(f"Done with seed update")
-            # Update density vector for affected points
-
-            for i in tqdm(range(0, N, self.block_size), desc="cands"):
+            # Update density vector for affected points O(NxC)
+            for i in range(0, N, self.block_size):
                 i_end = min(i + self.block_size, N)
                 block_i_np = self.embeddings_np[i:i_end]
                 block_i = torch.from_numpy(block_i_np).to(self.device)
@@ -173,19 +167,6 @@ class KMediodFAISS:
                     sim = torch.mm(block_i, block_c.T)
                     sim = torch.where(sim >= min_similarity, sim, torch.zeros_like(sim))
                     density_vector[i:i_end] -= sim.sum(dim=1)
-
-            # for i in range(0, N, self.block_size):
-            #     i_end = min(i + self.block_size, N)
-            #     batch = self.embeddings_np[i:i_end]
-
-            #     # Search only the candidates to update density
-            #     sim_cand, _ = self.cpu_index.search(batch, len(candidates))
-            #     sim_matrix = torch.from_numpy(sim_cand).to(self.device)
-            #     mask = sim_matrix >= min_similarity
-            #     density_update = torch.where(
-            #         mask, sim_matrix, torch.zeros_like(sim_matrix)
-            #     ).sum(dim=1)
-            #     density_vector[i:i_end] -= density_update
 
             density_vector[candidates] = -100
             pbar.update(1)
