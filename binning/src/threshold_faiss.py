@@ -1,5 +1,6 @@
 import os
 import json
+from tqdm import tqdm
 import numpy as np
 import faiss
 import torch
@@ -95,7 +96,7 @@ class ThresholdFAISS:
 
         bin_vector = torch.zeros(self.n_bins, dtype=torch.float32, device=self.device)
 
-        for start in range(0, self.N, self.block_size):
+        for start in tqdm(range(0, self.N, self.block_size), desc='Calculating Threshold')':
             end = min(start + self.block_size, self.N)
             queries = self.index.reconstruct_n(start, end - start)
 
