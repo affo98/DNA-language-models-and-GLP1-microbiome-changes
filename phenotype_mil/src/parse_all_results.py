@@ -136,8 +136,6 @@ def parse_knn_histograms(model_results_dir):
 
 
 def parse_contig_lengths(processed_data_dir):
-
-    # --------------------TO DO FIND CORRECT DIRS
     """Reads in contigs from each dataset and saves their length in a list."""
 
     contigs_summary = []
@@ -146,6 +144,7 @@ def parse_contig_lengths(processed_data_dir):
         glob(os.path.join(processed_data_dir, "*")), desc="Parsing contig lengths"
     ):
         dataset_name = os.path.basename(dataset_dir)
+        print(dataset_name)
         contigs_file = glob(
             os.path.join(dataset_dir, "global_contig_catalogue.fna.gz")
         )[0]
