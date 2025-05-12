@@ -32,6 +32,13 @@ print(samples)
 #     SAMPLES_LU[sample_name] = sample
 #     SAMPLES.append(sample_name)
 
+### MANUAL 2000 quick fix####
+SAMPLES = [
+    Path(f).parent.name.split("_")[0][5:]
+    for f in glob.glob("T2D-EW_PRJEB1786/knead/*/paired_1.fastq")
+]
+print(SAMPLES)
+
 # print("\n"*2)
 # print("\t"*1,"#"*100)
 # print("\n")
@@ -41,15 +48,15 @@ print(samples)
 # print("\t"*1,"#"*100)
 # print("\n"*2)
 
-def get_samples(wildcards):
-    checkpoint_output = checkpoints.download.get().output[0]
-    samples = glob.glob(f"{checkpoint_output}/*/1.fastq.gz")
-    sample_names = []
-    for sample in samples:
-        # Customize logic based on your file structure
-        sample_name = sample.split("/")[-2].split("_")[0][5:]
-        sample_names.append(sample_name)
-    return sample_names
+# def get_samples(wildcards):
+#     checkpoint_output = checkpoints.download.get().output[0]
+#     samples = glob.glob(f"{checkpoint_output}/*/1.fastq.gz")
+#     sample_names = []
+#     for sample in samples:
+#         # Customize logic based on your file structure
+#         sample_name = sample.split("/")[-2].split("_")[0][5:]
+#         sample_names.append(sample_name)
+#     return sample_names
 
 
 # def get_samples(wildcards):
@@ -80,20 +87,19 @@ rule all:
         # os.path.join(DATAPATH, "SAMEA{sample}/1.fastq.gz"),
         # os.path.join(DATAPATH, "SAMEA{sample}/2.fastq.gz"),
 
-checkpoint download:
-    output:
-        directory(DATAPATH)
-    conda:
-        os.path.join(CONDA_ENVS, "get_phenotype_reads.yaml"),
-    params:
-        dataset_id = STUDY_ID,
-        dataset_name = STUDY_NAME,
-        get_reads_py = os.path.join(PY_SCRIPTS, "get_phenotype_reads.py"),
-    shell:
-        """
-        python {params.get_reads_py} -i {params.dataset_id} -n {params.dataset_name}
-        """
-
+# checkpoint download:
+#     output:
+#         directory(DATAPATH)
+#     conda:
+#         os.path.join(CONDA_ENVS, "get_phenotype_reads.yaml"),
+#     params:
+#         dataset_id = STUDY_ID,
+#         dataset_name = STUDY_NAME,
+#         get_reads_py = os.path.join(PY_SCRIPTS, "get_phenotype_reads.py"),
+#     shell:
+#         """
+#         python {params.get_reads_py} -i {params.dataset_id} -n {params.dataset_name}
+#         """
 
 rule fastqc:
     input: 
