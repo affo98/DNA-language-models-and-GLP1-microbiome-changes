@@ -237,13 +237,13 @@ rule metaspades:
 
 
 rule concatenate:
-    input:
-        expand(os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"), sample=SAMPLES)
     # input:
-    #     lambda wildcards: expand(
-    #         os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"),
-    #         sample=get_samples(wildcards)
-    #     )
+    #     expand(os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"), sample=SAMPLES)
+    input:
+        lambda wildcards: expand(
+            os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"),
+            sample=get_samples(wildcards)
+        )
     output:
         os.path.join(OUTDIR, "global_contig_catalogue.fna.gz")
     conda:
