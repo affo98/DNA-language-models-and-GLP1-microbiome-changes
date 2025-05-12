@@ -239,7 +239,7 @@ rule concatenate:
     #     expand(os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"), sample=SAMPLES)
     input:
         lambda wildcards: expand(
-            os.path.join(OUTDIR, "spades/asm_{sample}/contigs_renamed.fasta"),
+            os.path.join(OUTDIR, "spades/asm_{sample}/contigs.fasta"),
             sample=get_samples(wildcards)
         )
     output:
