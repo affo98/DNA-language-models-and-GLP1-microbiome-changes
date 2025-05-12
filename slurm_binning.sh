@@ -26,23 +26,23 @@
 
 
 #1c Using 2x H100 
-# #SBATCH --output=t2dew_h100_%j.out
-# #SBATCH --error=slurm_h100_%j.err 
-# #SBATCH --exclude=cn[1-10]
-# #SBATCH --exclude=cn[12-19]
-# #SBATCH --exclude=desktop[1-16]
-# #SBATCH --nodelist=cn11                        
-# #SBATCH --gres=gpu:h100:2
+#SBATCH --output=t2dew_h100_%j.out
+#SBATCH --error=slurm_h100_%j.err 
+#SBATCH --exclude=cn[1-10]
+#SBATCH --exclude=cn[12-19]
+#SBATCH --exclude=desktop[1-16]
+#SBATCH --nodelist=cn11                        
+#SBATCH --gres=gpu:h100:2
 
 
 #1b Using 4x A100 (40gb) 
-#SBATCH --output=t2dew_a100_%j.out
-#SBATCH --error=slurm_a100_%j.err 
-#SBATCH --exclude=cn[3-12]
-#SBATCH --exclude=cn[14-19]
-#SBATCH --exclude=desktop[1-16]
-#SBATCH --nodelist=cn13                        
-#SBATCH --gres=gpu:a100_40gb:4
+# #SBATCH --output=t2dew_a100_%j.out
+# #SBATCH --error=slurm_a100_%j.err 
+# #SBATCH --exclude=cn[3-12]
+# #SBATCH --exclude=cn[14-19]
+# #SBATCH --exclude=desktop[1-16]
+# #SBATCH --nodelist=cn13                        
+# #SBATCH --gres=gpu:a100_40gb:4
 
 
 #---------------------Setup-------------------------
