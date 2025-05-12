@@ -47,7 +47,7 @@ def read_hausdorff(path: str, log: Logger) -> tuple[np.ndarray, np.ndarray]:
 
     assert distance_matrix.shape[0] == distance_matrix.shape[1] == len(cluster_names)
 
-    log.append(f"Loaded distance matrix with shape {distance_matrix.shape}")
+    log.append(f"Loaded hausdorff distance matrix with shape {distance_matrix.shape}")
     log.append(f"Loaded {len(cluster_names)} cluster names")
 
     return distance_matrix, cluster_names

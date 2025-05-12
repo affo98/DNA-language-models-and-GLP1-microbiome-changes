@@ -230,6 +230,7 @@ rule other_model_test:
         os.path.join(BINNING_DIR, "envs/binning.yml")
     shell:
         """
+        pip uninstall -y triton
         best_combination_file="{input.best_kp_path}/best_combination.json"
         best_k=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_k"])' $best_combination_file)
         best_p=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_p"])' $best_combination_file)
@@ -324,6 +325,8 @@ rule get_hausdorff_distances:
             --save_path {output.result_dir} \
             --log {log}
         """
+
+
 
 
 rule phenotype_mil:
