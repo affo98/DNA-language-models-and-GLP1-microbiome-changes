@@ -10,12 +10,12 @@
 #-----------------1. Pick Node-----------------------
 
 #1a For 4 L40s
-#SBATCH --output=t2dew_l40_%j.out
-#SBATCH --error=slurm_l40_%j.err 
-#SBATCH --exclude=cn[3-18]
-#SBATCH --exclude=desktop[1-16]
-#SBATCH --nodelist=cn19
-#SBATCH --gres=gpu:l40s:4
+# #SBATCH --output=t2dew_l40_%j.out
+# #SBATCH --error=slurm_l40_%j.err 
+# #SBATCH --exclude=cn[3-18]
+# #SBATCH --exclude=desktop[1-16]
+# #SBATCH --nodelist=cn19
+# #SBATCH --gres=gpu:l40s:4
 
 
 #1b For small testing
@@ -26,13 +26,13 @@
 
 
 #1c Using 2x H100 
-# #SBATCH --output=t2dew_h100_%j.out
-# #SBATCH --error=slurm_h100_%j.err 
-# #SBATCH --exclude=cn[1-10]
-# #SBATCH --exclude=cn[12-19]
-# #SBATCH --exclude=desktop[1-16]
-# #SBATCH --nodelist=cn11                        
-# #SBATCH --gres=gpu:h100:2
+#SBATCH --output=t2dew_h100_%j.out
+#SBATCH --error=slurm_h100_%j.err 
+#SBATCH --exclude=cn[1-10]
+#SBATCH --exclude=cn[12-19]
+#SBATCH --exclude=desktop[1-16]
+#SBATCH --nodelist=cn11                        
+#SBATCH --gres=gpu:h100:2
 
 
 #1b Using 4x A100 (40gb) 
