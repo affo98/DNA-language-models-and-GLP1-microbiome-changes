@@ -9,8 +9,8 @@ CONDA_ENVS = config['CONDA_ENVS']
 DB = config['DB']
 FASTQC_PATH = config['FASTQC_PATH']
 
-STUDY_ID = config["studies"][3].get("id")
-STUDY_NAME = config["studies"][3].get("name")
+STUDY_ID = config["studies"][5].get("id")
+STUDY_NAME = config["studies"][5].get("name")
 
 
 OUTDIR = f"{STUDY_NAME}_{STUDY_ID}"
@@ -23,20 +23,20 @@ samples = glob.glob(f"{DATAPATH}/*/*_1.fastq.gz")
 print(samples)
 
 # # Construct Wildcards
-# READS = ["1","2"]
-# SAMPLES_LU = {}
-# SAMPLES = []
-# for sample in samples:
-#     print(sample)
-#     sample_name = sample.split("/")[-2]
-#     SAMPLES_LU[sample_name] = sample
-#     SAMPLES.append(sample_name)
+READS = ["1","2"]
+SAMPLES_LU = {}
+SAMPLES = []
+for sample in samples:
+    print(sample)
+    sample_name = sample.split("/")[-2]
+    SAMPLES_LU[sample_name] = sample
+    SAMPLES.append(sample_name)
 
 ### MANUAL 2000 quick fix####
-SAMPLES = [
-    Path(f).parent.name.split("_")[0]
-    for f in glob.glob("T2D-EW_PRJEB1786/knead/*/paired_1.fastq")
-]
+# SAMPLES = [
+#     Path(f).parent.name.split("_")[0]
+#     for f in glob.glob("T2D-EW_PRJEB1786/knead/*/paired_1.fastq")
+# ]
 print(SAMPLES)
 
 # print("\n"*2)
@@ -299,9 +299,9 @@ rule alignment:
     benchmark:
         os.path.join(BENCHMARKS, "alignment", "{sample}.txt")
     threads:
-        64
+        48
     resources:
-        mem_gb=80
+        mem_gb=60
     conda:
         # os.path.join(CONDA_ENVS, "minimap2.yaml")
         os.path.join(CONDA_ENVS, "strobealign.yaml")
