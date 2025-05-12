@@ -283,7 +283,7 @@ rule alignment:
         contig_catalouge=os.path.join(OUTDIR,"global_contig_catalogue.fna.gz")
         # contig_catalogue_index = os.path.join(OUTDIR, "minimap/catalogue.mmi")
     output:
-        os.path.join(OUTDIR, "algn/{sample}_sorted.bam"),
+        os.path.join(OUTDIR, "algn/{sample}_2000_sorted.bam"),
     benchmark:
         os.path.join(BENCHMARKS, "alignment", "{sample}.txt")
     threads:
@@ -302,9 +302,9 @@ rule alignment:
         """    
 rule get_coverage:
     input:
-        os.path.join(OUTDIR, "algn/{sample}_sorted.bam"),
+        os.path.join(OUTDIR, "algn/{sample}_2000_sorted.bam"),
     output:
-        os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv"),
+        os.path.join(OUTDIR, "abdn_coverm/{sample}_2000.tsv"),
     threads:
         64
     conda:
@@ -321,11 +321,11 @@ rule merge_abundances:
         # expand(os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv"),sample=SAMPLES)
     input:
         lambda wildcards: expand(
-            os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv"),
+            os.path.join(OUTDIR, "abdn_coverm/{sample}_2000.tsv"),
             sample=get_samples(wildcards)
         )
     output:
-        os.path.join(OUTDIR, "abdn_coverm/abundances.tsv")
+        os.path.join(OUTDIR, "abdn_coverm/abundances_2000.tsv")
     params:
         # merge abundances from vamb takes in a directory of tsv files.
         abdn_path = os.path.join(OUTDIR, "abdn_coverm"),
