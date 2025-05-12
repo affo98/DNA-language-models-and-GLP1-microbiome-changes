@@ -23,7 +23,7 @@ OUTPUT_DIR = os.path.join("phenotype_mil", "binning_results", "parsed_results")
 COMPLETENESS_BINS = [90, 80, 70, 60, 50]
 CONTAMINATION = 5
 
-DATASETS = ["T2D-EW_PRJEB1786", "BIO_UNSEEN"]
+DATASETS = ["T2D-EW_PRJEB1786", "UNSEEN_BIO"]
 
 OTHER_MODELS = [
     "dnaberts",
@@ -144,6 +144,8 @@ def parse_contig_lengths(processed_data_dir):
         glob(os.path.join(processed_data_dir, "*")), desc="Parsing contig lengths"
     ):
         dataset_name = os.path.basename(dataset_dir)
+        if dataset_name not in DATASETS:
+            continue
         print(dataset_name)
         contigs_file = glob(
             os.path.join(dataset_dir, "global_contig_catalogue.fna.gz")
