@@ -15,6 +15,7 @@ STUDY_NAME = config["studies"][3].get("name")
 
 OUTDIR = f"{STUDY_NAME}_{STUDY_ID}"
 DATAPATH = os.path.join("raw_data", "reads", OUTDIR)
+print(DATAPATH)
 BENCHMARKS = os.path.join(OUTDIR, "benchmarks")
 LOGS = os.path.join(OUTDIR,"logs")
 
