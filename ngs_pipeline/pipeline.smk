@@ -34,7 +34,7 @@ print(samples)
 
 ### MANUAL 2000 quick fix####
 SAMPLES = [
-    Path(f).parent.name.split("_")[0][5:]
+    Path(f).parent.name.split("_")
     for f in glob.glob("T2D-EW_PRJEB1786/knead/*/paired_1.fastq")
 ]
 print(SAMPLES)
