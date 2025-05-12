@@ -131,6 +131,8 @@ elif MODEL=='vamb' and not config_nomodelrun:
     ]
 if config_checkm2:
     input_files += [os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "checkm2", f"{MODEL}_results")]
+
+
 if config_phenotype_mil:
     input_files += [os.path.join(OUTDIR_MIL_RESULTS, DATASET, f"{MODEL}_results")]
 
@@ -354,6 +356,7 @@ rule checkm2:
 
 # rule abundance 2
 #   ...
+
 
 
 
