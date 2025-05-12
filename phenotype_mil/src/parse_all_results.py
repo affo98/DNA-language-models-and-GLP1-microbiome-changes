@@ -13,9 +13,9 @@ import pandas as pd
 import numpy as np
 
 
-MODEL_RESULTS_DIR = os.path.join("phenotype_mil", "binning_results", "model_results")
-LOG_DIR = os.path.join("phenotype_mil", "binning_results", "logs")
-BASE_DIR = os.path.join("phenotype_mil", "binning_results")
+# MODEL_RESULTS_DIR = os.path.join("phenotype_mil", "binning_results", "model_results")
+# LOG_DIR = os.path.join("phenotype_mil", "binning_results", "logs")
+# BASE_DIR = os.path.join("phenotype_mil", "binning_results")
 PROCESSED_DATA_DIR = os.path.join("ngs_pipeline")
 OUTPUT_DIR = os.path.join("phenotype_mil", "binning_results", "parsed_results")
 
@@ -23,7 +23,7 @@ OUTPUT_DIR = os.path.join("phenotype_mil", "binning_results", "parsed_results")
 COMPLETENESS_BINS = [90, 80, 70, 60, 50]
 CONTAMINATION = 5
 
-DATASETS = ["T2D-EW_PRJEB1786"]
+DATASETS = ["T2D-EW_PRJEB1786", "BIO_UNSEEN"]
 
 OTHER_MODELS = [
     "dnaberts",
@@ -332,18 +332,18 @@ if __name__ == "__main__":
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    bin_counts = get_bin_counts(MODEL_RESULTS_DIR)
+    # bin_counts = get_bin_counts(MODEL_RESULTS_DIR)
 
-    get_cluster_results(MODEL_RESULTS_DIR)
+    # get_cluster_results(MODEL_RESULTS_DIR)
 
-    knn_histograms = parse_knn_histograms(MODEL_RESULTS_DIR)
+    # knn_histograms = parse_knn_histograms(MODEL_RESULTS_DIR)
 
-    runtimes = parse_runtimes(BASE_DIR)
+    # runtimes = parse_runtimes(BASE_DIR)
 
-    bin_postprocess = parse_bin_postprocess(LOG_DIR)
+    # bin_postprocess = parse_bin_postprocess(LOG_DIR)
 
-    n_valtest = parse_nvaltest(MODEL_RESULTS_DIR)
+    # n_valtest = parse_nvaltest(MODEL_RESULTS_DIR)
 
-    heatmaps = parse_heatmaps(MODEL_RESULTS_DIR)
+    # heatmaps = parse_heatmaps(MODEL_RESULTS_DIR)
 
     contig_summary, contig_lengths = parse_contig_lengths(PROCESSED_DATA_DIR)
