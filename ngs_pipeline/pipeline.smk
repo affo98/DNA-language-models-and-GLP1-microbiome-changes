@@ -153,10 +153,10 @@ rule detect_adapter:
 
 rule kneaddata:
     input:
-        r1 = lambda wildcards: SAMPLES_LU[wildcards.sample],
-        r2 = lambda wildcards: SAMPLES_LU[wildcards.sample].replace("_1.fastq.gz", "_2.fastq.gz"),
-        # r1 = os.path.join(DATAPATH, "SAMEA{sample}/1.fastq.gz"),
-        # r2 = os.path.join(DATAPATH, "SAMEA{sample}/2.fastq.gz"),
+        # r1 = lambda wildcards: SAMPLES_LU[wildcards.sample],
+        # r2 = lambda wildcards: SAMPLES_LU[wildcards.sample].replace("_1.fastq.gz", "_2.fastq.gz"),
+        r1 = os.path.join(DATAPATH, "SAMEA{sample}/1.fastq.gz"),
+        r2 = os.path.join(DATAPATH, "SAMEA{sample}/2.fastq.gz"),
         adapter=os.path.join(OUTDIR, "fastqc/{sample}/adapters.txt")
     output:
         # dir = temp(directory(os.path.join(OUTDIR, "knead/{sample}/tmp"))),
