@@ -69,7 +69,7 @@ def main(args, log):
         )
         embeddings_val = embedder_val.get_embeddings()
 
-        thresholder_val = ThresholdFAISS(
+        thresholder_val = Threshold(
             embeddings_val,
             N_BINS,
             BLOCK_SIZE,
@@ -78,14 +78,13 @@ def main(args, log):
             log,
         )
 
-        kmediod_val = KMediodFAISS(
+        kmediod_val = KMediod(
             embeddings_val,
             contig_names_val,
             results_dir,
             log,
             False,
             "val",
-            CONVERT_MILLION_EMB_GPU_SECONDS,
             MIN_BIN_SIZE,
             NUM_STEPS,
             MAX_ITER,
@@ -101,8 +100,6 @@ def main(args, log):
     elif args.mode == "test":
         knnk = args.knnk[0]
         knnp = args.knnp[0]
-        # knnk = 1000
-        # knnp = 25
         log.append(
             f"{'='*60}\n"
             f"=== Running Binning Test with K: {knnk} P: {knnp} ===\n"
@@ -116,31 +113,28 @@ def main(args, log):
             args.model_name,
             args.model_path,
             args.weight_path,
-            # args.save_path,
-            os.path.join("11may", "T2D-EW", "dnaberts_output", "test"),
+            args.save_path,  # os.path.join("11may", "T2D-EW", "dnaberts_output", "test"),
             normalize_embeddings=True,
             log=log,
         )
         embeddings_test = embedder_test.get_embeddings()
 
-        thresholder_test = ThresholdFAISS(
+        thresholder_test = Threshold(
             embeddings_test, N_BINS, BLOCK_SIZE, args.save_path, args.model_name, log
         )
 
-        kmediod_test = KMediodFAISS(
+        kmediod_test = KMediod(
             embeddings_test,
             contig_names_test,
             args.save_path,
             log,
             True,
             "test",
-            CONVERT_MILLION_EMB_GPU_SECONDS,
             MIN_BIN_SIZE,
             NUM_STEPS,
             MAX_ITER,
             BLOCK_SIZE,
         )
-        # threshold = 0.6714885830879211  # gastroshort dnaberts
         threshold = thresholder_test.get_knn_threshold(knnk, knnp)
         _, _ = kmediod_test.fit(threshold, knnp, knnk)
 

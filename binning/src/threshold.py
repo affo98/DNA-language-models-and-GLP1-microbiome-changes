@@ -34,22 +34,10 @@ class Threshold:
         save_path: str,
         model_name: str,
         log: Logger,
-        convert_million_emb_gpu_seconds: int,
     ):
         self.check_params(embeddings, n_bins, block_size)
 
         device, gpu_count = get_available_device()
-
-        # log.append(
-        #     f"[Before embeddings GPU16 allocation]; {get_gpu_mem(log)} MIB"
-        #     f"Converting embeddings to GPU16. Estimated time: "
-        #     f"{embeddings.shape[0] / 1_000_000 * convert_million_emb_gpu_seconds:.1f} seconds",
-        # )
-
-        # embeddings_torch = torch.from_numpy(embeddings).half().to(device)
-        # log.append(
-        #     f"[After embedding GPU16 allocation] GPU mem used: {get_gpu_mem(log)} MiB"
-        # )
 
         self.embeddings_np = embeddings
         self.n_bins = n_bins
@@ -115,10 +103,6 @@ class Threshold:
 
             del topk_embs, centroids, csims, emb_i
             torch.cuda.empty_cache()
-
-        # RM!!
-        # global_min = torch.tensor(-1.0, dtype=torch.float32, device=self.device)
-        # global_max = torch.tensor(1.0, dtype=torch.float32, device=self.device)
 
         # ---------------- Histogram pass ----------------
         for i in tqdm(range(0, n_samples, self.block_size), desc="Calculating knns"):

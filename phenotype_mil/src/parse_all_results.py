@@ -146,7 +146,6 @@ def parse_contig_lengths(processed_data_dir):
         dataset_name = os.path.basename(dataset_dir)
         if dataset_name not in DATASETS:
             continue
-        print(dataset_name)
         contigs_file = glob(
             os.path.join(dataset_dir, "global_contig_catalogue.fna.gz")
         )[0]
@@ -182,12 +181,12 @@ def parse_contig_lengths(processed_data_dir):
                 }
             )
 
-    with open(os.path.join(OUTPUT_DIR, "parsed_contig_lengths.json"), "w") as f:
+    with open(os.path.join(OUTPUT_DIR, "parsed_contig_lengths_mil.json"), "w") as f:
         json.dump(contigs_lengths, f, indent=4)
 
     contigs_summary_df = pd.DataFrame(contigs_summary)
     contigs_summary_df.to_csv(
-        os.path.join(OUTPUT_DIR, "parsed_contig_lengths.csv"), index=False
+        os.path.join(OUTPUT_DIR, "parsed_contig_lengths_mil.csv"), index=False
     )
 
     return contigs_summary, contigs_lengths

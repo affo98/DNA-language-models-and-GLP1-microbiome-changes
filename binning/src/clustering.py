@@ -42,7 +42,6 @@ class KMediod:
         log: Logger,
         log_verbose: bool,
         mode: str,
-        convert_million_emb_gpu_seconds: int,
         min_bin_size: int = 10,
         num_steps: int = 3,
         max_iter: int = 1000,
@@ -51,17 +50,6 @@ class KMediod:
         self.check_params(embeddings, contig_names, min_bin_size, num_steps, max_iter)
 
         device, gpu_count = get_available_device()
-
-        # log.append(
-        #     f"[Before embeddings GPU16 allocation]; {get_gpu_mem(log)} MIB"
-        #     f"Converting embeddings to GPU16. Estimated time: "
-        #     f"{embeddings.shape[0] / 1_000_000 * convert_million_emb_gpu_seconds:.1f} seconds",
-        # )
-
-        # embeddings_torch = torch.from_numpy(embeddings).half().to(device)
-        # log.append(
-        #     f"[After embedding GPU16 allocation] GPU mem used: {get_gpu_mem(log)} MiB"
-        # )
 
         self.embeddings_np = embeddings
         self.contig_names = contig_names
