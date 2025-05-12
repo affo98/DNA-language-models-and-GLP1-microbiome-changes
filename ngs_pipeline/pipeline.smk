@@ -9,8 +9,8 @@ CONDA_ENVS = config['CONDA_ENVS']
 DB = config['DB']
 FASTQC_PATH = config['FASTQC_PATH']
 
-STUDY_ID = config["studies"][5].get("id")
-STUDY_NAME = config["studies"][5].get("name")
+STUDY_ID = config["studies"][3].get("id")
+STUDY_NAME = config["studies"][3].get("name")
 
 
 OUTDIR = f"{STUDY_NAME}_{STUDY_ID}"
@@ -40,15 +40,15 @@ for sample in samples:
 # print("\t"*1,"#"*100)
 # print("\n"*2)
 
-# def get_samples(wildcards):
-#     checkpoint_output = checkpoints.download.get().output[0]
-#     samples = glob.glob(f"{checkpoint_output}/*/1.fastq.gz")
-#     sample_names = []
-#     for sample in samples:
-#         # Customize logic based on your file structure
-#         sample_name = sample.split("/")[-2].split("_")[0][5:]
-#         sample_names.append(sample_name)
-#     return sample_names
+def get_samples(wildcards):
+    checkpoint_output = checkpoints.download.get().output[0]
+    samples = glob.glob(f"{checkpoint_output}/*/1.fastq.gz")
+    sample_names = []
+    for sample in samples:
+        # Customize logic based on your file structure
+        sample_name = sample.split("/")[-2].split("_")[0][5:]
+        sample_names.append(sample_name)
+    return sample_names
 
 
 # def get_samples(wildcards):
@@ -79,19 +79,19 @@ rule all:
         # os.path.join(DATAPATH, "SAMEA{sample}/1.fastq.gz"),
         # os.path.join(DATAPATH, "SAMEA{sample}/2.fastq.gz"),
 
-# checkpoint download:
-#     output:
-#         directory(DATAPATH)
-#     conda:
-#         os.path.join(CONDA_ENVS, "get_phenotype_reads.yaml"),
-#     params:
-#         dataset_id = STUDY_ID,
-#         dataset_name = STUDY_NAME,
-#         get_reads_py = os.path.join(PY_SCRIPTS, "get_phenotype_reads.py"),
-#     shell:
-#         """
-#         python {params.get_reads_py} -i {params.dataset_id} -n {params.dataset_name}
-#         """
+checkpoint download:
+    output:
+        directory(DATAPATH)
+    conda:
+        os.path.join(CONDA_ENVS, "get_phenotype_reads.yaml"),
+    params:
+        dataset_id = STUDY_ID,
+        dataset_name = STUDY_NAME,
+        get_reads_py = os.path.join(PY_SCRIPTS, "get_phenotype_reads.py"),
+    shell:
+        """
+        python {params.get_reads_py} -i {params.dataset_id} -n {params.dataset_name}
+        """
 
 
 rule fastqc:
@@ -283,7 +283,7 @@ rule alignment:
         contig_catalouge=os.path.join(OUTDIR,"global_contig_catalogue.fna.gz")
         # contig_catalogue_index = os.path.join(OUTDIR, "minimap/catalogue.mmi")
     output:
-        os.path.join(OUTDIR, "algn/{sample}_2000_sorted.bam"),
+        os.path.join(OUTDIR, "algn/{sample}_sorted.bam"),
     benchmark:
         os.path.join(BENCHMARKS, "alignment", "{sample}.txt")
     threads:
@@ -302,9 +302,9 @@ rule alignment:
         """    
 rule get_coverage:
     input:
-        os.path.join(OUTDIR, "algn/{sample}_2000_sorted.bam"),
+        os.path.join(OUTDIR, "algn/{sample}_sorted.bam"),
     output:
-        os.path.join(OUTDIR, "abdn_coverm/{sample}_2000.tsv"),
+        os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv"),
     threads:
         64
     conda:
@@ -321,11 +321,11 @@ rule merge_abundances:
         # expand(os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv"),sample=SAMPLES)
     input:
         lambda wildcards: expand(
-            os.path.join(OUTDIR, "abdn_coverm/{sample}_2000.tsv"),
+            os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv"),
             sample=get_samples(wildcards)
         )
     output:
-        os.path.join(OUTDIR, "abdn_coverm/abundances_2000.tsv")
+        os.path.join(OUTDIR, "abdn_coverm/abundances.tsv")
     params:
         # merge abundances from vamb takes in a directory of tsv files.
         abdn_path = os.path.join(OUTDIR, "abdn_coverm"),
