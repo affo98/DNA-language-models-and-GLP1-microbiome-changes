@@ -82,7 +82,8 @@ print(SAMPLES)
 rule all:
     input:
         # os.path.join(OUTDIR, "global_contig_catalogue.fna.gz"),
-        os.path.join(OUTDIR, "abdn_coverm/abundances.tsv")
+        os.path.join(OUTDIR, "abdn_coverm/abundances.tsv"),
+        expand(os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv"), sample=SAMPLES)
         # os.path.join(OUTDIR, "abdn_coverm/abundances.tsv")
         # os.path.join(DATAPATH, "SAMEA{sample}/1.fastq.gz"),
         # os.path.join(DATAPATH, "SAMEA{sample}/2.fastq.gz"),
