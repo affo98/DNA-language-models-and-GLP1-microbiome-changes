@@ -91,8 +91,8 @@ echo "Running on node: $(hostname)"; nvidia-smi
 #2b Run the Snakemake pipeline
 SNAKEFILE=~/l40_test/DNA-language-models-and-GLP1-microbiome-changes/phenotype_mil/Snakefile
 WORKDIR=~/l40_test/DNA-language-models-and-GLP1-microbiome-changes
-CONFIG="--config DATASET=T2D-EW MODEL=vamb CHECKM2=True"
-snakemake --snakefile "$SNAKEFILE" --directory "$WORKDIR" $CONFIG --use-conda --cores all --rerun-incomplete --rerun-triggers mtime --unlock #add --unlock here if necessary
+CONFIG="--config DATASET=T2D-EW MODEL=dnaberts CHECKM2=True"
+snakemake --snakefile "$SNAKEFILE" --directory "$WORKDIR" $CONFIG --use-conda --cores all --rerun-incomplete --rerun-triggers mtime #add --unlock here if necessary
 
 
 
