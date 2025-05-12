@@ -22,14 +22,14 @@ samples = glob.glob(f"{DATAPATH}/*/*_1.fastq.gz")
 print(samples)
 
 # # Construct Wildcards
-READS = ["1","2"]
-SAMPLES_LU = {}
-SAMPLES = []
-for sample in samples:
-    print(sample)
-    sample_name = sample.split("/")[-2]
-    SAMPLES_LU[sample_name] = sample
-    SAMPLES.append(sample_name)
+# READS = ["1","2"]
+# SAMPLES_LU = {}
+# SAMPLES = []
+# for sample in samples:
+#     print(sample)
+#     sample_name = sample.split("/")[-2]
+#     SAMPLES_LU[sample_name] = sample
+#     SAMPLES.append(sample_name)
 
 # print("\n"*2)
 # print("\t"*1,"#"*100)
