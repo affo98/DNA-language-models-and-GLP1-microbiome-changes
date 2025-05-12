@@ -316,12 +316,12 @@ rule get_coverage:
 
 rule merge_abundances:
     input:
-        expand(os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv"),sample=SAMPLES)
-    # input:
-    #     lambda wildcards: expand(
-    #         os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv"),
-    #         sample=get_samples(wildcards)
-    #     )
+        # expand(os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv"),sample=SAMPLES)
+    input:
+        lambda wildcards: expand(
+            os.path.join(OUTDIR, "abdn_coverm/{sample}.tsv"),
+            sample=get_samples(wildcards)
+        )
     output:
         os.path.join(OUTDIR, "abdn_coverm/abundances.tsv")
     params:
