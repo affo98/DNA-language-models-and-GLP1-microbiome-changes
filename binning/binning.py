@@ -20,7 +20,7 @@ VAL_PROPORTION = 0.1  # 0.1 for cami2, and 0.01 should be enough for phenotype d
 
 # threshold calculation
 N_BINS = 1000
-BLOCK_SIZE = 10_000
+BLOCK_SIZE = 20_000
 
 # kmediod
 MIN_BIN_SIZE = 2  # changed from 10 to 2, because bins less than MINSIZE_BINS (250000) will be removed in postprocessing.
@@ -36,7 +36,7 @@ def main(args, log):
         args.contigs, filter_len=MAX_CONTIG_LENGTH, log=log
     )
     # contigs = contigs[0:10000]
-    # contig_names = contig_names[0:10000]
+    # contig_names = contig_names[0:100000]
 
     contigs_test, contigs_val, contig_names_test, contig_names_val = (
         split_contigs_valtest(
