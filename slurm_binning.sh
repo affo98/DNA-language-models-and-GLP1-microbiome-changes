@@ -10,19 +10,19 @@
 #-----------------1. Pick Node-----------------------
 
 #1a For 4 L40s
-# #SBATCH --output=t2dew_l40_%j.out
-# #SBATCH --error=slurm_l40_%j.err 
-# #SBATCH --exclude=cn[3-18]
-# #SBATCH --exclude=desktop[1-16]
-# #SBATCH --nodelist=cn19
-# #SBATCH --gres=gpu:l40s:4
+#SBATCH --output=t2dew_l40_%j.out
+#SBATCH --error=slurm_l40_%j.err 
+#SBATCH --exclude=cn[3-18]
+#SBATCH --exclude=desktop[1-16]
+#SBATCH --nodelist=cn19
+#SBATCH --gres=gpu:l40s:4
 
 
 #1b For small testing
-#SBATCH --output=t2dew_small_%j.out
-#SBATCH --error=slurm_small_%j.err 
-#SBATCH --partition=scavenge
-#SBATCH --time=04:00:00
+# #SBATCH --output=t2dew_small_%j.out
+# #SBATCH --error=slurm_small_%j.err 
+# #SBATCH --partition=scavenge
+# #SBATCH --time=04:00:00
 
 
 #1c Using 2x H100 
@@ -93,7 +93,7 @@ conda clean --index-cache --packages --tarballs --yes #uncomment if problems wit
 SNAKEFILE=~/l40_test/DNA-language-models-and-GLP1-microbiome-changes/phenotype_mil/Snakefile
 WORKDIR=~/l40_test/DNA-language-models-and-GLP1-microbiome-changes
 CONFIG="--config DATASET=T2D-EW MODEL=dnaberts CHECKM2=True"
-snakemake --snakefile "$SNAKEFILE" --directory "$WORKDIR" $CONFIG --use-conda --cores all --rerun-incomplete --rerun-triggers mtime --unlock #add --unlock here if necessary
+snakemake --snakefile "$SNAKEFILE" --directory "$WORKDIR" $CONFIG --use-conda --cores all --rerun-incomplete --rerun-triggers mtime #add --unlock here if necessary
 
 
 
