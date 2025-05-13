@@ -113,8 +113,8 @@ def main(args, log):
             args.model_name,
             args.model_path,
             args.weight_path,
-            "phenotype_mil/binning_results/T2D-EW/dnaberts_output/test/",
-            # args.save_path,  # os.path.join("11may", "T2D-EW", "dnaberts_output", "test"),
+            # "phenotype_mil/binning_results/T2D-EW/dnaberts_output/test/",
+            args.save_path,  # os.path.join("11may", "T2D-EW", "dnaberts_output", "test"),
             normalize_embeddings=True,
             log=log,
         )
