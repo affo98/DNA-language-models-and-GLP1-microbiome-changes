@@ -64,6 +64,7 @@ def main(args, log):
             args.model_path,
             args.weight_path,
             args.save_path,
+            # "phenotype_mil/"
             normalize_embeddings=True,
             log=log,
         )
