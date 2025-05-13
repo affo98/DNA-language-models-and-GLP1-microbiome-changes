@@ -79,7 +79,8 @@ conda activate "$ENV_DIR"
 # Print node and GPU info
 echo "Running on node: $(hostname)"; nvidia-smi
 
-#conda clean --index-cache --packages --tarballs --yes #uncomment if problems with conda envs
+rm -rf ~/miniconda/pkgs/ffmpeg-4.4.2-gpl_hdf48244_113
+conda clean --index-cache --packages --tarballs --yes #uncomment if problems with conda envs
 
 
 #--------------------------2. Pick job-------------------------
