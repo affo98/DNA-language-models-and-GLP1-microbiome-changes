@@ -63,8 +63,8 @@ def main(args, log):
             args.model_name,
             args.model_path,
             args.weight_path,
-            args.save_path,
-            # "phenotype_mil/"
+            #args.save_path,
+            "phenotype_mil/binning_results/T2D-EW/dnaberts_output/test/"
             normalize_embeddings=True,
             log=log,
         )
