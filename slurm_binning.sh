@@ -10,19 +10,19 @@
 #-----------------1. Pick Node-----------------------
 
 #1a For 4 L40s
-# #SBATCH --output=t2dew_l40_%j.out
-# #SBATCH --error=slurm_l40_%j.err 
-# #SBATCH --exclude=cn[3-18]
-# #SBATCH --exclude=desktop[1-16]
-# #SBATCH --nodelist=cn19
-# #SBATCH --gres=gpu:l40s:4
+#SBATCH --output=t2dew_l40_%j.out
+#SBATCH --error=slurm_l40_%j.err 
+#SBATCH --exclude=cn[3-18]
+#SBATCH --exclude=desktop[1-16]
+#SBATCH --nodelist=cn19
+#SBATCH --gres=gpu:l40s:4
 
 
 #1b For small testing
-#SBATCH --output=t2dew_small_%j.out
-#SBATCH --error=slurm_small_%j.err 
-#SBATCH --partition=scavenge
-#SBATCH --time=04:00:00
+# #SBATCH --output=t2dew_small_%j.out
+# #SBATCH --error=slurm_small_%j.err 
+# #SBATCH --partition=scavenge
+# #SBATCH --time=04:00:00
 
 
 #1c Using 2x H100 
@@ -80,7 +80,7 @@ conda activate "$ENV_DIR"
 echo "Running on node: $(hostname)"; nvidia-smi
 
 # rm -rf ~/miniconda/pkgs/ffmpeg-4.4.2-gpl_hdf48244_113
-# conda clean --index-cache --packages --tarballs --yes #uncomment if problems with conda envs
+conda clean --index-cache --packages --tarballs --yes #uncomment if problems with conda envs
 
 
 #--------------------------2. Pick job-------------------------
