@@ -45,18 +45,18 @@ L1_REGS = np.logspace(-4, 4, 10)
 
 
 def main(args, log):
-
+    #-------------------------------------------- Read data --------------------------------------------
+    #cluster_catalogue_centroid = get_cluster_catalogue(args.input_path, log)
+    
     sample_ids, labels = read_sample_labels(
         args.sample_labels_path, log, split_train_test=False
     )
-
-    cluster_catalogue_centroid = get_cluster_catalogue(args.input_path, log)
 
     cluster_abundances = read_cluster_abundances(args.input_path, sample_ids, log)
     
     hausdorff, hausdorff_clusternames = read_hausdorff(os.path.join(args.input_path, "hausdorff", f"{args.model_name}_{args.dataset_name}.npz"), log)
 
-    assert cluster_abundances.columns[1:].to_list() == list(cluster_catalogue_centroid.keys()) == list(hausdorff_clusternames), log.append("Cluster catalogue and abundances do not match!")
+    assert cluster_abundances.columns[1:].to_list() == list(hausdorff_clusternames), log.append("Cluster catalogue and abundances do not match!") #== list(cluster_catalogue_centroid.keys())
     assert cluster_abundances["sample"].values.tolist() == sample_ids, log.append("Sample ids do not match!")
 
     
@@ -67,7 +67,7 @@ def main(args, log):
                                       os.path.join(args.output_path, f"agglomorative_{args.model_name}_{args.dataset_name}.png"))
     log.append(f"Using {n_groups} groups")
 
-    # Evaluate model
+    #-------------------------------------------- CV Evaluate --------------------------------------------
     eval_metrics = {"metrics": []}
     global_features = cluster_abundances.columns.drop("sample").tolist()
     coefficients = {"coefs": []}
