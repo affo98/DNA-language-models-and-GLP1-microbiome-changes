@@ -245,7 +245,7 @@ rule other_model_test:
         catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
         best_kp_path=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results")
     output:
-        dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test")) #change back
+        dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test2")) #change back
     log:
         os.path.join(LOGS, DATASET, "{MODEL}_test_binning.log")
     conda:
@@ -264,7 +264,7 @@ rule other_model_test:
 rule create_fasta_bins_other_model_test:
     input:
         catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
-        cluster_results=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test") #change back
+        cluster_results=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test2") #change back
     output:
         dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "{MODEL}")),
     log:
