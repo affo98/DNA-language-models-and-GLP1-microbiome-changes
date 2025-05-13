@@ -93,6 +93,11 @@ conda clean --index-cache --packages --tarballs --yes #uncomment if problems wit
 SNAKEFILE=~/l40_test/DNA-language-models-and-GLP1-microbiome-changes/phenotype_mil/Snakefile
 WORKDIR=~/l40_test/DNA-language-models-and-GLP1-microbiome-changes
 CONFIG="--config DATASET=T2D-EW MODEL=dnaberts CHECKM2=True"
+
+# Ensure any stale Snakemake lock is removed
+echo "Unlocking any stale Snakemake locks..."
+snakemake --unlock --directory "$WORKDIR" --quiet
+
 snakemake --snakefile "$SNAKEFILE" --directory "$WORKDIR" $CONFIG --use-conda --cores all --rerun-incomplete --rerun-triggers mtime #add --unlock here if necessary
 
 
