@@ -105,6 +105,8 @@ class Embedder:
 
         elif self.model_name in [
             "dnaberts",
+            "dnaberth_400kv2",
+            "dnaberth_2mv3",
             "dnaberth_400k",
             "dnaberth_2mv1",
             "dnaberth_2mv2",

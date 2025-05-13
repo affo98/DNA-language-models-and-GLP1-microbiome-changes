@@ -43,6 +43,8 @@ OTHER_MODELS = [
     "dnabert2",
     "dnabert2random",
     "dnaberts",
+    "dnaberth_400kv2",
+    "dnaberth_2mv3",
     "dnaberth_400k",
     "dnaberth_2mv1",
     "dnaberth_2mv2",
