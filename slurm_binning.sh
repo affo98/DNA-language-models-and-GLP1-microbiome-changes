@@ -79,8 +79,8 @@ conda activate "$ENV_DIR"
 # Print node and GPU info
 echo "Running on node: $(hostname)"; nvidia-smi
 
-rm -rf ~/miniconda/pkgs/ffmpeg-4.4.2-gpl_hdf48244_113
-conda clean --index-cache --packages --tarballs --yes #uncomment if problems with conda envs
+# rm -rf ~/miniconda/pkgs/ffmpeg-4.4.2-gpl_hdf48244_113
+# conda clean --index-cache --packages --tarballs --yes #uncomment if problems with conda envs
 
 
 #--------------------------2. Pick job-------------------------
@@ -93,7 +93,7 @@ conda clean --index-cache --packages --tarballs --yes #uncomment if problems wit
 SNAKEFILE=~/l40_test/DNA-language-models-and-GLP1-microbiome-changes/phenotype_mil/Snakefile
 WORKDIR=~/l40_test/DNA-language-models-and-GLP1-microbiome-changes
 CONFIG="--config DATASET=T2D-EW MODEL=dnaberts CHECKM2=True"
-snakemake --snakefile "$SNAKEFILE" --directory "$WORKDIR" $CONFIG --use-conda --cores all --rerun-incomplete --rerun-triggers mtime --unlock #add --unlock here if necessary
+snakemake --snakefile "$SNAKEFILE" --directory "$WORKDIR" $CONFIG --use-conda --cores all --rerun-incomplete --rerun-triggers mtime #add --unlock here if necessary
 
 
 
