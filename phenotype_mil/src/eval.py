@@ -1,5 +1,6 @@
 """Functions to evaluate models given true labels and predictions."""
 
+import pandas as pd
 from sklearn.metrics import f1_score, roc_auc_score, accuracy_score
 
 
@@ -21,3 +22,22 @@ def append_eval_metrics(
     eval_metrics["metrics"].append(eval_metrics_fold)
 
     return eval_metrics
+
+
+def compute_summary_eval(eval_metrics: dict) -> dict[str, dict[str, float]]:
+    """
+    Compute mean and std of method/metric
+    """
+
+    # Turn the list of per-fold dicts into a DataFrame
+    df = pd.DataFrame(eval_metrics["metrics"])
+
+    summary_eval = {}
+    for method, group in df.groupby("mil_method"):
+        stats = {}
+        for metric in ("f1_score", "auc_roc", "accuracy"):
+            stats[f"{metric}_mean"] = group[metric].mean()
+            stats[f"{metric}_std"] = group[metric].std(ddof=0)  # population std
+        summary_eval[method] = stats
+
+    return summary_eval

@@ -12,10 +12,10 @@ from src.cluster_catalogue import get_cluster_catalogue
 
 
 from src.knn_model import fit_predict_knn
-from src.classifiers import fit_predict_logistic, fit_predict_sparsegrouplasso
+from src.classifiers import fit_predict_logistic, fit_predict_sparsegrouplasso, coefs_dict_to_df
 from src.agglmorative_clustering import get_groups_agglomorative
 
-from src.eval import append_eval_metrics
+from src.eval import append_eval_metrics, compute_summary_eval
 
 # DISTANCE_METRIC_BAG = "cosine"
 
@@ -56,15 +56,11 @@ def main(args, log):
     
     hausdorff, hausdorff_clusternames = read_hausdorff(os.path.join(args.input_path, "hausdorff", f"{args.model_name}_{args.dataset_name}.npz"), log)
 
-    assert set(cluster_abundances.columns[1:].to_list()) == set(
-        cluster_catalogue_centroid.keys()
-    ) == hausdorff_clusternames , log.append("Cluster catalogue and abundances do not match!")
+    assert cluster_abundances.columns[1:].to_list() == list(cluster_catalogue_centroid.keys()) == list(hausdorff_clusternames), log.append("Cluster catalogue and abundances do not match!")
+    assert cluster_abundances["sample"].values.tolist() == sample_ids, log.append("Sample ids do not match!")
 
-    assert set(cluster_abundances["sample"].values.tolist()) == set(
-        sample_ids
-    ), log.append("Sample ids do not match!")
     
-    
+    #agglomorative
     n_groups = hausdorff.shape[0]**0.5
     groups = get_groups_agglomorative(hausdorff, n_groups, 
                                       DISTANCE_METRIC_AGG, LINKAGE_AGG, TSNE_PERPLEXITY, 
@@ -73,6 +69,8 @@ def main(args, log):
 
     # Evaluate model
     eval_metrics = {"metrics": []}
+    global_features = cluster_abundances.columns.drop("sample").tolist()
+    coefficients = {"coefs": []}
     skf = StratifiedKFold(n_splits=CV_OUTER, shuffle=True, random_state=42)
     for fold_idx, (train_idx, test_idx) in enumerate(
         skf.split(cluster_abundances, labels)
@@ -126,7 +124,7 @@ def main(args, log):
             elif mil_method == "logistic":
                 for penalty in ['none', 'l1', 'l2', 'elasticnet']:
                     log.append(f"  → Training logistic regression with penalty='{penalty}'")
-                    predictions, predictions_proba = fit_predict_logistic(
+                    predictions, predictions_proba, coefficients, = fit_predict_logistic(
                         X_train=cluster_abundances_train,
                         X_test=cluster_abundances_test,
                         y_train=labels_train,
@@ -137,6 +135,8 @@ def main(args, log):
                         C_grid=C_GRID,            
                         cv=CV_LOGISTIC,
                         scoring=SCORING_LOGISTIC,
+                        coefficients,
+                        global_features,
                     )
                     eval_metrics = append_eval_metrics(
                         eval_metrics, labels_test, predictions, predictions_proba, f"{mil_method}_{penalty}", fold_idx + 1
@@ -144,7 +144,7 @@ def main(args, log):
 
             elif mil_method == "logistic_groupsparselasso":
                 
-                predictions, predictions_proba = fit_predict_sparsegrouplasso(
+                predictions, predictions_proba, coefficients, = fit_predict_sparsegrouplasso(
                     X_train=cluster_abundances_train,
                     X_test=cluster_abundances_test,
                     y_train=labels_train,
@@ -155,13 +155,18 @@ def main(args, log):
                     group_reg_grid=GROUP_REGS,
                     l1_reg_grid=L1_REGS,
                     cv=CV_LOGISTIC,
-                    scoring=SCORING_LOGISTIC
+                    scoring=SCORING_LOGISTIC,
+                    coefficients,
+                    global_features,
                 )
                 
                 eval_metrics = append_eval_metrics(
                     eval_metrics, labels_test, predictions, predictions_proba, mil_method, fold_idx + 1
                 )
 
+    
+    coefs_df = coefs_dict_to_df(coefficients, os.path.join(args.output_path, f"coefs.csv"))
+    
     log.append(f"{eval_metrics}")
     with open(
         os.path.join(
@@ -171,6 +176,17 @@ def main(args, log):
         "w",
     ) as f:
         json.dump(eval_metrics, f, indent=4)
+    
+    summary_eval = compute_summary_eval(eval_metrics, log)
+    log.append(f"{summary_eval}")
+    with open(
+        os.path.join(
+            args.output_path,
+            f"eval_metrics_{args.model_name}_{args.dataset_name}.json",
+        ),
+        "w",
+    ) as f:
+        json.dump(summary_eval, f, indent=4)
 
 
 
