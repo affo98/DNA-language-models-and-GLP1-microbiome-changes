@@ -160,9 +160,9 @@ def fit_predict_sparsegrouplasso(
                         fold_scores.append(0.0)
                         continue
 
-                    #lr = LogisticRegression(
-                        solver="lbfgs", max_iter=1000, random_state=0
-                    #)
+                    # lr = LogisticRegression(
+                    # solver="lbfgs", max_iter=1000, random_state=0
+                    # )
                     lr = LogisticRegression(
                         penalty=None,
                         solver="saga",
