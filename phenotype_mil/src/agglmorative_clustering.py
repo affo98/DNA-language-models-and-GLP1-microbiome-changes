@@ -13,8 +13,8 @@ def get_groups_agglomorative(
     linkage: str,
     perplexity: int,
     save_path: str,
-    random_state: int = 42,
     log,
+    random_state: int = 42,
 ) -> np.ndarray:
     """
     Runs Agglomerative Clustering with different numbers of clusters,
