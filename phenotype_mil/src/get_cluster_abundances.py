@@ -78,7 +78,8 @@ def plotting_cluster_contig_distribution(clusters_df: pd.DataFrame) -> None:
     ax.set_yscale("log")
     plt.savefig(
         os.path.join(
-            PATH_TO_CLUSTER_ABUNDANCES, "cluster_contig_abundance_distribution.png"
+            os.path.dirname(PATH_TO_CLUSTER_ABUNDANCES),
+            "cluster_contig_abundance_distribution.png",
         )
     )
 
