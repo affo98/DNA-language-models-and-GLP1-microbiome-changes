@@ -224,12 +224,12 @@ def main(args, log):
     ) as f:
         json.dump(eval_metrics, f, indent=4)
 
-    summary_eval = compute_summary_eval(eval_metrics, log)
+    summary_eval = compute_summary_eval(eval_metrics)
     log.append(f"{summary_eval}")
     with open(
         os.path.join(
             args.output_path,
-            f"eval_metrics_{args.model_name}_{args.dataset_name}.json",
+            f"eval_metrics_summary_{args.model_name}_{args.dataset_name}.json",
         ),
         "w",
     ) as f:
