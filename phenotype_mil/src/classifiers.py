@@ -252,7 +252,7 @@ def fit_predict_logistic(
     base_lr = LogisticRegression(
         penalty=penalty,
         solver="saga",
-        max_iter=2000,
+        max_iter=10_000,
         random_state=0,
         l1_ratio=0.5 if penalty == "elasticnet" else None,
     )
@@ -291,7 +291,7 @@ def fit_predict_logistic(
         best_lr = LogisticRegression(
             penalty=penalty,
             solver="saga",
-            max_iter=2000,
+            max_iter=10_000,
             random_state=0,
             l1_ratio=0.5 if penalty == "elasticnet" else None,
         )
