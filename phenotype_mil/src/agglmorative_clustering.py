@@ -43,7 +43,7 @@ def get_groups_agglomorative(
     except FileNotFoundError:
         log.append(f"Agglomorative clustering not found at {save_path}, generating new")
 
-    os.make_dirs(save_path, exist_ok=True)
+    os.makedirs(save_path, exist_ok=True)
     model = AgglomerativeClustering(
         n_clusters=n_clusters, metric=distance_metric, linkage=linkage
     )
