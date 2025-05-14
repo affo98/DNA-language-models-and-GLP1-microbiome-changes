@@ -149,7 +149,8 @@ def fit_predict_sparsegrouplasso(
                     scale_reg="inverse_group_size",
                     random_state=42,
                     supress_warning=True,
-                    n_iter=10_000,
+                    n_iter=2_000,
+                    tol=1e-4,
                 )
 
                 try:
