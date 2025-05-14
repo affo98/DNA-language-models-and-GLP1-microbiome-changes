@@ -285,7 +285,7 @@ def fit_predict_logistic(
 
         best_lr = search.best_estimator_
         y_pred = best_lr.predict(X_test)
-        y_predprob = best_lr.predict(X_test)[:, 1]  # probability of class 1
+        y_predprob = best_lr.predict_proba(X_test)[:, 1]  # probability of class 1
 
     else:  # no penalty
         best_lr = LogisticRegression(
@@ -298,7 +298,7 @@ def fit_predict_logistic(
 
         best_lr.fit(X_train, y_train)
         y_pred = best_lr.predict(X_test)
-        y_predprob = best_lr.predict(X_test)[:, 1]  # probability of class 1
+        y_predprob = best_lr.predict_proba(X_test)[:, 1]  # probability of class 1
 
     coefficients = append_coefs(
         coefficients,
