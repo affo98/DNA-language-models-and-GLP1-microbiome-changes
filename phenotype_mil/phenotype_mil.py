@@ -67,17 +67,26 @@ def main(args, log):
     )
 
     cluster_abundances = read_cluster_abundances(args.input_path, sample_ids, log)
-    hausdorff, hausdorff_clusternames = read_hausdorff(
-        os.path.join(
-            args.input_path, "hausdorff", f"{args.model_name}_{args.dataset_name}.npz"
-        ),
-        log,
-    )
+
+    if args.model_name != "vamb":
+        hausdorff, hausdorff_clusternames = read_hausdorff(
+            os.path.join(
+                args.input_path,
+                "hausdorff",
+                f"{args.model_name}_{args.dataset_name}.npz",
+            ),
+            log,
+        )
+        assert all(isinstance(x, str) for x in hausdorff_clusternames)
+        assert np.array_equal(
+            cluster_abundances.columns[1:].values, hausdorff_clusternames
+        )
+
     assert all(isinstance(x, str) for x in cluster_abundances.columns[1:].values)
     assert all(isinstance(x, str) for x in hausdorff_clusternames)
     assert all(isinstance(x, str) for x in cluster_abundances["sample"].values)
     assert all(isinstance(x, str) for x in sample_ids)
-    assert np.array_equal(cluster_abundances.columns[1:].values, hausdorff_clusternames)
+
     assert np.array_equal(cluster_abundances["sample"].values, sample_ids)
     assert len(cluster_abundances["sample"]) == len(sample_ids)
 
