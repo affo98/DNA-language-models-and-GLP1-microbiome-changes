@@ -127,10 +127,10 @@ def main(args, log):
             f"- Test samples:  n={len(labels_test)},  0s={len(labels_test) - np.sum(labels_test)}, 1s={np.sum(labels_test)}\n{sample_ids_test}"
         )
 
-        assert cluster_abundances_train["sample"].astype(
-            str
-        ) == sample_ids_train.astype(str), print(
-            cluster_abundances_train, sample_ids_train
+        assert (
+            cluster_abundances_train["sample"]
+            .astype(str)
+            .equals(sample_ids_train.astype(str))
         )
 
         # assert (
