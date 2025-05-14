@@ -7,7 +7,7 @@ from sklearn.cluster import AgglomerativeClustering
 
 def get_groups_agglomorative(
     hausdorff_matrix: np.ndarray,
-    hausdorff_clusternames: np.darray,
+    hausdorff_clusternames: np.array,
     n_clusters: int,
     distance_metric: str,
     linkage: str,
@@ -36,7 +36,7 @@ def get_groups_agglomorative(
         assert len(np.unique(labels)) == n_clusters_loaded == n_clusters
         assert len(labels) == len(hausdorff_clusternames)
         assert hausdorff_clusternames == hausdorff_clusternames_loaded
-        log.append(f"Loaded agglmorative clustering  from {save_path}")
+        log.append(f"Loaded agglmorative clustering from {save_path}")
 
         return labels
 
