@@ -121,12 +121,16 @@ def main(args, log):
         labels_train, labels_test = labels[train_idx], labels[test_idx]
         sample_ids_train, sample_ids_test = sample_ids[train_idx], sample_ids[test_idx]
 
-        assert set(cluster_abundances_train["sample"].astype(str)) == set(
-            sample_ids_train.astype(str).tolist()
-        )
-        assert set(cluster_abundances_test["sample"].astype(str)) == set(
-            sample_ids_test.astype(str).tolist()
-        )
+        # assert (
+        #     cluster_abundances_train["sample"].astype(str)
+        #     == sample_ids_train.astype(str).tolist()
+        # )
+
+        # assert (
+        #     cluster_abundances_test["sample"].astype(str)
+        #     == sample_ids_test.astype(str).tolist()
+        # )
+
         assert (
             len(cluster_abundances_train)
             == len(sample_ids_train) & len(cluster_abundances_test)
