@@ -44,7 +44,7 @@ KNN_K = 2
 
 # params logistic
 # C_GRID = np.logspace(-4, 4, 10)
-C_GRID = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]
+C_GRID = [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]
 CV_LOGISTIC = 5
 SCORING_LOGISTIC = "roc_auc"
 
@@ -129,56 +129,56 @@ def main(args, log):
         for mil_method in args.mil_methods:
             log.append(f"Using MIL method: {mil_method}")
 
-            # if mil_method == "knn":
-            #     log.append(f"  → Training KNN'")
-            #     predictions, predictions_proba = fit_predict_knn(  # euclidian
-            #         cluster_abundances_train,
-            #         cluster_abundances_test,
-            #         labels_train,
-            #         k=KNN_K,
-            #         fold=fold_idx + 1,
-            #         output_path=args.output_path,
-            #     )
-            #     eval_metrics = append_eval_metrics(
-            #         eval_metrics,
-            #         labels_test,
-            #         predictions,
-            #         predictions_proba,
-            #         mil_method,
-            #         fold_idx + 1,
-            #     )
+            if mil_method == "knn":
+                log.append(f"  → Training KNN'")
+                predictions, predictions_proba = fit_predict_knn(  # euclidian
+                    cluster_abundances_train,
+                    cluster_abundances_test,
+                    labels_train,
+                    k=KNN_K,
+                    fold=fold_idx + 1,
+                    output_path=args.output_path,
+                )
+                eval_metrics = append_eval_metrics(
+                    eval_metrics,
+                    labels_test,
+                    predictions,
+                    predictions_proba,
+                    mil_method,
+                    fold_idx + 1,
+                )
 
-            # elif mil_method == "logistic":
-            #     for penalty in [None, "l1", "l2", "elasticnet"]:
-            #         log.append(
-            #             f"  → Training logistic regression with penalty='{penalty}'"
-            #         )
-            #         (
-            #             predictions,
-            #             predictions_proba,
-            #             coefficients,
-            #         ) = fit_predict_logistic(
-            #             X_train=cluster_abundances_train,
-            #             X_test=cluster_abundances_test,
-            #             y_train=labels_train,
-            #             fold=fold_idx + 1,
-            #             output_path=args.output_path,
-            #             penalty=penalty,
-            #             log=log,
-            #             C_grid=C_GRID,
-            #             cv=CV_LOGISTIC,
-            #             scoring=SCORING_LOGISTIC,
-            #             coefficients=coefficients,
-            #             global_features=global_features,
-            #         )
-            #         eval_metrics = append_eval_metrics(
-            #             eval_metrics,
-            #             labels_test,
-            #             predictions,
-            #             predictions_proba,
-            #             f"{mil_method}_{penalty}",
-            #             fold_idx + 1,
-            #         )
+            elif mil_method == "logistic":
+                for penalty in [None, "l1", "l2", "elasticnet"]:
+                    log.append(
+                        f"  → Training logistic regression with penalty='{penalty}'"
+                    )
+                    (
+                        predictions,
+                        predictions_proba,
+                        coefficients,
+                    ) = fit_predict_logistic(
+                        X_train=cluster_abundances_train,
+                        X_test=cluster_abundances_test,
+                        y_train=labels_train,
+                        fold=fold_idx + 1,
+                        output_path=args.output_path,
+                        penalty=penalty,
+                        log=log,
+                        C_grid=C_GRID,
+                        cv=CV_LOGISTIC,
+                        scoring=SCORING_LOGISTIC,
+                        coefficients=coefficients,
+                        global_features=global_features,
+                    )
+                    eval_metrics = append_eval_metrics(
+                        eval_metrics,
+                        labels_test,
+                        predictions,
+                        predictions_proba,
+                        f"{mil_method}_{penalty}",
+                        fold_idx + 1,
+                    )
 
             if mil_method == "logistic_groupsparselasso":
 
