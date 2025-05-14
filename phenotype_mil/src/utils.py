@@ -77,9 +77,7 @@ def read_cluster_abundances(
     cluster_abundances.reset_index(drop=True, inplace=True)
 
     cluster_abundances.columns = cluster_abundances.columns.astype(str)
-    log.append(
-        f"Abundances shape {cluster_abundances.shape}, Sample IDs: {cluster_abundances['sample'].values.tolist()}"
-    )
+    log.append(f"Abundances shape {cluster_abundances.shape}")
 
     return cluster_abundances
 
@@ -134,7 +132,7 @@ def read_sample_labels(
 
     if not split_train_test:
         assert len(sample_ids) == len(labels)
-        log.append(f"Sample Ids: {sample_ids} \n Labels: {labels}")
+        log.append(f"Sample Ids: {len(sample_ids)} \n Labels: {len(labels)}")
         return np.array(sample_ids), np.array(labels)
 
     sample_ids_train, sample_ids_test, labels_train, labels_test = (
