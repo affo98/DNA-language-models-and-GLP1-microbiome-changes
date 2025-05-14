@@ -176,7 +176,7 @@ def main(args, log):
             #             fold_idx + 1,
             #         )
 
-            elif mil_method == "logistic_groupsparselasso":
+            if mil_method == "logistic_groupsparselasso":
 
                 if args.model_name != "vamb":
                     (
