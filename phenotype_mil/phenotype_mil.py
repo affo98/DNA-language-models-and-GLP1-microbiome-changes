@@ -7,73 +7,99 @@ import json
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
 
-from src.utils import Logger, read_sample_labels, read_cluster_abundances, read_hausdorff
+from src.utils import (
+    Logger,
+    read_sample_labels,
+    read_cluster_abundances,
+    read_hausdorff,
+)
 from src.cluster_catalogue import get_cluster_catalogue
 
 
 from src.knn_model import fit_predict_knn
-from src.classifiers import fit_predict_logistic, fit_predict_sparsegrouplasso, coefs_dict_to_df
+from src.classifiers import (
+    fit_predict_logistic,
+    fit_predict_sparsegrouplasso,
+    coefs_dict_to_df,
+)
 from src.agglmorative_clustering import get_groups_agglomorative
 
 from src.eval import append_eval_metrics, compute_summary_eval
 
 # DISTANCE_METRIC_BAG = "cosine"
 
-MIL_METHODS = ['knn', 'logistic', 'logistic_groupsparselasso']
+MIL_METHODS = ["knn", "logistic", "logistic_groupsparselasso"]
 
 
-#agglomorative
-DISTANCE_METRIC_AGG = 'euclidean' #wards can not use cosine
-LINKAGE_AGG = 'ward'
-TSNE_PERPLEXITY=17
+# agglomorative
+DISTANCE_METRIC_AGG = "euclidean"  # wards can not use cosine
+LINKAGE_AGG = "ward"
+TSNE_PERPLEXITY = 17
 
-#cv
+# cv
 CV_OUTER = 2
 
 # params knn
 KNN_K = 2
 
-#params logistic 
+# params logistic
 C_GRID = np.logspace(-4, 4, 10)
 CV_LOGISTIC = 5
-SCORING_LOGISTIC = 'roc_auc'
+SCORING_LOGISTIC = "roc_auc"
 
-#params sparse group lasso logistic
+# params sparse group lasso logistic
 GROUP_REGS = np.logspace(-4, 4, 10)
 L1_REGS = np.logspace(-4, 4, 10)
 
 
-
 def main(args, log):
-    #-------------------------------------------- Read data --------------------------------------------
-    #cluster_catalogue_centroid = get_cluster_catalogue(args.input_path, log)
-    
+    # -------------------------------------------- Read data --------------------------------------------
+    # cluster_catalogue_centroid = get_cluster_catalogue(args.input_path, log)
+
     sample_ids, labels = read_sample_labels(
         args.sample_labels_path, log, split_train_test=False
     )
 
     cluster_abundances = read_cluster_abundances(args.input_path, sample_ids, log)
-    
-    hausdorff, hausdorff_clusternames = read_hausdorff(os.path.join(args.input_path, "hausdorff", f"{args.model_name}_{args.dataset_name}.npz"), log)
 
-    assert cluster_abundances.columns[1:].to_list() == list(hausdorff_clusternames), log.append("Cluster catalogue and abundances do not match!") #== list(cluster_catalogue_centroid.keys())
-    assert cluster_abundances["sample"].values.tolist() == sample_ids, log.append("Sample ids do not match!")
+    hausdorff, hausdorff_clusternames = read_hausdorff(
+        os.path.join(
+            args.input_path, "hausdorff", f"{args.model_name}_{args.dataset_name}.npz"
+        ),
+        log,
+    )
 
-    
-    #agglomorative
-    if args.model_name != 'vamb':
-        n_groups = hausdorff.shape[0]**0.5
-        groups = get_groups_agglomorative(hausdorff, n_groups, 
-                                        DISTANCE_METRIC_AGG, LINKAGE_AGG, TSNE_PERPLEXITY, 
-                                        os.path.join(args.output_path, f"agglomorative_{args.model_name}_{args.dataset_name}.png"))
+    assert cluster_abundances.columns[1:].to_list() == list(
+        hausdorff_clusternames
+    ), log.append(
+        "Cluster catalogue and abundances do not match!"
+    )  # == list(cluster_catalogue_centroid.keys())
+    assert cluster_abundances["sample"].values.tolist() == sample_ids, log.append(
+        "Sample ids do not match!"
+    )
+
+    # agglomorative
+    if args.model_name != "vamb":
+        n_groups = hausdorff.shape[0] ** 0.5
+        groups = get_groups_agglomorative(
+            hausdorff,
+            n_groups,
+            DISTANCE_METRIC_AGG,
+            LINKAGE_AGG,
+            TSNE_PERPLEXITY,
+            os.path.join(
+                args.output_path,
+                f"agglomorative_{args.model_name}_{args.dataset_name}.png",
+            ),
+        )
         log.append(f"Using {n_groups} groups")
 
-    #-------------------------------------------- CV Evaluate --------------------------------------------
+    # -------------------------------------------- CV Evaluate --------------------------------------------
     eval_metrics = {"metrics": []}
     global_features = cluster_abundances.columns.drop("sample").tolist()
     coefficients = {"coefs": []}
     skf = StratifiedKFold(n_splits=CV_OUTER, shuffle=True, random_state=42)
-    
+
     for fold_idx, (train_idx, test_idx) in enumerate(
         skf.split(cluster_abundances, labels)
     ):
@@ -107,7 +133,6 @@ def main(args, log):
         for mil_method in args.mil_methods:
             log.append(f"Using MIL method: {mil_method}")
 
-            
             if mil_method == "knn":
                 log.append(f"  → Training KNN'")
                 predictions, predictions_proba = fit_predict_knn(  # euclidian
@@ -119,40 +144,59 @@ def main(args, log):
                     output_path=args.output_path,
                 )
                 eval_metrics = append_eval_metrics(
-                    eval_metrics, labels_test, predictions, predictions_proba, mil_method, fold_idx + 1
+                    eval_metrics,
+                    labels_test,
+                    predictions,
+                    predictions_proba,
+                    mil_method,
+                    fold_idx + 1,
                 )
 
-
             elif mil_method == "logistic":
-                for penalty in ['none', 'l1', 'l2', 'elasticnet']:
-                    log.append(f"  → Training logistic regression with penalty='{penalty}'")
-                    predictions, predictions_proba, coefficients, = fit_predict_logistic(
+                for penalty in ["none", "l1", "l2", "elasticnet"]:
+                    log.append(
+                        f"  → Training logistic regression with penalty='{penalty}'"
+                    )
+                    (
+                        predictions,
+                        predictions_proba,
+                        coefficients,
+                    ) = fit_predict_logistic(
                         X_train=cluster_abundances_train,
                         X_test=cluster_abundances_test,
                         y_train=labels_train,
                         fold=fold_idx + 1,
                         output_path=args.output_path,
                         penalty=penalty,
-                        log=log,                
-                        C_grid=C_GRID,            
+                        log=log,
+                        C_grid=C_GRID,
                         cv=CV_LOGISTIC,
                         scoring=SCORING_LOGISTIC,
                         coefficients=coefficients,
                         global_features=global_features,
                     )
                     eval_metrics = append_eval_metrics(
-                        eval_metrics, labels_test, predictions, predictions_proba, f"{mil_method}_{penalty}", fold_idx + 1
-                    )   
+                        eval_metrics,
+                        labels_test,
+                        predictions,
+                        predictions_proba,
+                        f"{mil_method}_{penalty}",
+                        fold_idx + 1,
+                    )
 
             elif mil_method == "logistic_groupsparselasso":
-                
-                if args.model_name != 'vamb':
-                    predictions, predictions_proba, coefficients, = fit_predict_sparsegrouplasso(
+
+                if args.model_name != "vamb":
+                    (
+                        predictions,
+                        predictions_proba,
+                        coefficients,
+                    ) = fit_predict_sparsegrouplasso(
                         X_train=cluster_abundances_train,
                         X_test=cluster_abundances_test,
                         y_train=labels_train,
                         groups=groups,
-                        fold = fold_idx+1,
+                        fold=fold_idx + 1,
                         output_path=args.output_path,
                         log=log,
                         group_reg_grid=GROUP_REGS,
@@ -162,14 +206,20 @@ def main(args, log):
                         coefficients=coefficients,
                         global_features=global_features,
                     )
-                    
+
                     eval_metrics = append_eval_metrics(
-                        eval_metrics, labels_test, predictions, predictions_proba, mil_method, fold_idx + 1
+                        eval_metrics,
+                        labels_test,
+                        predictions,
+                        predictions_proba,
+                        mil_method,
+                        fold_idx + 1,
                     )
 
-    
-    coefs_df = coefs_dict_to_df(coefficients, os.path.join(args.output_path, f"coefs.csv"))
-    
+    coefs_df = coefs_dict_to_df(
+        coefficients, os.path.join(args.output_path, f"coefs.csv")
+    )
+
     log.append(f"{eval_metrics}")
     with open(
         os.path.join(
@@ -179,7 +229,7 @@ def main(args, log):
         "w",
     ) as f:
         json.dump(eval_metrics, f, indent=4)
-    
+
     summary_eval = compute_summary_eval(eval_metrics, log)
     log.append(f"{summary_eval}")
     with open(
@@ -190,8 +240,6 @@ def main(args, log):
         "w",
     ) as f:
         json.dump(summary_eval, f, indent=4)
-
-
 
 
 def add_arguments() -> ArgumentParser:
@@ -231,7 +279,7 @@ def add_arguments() -> ArgumentParser:
         "--mil_methods",
         "-m",
         nargs="+",
-        choices=MIL_METHODS+['all']
+        choices=MIL_METHODS + ["all"],
         help="MIL method to use",
     )
 
@@ -249,8 +297,8 @@ if __name__ == "__main__":
 
     for arg, value in vars(args).items():
         log.append(f"{arg}: {value}")
-    
-    if 'all' in args.mil_methods:
+
+    if "all" in args.mil_methods:
         args.mil_methods = MIL_METHODS
 
     os.makedirs(args.output_path, exist_ok=True)
