@@ -143,7 +143,6 @@ def main(args, log):
                     mil_method,
                     fold_idx + 1,
                 )
-                print(eval_metrics)
 
             elif mil_method == "logistic":
                 for penalty in [None, "l1", "l2", "elasticnet"]:
@@ -176,7 +175,6 @@ def main(args, log):
                         f"{mil_method}_{penalty}",
                         fold_idx + 1,
                     )
-                    print(eval_metrics)
 
             # elif mil_method == "logistic_groupsparselasso":
 
