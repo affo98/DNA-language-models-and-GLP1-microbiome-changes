@@ -162,7 +162,7 @@ def fit_predict_sparsegrouplasso(
 
                     #lr = LogisticRegression(
                         solver="lbfgs", max_iter=1000, random_state=0
-                    )#
+                    #)
                     lr = LogisticRegression(
                         penalty=None,
                         solver="saga",
