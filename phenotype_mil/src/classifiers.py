@@ -5,6 +5,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 from sklearn.metrics import roc_auc_score
 from group_lasso import LogisticGroupLasso
+from tqdm import tqdm
 
 
 def coefs_dict_to_df(coefficients: dict, output_path: str) -> pd.DataFrame:
@@ -134,7 +135,7 @@ def fit_predict_sparsegrouplasso(
     inner_cv = StratifiedKFold(n_splits=cv, shuffle=True, random_state=0)
 
     # Grid search loop
-    for group_reg in group_reg_grid:
+    for group_reg in tqdm(group_reg_grid, desc="Grid search on group lasso"):
         for l1_reg in l1_reg_grid:
             fold_scores = []
 
@@ -184,9 +185,9 @@ def fit_predict_sparsegrouplasso(
                     continue
 
             mean_score = np.mean(fold_scores)
-            log.append(
-                f"[Fold {fold}] group_reg={group_reg}, l1_reg={l1_reg}, {scoring}={mean_score:.4f}"
-            )
+            # log.append(
+            #     f"[Fold {fold}] group_reg={group_reg}, l1_reg={l1_reg}, {scoring}={mean_score:.4f}"
+            # )
 
             if mean_score > best_score:
                 best_score = mean_score
@@ -195,7 +196,7 @@ def fit_predict_sparsegrouplasso(
     # Refit best model on full training data
     group_reg, l1_reg = best_params
     log.append(
-        f"[Fold {fold}] Best params: group_reg={group_reg}, l1_reg={l1_reg}, best_score={best_score:.4f}"
+        f"[Fold {fold}] Best params: group_reg={group_reg}, l1_reg={l1_reg}, best_AUCROC{best_score:.4f}"
     )
 
     best_gl = LogisticGroupLasso(
@@ -207,7 +208,9 @@ def fit_predict_sparsegrouplasso(
         supress_warning=True,
     )
     best_gl.fit(X_train.values, y_train)
-    log.append(f"[Fold {fold}] Chosen groups: {best_gl.chosen_groups_}")
+    log.append(
+        f"[Fold {fold}] Chosen groups (n={len(best_gl.chosen_groups_)}): {best_gl.chosen_groups_}"
+    )
 
     # Transform data, i.e. only keep selected groups
     X_train_sel = best_gl.transform(X_train.values)
@@ -223,9 +226,9 @@ def fit_predict_sparsegrouplasso(
         max_iter=10_000,
         random_state=0,
     )
-    second_lr.fit(X_tr_sel, y_train)
+    second_lr.fit(X_train_sel, y_train)
 
-    y_pred = second_lr.predict(X_train_sel)
+    y_pred = second_lr.predict(X_test_sel)
     y_predprob = second_lr.predict_proba(X_test_sel)[:, 1]
 
     coefficients = append_coefs(
