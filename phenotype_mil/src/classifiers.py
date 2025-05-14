@@ -71,10 +71,23 @@ def append_coefs(
 
     # --------------sparse group lasso-------------
     if gl_model is not None and groups is not None:
-        chosen = set(gl_model.chosen_groups_)
-        selected_idx = [i for i, g in enumerate(groups) if g in chosen]
-        sel_coefs = model.coef_.flatten()  # may have fewer coefs than len(features)
+        # chosen = set(gl_model.chosen_groups_)
+        # selected_idx = [i for i, g in enumerate(groups) if g in chosen]
+        # sel_coefs = model.coef_.flatten()
+        # sel_feature_names = [global_features[i] for i in selected_idx]
+
+        # 1) Boolean mask of the original features that survived (non‑zero)
+        mask = gl_model.features_mask_
+        #     ↳ e.g. array([False, True, False, True, ...])
+
+        # 2) Indices of those True positions
+        selected_idx = np.where(mask)[0].tolist()
+
+        # 3) The actual names of those features
         sel_feature_names = [global_features[i] for i in selected_idx]
+
+        # 4) And the coefficients you learned on exactly those columns
+        sel_coefs = model.coef_.flatten()
 
         if len(sel_coefs) != len(sel_feature_names):
             raise ValueError(
@@ -216,10 +229,8 @@ def fit_predict_sparsegrouplasso(
     selected_idx = [
         idx for idx, grp in enumerate(groups) if grp in best_gl.chosen_groups_
     ]
-    print(selected_idx)
     # Map indices back to feature names in the original order:
     local_feature_names = [global_features[i] for i in selected_idx]
-    print(local_feature_names.shape)
 
     # Transform data, i.e. only keep selected groups
     X_train_sel = best_gl.transform(X_train.values)
