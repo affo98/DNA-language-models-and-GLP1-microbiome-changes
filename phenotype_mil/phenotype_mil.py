@@ -206,6 +206,8 @@ def main(args, log):
                         coefficients=coefficients,
                         global_features=global_features,
                     )
+                    if predictions is None:  # can happen that no features are used.
+                        continue
 
                     eval_metrics = append_eval_metrics(
                         eval_metrics,
