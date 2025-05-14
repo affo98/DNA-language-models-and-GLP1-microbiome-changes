@@ -37,10 +37,11 @@ LINKAGE_AGG = "ward"
 TSNE_PERPLEXITY = 17
 
 # cv
-CV_OUTER = 10
+CV_OUTER = 5
+N_REPEATS = 10
 
 # params knn
-KNN_K = 2
+KNN_K = 10
 
 # params logistic
 # C_GRID = np.logspace(-4, 4, 10)
@@ -102,8 +103,6 @@ def main(args, log):
     global_features = cluster_abundances.columns.drop("sample").tolist()
     coefficients = {"coefs": {}}
     # skf = StratifiedKFold(n_splits=CV_OUTER, shuffle=True, random_state=42)
-
-    N_REPEATS = 2
     rskf = RepeatedStratifiedKFold(
         n_splits=CV_OUTER, n_repeats=N_REPEATS, random_state=42
     )
