@@ -37,8 +37,12 @@ def get_groups_agglomorative(
         print(hausdorff_clusternames.shape)
 
         assert len(np.unique(labels)) == n_clusters_loaded == n_clusters
-        assert len(labels) == len(hausdorff_clusternames)
-        assert hausdorff_clusternames == hausdorff_clusternames_loaded
+        assert (
+            len(labels)
+            == len(hausdorff_clusternames)
+            == len(hausdorff_clusternames_loaded)
+        )
+        assert np.array_equal(hausdorff_clusternames, hausdorff_clusternames_loaded)
         log.append(f"Loaded agglmorative clustering from {save_path}")
 
         return labels
