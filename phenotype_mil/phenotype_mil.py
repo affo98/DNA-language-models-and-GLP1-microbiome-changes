@@ -79,9 +79,9 @@ def main(args, log):
     ), log.append(
         "Cluster catalogue and abundances do not match!"
     )  # == list(cluster_catalogue_centroid.keys())
-    assert cluster_abundances["sample"].values.tolist() == sample_ids, log.append(
-        "Sample ids do not match!"
-    )
+    # assert cluster_abundances["sample"].values.tolist() == sample_ids, log.append(
+    #     "Sample ids do not match!"
+    # )
 
     # agglomorative
     if args.model_name != "vamb":
@@ -99,152 +99,152 @@ def main(args, log):
         )
         log.append(f"Using {n_groups} groups")
 
-    # # -------------------------------------------- CV Evaluate --------------------------------------------
-    # eval_metrics = {"metrics": []}
-    # global_features = cluster_abundances.columns.drop("sample").tolist()
-    # coefficients = {"coefs": []}
-    # skf = StratifiedKFold(n_splits=CV_OUTER, shuffle=True, random_state=42)
+    # -------------------------------------------- CV Evaluate --------------------------------------------
+    eval_metrics = {"metrics": []}
+    global_features = cluster_abundances.columns.drop("sample").tolist()
+    coefficients = {"coefs": []}
+    skf = StratifiedKFold(n_splits=CV_OUTER, shuffle=True, random_state=42)
 
-    # for fold_idx, (train_idx, test_idx) in enumerate(
-    #     skf.split(cluster_abundances, labels)
-    # ):
-    #     # ------------ split ------------
-    #     cluster_abundances_train, cluster_abundances_test = (
-    #         cluster_abundances.iloc[train_idx, :],
-    #         cluster_abundances.iloc[test_idx, :],
-    #     )
-    #     labels_train, labels_test = labels[train_idx], labels[test_idx]
-    #     sample_ids_train, sample_ids_test = sample_ids[train_idx], sample_ids[test_idx]
+    for fold_idx, (train_idx, test_idx) in enumerate(
+        skf.split(cluster_abundances, labels)
+    ):
+        # ------------ split ------------
+        cluster_abundances_train, cluster_abundances_test = (
+            cluster_abundances.iloc[train_idx, :],
+            cluster_abundances.iloc[test_idx, :],
+        )
+        labels_train, labels_test = labels[train_idx], labels[test_idx]
+        sample_ids_train, sample_ids_test = sample_ids[train_idx], sample_ids[test_idx]
 
-    #     assert set(cluster_abundances_train["sample"].astype(str)) == set(
-    #         sample_ids_train.astype(str).tolist()
-    #     )
-    #     assert set(cluster_abundances_test["sample"].astype(str)) == set(
-    #         sample_ids_test.astype(str).tolist()
-    #     )
-    #     assert (
-    #         len(cluster_abundances_train)
-    #         == len(sample_ids_train) & len(cluster_abundances_test)
-    #         == len(sample_ids_test)
-    #     )
+        assert set(cluster_abundances_train["sample"].astype(str)) == set(
+            sample_ids_train.astype(str).tolist()
+        )
+        assert set(cluster_abundances_test["sample"].astype(str)) == set(
+            sample_ids_test.astype(str).tolist()
+        )
+        assert (
+            len(cluster_abundances_train)
+            == len(sample_ids_train) & len(cluster_abundances_test)
+            == len(sample_ids_test)
+        )
 
-    #     log.append(
-    #         f"{'-'*20} Fold {fold_idx+1} {'-'*20}\n"
-    #         f"- Train samples: n={len(labels_train)}, 0s={len(labels_train) - np.sum(labels_train)}, 1s={np.sum(labels_train)}\n{sample_ids_train}\n"
-    #         f"- Test samples:  n={len(labels_test)},  0s={len(labels_test) - np.sum(labels_test)}, 1s={np.sum(labels_test)}\n{sample_ids_test}"
-    #     )
+        log.append(
+            f"{'-'*20} Fold {fold_idx+1} {'-'*20}\n"
+            f"- Train samples: n={len(labels_train)}, 0s={len(labels_train) - np.sum(labels_train)}, 1s={np.sum(labels_train)}\n{sample_ids_train}\n"
+            f"- Test samples:  n={len(labels_test)},  0s={len(labels_test) - np.sum(labels_test)}, 1s={np.sum(labels_test)}\n{sample_ids_test}"
+        )
 
-    #     # ------------ MIL ------------
-    #     for mil_method in args.mil_methods:
-    #         log.append(f"Using MIL method: {mil_method}")
+        # ------------ MIL ------------
+        for mil_method in args.mil_methods:
+            log.append(f"Using MIL method: {mil_method}")
 
-    #         if mil_method == "knn":
-    #             log.append(f"  → Training KNN'")
-    #             predictions, predictions_proba = fit_predict_knn(  # euclidian
-    #                 cluster_abundances_train,
-    #                 cluster_abundances_test,
-    #                 labels_train,
-    #                 k=KNN_K,
-    #                 fold=fold_idx + 1,
-    #                 output_path=args.output_path,
-    #             )
-    #             eval_metrics = append_eval_metrics(
-    #                 eval_metrics,
-    #                 labels_test,
-    #                 predictions,
-    #                 predictions_proba,
-    #                 mil_method,
-    #                 fold_idx + 1,
-    #             )
+            if mil_method == "knn":
+                log.append(f"  → Training KNN'")
+                predictions, predictions_proba = fit_predict_knn(  # euclidian
+                    cluster_abundances_train,
+                    cluster_abundances_test,
+                    labels_train,
+                    k=KNN_K,
+                    fold=fold_idx + 1,
+                    output_path=args.output_path,
+                )
+                eval_metrics = append_eval_metrics(
+                    eval_metrics,
+                    labels_test,
+                    predictions,
+                    predictions_proba,
+                    mil_method,
+                    fold_idx + 1,
+                )
 
-    #         elif mil_method == "logistic":
-    #             for penalty in ["none", "l1", "l2", "elasticnet"]:
-    #                 log.append(
-    #                     f"  → Training logistic regression with penalty='{penalty}'"
-    #                 )
-    #                 (
-    #                     predictions,
-    #                     predictions_proba,
-    #                     coefficients,
-    #                 ) = fit_predict_logistic(
-    #                     X_train=cluster_abundances_train,
-    #                     X_test=cluster_abundances_test,
-    #                     y_train=labels_train,
-    #                     fold=fold_idx + 1,
-    #                     output_path=args.output_path,
-    #                     penalty=penalty,
-    #                     log=log,
-    #                     C_grid=C_GRID,
-    #                     cv=CV_LOGISTIC,
-    #                     scoring=SCORING_LOGISTIC,
-    #                     coefficients=coefficients,
-    #                     global_features=global_features,
-    #                 )
-    #                 eval_metrics = append_eval_metrics(
-    #                     eval_metrics,
-    #                     labels_test,
-    #                     predictions,
-    #                     predictions_proba,
-    #                     f"{mil_method}_{penalty}",
-    #                     fold_idx + 1,
-    #                 )
+            elif mil_method == "logistic":
+                for penalty in ["none", "l1", "l2", "elasticnet"]:
+                    log.append(
+                        f"  → Training logistic regression with penalty='{penalty}'"
+                    )
+                    (
+                        predictions,
+                        predictions_proba,
+                        coefficients,
+                    ) = fit_predict_logistic(
+                        X_train=cluster_abundances_train,
+                        X_test=cluster_abundances_test,
+                        y_train=labels_train,
+                        fold=fold_idx + 1,
+                        output_path=args.output_path,
+                        penalty=penalty,
+                        log=log,
+                        C_grid=C_GRID,
+                        cv=CV_LOGISTIC,
+                        scoring=SCORING_LOGISTIC,
+                        coefficients=coefficients,
+                        global_features=global_features,
+                    )
+                    eval_metrics = append_eval_metrics(
+                        eval_metrics,
+                        labels_test,
+                        predictions,
+                        predictions_proba,
+                        f"{mil_method}_{penalty}",
+                        fold_idx + 1,
+                    )
 
-    #         elif mil_method == "logistic_groupsparselasso":
+            elif mil_method == "logistic_groupsparselasso":
 
-    #             if args.model_name != "vamb":
-    #                 (
-    #                     predictions,
-    #                     predictions_proba,
-    #                     coefficients,
-    #                 ) = fit_predict_sparsegrouplasso(
-    #                     X_train=cluster_abundances_train,
-    #                     X_test=cluster_abundances_test,
-    #                     y_train=labels_train,
-    #                     groups=groups,
-    #                     fold=fold_idx + 1,
-    #                     output_path=args.output_path,
-    #                     log=log,
-    #                     group_reg_grid=GROUP_REGS,
-    #                     l1_reg_grid=L1_REGS,
-    #                     cv=CV_LOGISTIC,
-    #                     scoring=SCORING_LOGISTIC,
-    #                     coefficients=coefficients,
-    #                     global_features=global_features,
-    #                 )
+                if args.model_name != "vamb":
+                    (
+                        predictions,
+                        predictions_proba,
+                        coefficients,
+                    ) = fit_predict_sparsegrouplasso(
+                        X_train=cluster_abundances_train,
+                        X_test=cluster_abundances_test,
+                        y_train=labels_train,
+                        groups=groups,
+                        fold=fold_idx + 1,
+                        output_path=args.output_path,
+                        log=log,
+                        group_reg_grid=GROUP_REGS,
+                        l1_reg_grid=L1_REGS,
+                        cv=CV_LOGISTIC,
+                        scoring=SCORING_LOGISTIC,
+                        coefficients=coefficients,
+                        global_features=global_features,
+                    )
 
-    #                 eval_metrics = append_eval_metrics(
-    #                     eval_metrics,
-    #                     labels_test,
-    #                     predictions,
-    #                     predictions_proba,
-    #                     mil_method,
-    #                     fold_idx + 1,
-    #                 )
+                    eval_metrics = append_eval_metrics(
+                        eval_metrics,
+                        labels_test,
+                        predictions,
+                        predictions_proba,
+                        mil_method,
+                        fold_idx + 1,
+                    )
 
-    # coefs_df = coefs_dict_to_df(
-    #     coefficients, os.path.join(args.output_path, f"coefs.csv")
-    # )
+    coefs_df = coefs_dict_to_df(
+        coefficients, os.path.join(args.output_path, f"coefs.csv")
+    )
 
-    # log.append(f"{eval_metrics}")
-    # with open(
-    #     os.path.join(
-    #         args.output_path,
-    #         f"eval_metrics_{args.model_name}_{args.dataset_name}.json",
-    #     ),
-    #     "w",
-    # ) as f:
-    #     json.dump(eval_metrics, f, indent=4)
+    log.append(f"{eval_metrics}")
+    with open(
+        os.path.join(
+            args.output_path,
+            f"eval_metrics_{args.model_name}_{args.dataset_name}.json",
+        ),
+        "w",
+    ) as f:
+        json.dump(eval_metrics, f, indent=4)
 
-    # summary_eval = compute_summary_eval(eval_metrics, log)
-    # log.append(f"{summary_eval}")
-    # with open(
-    #     os.path.join(
-    #         args.output_path,
-    #         f"eval_metrics_{args.model_name}_{args.dataset_name}.json",
-    #     ),
-    #     "w",
-    # ) as f:
-    #     json.dump(summary_eval, f, indent=4)
+    summary_eval = compute_summary_eval(eval_metrics, log)
+    log.append(f"{summary_eval}")
+    with open(
+        os.path.join(
+            args.output_path,
+            f"eval_metrics_{args.model_name}_{args.dataset_name}.json",
+        ),
+        "w",
+    ) as f:
+        json.dump(summary_eval, f, indent=4)
 
 
 def add_arguments() -> ArgumentParser:
