@@ -93,8 +93,8 @@ def main(args, log):
 
     # -------------------------------------------- CV Evaluate --------------------------------------------
     eval_metrics = {"metrics": []}
-    cluster_abundance_features = cluster_abundances[1:]
-    print(cluster_abundance_features.head(5))
+    cluster_abundance_features = cluster_abundances[:1]
+    print(cluster_abundance_features.shape)
     global_features = cluster_abundances.columns.drop("sample").tolist()
     coefficients = {"coefs": []}
     skf = StratifiedKFold(n_splits=CV_OUTER, shuffle=True, random_state=42)
