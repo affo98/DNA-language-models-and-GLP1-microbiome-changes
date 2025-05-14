@@ -49,8 +49,10 @@ CV_LOGISTIC = 5
 SCORING_LOGISTIC = "roc_auc"
 
 # params sparse group lasso logistic
-GROUP_REGS = np.logspace(-4, 4, 10)
-L1_REGS = np.logspace(-4, 4, 10)
+# GROUP_REGS = np.logspace(-4, 4, 10)
+# L1_REGS = np.logspace(-4, 4, 10)
+GROUP_REGS = [0.01, 0.1, 1, 10, 100, 1000]
+L1_REGS = [0.01, 0.1, 1, 10, 100, 1000]
 
 
 def main(args, log):
