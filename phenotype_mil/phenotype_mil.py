@@ -121,6 +121,12 @@ def main(args, log):
         labels_train, labels_test = labels[train_idx], labels[test_idx]
         sample_ids_train, sample_ids_test = sample_ids[train_idx], sample_ids[test_idx]
 
+        log.append(
+            f"{'-'*20} Fold {fold_idx+1} {'-'*20}\n"
+            f"- Train samples: n={len(labels_train)}, 0s={len(labels_train) - np.sum(labels_train)}, 1s={np.sum(labels_train)}\n{sample_ids_train}\n"
+            f"- Test samples:  n={len(labels_test)},  0s={len(labels_test) - np.sum(labels_test)}, 1s={np.sum(labels_test)}\n{sample_ids_test}"
+        )
+
         # assert (
         #     cluster_abundances_train["sample"].astype(str)
         #     == sample_ids_train.astype(str).tolist()
@@ -132,16 +138,9 @@ def main(args, log):
         # )
 
         assert (
-            len(cluster_abundances_train)
-            == len(sample_ids_train) & len(cluster_abundances_test)
-            == len(sample_ids_test)
+            len(cluster_abundances_train) == len(sample_ids_train) == len(labels_train)
         )
-
-        log.append(
-            f"{'-'*20} Fold {fold_idx+1} {'-'*20}\n"
-            f"- Train samples: n={len(labels_train)}, 0s={len(labels_train) - np.sum(labels_train)}, 1s={np.sum(labels_train)}\n{sample_ids_train}\n"
-            f"- Test samples:  n={len(labels_test)},  0s={len(labels_test) - np.sum(labels_test)}, 1s={np.sum(labels_test)}\n{sample_ids_test}"
-        )
+        assert len(cluster_abundances_test) == len(sample_ids_test) == len(labels_test)
 
         # ------------ MIL ------------
         for mil_method in args.mil_methods:
