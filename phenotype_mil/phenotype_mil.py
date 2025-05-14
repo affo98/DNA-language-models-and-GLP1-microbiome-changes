@@ -62,6 +62,10 @@ def main(args, log):
 
     cluster_abundances = read_cluster_abundances(args.input_path, sample_ids, log)
 
+    sample_ids = np.array(
+        [s for s in sample_ids if s in cluster_abundances["sample"].values.tolist()]
+    )
+
     hausdorff, hausdorff_clusternames = read_hausdorff(
         os.path.join(
             args.input_path, "hausdorff", f"{args.model_name}_{args.dataset_name}.npz"
@@ -74,9 +78,9 @@ def main(args, log):
     ), log.append(
         "Cluster catalogue and abundances do not match!"
     )  # == list(cluster_catalogue_centroid.keys())
-    # assert cluster_abundances["sample"].values.tolist() == sample_ids, log.append(
-    #     "Sample ids do not match!"
-    # )
+    assert cluster_abundances["sample"].values.tolist() == sample_ids, log.append(
+        "Sample ids do not match!"
+    )
 
     # agglomorative
     if args.model_name != "vamb":

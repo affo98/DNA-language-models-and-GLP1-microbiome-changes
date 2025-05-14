@@ -23,7 +23,7 @@ OUTPUT_DIR = os.path.join("phenotype_mil", "binning_results", "parsed_results")
 COMPLETENESS_BINS = [90, 80, 70, 60, 50]
 CONTAMINATION = 5
 
-# DATASETS = ["T2D-EW", "UNSEEN_BIO"]
+# DATASETS = ["T2D-EW", "UNSEEN_BIO"] #CHANGE
 DATASETS = ["T2D-EW"]
 
 OTHER_MODELS = [
