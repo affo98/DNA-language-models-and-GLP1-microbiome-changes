@@ -152,7 +152,7 @@ def main(args, log):
                 print(eval_metrics)
 
             elif mil_method == "logistic":
-                for penalty in ["none", "l1", "l2", "elasticnet"]:
+                for penalty in ["None", "l1", "l2", "elasticnet"]:
                     log.append(
                         f"  → Training logistic regression with penalty='{penalty}'"
                     )
