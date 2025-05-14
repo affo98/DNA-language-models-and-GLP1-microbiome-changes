@@ -7,8 +7,7 @@ from sklearn.metrics import roc_auc_score
 from group_lasso import LogisticGroupLasso
 
 
-
-def coefs_dict_to_df(coefficients: dict, output_path:str) -> pd.DataFrame:
+def coefs_dict_to_df(coefficients: dict, output_path: str) -> pd.DataFrame:
     """
     Convert coefficients["coefs"] of the form:
       {
@@ -27,17 +26,18 @@ def coefs_dict_to_df(coefficients: dict, output_path:str) -> pd.DataFrame:
     for mil_method, feat_dict in coefficients["coefs"].items():
         for feat, coef_list in feat_dict.items():
             for fold_idx, coef in enumerate(coef_list, start=1):
-                records.append({
-                    "mil_method": mil_method,
-                    "feature":     feat,
-                    "fold":        fold_idx,
-                    "coef":        coef
-                })
+                records.append(
+                    {
+                        "mil_method": mil_method,
+                        "feature": feat,
+                        "fold": fold_idx,
+                        "coef": coef,
+                    }
+                )
     df = pd.DataFrame.from_records(records)
     df.to_csv(output_path)
-    
-    return df
 
+    return df
 
 
 def append_coefs(
@@ -69,9 +69,7 @@ def append_coefs(
     full_coefs = np.zeros(len(global_features), dtype=float)
 
     # --------------sparse group lasso-------------
-    if (
-        gl_model is not None and groups is not None
-    ):  # sparsegrouplasso: identify selected features by group
+    if gl_model is not None and groups is not None:
         chosen = set(gl_model.chosen_groups_)
         selected_idx = [i for i, g in enumerate(groups) if g in chosen]
         sel_coefs = model.coef_.flatten()  # may have fewer coefs than len(features)
@@ -215,16 +213,16 @@ def fit_predict_sparsegrouplasso(
 
     y_pred = second_lr.predict(X_train_sel)
     y_predprob = second_lr.predict_proba(X_test_sel)[:, 1]
-    
+
     coefficients = append_coefs(
         coefficients,
-        mil_method="sparsegrouplasso",
+        "sparsegrouplasso",
         global_features,
         X_train.columns.tolist(),
-        model=second_lr,
-        fold=fold,
-        best_gl,
-        groups,
+        second_lr,
+        fold,
+        gl_model=best_gl,
+        groups=groups,
     )
 
     return y_pred, y_predprob, coefficients
@@ -300,8 +298,8 @@ def fit_predict_logistic(
         f"logistic_{penalty}",
         global_features,
         X_train.columns.tolist(),
-        model=best_lr,
-        fold=fold,
+        best_lr,
+        fold,
     )
 
     return y_pred, y_predprob, coefficients
