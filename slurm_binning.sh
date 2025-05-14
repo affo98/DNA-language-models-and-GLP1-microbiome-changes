@@ -10,19 +10,19 @@
 #-----------------1. Pick Node-----------------------
 
 #1a For 4 L40s
-#SBATCH --output=t2dew_l40_%j.out
-#SBATCH --error=slurm_l40_%j.err 
-#SBATCH --exclude=cn[3-18]
-#SBATCH --exclude=desktop[1-16]
-#SBATCH --nodelist=cn19
-#SBATCH --gres=gpu:l40s:4
+# #SBATCH --output=t2dew_l40_%j.out
+# #SBATCH --error=slurm_l40_%j.err 
+# #SBATCH --exclude=cn[3-18]
+# #SBATCH --exclude=desktop[1-16]
+# #SBATCH --nodelist=cn19
+# #SBATCH --gres=gpu:l40s:4
 
 
 #1b For small testing
-# #SBATCH --output=t2dew_small_%j.out
-# #SBATCH --error=slurm_small_%j.err 
-# #SBATCH --partition=scavenge
-# #SBATCH --time=04:00:00
+#SBATCH --output=t2dew_small_%j.out
+#SBATCH --error=slurm_small_%j.err 
+#SBATCH --partition=scavenge
+#SBATCH --time=04:00:00
 
 
 #1c Using 2x H100 
@@ -86,19 +86,19 @@ conda clean --index-cache --packages --tarballs --yes #uncomment if problems wit
 #--------------------------2. Pick job-------------------------
 
 #2a Run sweeps on cami2_benchmark
-#chmod +x cami2_benchmark/sweeps/run_models.sh
-#cami2_benchmark/sweeps/run_models.sh airways_short gastro_short oral_short skin_short urogenital_short marine_short plant_short metahit -- dnaberth_2mv1_150k
+chmod +x cami2_benchmark/sweeps/run_models.sh
+cami2_benchmark/sweeps/run_models.sh airways_short gastro_short oral_short skin_short urogenital_short marine_short plant_short metahit -- dnaberth_400kv2 dnaberth_2mv3
 
 #2b Run the Snakemake pipeline
-SNAKEFILE=~/l40_test/DNA-language-models-and-GLP1-microbiome-changes/phenotype_mil/Snakefile
-WORKDIR=~/l40_test/DNA-language-models-and-GLP1-microbiome-changes
-CONFIG="--config DATASET=T2D-EW MODEL=dnaberts CHECKM2=True"
+# SNAKEFILE=~/l40_test/DNA-language-models-and-GLP1-microbiome-changes/phenotype_mil/Snakefile
+# WORKDIR=~/l40_test/DNA-language-models-and-GLP1-microbiome-changes
+# CONFIG="--config DATASET=T2D-EW MODEL=dnaberts CHECKM2=True"
 
 # Ensure any stale Snakemake lock is removed
 #echo "Unlocking any stale Snakemake locks..."
 #snakemake --unlock --directory "$WORKDIR" --quiet
 
-snakemake --snakefile "$SNAKEFILE" --directory "$WORKDIR" $CONFIG --use-conda --cores all --rerun-incomplete --rerun-triggers mtime #add --unlock here if necessary
+#snakemake --snakefile "$SNAKEFILE" --directory "$WORKDIR" $CONFIG --use-conda --cores all --rerun-incomplete --rerun-triggers mtime #add --unlock here if necessary
 
 
 
