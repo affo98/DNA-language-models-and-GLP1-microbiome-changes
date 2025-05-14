@@ -54,24 +54,13 @@ L1_REGS = np.logspace(-4, 4, 10)
 
 def main(args, log):
     # -------------------------------------------- Read data --------------------------------------------
-    # cluster_catalogue_centroid = get_cluster_catalogue(args.input_path, log)
+    # cluster_catalogue_centroid = get_cluster_catalogue(args.input_path, log) # == list(cluster_catalogue_centroid.keys())
 
     sample_ids, labels = read_sample_labels(
         args.sample_labels_path, log, split_train_test=False
     )
 
     cluster_abundances = read_cluster_abundances(args.input_path, sample_ids, log)
-
-    ###########################################################################
-    valid_sample_mask = np.isin(sample_ids, cluster_abundances["sample"].values)
-
-    # Filter sample_ids and labels to include only valid samples
-    sample_ids = sample_ids[valid_sample_mask]
-    labels = labels[valid_sample_mask]
-
-    print(f"Filtered sample_ids shape: {sample_ids.shape}")
-    print(f"Filtered labels shape: {labels.shape}")
-    ############################################################
 
     hausdorff, hausdorff_clusternames = read_hausdorff(
         os.path.join(
@@ -80,14 +69,9 @@ def main(args, log):
         log,
     )
 
-    assert cluster_abundances.columns[1:].to_list() == list(
-        hausdorff_clusternames
-    ), log.append(
-        "Cluster catalogue and abundances do not match!"
-    )  # == list(cluster_catalogue_centroid.keys())
-    # assert cluster_abundances["sample"].values.tolist() == sample_ids, log.append(
-    #     "Sample ids do not match!"
-    # )
+    assert np.array_equal(cluster_abundances.columns[1:].values, hausdorff_clusternames)
+    assert np.array_equal(cluster_abundances["sample"].values, sample_ids)
+    assert len(cluster_abundances["sample"]) == len(sample_ids)
 
     # agglomorative
     if args.model_name != "vamb":
@@ -129,6 +113,7 @@ def main(args, log):
 
         assert (
             cluster_abundances_train["sample"]
+            .values()
             .astype(str)
             .equals(sample_ids_train.astype(str))
         )
