@@ -36,7 +36,7 @@ def compute_summary_eval(eval_metrics: dict) -> dict[str, dict[str, float]]:
     for method, group in df.groupby("mil_method"):
         stats = {}
         for metric in ("f1_score", "auc_roc", "accuracy"):
-            stats[f"{metric}_mean"] = round(float(group[metric].mean(), 2))
+            stats[f"{metric}_mean"] = round(float(group[metric].mean()), 2)
             stats[f"{metric}_std"] = round(
                 float(group[metric].std(ddof=0)), 2
             )  # population std
