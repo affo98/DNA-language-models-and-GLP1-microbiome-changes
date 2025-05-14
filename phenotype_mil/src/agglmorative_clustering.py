@@ -55,7 +55,9 @@ def get_groups_agglomorative(
         plt.savefig(save_file, dpi=300)
 
     base, _ = os.path.splitext(save_file)
-    npz_path = base + "agglomorative_data.npz"
-    np.savez_compressed(npz_path, labels=labels, embedding=embedding)
+    npz_path = base + "_agglomorative_data.npz"
+    np.savez_compressed(
+        npz_path, labels=labels, embedding=embedding, n_clusters=n_clusters
+    )
 
     return labels
