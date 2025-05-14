@@ -68,12 +68,22 @@ conda install -n base -c conda-forge mamba --yes
 
 conda config --set channel_priority flexible
 
+
+#----------------pick env---------------------------
+# # 3. Create & activate your env
+# ENV_DIR="$HOME/envs/snakeenv"
+# if [[ ! -d "$ENV_DIR" ]]; then
+#     conda env create -p "$ENV_DIR" -f phenotype_mil/envs/snakeenv.yml --yes
+# fi
+# conda activate "$ENV_DIR"
+
 # 3. Create & activate your env
-ENV_DIR="$HOME/envs/snakeenv"
+ENV_DIR="$HOME/envs/cami2_processing"
 if [[ ! -d "$ENV_DIR" ]]; then
-    conda env create -p "$ENV_DIR" -f phenotype_mil/envs/snakeenv.yml --yes
+    conda env create -p "$ENV_DIR" -f cami2_benchmark/envs/cami2_processing.yml --yes
 fi
 conda activate "$ENV_DIR"
+
 
 
 # Print node and GPU info
