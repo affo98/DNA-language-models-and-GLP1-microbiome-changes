@@ -58,7 +58,7 @@ config_nomodelrun = bool(config.get("NOMODELRUN", False))
 config_process_abundances = bool(config.get("PROCESS_ABUNDANCES", False))
 config_phenotype_mil = bool(config.get("PHENOTYPE_MIL", False))
 config_hausdorff = bool(config.get("HAUSDORFF", False))
-
+config_binlook_up = bool(config.get("BIN_LOOKUP", False))
 
 #contig params
 MINSIZE_BINS=200000 #changed from 250000 in cami2, could potentially be smaller, e.g. 150.000
@@ -100,6 +100,8 @@ if MODEL in ['dnaberts'] and not config_nomodelrun:
         os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "dnaberts"),
     ]
 
+
+
 if config_checkm2:
     input_files += [os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "checkm2", f"{MODEL}_results")]
 
@@ -111,6 +113,9 @@ if config_process_abundances:
 if config_hausdorff:
     input_files += [os.path.join(OUTDIR_BINNING_RESULTS, DATASET, f"{MODEL}_output", "hausdorff")]
 
+# if config config_binlook_up:
+
+
 if config_phenotype_mil:
     input_files += [os.path.join(OUTDIR_MIL_RESULTS, DATASET, f"{MODEL}_results")]
 
@@ -120,6 +125,47 @@ rule all:
 
 if config_phenotype_mil:
     ruleorder: normalize_abundances > get_cluster_abundances > phenotype_mil
+
+
+# rule download_gldb_db:
+#     input:
+#         fasta_bins=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "{MODEL}")
+#     output:
+#         database = directory(os.path.join(OUTDIR_MIL_RESULTS, "gldb_db"))
+#     conda:
+#         ...
+#     shell:
+#         """
+        
+#         """
+
+
+# rule lookup_bins:
+#     input:
+#         fasta_bins=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "{MODEL}")
+#     output:
+#         bin_lookups = directory(os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_binlookup")),
+#     conda:
+#         ...
+#     params:
+#         database=os.path.join(OUTDIR_MIL_RESULTS, "gldb_db")
+#     shell:
+#         """
+#         gltdb_tk {input.fasta_bins} {output.bin_lookups} -db {params.database}
+#         """
+
+
+# rule lookupbins_lookup_bins:
+#     input:
+#         bin_lookups = os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_binlookup")
+#     output:
+#         bin_lookup_file = os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_binlookup.csv"),
+#     conda:
+#         ...
+#     shell:
+#         """
+#         python {SRC_DIR}/... 
+#         """
 
 
 
@@ -327,7 +373,63 @@ rule get_hausdorff_distances:
         """
 
 
+rule download_gldb_db:
+    input:
+        fasta_bins=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "{MODEL}")
+    output:
+        database = directory(os.path.join(OUTDIR_MIL_RESULTS, "gldb_db"))
+    conda:
+        ...
+    shell:
+        """
+        
+        """
 
+
+rule lookup_bins:
+    input:
+        fasta_bins=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "{MODEL}")
+    output:
+        bin_lookups = directory(os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_binlookup")),
+    conda:
+        ...
+    params:
+        database=os.path.join(OUTDIR_MIL_RESULTS, "gldb_db")
+    shell:
+        """
+        gltdb_tk {input.fasta_bins} {output.bin_lookups} -db {params.database}
+        """
+
+
+rule lookupbins_lookup_bins:
+    input:
+        bin_lookups = os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_binlookup")
+    output:
+        bin_lookup_file = os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_binlookup.csv"),
+    conda:
+        ...
+    shell:
+        """
+        python {SRC_DIR}/... 
+        """
+
+# rule download_gldb_db
+# input:
+#       - the bin folder (just so it triggers)
+# output:
+#  gldb_db files
+
+# rule lookup_bins
+# input:
+#       - the bin folder (just so it triggers)
+# output:
+#      - bin lookups
+# params:
+#      - path/to_gdlb/database
+# shell:
+#     gltdb_tk {input} {output} -db {params}
+
+# then maybe we can add a third with some post processing
 
 rule phenotype_mil:
     input:
