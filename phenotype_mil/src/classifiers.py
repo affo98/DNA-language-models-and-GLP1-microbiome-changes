@@ -71,23 +71,11 @@ def append_coefs(
 
     # --------------sparse group lasso-------------
     if gl_model is not None and groups is not None:
-        # chosen = set(gl_model.chosen_groups_)
-        # selected_idx = [i for i, g in enumerate(groups) if g in chosen]
-        # sel_coefs = model.coef_.flatten()
-        # sel_feature_names = [global_features[i] for i in selected_idx]
 
-        # 1) Boolean mask of the original features that survived (non‑zero)
-        mask = gl_model.features_mask_
-        #     ↳ e.g. array([False, True, False, True, ...])
-
-        # 2) Indices of those True positions
-        selected_idx = np.where(mask)[0].tolist()
-
-        # 3) The actual names of those features
-        sel_feature_names = [global_features[i] for i in selected_idx]
-
-        # 4) And the coefficients you learned on exactly those columns
+        mask = gl_model.sparsity_mask_
+        assert len(mask) == len(local_features)
         sel_coefs = model.coef_.flatten()
+        sel_feature_names = [local_features[i] for i, m in enumerate(mask) if m]
 
         if len(sel_coefs) != len(sel_feature_names):
             raise ValueError(
@@ -239,7 +227,6 @@ def fit_predict_sparsegrouplasso(
     log.append(f"[Fold {fold}] Reduced test shape: {X_test_sel.shape}")
 
     # Second-stage classifier
-    # second_lr = LogisticRegression(solver="lbfgs", max_iter=1000, random_state=0)
     second_lr = LogisticRegression(
         penalty=None,
         solver="saga",
@@ -255,7 +242,7 @@ def fit_predict_sparsegrouplasso(
         coefficients,
         "sparsegrouplasso",
         global_features,
-        local_feature_names,
+        X_train.columns.tolist(),
         second_lr,
         fold,
         gl_model=best_gl,
