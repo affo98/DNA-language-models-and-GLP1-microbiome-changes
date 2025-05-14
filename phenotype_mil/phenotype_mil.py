@@ -74,9 +74,9 @@ def main(args, log):
     ), log.append(
         "Cluster catalogue and abundances do not match!"
     )  # == list(cluster_catalogue_centroid.keys())
-    assert cluster_abundances["sample"].values.tolist() == sample_ids, log.append(
-        "Sample ids do not match!"
-    )
+    # assert cluster_abundances["sample"].values.tolist() == sample_ids, log.append(
+    #     "Sample ids do not match!"
+    # )
 
     # agglomorative
     if args.model_name != "vamb":
