@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
@@ -39,7 +40,7 @@ def get_groups_agglomorative(
     )
     embedding = tsne.fit_transform(hausdorff_matrix)
 
-    plt.figure(figsize=(12, 12))
+    plt.figure(figsize=(9, 9))
     for lbl in np.unique(labels):
         mask = labels == lbl
         plt.scatter(
@@ -52,5 +53,9 @@ def get_groups_agglomorative(
         plt.legend(loc="upper left", bbox_to_anchor=(1, 1), title="Clusters")
         plt.tight_layout()
         plt.savefig(save_file, dpi=300)
+
+    base, _ = os.path.splitext(save_file)
+    npz_path = base + "agglomorative_data.npz"
+    np.savez_compressed(npz_path, labels=labels, embedding=embedding)
 
     return labels
