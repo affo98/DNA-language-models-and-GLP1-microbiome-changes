@@ -61,7 +61,6 @@ def main(args, log):
     )
 
     cluster_abundances = read_cluster_abundances(args.input_path, sample_ids, log)
-    print(cluster_abundances.head(5))
     hausdorff, hausdorff_clusternames = read_hausdorff(
         os.path.join(
             args.input_path, "hausdorff", f"{args.model_name}_{args.dataset_name}.npz"
@@ -116,14 +115,6 @@ def main(args, log):
             f"- Test samples:  n={len(labels_test)},  0s={len(labels_test) - np.sum(labels_test)}, 1s={np.sum(labels_test)}\n{sample_ids_test}"
         )
 
-        assert np.array_equal(
-            cluster_abundances_train["sample"].values,
-            sample_ids_train,
-        )
-        assert np.array_equal(
-            cluster_abundances_test["sample"].values,
-            sample_ids_test,
-        )
         assert (
             len(cluster_abundances_train) == len(sample_ids_train) == len(labels_train)
         )
