@@ -37,8 +37,8 @@ LINKAGE_AGG = "ward"
 TSNE_PERPLEXITY = 17
 
 # cv
-CV_OUTER = 5
-N_REPEATS = 10
+CV_OUTER = 10
+N_REPEATS = 5
 
 # params knn
 KNN_K = 10
