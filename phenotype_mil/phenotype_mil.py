@@ -95,7 +95,7 @@ def main(args, log):
     cluster_abundance_features = cluster_abundances.iloc[:, 1:]
     print(cluster_abundance_features.shape)
     global_features = cluster_abundances.columns.drop("sample").tolist()
-    coefficients = {"coefs": []}
+    coefficients = {"coefs": {}}
     skf = StratifiedKFold(n_splits=CV_OUTER, shuffle=True, random_state=42)
 
     for fold_idx, (train_idx, test_idx) in enumerate(
