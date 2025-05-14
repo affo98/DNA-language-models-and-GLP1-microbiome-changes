@@ -78,12 +78,12 @@ def main(args, log):
             log,
         )
         assert all(isinstance(x, str) for x in hausdorff_clusternames)
+        assert all(isinstance(x, str) for x in hausdorff_clusternames)
         assert np.array_equal(
             cluster_abundances.columns[1:].values, hausdorff_clusternames
         )
 
     assert all(isinstance(x, str) for x in cluster_abundances.columns[1:].values)
-    assert all(isinstance(x, str) for x in hausdorff_clusternames)
     assert all(isinstance(x, str) for x in cluster_abundances["sample"].values)
     assert all(isinstance(x, str) for x in sample_ids)
 
