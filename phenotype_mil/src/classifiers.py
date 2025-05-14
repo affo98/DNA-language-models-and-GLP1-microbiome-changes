@@ -160,8 +160,14 @@ def fit_predict_sparsegrouplasso(
                         fold_scores.append(0.0)
                         continue
 
-                    lr = LogisticRegression(
+                    #lr = LogisticRegression(
                         solver="lbfgs", max_iter=1000, random_state=0
+                    )#
+                    lr = LogisticRegression(
+                        penalty=None,
+                        solver="saga",
+                        max_iter=10_000,
+                        random_state=0,
                     )
                     lr.fit(X_tr_sel, y_tr)
 
@@ -208,7 +214,13 @@ def fit_predict_sparsegrouplasso(
     log.append(f"[Fold {fold}] Reduced test shape: {X_test_sel.shape}")
 
     # Second-stage classifier
-    second_lr = LogisticRegression(solver="lbfgs", max_iter=1000, random_state=0)
+    # second_lr = LogisticRegression(solver="lbfgs", max_iter=1000, random_state=0)
+    second_lr = LogisticRegression(
+        penalty=None,
+        solver="saga",
+        max_iter=10_000,
+        random_state=0,
+    )
     second_lr.fit(X_tr_sel, y_train)
 
     y_pred = second_lr.predict(X_train_sel)
