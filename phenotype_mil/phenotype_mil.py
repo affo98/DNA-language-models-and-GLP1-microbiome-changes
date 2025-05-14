@@ -73,7 +73,7 @@ def main(args, log):
     assert all(isinstance(x, str) for x in cluster_abundances["sample"].values)
     assert all(isinstance(x, str) for x in sample_ids)
     assert np.array_equal(cluster_abundances.columns[1:].values, hausdorff_clusternames)
-    assert np.array_equal(cluster_abundances["sample"].values(), sample_ids)
+    assert np.array_equal(cluster_abundances["sample"].values, sample_ids)
     assert len(cluster_abundances["sample"]) == len(sample_ids)
 
     # agglomorative
@@ -115,11 +115,11 @@ def main(args, log):
         )
 
         assert np.array_equal(
-            cluster_abundances_train["sample"].values(),
+            cluster_abundances_train["sample"].values,
             sample_ids_train,
         )
         assert np.array_equal(
-            cluster_abundances_test["sample"].values(),
+            cluster_abundances_test["sample"].values,
             sample_ids_test,
         )
         assert (
