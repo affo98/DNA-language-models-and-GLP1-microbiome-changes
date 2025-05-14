@@ -39,7 +39,7 @@ def get_groups_agglomorative(
     )
     embedding = tsne.fit_transform(hausdorff_matrix)
 
-    plt.figure(figsize=(6, 5))
+    plt.figure(figsize=(12, 12))
     for lbl in np.unique(labels):
         mask = labels == lbl
         plt.scatter(
