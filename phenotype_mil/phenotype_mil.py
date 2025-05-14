@@ -125,88 +125,88 @@ def main(args, log):
         for mil_method in args.mil_methods:
             log.append(f"Using MIL method: {mil_method}")
 
-            if mil_method == "knn":
-                log.append(f"  → Training KNN'")
-                predictions, predictions_proba = fit_predict_knn(  # euclidian
-                    cluster_abundances_train,
-                    cluster_abundances_test,
-                    labels_train,
-                    k=KNN_K,
-                    fold=fold_idx + 1,
-                    output_path=args.output_path,
-                )
-                eval_metrics = append_eval_metrics(
-                    eval_metrics,
-                    labels_test,
-                    predictions,
-                    predictions_proba,
-                    mil_method,
-                    fold_idx + 1,
-                )
+            # if mil_method == "knn":
+            #     log.append(f"  → Training KNN'")
+            #     predictions, predictions_proba = fit_predict_knn(  # euclidian
+            #         cluster_abundances_train,
+            #         cluster_abundances_test,
+            #         labels_train,
+            #         k=KNN_K,
+            #         fold=fold_idx + 1,
+            #         output_path=args.output_path,
+            #     )
+            #     eval_metrics = append_eval_metrics(
+            #         eval_metrics,
+            #         labels_test,
+            #         predictions,
+            #         predictions_proba,
+            #         mil_method,
+            #         fold_idx + 1,
+            #     )
 
-            elif mil_method == "logistic":
-                for penalty in [None, "l1", "l2", "elasticnet"]:
-                    log.append(
-                        f"  → Training logistic regression with penalty='{penalty}'"
-                    )
-                    (
-                        predictions,
-                        predictions_proba,
-                        coefficients,
-                    ) = fit_predict_logistic(
-                        X_train=cluster_abundances_train,
-                        X_test=cluster_abundances_test,
-                        y_train=labels_train,
-                        fold=fold_idx + 1,
-                        output_path=args.output_path,
-                        penalty=penalty,
-                        log=log,
-                        C_grid=C_GRID,
-                        cv=CV_LOGISTIC,
-                        scoring=SCORING_LOGISTIC,
-                        coefficients=coefficients,
-                        global_features=global_features,
-                    )
-                    eval_metrics = append_eval_metrics(
-                        eval_metrics,
-                        labels_test,
-                        predictions,
-                        predictions_proba,
-                        f"{mil_method}_{penalty}",
-                        fold_idx + 1,
-                    )
-
-            # elif mil_method == "logistic_groupsparselasso":
-
-            #     if args.model_name != "vamb":
+            # elif mil_method == "logistic":
+            #     for penalty in [None, "l1", "l2", "elasticnet"]:
+            #         log.append(
+            #             f"  → Training logistic regression with penalty='{penalty}'"
+            #         )
             #         (
             #             predictions,
             #             predictions_proba,
             #             coefficients,
-            #         ) = fit_predict_sparsegrouplasso(
+            #         ) = fit_predict_logistic(
             #             X_train=cluster_abundances_train,
             #             X_test=cluster_abundances_test,
             #             y_train=labels_train,
-            #             groups=groups,
             #             fold=fold_idx + 1,
             #             output_path=args.output_path,
+            #             penalty=penalty,
             #             log=log,
-            #             group_reg_grid=GROUP_REGS,
-            #             l1_reg_grid=L1_REGS,
+            #             C_grid=C_GRID,
             #             cv=CV_LOGISTIC,
             #             scoring=SCORING_LOGISTIC,
             #             coefficients=coefficients,
             #             global_features=global_features,
             #         )
-
             #         eval_metrics = append_eval_metrics(
             #             eval_metrics,
             #             labels_test,
             #             predictions,
             #             predictions_proba,
-            #             mil_method,
+            #             f"{mil_method}_{penalty}",
             #             fold_idx + 1,
             #         )
+
+            elif mil_method == "logistic_groupsparselasso":
+
+                if args.model_name != "vamb":
+                    (
+                        predictions,
+                        predictions_proba,
+                        coefficients,
+                    ) = fit_predict_sparsegrouplasso(
+                        X_train=cluster_abundances_train,
+                        X_test=cluster_abundances_test,
+                        y_train=labels_train,
+                        groups=groups,
+                        fold=fold_idx + 1,
+                        output_path=args.output_path,
+                        log=log,
+                        group_reg_grid=GROUP_REGS,
+                        l1_reg_grid=L1_REGS,
+                        cv=CV_LOGISTIC,
+                        scoring=SCORING_LOGISTIC,
+                        coefficients=coefficients,
+                        global_features=global_features,
+                    )
+
+                    eval_metrics = append_eval_metrics(
+                        eval_metrics,
+                        labels_test,
+                        predictions,
+                        predictions_proba,
+                        mil_method,
+                        fold_idx + 1,
+                    )
 
     coefs_df = coefs_dict_to_df(
         coefficients, os.path.join(args.output_path, f"coefs.csv")
