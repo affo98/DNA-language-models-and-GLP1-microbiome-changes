@@ -93,7 +93,7 @@ def main(args, log):
 
     # -------------------------------------------- CV Evaluate --------------------------------------------
     eval_metrics = {"metrics": []}
-    cluster_abundance_features = cluster_abundances[:1]
+    cluster_abundance_features = cluster_abundances.iloc[:, 1:]
     print(cluster_abundance_features.shape)
     global_features = cluster_abundances.columns.drop("sample").tolist()
     coefficients = {"coefs": []}
