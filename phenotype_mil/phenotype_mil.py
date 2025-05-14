@@ -61,7 +61,7 @@ def main(args, log):
     )
 
     cluster_abundances = read_cluster_abundances(args.input_path, sample_ids, log)
-
+    print(cluster_abundances.head(5))
     hausdorff, hausdorff_clusternames = read_hausdorff(
         os.path.join(
             args.input_path, "hausdorff", f"{args.model_name}_{args.dataset_name}.npz"
