@@ -9,6 +9,8 @@ studies:
     name: T2D-EW
   - id: PRJEB21528
     name: CAR
+  - id: BIO
+    name: UNSEEN
 
   #potential inclusion
   #- id: PRJEB4336 - multiple runs per patient
