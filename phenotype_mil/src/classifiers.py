@@ -220,17 +220,18 @@ def fit_predict_sparsegrouplasso(
     log.append(
         f"[Fold {fold}] Chosen groups (n={len(best_gl.chosen_groups_)}): {best_gl.chosen_groups_}"
     )
-    selected_idx = [
-        idx for idx, grp in enumerate(groups) if grp in best_gl.chosen_groups_
-    ]
-    # Map indices back to feature names in the original order:
-    local_feature_names = [global_features[i] for i in selected_idx]
 
     # Transform data, i.e. only keep selected groups
     X_train_sel = best_gl.transform(X_train.values)
     X_test_sel = best_gl.transform(X_test.values)
     log.append(f"[Fold {fold}] Reduced train shape: {X_train_sel.shape}")
     log.append(f"[Fold {fold}] Reduced test shape: {X_test_sel.shape}")
+
+    if X_train_sel.shape[1] == 0:
+        log.append(
+            f"[Fold {fold}] No features selected after group lasso. Skipping fold."
+        )
+        return None, None, coefficients
 
     # Second-stage classifier
     second_lr = LogisticRegression(
