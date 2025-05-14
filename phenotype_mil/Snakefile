@@ -118,7 +118,7 @@ if config_process_abundances:
                     os.path.join(OUTDIR_BINNING_RESULTS, DATASET, f"{MODEL}_output", "test", "cluster_abundances.tsv")]    
 
 if config_hausdorff:
-    input_files += [os.path.join(OUTDIR_BINNING_RESULTS, DATASET, f"{MODEL}_output", "hausdorff")]
+    input_files += [os.path.join(OUTDIR_BINNING_RESULTS, DATASET, f"{MODEL}_output", "test", "hausdorff")]
 
 if config_bin_lookup:
     input_files += [
