@@ -151,7 +151,7 @@ rule normalize_abundances:
         "envs/phenotype_mil.yml",
     shell:
         """
-        python {SRC_DIR}/normalize_abundances.py {input} {output} --log {log}
+        python {SRC_DIR}/normalize_abundances.py {input} {output} {log}
         """
 
 
