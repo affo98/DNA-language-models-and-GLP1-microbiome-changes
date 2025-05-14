@@ -68,9 +68,12 @@ def main(args, log):
         ),
         log,
     )
-
+    assert all(isinstance(x, str) for x in cluster_abundances.columns[1:].values)
+    assert all(isinstance(x, str) for x in hausdorff_clusternames)
+    assert all(isinstance(x, str) for x in cluster_abundances["sample"].values)
+    assert all(isinstance(x, str) for x in sample_ids)
     assert np.array_equal(cluster_abundances.columns[1:].values, hausdorff_clusternames)
-    assert np.array_equal(cluster_abundances["sample"].values, sample_ids)
+    assert np.array_equal(cluster_abundances["sample"].values(), sample_ids)
     assert len(cluster_abundances["sample"]) == len(sample_ids)
 
     # agglomorative
@@ -111,18 +114,14 @@ def main(args, log):
             f"- Test samples:  n={len(labels_test)},  0s={len(labels_test) - np.sum(labels_test)}, 1s={np.sum(labels_test)}\n{sample_ids_test}"
         )
 
-        assert (
-            cluster_abundances_train["sample"]
-            .values()
-            .astype(str)
-            .equals(sample_ids_train.astype(str))
+        assert np.array_equal(
+            cluster_abundances_train["sample"].values(),
+            sample_ids_train,
         )
-
-        # assert (
-        #     cluster_abundances_test["sample"].astype(str)
-        #     == sample_ids_test.astype(str).tolist()
-        # )
-
+        assert np.array_equal(
+            cluster_abundances_test["sample"].values(),
+            sample_ids_test,
+        )
         assert (
             len(cluster_abundances_train) == len(sample_ids_train) == len(labels_train)
         )
