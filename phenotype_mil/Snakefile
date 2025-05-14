@@ -173,7 +173,7 @@ rule get_hausdorff_distances:
     input:
         cluster_dir = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test")
     output:
-        result_dir = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "hausdorff")
+        result_dir = directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "hausdorff"))
     log:
         os.path.join(LOGS, DATASET, "{MODEL}_hausdorff.log"),
     conda:
