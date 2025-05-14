@@ -94,14 +94,13 @@ def main(args, log):
         n_groups = int(hausdorff.shape[0] ** 0.5)
         groups = get_groups_agglomorative(
             hausdorff,
+            hausdorff_clusternames,
             n_groups,
             DISTANCE_METRIC_AGG,
             LINKAGE_AGG,
             TSNE_PERPLEXITY,
-            os.path.join(
-                args.output_path,
-                f"agglomorative_{args.model_name}_{args.dataset_name}.png",
-            ),
+            args.agglomorative_path,
+            log,
         )
         log.append(f"Using {n_groups} groups")
 
@@ -292,6 +291,11 @@ def add_arguments() -> ArgumentParser:
         nargs="+",
         choices=MIL_METHODS + ["all"],
         help="MIL method to use",
+    )
+    parser.add_argument(
+        "--agglomorative_path",
+        "-ag",
+        help="Path to save/load agglomorative clustering",
     )
 
     args = parser.parse_args()

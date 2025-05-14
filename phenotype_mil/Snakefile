@@ -257,6 +257,8 @@ rule phenotype_mil:
         os.path.join(LOGS, DATASET, "{MODEL}_mil.log"),
     conda:
         "envs/phenotype_mil.yml",
+    params:
+        agglomorative_clustering_path = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "agglomorative_clustering")
     shell:
         """
         mkdir -p {output.result_dir}
@@ -268,6 +270,7 @@ rule phenotype_mil:
             --output_path {output.result_dir} \
             --log {log} \
             --mil_methods {MIL_METHODS} \
+            --agglomorative_path {params.agglomorative_clustering_path}
         """
 
 
