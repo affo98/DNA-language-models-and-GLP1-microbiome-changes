@@ -93,17 +93,19 @@ def main(args, log):
 
     # -------------------------------------------- CV Evaluate --------------------------------------------
     eval_metrics = {"metrics": []}
+    cluster_abundance_features = cluster_abundances[1:]
+    print(cluster_abundance_features.head(5))
     global_features = cluster_abundances.columns.drop("sample").tolist()
     coefficients = {"coefs": []}
     skf = StratifiedKFold(n_splits=CV_OUTER, shuffle=True, random_state=42)
 
     for fold_idx, (train_idx, test_idx) in enumerate(
-        skf.split(cluster_abundances, labels)
+        skf.split(cluster_abundance_features, labels)
     ):
         # ------------ split ------------
         cluster_abundances_train, cluster_abundances_test = (
-            cluster_abundances.iloc[train_idx, :],
-            cluster_abundances.iloc[test_idx, :],
+            cluster_abundance_features.iloc[train_idx, :],
+            cluster_abundance_features.iloc[test_idx, :],
         )
         labels_train, labels_test = labels[train_idx], labels[test_idx]
         sample_ids_train, sample_ids_test = sample_ids[train_idx], sample_ids[test_idx]
