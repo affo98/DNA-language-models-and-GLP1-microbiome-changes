@@ -31,21 +31,18 @@ def get_groups_agglomorative(
     try:
         agg_data = np.load(os.path.join(save_path, "agglomorative_data.npz"))
         labels = agg_data["labels"]
-        n_clusters_loaded = agg_data['n_clusters']
+        n_clusters_loaded = agg_data["n_clusters"]
         hausdorff_clusternames_loaded = hausdorff_clusternames
-        assert len(np.unique(labels)) == n_clusters_loaded = n_clusters
+        assert len(np.unique(labels)) == n_clusters_loaded == n_clusters
         assert len(labels) == len(hausdorff_clusternames)
         assert hausdorff_clusternames == hausdorff_clusternames_loaded
         log.append(f"Loaded agglmorative clustering  from {save_path}")
-        
+
         return labels
-        
+
     except FileNotFoundError:
-            log.append(
-                f"Agglomorative clustering not found at {save_path}, generating new"
-            )
-    
-    
+        log.append(f"Agglomorative clustering not found at {save_path}, generating new")
+
     model = AgglomerativeClustering(
         n_clusters=n_clusters, metric=distance_metric, linkage=linkage
     )
@@ -76,8 +73,11 @@ def get_groups_agglomorative(
 
     npz_path = os.path.join(save_path, "agglomorative_data.npz")
     np.savez_compressed(
-        npz_path, labels=labels, embedding=embedding, n_clusters=n_clusters, hausdorff_clusternames=hausdorff_clusternames
+        npz_path,
+        labels=labels,
+        embedding=embedding,
+        n_clusters=n_clusters,
+        hausdorff_clusternames=hausdorff_clusternames,
     )
 
     return labels
-
