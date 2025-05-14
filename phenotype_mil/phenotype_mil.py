@@ -5,7 +5,7 @@ import json
 
 
 import numpy as np
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, RepeatedStratifiedKFold
 
 from src.utils import (
     Logger,
@@ -101,10 +101,15 @@ def main(args, log):
     print(cluster_abundance_features.shape)
     global_features = cluster_abundances.columns.drop("sample").tolist()
     coefficients = {"coefs": {}}
-    skf = StratifiedKFold(n_splits=CV_OUTER, shuffle=True, random_state=42)
+    # skf = StratifiedKFold(n_splits=CV_OUTER, shuffle=True, random_state=42)
+
+    N_REPEATS = 2
+    rskf = RepeatedStratifiedKFold(
+        n_splits=CV_OUTER, n_repeats=N_REPEATS, shuffle=True, random_state=42
+    )
 
     for fold_idx, (train_idx, test_idx) in enumerate(
-        skf.split(cluster_abundance_features, labels)
+        rskf.split(cluster_abundance_features, labels)
     ):
         # ------------ split ------------
         cluster_abundances_train, cluster_abundances_test = (
