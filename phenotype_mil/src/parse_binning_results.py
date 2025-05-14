@@ -107,7 +107,7 @@ def parse_knn_histograms(model_results_dir):
         dataset_name = os.path.basename(dataset_dir)
 
         for model_dir in glob(os.path.join(dataset_dir, "*_output")):
-            model_name = os.path.basename(model_dir).split("_output")[0]
+            model_name = os.path.basename(model_dir).split("_output")
 
             hist_file = glob(
                 os.path.join(model_dir, "test", "k*_p*_similarity_histogram.json")
