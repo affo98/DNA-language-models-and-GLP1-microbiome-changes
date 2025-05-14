@@ -35,7 +35,7 @@ def coefs_dict_to_df(coefficients: dict, output_path: str) -> pd.DataFrame:
                     }
                 )
     df = pd.DataFrame.from_records(records)
-    df.to_csv(output_path)
+    df.to_csv(output_path, index=False)
 
     return df
 
