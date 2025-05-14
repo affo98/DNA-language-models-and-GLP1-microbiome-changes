@@ -61,17 +61,19 @@ def main(args, log):
 
     
     #agglomorative
-    n_groups = hausdorff.shape[0]**0.5
-    groups = get_groups_agglomorative(hausdorff, n_groups, 
-                                      DISTANCE_METRIC_AGG, LINKAGE_AGG, TSNE_PERPLEXITY, 
-                                      os.path.join(args.output_path, f"agglomorative_{args.model_name}_{args.dataset_name}.png"))
-    log.append(f"Using {n_groups} groups")
+    if args.model_name != 'vamb':
+        n_groups = hausdorff.shape[0]**0.5
+        groups = get_groups_agglomorative(hausdorff, n_groups, 
+                                        DISTANCE_METRIC_AGG, LINKAGE_AGG, TSNE_PERPLEXITY, 
+                                        os.path.join(args.output_path, f"agglomorative_{args.model_name}_{args.dataset_name}.png"))
+        log.append(f"Using {n_groups} groups")
 
     #-------------------------------------------- CV Evaluate --------------------------------------------
     eval_metrics = {"metrics": []}
     global_features = cluster_abundances.columns.drop("sample").tolist()
     coefficients = {"coefs": []}
     skf = StratifiedKFold(n_splits=CV_OUTER, shuffle=True, random_state=42)
+    
     for fold_idx, (train_idx, test_idx) in enumerate(
         skf.split(cluster_abundances, labels)
     ):
@@ -135,8 +137,8 @@ def main(args, log):
                         C_grid=C_GRID,            
                         cv=CV_LOGISTIC,
                         scoring=SCORING_LOGISTIC,
-                        coefficients,
-                        global_features,
+                        coefficients=coefficients,
+                        global_features=global_features,
                     )
                     eval_metrics = append_eval_metrics(
                         eval_metrics, labels_test, predictions, predictions_proba, f"{mil_method}_{penalty}", fold_idx + 1
@@ -144,25 +146,26 @@ def main(args, log):
 
             elif mil_method == "logistic_groupsparselasso":
                 
-                predictions, predictions_proba, coefficients, = fit_predict_sparsegrouplasso(
-                    X_train=cluster_abundances_train,
-                    X_test=cluster_abundances_test,
-                    y_train=labels_train,
-                    groups,
-                    fold = fold_idx+1,
-                    output_path=args.output_path,
-                    log=log,
-                    group_reg_grid=GROUP_REGS,
-                    l1_reg_grid=L1_REGS,
-                    cv=CV_LOGISTIC,
-                    scoring=SCORING_LOGISTIC,
-                    coefficients,
-                    global_features,
-                )
-                
-                eval_metrics = append_eval_metrics(
-                    eval_metrics, labels_test, predictions, predictions_proba, mil_method, fold_idx + 1
-                )
+                if args.model_name != 'vamb':
+                    predictions, predictions_proba, coefficients, = fit_predict_sparsegrouplasso(
+                        X_train=cluster_abundances_train,
+                        X_test=cluster_abundances_test,
+                        y_train=labels_train,
+                        groups=groups,
+                        fold = fold_idx+1,
+                        output_path=args.output_path,
+                        log=log,
+                        group_reg_grid=GROUP_REGS,
+                        l1_reg_grid=L1_REGS,
+                        cv=CV_LOGISTIC,
+                        scoring=SCORING_LOGISTIC,
+                        coefficients=coefficients,
+                        global_features=global_features,
+                    )
+                    
+                    eval_metrics = append_eval_metrics(
+                        eval_metrics, labels_test, predictions, predictions_proba, mil_method, fold_idx + 1
+                    )
 
     
     coefs_df = coefs_dict_to_df(coefficients, os.path.join(args.output_path, f"coefs.csv"))
@@ -248,7 +251,7 @@ if __name__ == "__main__":
         log.append(f"{arg}: {value}")
     
     if 'all' in args.mil_methods:
-        args.mil_methods = list(MIL_METHODS)
+        args.mil_methods = MIL_METHODS
 
     os.makedirs(args.output_path, exist_ok=True)
     main(args, log)
