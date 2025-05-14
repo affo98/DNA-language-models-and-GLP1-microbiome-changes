@@ -158,6 +158,9 @@ def fit_predict_sparsegrouplasso(
                     X_tr_sel = gl.transform(X_tr.values)
                     X_val_sel = gl.transform(X_val.values)
 
+                    print(X_tr_sel)
+                    print(X_val_sel)
+
                     if X_tr_sel.shape[1] == 0:  # if all coefs=0
                         fold_scores.append(0.0)
                         continue
