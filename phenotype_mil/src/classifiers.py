@@ -7,6 +7,12 @@ from sklearn.metrics import roc_auc_score
 from group_lasso import LogisticGroupLasso
 from tqdm import tqdm
 
+import warnings
+
+warnings.filterwarnings(
+    "ignore", category=UserWarning, message=".*FISTA iterations did not converge.*"
+)
+
 
 def coefs_dict_to_df(coefficients: dict, output_path: str) -> pd.DataFrame:
     """
