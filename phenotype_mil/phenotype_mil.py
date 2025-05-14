@@ -65,6 +65,7 @@ def main(args, log):
     sample_ids = np.array(
         [s for s in sample_ids if s in cluster_abundances["sample"].values.tolist()]
     )
+    print(sample_ids.shape)
 
     hausdorff, hausdorff_clusternames = read_hausdorff(
         os.path.join(
