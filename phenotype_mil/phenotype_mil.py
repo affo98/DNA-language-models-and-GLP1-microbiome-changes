@@ -105,7 +105,7 @@ def main(args, log):
 
     N_REPEATS = 2
     rskf = RepeatedStratifiedKFold(
-        n_splits=CV_OUTER, n_repeats=N_REPEATS, shuffle=True, random_state=42
+        n_splits=CV_OUTER, n_repeats=N_REPEATS, random_state=42
     )
 
     for fold_idx, (train_idx, test_idx) in enumerate(
