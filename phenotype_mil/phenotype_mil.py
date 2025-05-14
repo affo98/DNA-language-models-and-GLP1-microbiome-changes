@@ -37,7 +37,7 @@ LINKAGE_AGG = "ward"
 TSNE_PERPLEXITY = 17
 
 # cv
-CV_OUTER = 2
+CV_OUTER = 10
 
 # params knn
 KNN_K = 2
@@ -161,6 +161,7 @@ def main(args, log):
                     mil_method,
                     fold_idx + 1,
                 )
+                print(eval_metrics)
 
             elif mil_method == "logistic":
                 for penalty in ["none", "l1", "l2", "elasticnet"]:
@@ -193,6 +194,7 @@ def main(args, log):
                         f"{mil_method}_{penalty}",
                         fold_idx + 1,
                     )
+                    print(eval_metrics)
 
             elif mil_method == "logistic_groupsparselasso":
 
@@ -315,6 +317,7 @@ if __name__ == "__main__":
 
     if "all" in args.mil_methods:
         args.mil_methods = MIL_METHODS
+        log.append(f"Running with {MIL_METHODS}")
 
     os.makedirs(args.output_path, exist_ok=True)
     main(args, log)

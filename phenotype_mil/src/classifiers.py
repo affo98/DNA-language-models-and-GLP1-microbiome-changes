@@ -287,8 +287,8 @@ def fit_predict_logistic(
         y_pred = best_lr.predict(X_test)
         y_predprob = best_lr.predict(X_test)[:, 1]  # probability of class 1
 
-    else:
-        # no tuning needed for penalty='none'
+    else:  # no penalty
+        best_lr = base_lr.copy()
         best_lr.fit(X_train, y_train)
         y_pred = best_lr.predict(X_test)
         y_predprob = best_lr.predict(X_test)[:, 1]  # probability of class 1
