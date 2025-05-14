@@ -178,37 +178,37 @@ def main(args, log):
                     )
                     print(eval_metrics)
 
-            elif mil_method == "logistic_groupsparselasso":
+            # elif mil_method == "logistic_groupsparselasso":
 
-                if args.model_name != "vamb":
-                    (
-                        predictions,
-                        predictions_proba,
-                        coefficients,
-                    ) = fit_predict_sparsegrouplasso(
-                        X_train=cluster_abundances_train,
-                        X_test=cluster_abundances_test,
-                        y_train=labels_train,
-                        groups=groups,
-                        fold=fold_idx + 1,
-                        output_path=args.output_path,
-                        log=log,
-                        group_reg_grid=GROUP_REGS,
-                        l1_reg_grid=L1_REGS,
-                        cv=CV_LOGISTIC,
-                        scoring=SCORING_LOGISTIC,
-                        coefficients=coefficients,
-                        global_features=global_features,
-                    )
+            #     if args.model_name != "vamb":
+            #         (
+            #             predictions,
+            #             predictions_proba,
+            #             coefficients,
+            #         ) = fit_predict_sparsegrouplasso(
+            #             X_train=cluster_abundances_train,
+            #             X_test=cluster_abundances_test,
+            #             y_train=labels_train,
+            #             groups=groups,
+            #             fold=fold_idx + 1,
+            #             output_path=args.output_path,
+            #             log=log,
+            #             group_reg_grid=GROUP_REGS,
+            #             l1_reg_grid=L1_REGS,
+            #             cv=CV_LOGISTIC,
+            #             scoring=SCORING_LOGISTIC,
+            #             coefficients=coefficients,
+            #             global_features=global_features,
+            #         )
 
-                    eval_metrics = append_eval_metrics(
-                        eval_metrics,
-                        labels_test,
-                        predictions,
-                        predictions_proba,
-                        mil_method,
-                        fold_idx + 1,
-                    )
+            #         eval_metrics = append_eval_metrics(
+            #             eval_metrics,
+            #             labels_test,
+            #             predictions,
+            #             predictions_proba,
+            #             mil_method,
+            #             fold_idx + 1,
+            #         )
 
     coefs_df = coefs_dict_to_df(
         coefficients, os.path.join(args.output_path, f"coefs.csv")
