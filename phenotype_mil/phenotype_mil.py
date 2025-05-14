@@ -80,7 +80,7 @@ def main(args, log):
 
     # agglomorative
     if args.model_name != "vamb":
-        n_groups = hausdorff.shape[0] ** 0.5
+        n_groups = int(hausdorff.shape[0] ** 0.5)
         groups = get_groups_agglomorative(
             hausdorff,
             n_groups,
