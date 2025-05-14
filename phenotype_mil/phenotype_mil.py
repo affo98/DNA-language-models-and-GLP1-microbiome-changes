@@ -44,7 +44,7 @@ KNN_K = 2
 
 # params logistic
 # C_GRID = np.logspace(-4, 4, 10)
-C_GRID = [0.01, 0.1, 1, 10, 100, 1000]
+C_GRID = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]
 CV_LOGISTIC = 5
 SCORING_LOGISTIC = "roc_auc"
 
