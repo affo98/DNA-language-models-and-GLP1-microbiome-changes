@@ -62,10 +62,16 @@ def main(args, log):
 
     cluster_abundances = read_cluster_abundances(args.input_path, sample_ids, log)
 
-    sample_ids = np.array(
-        [s for s in sample_ids if s in cluster_abundances["sample"].values.tolist()]
-    )
-    print(sample_ids.shape)
+    ###########################################################################
+    valid_sample_mask = np.isin(sample_ids, cluster_abundances["sample"].values)
+
+    # Filter sample_ids and labels to include only valid samples
+    sample_ids = sample_ids[valid_sample_mask]
+    labels = labels[valid_sample_mask]
+
+    print(f"Filtered sample_ids shape: {sample_ids.shape}")
+    print(f"Filtered labels shape: {labels.shape}")
+    ############################################################
 
     hausdorff, hausdorff_clusternames = read_hausdorff(
         os.path.join(
