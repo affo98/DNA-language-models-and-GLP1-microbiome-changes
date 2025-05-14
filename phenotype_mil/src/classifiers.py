@@ -199,7 +199,7 @@ def fit_predict_sparsegrouplasso(
     # Refit best model on full training data
     group_reg, l1_reg = best_params
     log.append(
-        f"[Fold {fold}] Best params: group_reg={group_reg}, l1_reg={l1_reg}, best_AUCROC{best_score:.4f}"
+        f"[Fold {fold}] Best params: group_reg={group_reg}, l1_reg={l1_reg}, best_AUCROC: {best_score:.4f}"
     )
 
     best_gl = LogisticGroupLasso(
