@@ -74,13 +74,15 @@ def append_coefs(
         chosen = set(gl_model.chosen_groups_)
         selected_idx = [i for i, g in enumerate(groups) if g in chosen]
         sel_coefs = model.coef_.flatten()  # may have fewer coefs than len(features)
-        if len(sel_coefs) != len(selected_idx):
+        sel_feature_names = [global_features[i] for i in selected_idx]
+
+        if len(sel_coefs) != len(sel_feature_names):
             raise ValueError(
                 f"Mismatch: {len(sel_coefs)} coefficients vs "
-                f"{len(selected_idx)} selected features"
+                f"{len(sel_feature_names)} selected features"
             )
 
-        for coef, feat in zip(sel_coefs, local_features):
+        for coef, feat in zip(sel_coefs, sel_feature_names):
             global_idx = feature_to_global_idx.get(feat)
             if global_idx is None:
                 raise KeyError(f"Local feature {feat} not in global_features list")
@@ -211,6 +213,13 @@ def fit_predict_sparsegrouplasso(
     log.append(
         f"[Fold {fold}] Chosen groups (n={len(best_gl.chosen_groups_)}): {best_gl.chosen_groups_}"
     )
+    selected_idx = [
+        idx for idx, grp in enumerate(groups) if grp in best_gl.chosen_groups_
+    ]
+    print(selected_idx)
+    # Map indices back to feature names in the original order:
+    local_feature_names = [global_features[i] for i in selected_idx]
+    print(local_feature_names.shape)
 
     # Transform data, i.e. only keep selected groups
     X_train_sel = best_gl.transform(X_train.values)
@@ -235,7 +244,7 @@ def fit_predict_sparsegrouplasso(
         coefficients,
         "sparsegrouplasso",
         global_features,
-        X_train.columns.tolist(),
+        local_feature_names,
         second_lr,
         fold,
         gl_model=best_gl,
