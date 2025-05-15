@@ -3,6 +3,7 @@
 [Overleaf report](https://www.overleaf.com/project/679796b5a02b660e4f96beff)
 
 #### Meeting Outline
+* [15 May 2025] (#date-15-May-2025)
 * [08 May 2025](#date-30-january-2025)
 * [01 May 2025](#date-30-january-2025)
 * [23 April 2025](#date-30-january-2025)
@@ -16,6 +17,27 @@
 * [06 February 2025](#date-30-january-2025)
 
 
+#### Date 15 May 2025
+
+##### Who did you help this week?
+
+
+##### Who helped you this week?
+- Inna helped us with hpc batch jobs
+
+##### What did you achieve?
+- Finished processing all novo data
+- Got results on T2D dataset and binning for DNABERT-S and VAMB
+   - Best AUC was Ridge regression with $0.64$ (DNABERT-S) and $0.68$ (VAMB) 
+   - Groups Sparse Lasso achieved  AUC $0.59$ (DNABERT-S) and N/A for now (VAMB)
+- Wrote some more to the report.
+- Decreased the number of contigs for each dataset from $\approx 30\text{M}$ million to $\approx 1\text{M}$
+
+##### What did you struggle with?
+- Writing the MIL framework in the report
+
+##### Where do you need help from Veronika?
+- Confirm our idea of discarding two baseline models: TNF kernel and DNABERT-2 random.
 
 #### Date: 08 May 2025
 
