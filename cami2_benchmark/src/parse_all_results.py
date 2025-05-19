@@ -385,7 +385,7 @@ def parse_heatmaps(model_results_dir: str) -> pd.DataFrame:
 
     results_df = pd.DataFrame(results)
     print(results_df)
-    results_df.to_csv(os.path.join(OUTPUT_DIR, "heatmaps.csv"), index=False)
+    results_df.to_csv(os.path.join("./bl", "heatmaps.csv"), index=False)
     return pd.DataFrame(results)
 
 
@@ -404,6 +404,6 @@ if __name__ == "__main__":
 
     # heatmaps = parse_heatmaps(MODEL_RESULTS_DIR)
     os.makedirs("./bl", exist_ok=True)
-    heatmaps = parse_heatmaps("./bl")
+    heatmaps = parse_heatmaps(MODEL_RESULTS_DIR)
 
     # contig_summary, contig_lengths = parse_contig_lengths(PROCESSED_DATA_DIR)
