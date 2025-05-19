@@ -403,6 +403,7 @@ if __name__ == "__main__":
     # n_valtest = parse_nvaltest(MODEL_RESULTS_DIR)
 
     # heatmaps = parse_heatmaps(MODEL_RESULTS_DIR)
+    os.makedirs("./bl", exist_ok=True)
     heatmaps = parse_heatmaps("./bl")
 
     # contig_summary, contig_lengths = parse_contig_lengths(PROCESSED_DATA_DIR)
