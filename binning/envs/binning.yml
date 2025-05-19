@@ -21,6 +21,9 @@ dependencies:
   - pip:
       - transformers==4.50.3
       - einops
+
+
+      
 # name: binning
 # channels:
 #   - pytorch
