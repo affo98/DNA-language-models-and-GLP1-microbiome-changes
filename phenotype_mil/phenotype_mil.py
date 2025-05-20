@@ -21,6 +21,7 @@ from src.classifiers import (
     fit_predict_logistic,
     fit_predict_sparsegrouplasso,
     coefs_dict_to_df,
+    choose_regularization_strength,
 )
 from src.agglmorative_clustering import get_groups_agglomorative
 
@@ -195,45 +196,43 @@ def main(args, log):
                         fold_idx + 1,
                     )
 
-            if mil_method == "logistic_groupsparselasso":
+            # elif mil_method == "logistic_groupsparselasso":
 
-                if args.model_name != "vamb":
-                    (
-                        predictions,
-                        predictions_proba,
-                        coefficients,
-                    ) = fit_predict_sparsegrouplasso(
-                        X_train=cluster_abundances_train,
-                        X_test=cluster_abundances_test,
-                        y_train=labels_train,
-                        groups=groups,
-                        fold=fold_idx + 1,
-                        output_path=args.output_path,
-                        log=log,
-                        group_reg_grid=GROUP_REGS,
-                        l1_reg_grid=L1_REGS,
-                        cv=CV_LOGISTIC,
-                        scoring=SCORING_LOGISTIC,
-                        coefficients=coefficients,
-                        global_features=global_features,
-                    )
-                    if predictions is None:  # can happen that no features are used.
-                        continue
+            #     if args.model_name != "vamb":
+            #         (
+            #             predictions,
+            #             predictions_proba,
+            #             coefficients,
+            #         ) = fit_predict_sparsegrouplasso(
+            #             X_train=cluster_abundances_train,
+            #             X_test=cluster_abundances_test,
+            #             y_train=labels_train,
+            #             groups=groups,
+            #             fold=fold_idx + 1,
+            #             output_path=args.output_path,
+            #             log=log,
+            #             group_reg_grid=GROUP_REGS,
+            #             l1_reg_grid=L1_REGS,
+            #             cv=CV_LOGISTIC,
+            #             scoring=SCORING_LOGISTIC,
+            #             coefficients=coefficients,
+            #             global_features=global_features,
+            #         )
+            #         if predictions is None:  # can happen that no features are used.
+            #             continue
 
-                    eval_metrics = append_eval_metrics(
-                        eval_metrics,
-                        labels_test,
-                        predictions,
-                        predictions_proba,
-                        mil_method,
-                        fold_idx + 1,
-                    )
+            #         eval_metrics = append_eval_metrics(
+            #             eval_metrics,
+            #             labels_test,
+            #             predictions,
+            #             predictions_proba,
+            #             mil_method,
+            #             fold_idx + 1,
+            #         )
 
     coefs_df = coefs_dict_to_df(
         coefficients, os.path.join(args.output_path, f"coefs.csv")
     )
-
-    print(reg_strengths)
 
     log.append(f"{eval_metrics}")
     with open(
@@ -255,6 +254,10 @@ def main(args, log):
         "w",
     ) as f:
         json.dump(summary_eval, f, indent=4)
+
+    # permutation test with majority voting regurilization strengths
+    best_regs = choose_regularization_strength(reg_strengths, log)
+    print(best_regs)
 
 
 def add_arguments() -> ArgumentParser:

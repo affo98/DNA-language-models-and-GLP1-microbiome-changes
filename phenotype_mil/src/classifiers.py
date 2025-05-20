@@ -1,4 +1,5 @@
-from typing import Optional, Sequence
+from typing import Sequence
+from collections import Counter
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
@@ -132,6 +133,21 @@ def append_regurilization_strength(reg_strengths: dict, mil_method: str, best_lr
         reg_strengths["regs"][mil_method].append(reg)
 
     return reg_strengths
+
+
+def choose_regularization_strength(reg_strengths: dict, log):
+    best_regs = {}
+    for method, regs in reg_strengths.get("regs", {}).items():
+        if regs:
+            counts = Counter(regs)
+            most_common = counts.most_common()
+            log.append(f"\nRegularization strengths for method '{method}':")
+            for reg, count in most_common:
+                log.append(f"  Strength: {reg}, Count: {count}")
+            best_regs[method] = most_common[0][0]  # Most frequent strength
+        else:
+            log.append(f"\nNo regularization strengths recorded for method '{method}'.")
+    return best_regs
 
 
 def fit_predict_sparsegrouplasso(
