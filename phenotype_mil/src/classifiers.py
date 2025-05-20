@@ -3,10 +3,10 @@ from collections import Counter
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import (
     GridSearchCV,
     StratifiedKFold,
-    permutation_test_score,
 )
 from sklearn.metrics import roc_auc_score
 from group_lasso import LogisticGroupLasso
@@ -121,6 +121,25 @@ def append_coefs(
     return coefficients
 
 
+def append_rf_params(reg_strenghts: dict, mil_method, best_rf):
+    if mil_method not in reg_strenghts["regs"]:
+        reg_strenghts["regs"][mil_method] = []
+
+    params = {
+        "n_estimators": getattr(best_rf, "n_estimators", None),
+        "max_features": getattr(best_rf, "max_features", None),
+        "min_samples_leaf": getattr(best_rf, "min_samples_leaf", None),
+        "criterion": getattr(best_rf, "criterion", None),
+    }
+
+    # Append only if all were found (you can relax this if you like)
+    if None not in params.values():
+        reg_strenghts["regs"][mil_method].append(params)
+    else:
+        # If any attribute was missing, record None to keep track
+        reg_strenghts["regs"][mil_method].append(params)
+
+
 def append_regurilization_strength(reg_strengths: dict, mil_method: str, best_lr):
 
     if mil_method not in reg_strengths["regs"]:
@@ -135,21 +154,72 @@ def append_regurilization_strength(reg_strengths: dict, mil_method: str, best_lr
     return reg_strengths
 
 
-def choose_regularization_strength(reg_strengths: dict, log):
+def choose_hyperparams(reg_strengths: dict, log):
     best_regs = {}
-    for method, regs in reg_strengths.get("regs", {}).items():
-        if regs:
-            counts = Counter(regs)
+    for method, params in reg_strengths.get("regs", {}).items():
+        if not params:
+            log.append(f"No entries recorded for method '{method}'.")
+            best_regs[method] = None
+            continue
+
+        if isinstance(params[0], dict):
+            tupled = [tuple(sorted(d.items())) for d in params]
+            counts = Counter(tupled)
+            most_common = counts.most_common()
+
+            log.append(f"\nHyperparameter combinations for '{method}':")
+            for combo, cnt in most_common:
+                combo_dict = dict(combo)
+                log.append(f"  {combo_dict}, Count: {cnt}")
+
+            best_combo = dict(most_common[0][0])
+            best_regs[method] = best_combo
+
+        else:
+            counts = Counter(params)
             most_common = counts.most_common()
             log.append(f"\nRegularization strengths for method '{method}':")
             for reg, count in most_common:
                 log.append(f"  Strength: {reg}, Count: {count}")
             best_regs[method] = most_common[0][0]  # Most frequent strength
-        else:
-            log.append(f"\nNo regularization strengths recorded for method '{method}'.")
 
     log.append(str(best_regs))
     return best_regs
+
+
+def fit_predict_rf(
+    X_train: pd.DataFrame,
+    X_test: pd.DataFrame,
+    y_train: np.ndarray,
+    fold: int,
+    output_path: str,
+    log,
+    param_grid: dict,
+    cv: int,
+    scoring: str,
+):
+    base_rf = RandomForestClassifier(random_state=42)
+
+    strat_kf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=0)
+    search = GridSearchCV(
+        estimator=base_rf,
+        param_grid=param_grid,
+        cv=strat_kf,
+        scoring=scoring,
+        n_jobs=-1,
+        refit=True,
+        verbose=0,
+    )
+    search.fit(X_train, y_train)
+    log.append(
+        f"Best RandomForest params: {search.best_params_}, best {scoring}: {search.best_score_:.4f}"
+    )
+
+    best_lr = search.best_estimator_
+    y_pred = best_lr.predict(X_test)
+    y_predprob = best_lr.predict_proba(X_test)[:, 1]  # probability of class 1
+
+    return y_pred, y_predprob
 
 
 def fit_predict_sparsegrouplasso(

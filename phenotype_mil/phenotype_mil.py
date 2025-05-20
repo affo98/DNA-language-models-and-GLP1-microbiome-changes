@@ -16,11 +16,13 @@ from src.utils import (
 from src.cluster_catalogue import get_cluster_catalogue
 
 
-from src.knn_model import fit_predict_knn, append_bestk
+from src.knn_model import fit_predict_knn
 from src.classifiers import (
     fit_predict_logistic,
+    fit_predict_sparsegrouplasso,
+    fit_predict_rf,
     coefs_dict_to_df,
-    choose_regularization_strength,
+    choose_hyperparams,
 )
 from src.agglmorative_clustering import get_groups_agglomorative
 
@@ -28,7 +30,7 @@ from src.eval import append_eval_metrics, compute_summary_eval, append_permutati
 
 # DISTANCE_METRIC_BAG = "cosine"
 
-MIL_METHODS = ["knn", "logistic", "logistic_groupsparselasso"]
+MIL_METHODS = ["knn", "logistic", "logistic_groupsparselasso", "rf"]
 
 
 # agglomorative
@@ -51,13 +53,20 @@ CV_INNER = 5
 SCORING_CV = "roc_auc"
 
 # params sparse group lasso logistic
-# GROUP_REGS = np.logspace(-4, 4, 10)
-# L1_REGS = np.logspace(-4, 4, 10)
-# GROUP_REGS = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]
-# L1_REGS = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]
 GROUP_REGS = [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]
 L1_REGS = [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]
 
+# random forest (same as deepmicro)
+RF_GRID = [
+    {
+        "n_estimators": [s for s in range(100, 1001, 200)],
+        "max_features": ["sqrt", "log2"],
+        "min_samples_leaf": [1, 2, 3, 4, 5],
+        "criterion": ["gini", "entropy"],
+    }
+]
+
+# permutation test
 N_PERMUTATIONS = 100
 
 
@@ -149,9 +158,9 @@ def main(args, log):
             if mil_method == "knn":
                 log.append(f"  → Training KNN'")
                 predictions, predictions_proba = fit_predict_knn(
-                    cluster_abundances_train,
-                    cluster_abundances_test,
-                    labels_train,
+                    X_train=cluster_abundances_train,
+                    X_test=cluster_abundances_test,
+                    y_train=labels_train,
                     log=log,
                     k_grid=KNN_K,
                     fold=fold_idx + 1,
@@ -237,11 +246,32 @@ def main(args, log):
             #             fold_idx + 1,
             #         )
 
+            elif mil_method == "rf":
+                log.append(f"  → Training RF")
+                predictions, predictions_proba, fit_predict_rf(
+                    X_train=cluster_abundances_train,
+                    X_test=cluster_abundances_test,
+                    y_train=labels_train,
+                    fold=fold_idx + 1,
+                    output_path_=args.output_path,
+                    log=log,
+                    param_grid=RF_GRID,
+                    cv=CV_INNER,
+                    scoring=SCORING_CV,
+                )
+                eval_metrics = append_eval_metrics(
+                    eval_metrics,
+                    labels_test,
+                    predictions,
+                    predictions_proba,
+                    mil_method,
+                    fold_idx + 1,
+                )
+
     coefs_df = coefs_dict_to_df(
         coefficients, os.path.join(args.output_path, f"coefs.csv")
     )
 
-    # log.append(f"{eval_metrics}")
     with open(
         os.path.join(
             args.output_path,
@@ -263,7 +293,7 @@ def main(args, log):
         json.dump(summary_eval, f, indent=4)
 
     # permutation test with majority voting regurilization strengths
-    best_regs = choose_regularization_strength(reg_strengths, log)
+    best_regs = choose_hyperparams(reg_strengths, log)
 
     permutation_results = {"perms": {}}
     for mil_method in args.mil_methods:
@@ -311,6 +341,14 @@ def main(args, log):
                 )
 
     log.append(str(permutation_results))
+    with open(
+        os.path.join(
+            args.output_path,
+            f"permutation_{args.model_name}_{args.dataset_name}.json",
+        ),
+        "w",
+    ) as f:
+        json.dump(permutation_results, f, indent=4)
 
 
 def add_arguments() -> ArgumentParser:
