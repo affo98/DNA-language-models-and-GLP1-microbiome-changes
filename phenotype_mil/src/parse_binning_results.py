@@ -64,7 +64,7 @@ def get_bin_counts(model_results_dir):
                 data[dataset] = {}
             data[dataset][model] = bin_counts
 
-    with open(os.path.join(OUTPUT_DIR, "parsed_bincounts_results.json"), "w") as f:
+    with open(os.path.join(OUTPUT_DIR, "parsed_checkm2_results.json"), "w") as f:
         json.dump(data, f, indent=4)
 
     return data
@@ -85,7 +85,7 @@ def get_cluster_results(model_results_dir):
 
             df = pd.read_csv(report_path, sep="\t")
             df = df[["Name", "Completeness", "Contamination"]]
-            df.to_csv(os.path.join(OUTPUT_DIR, f"{model}_{dataset}"))
+            df.to_csv(os.path.join(OUTPUT_DIR, f"{model}_{dataset}.csv"))
 
     return
 
