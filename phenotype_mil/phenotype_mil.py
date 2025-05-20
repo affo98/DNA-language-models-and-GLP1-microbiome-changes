@@ -16,10 +16,9 @@ from src.utils import (
 from src.cluster_catalogue import get_cluster_catalogue
 
 
-from src.knn_model import fit_predict_knn
+from src.knn_model import fit_predict_knn, append_bestk
 from src.classifiers import (
     fit_predict_logistic,
-    fit_predict_sparsegrouplasso,
     coefs_dict_to_df,
     choose_regularization_strength,
 )
@@ -42,13 +41,14 @@ CV_OUTER = 5
 N_REPEATS = 1
 
 # params knn
-KNN_K = 10
+KNN_K = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+KNN_WEIGHTS = "uniform"
 
 # params logistic
 # C_GRID = np.logspace(-4, 4, 10)
 C_GRID = [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]
-CV_LOGISTIC = 5
-SCORING_LOGISTIC = "roc_auc"
+CV_INNER = 5
+SCORING_CV = "roc_auc"
 
 # params sparse group lasso logistic
 # GROUP_REGS = np.logspace(-4, 4, 10)
@@ -115,27 +115,6 @@ def main(args, log):
     global_features = cluster_abundances.columns.drop("sample").tolist()
     coefficients = {"coefs": {}}
     reg_strengths = {"regs": {}}
-
-    # -------------------------
-    # from sklearn.utils import _save_split
-    # def _permutation_test_score(
-    # estimator, X, y, cv, scorer, split_params, fit_params, score_params
-    # ):
-    #     """Auxiliary function for permutation_test_score"""
-    #     # Adjust length of sample weights
-    #     fit_params = fit_params if fit_params is not None else {}
-    #     score_params = score_params if score_params is not None else {}
-
-    #     avg_score = []
-    #     for train, test in cv.split(X, y, **split_params):
-    #         X_train, y_train = _safe_split(estimator, X, y, train)
-    #         X_test, y_test = _safe_split(estimator, X, y, test, train)
-    #         fit_params_train = _check_method_params(X, params=fit_params, indices=train)
-    #         score_params_test = _check_method_params(X, params=score_params, indices=test)
-    #         estimator.fit(X_train, y_train, **fit_params_train)
-    #         avg_score.append(scorer(estimator, X_test, y_test, **score_params_test))
-    #     return np.mean(avg_score)
-
     skf = StratifiedKFold(n_splits=CV_OUTER, shuffle=True, random_state=42)
     rskf = RepeatedStratifiedKFold(
         n_splits=CV_OUTER, n_repeats=N_REPEATS, random_state=42
@@ -169,13 +148,18 @@ def main(args, log):
 
             if mil_method == "knn":
                 log.append(f"  → Training KNN'")
-                predictions, predictions_proba = fit_predict_knn(  # euclidian
+                predictions, predictions_proba = fit_predict_knn(
                     cluster_abundances_train,
                     cluster_abundances_test,
                     labels_train,
-                    k=KNN_K,
+                    log=log,
+                    k_grid=KNN_K,
                     fold=fold_idx + 1,
                     output_path=args.output_path,
+                    weights=KNN_WEIGHTS,
+                    cv=CV_INNER,
+                    scoring=SCORING_CV,
+                    reg_strengths=reg_strengths,
                 )
                 eval_metrics = append_eval_metrics(
                     eval_metrics,
@@ -204,8 +188,8 @@ def main(args, log):
                         penalty=penalty,
                         log=log,
                         C_grid=C_GRID,
-                        cv=CV_LOGISTIC,
-                        scoring=SCORING_LOGISTIC,
+                        cv=CV_INNER,
+                        scoring=SCORING_CV,
                         coefficients=coefficients,
                         global_features=global_features,
                         reg_strengths=reg_strengths,
@@ -236,8 +220,8 @@ def main(args, log):
             #             log=log,
             #             group_reg_grid=GROUP_REGS,
             #             l1_reg_grid=L1_REGS,
-            #             cv=CV_LOGISTIC,
-            #             scoring=SCORING_LOGISTIC,
+            #             cv=CV_INNER,
+            #             scoring=SCORING_CV,
             #             coefficients=coefficients,
             #             global_features=global_features,
             #         )
@@ -294,7 +278,7 @@ def main(args, log):
                 best_reg=None,
                 k=KNN_K,
                 permutation_results=permutation_results,
-                scoring=SCORING_LOGISTIC,
+                scoring=SCORING_CV,
                 cv=skf,
                 n_permutations=N_PERMUTATIONS,
             )
@@ -315,7 +299,7 @@ def main(args, log):
                     best_reg=best_reg,
                     k=None,
                     permutation_results=permutation_results,
-                    scoring=SCORING_LOGISTIC,
+                    scoring=SCORING_CV,
                     cv=skf,
                     n_permutations=N_PERMUTATIONS,
                 )

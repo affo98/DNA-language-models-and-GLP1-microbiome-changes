@@ -3,7 +3,8 @@ import os
 import matplotlib.pyplot as plt
 from sklearn.inspection import DecisionBoundaryDisplay
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.decomposition import PCA
+
+from sklearn.model_selection import GridSearchCV, StratifiedKFold
 
 import numpy as np
 import pandas as pd
@@ -13,21 +14,56 @@ import pandas as pd
 # https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html
 
 
+def append_bestk(reg_strengths: dict, mil_method: str, best_lr):
+
+    if mil_method not in reg_strengths["regs"]:
+        reg_strengths["regs"][mil_method] = []
+
+    reg = getattr(best_lr, "n_neighbors", None)
+
+    if reg is not None:
+        reg_strengths["regs"][mil_method].append(reg)
+
+    return reg_strengths
+
+
 def fit_predict_knn(
     X_train: pd.DataFrame,
     X_test: pd.DataFrame,
     y_train: np.ndarray,
-    k: int,
+    log,
+    k_grid: list[int],
     fold: int,
     output_path: str,
-    weights: str = "uniform",
+    weights: str,
+    cv: str,
+    scoring: str,
+    reg_strengths: dict,
 ) -> tuple[np.ndarray, np.ndarray]:
+    strat_kf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=0)
 
-    knn = KNeighborsClassifier(n_neighbors=k, weights=weights)
-    knn.fit(X_train, y_train)
+    knn_base = KNeighborsClassifier(weights=weights)
 
-    y_pred = knn.predict(X_test)
-    y_predprob = knn.predict_proba(X_test)[:, 1]  # Probability of class 1
+    search = GridSearchCV(
+        knn_base,
+        param_grid={"n_neighbors": k_grid},
+        cv=strat_kf,
+        scoring=scoring,
+        n_jobs=-1,
+    )
+
+    search.fit(X_train, y_train)
+    best_knn = search.best_estimator_
+
+    log.append(
+        f"Best K: {best_knn.n_neighbors}, best {scoring}: {search.best_score_:.4f}"
+    )
+    best_knn.fit(X_train, y_train)
+
+    y_pred = best_knn.predict(X_test)
+    y_predprob = best_knn.predict_proba(X_test)[:, 1]  # Probability of class 1
+
+    reg_strengths = append_bestk(reg_strengths, f"mil_method", best_knn)
 
     # PCA for decision boundary visualization
     # pca = PCA(n_components=2)
@@ -82,50 +118,3 @@ def plot_knn_decision_boundary(
     if save_path:
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
     plt.show()
-
-
-# class KNNModel:
-
-#     def __init__(
-#         self,
-#         labels_train: np.array,
-#         labels_test: np.array,
-#         abundances_train: np.array,
-#         abundances_test: np.array,
-#         log=Logger,
-#         save_path=str,
-#     ):
-
-#         self.labels_train = labels_train
-#         self.labels_test = labels_test
-#         self.abundances_train = abundances_train
-#         self.abundances_test = abundances_test
-#         self.log = log
-#         self.save_path = save_path
-
-#     def predict(self, k: int, distance_metric: str) -> list[str]:
-#         """Predict the labels for the test set using KNN."""
-
-#         distances = cdist(
-#             self.abundances_test, self.abundances_train, metric=distance_metric
-#         )
-#         self.log.append(f"KNN distance matrix (test X train) {distances.shape}")
-#         top_k_indices = np.argsort(distances, axis=1)[:, :k]
-#         top_k_labels = np.array(
-#             [np.array(self.labels_train)[indices] for indices in top_k_indices]
-#         )
-#         self.log.append("topk labels", top_k_labels)
-
-#         predictions = []
-#         for labels in top_k_labels:
-#             print(labels)
-#             majority_label = Counter(labels).most_common(1)[0][
-#                 0
-#             ]  # majority voting pred
-#             print(majority_label)
-#             predictions.append(majority_label)
-
-#         self.predictions = predictions
-#         return predictions
-
-#     def plot_predictions(self): ...

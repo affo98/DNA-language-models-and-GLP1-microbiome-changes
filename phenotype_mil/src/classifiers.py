@@ -208,9 +208,6 @@ def fit_predict_sparsegrouplasso(
                         fold_scores.append(0.0)
                         continue
 
-                    # lr = LogisticRegression(
-                    # solver="lbfgs", max_iter=1000, random_state=0
-                    # )
                     lr = LogisticRegression(
                         penalty=None,
                         solver="saga",
@@ -233,9 +230,6 @@ def fit_predict_sparsegrouplasso(
                     continue
 
             mean_score = np.mean(fold_scores)
-            # log.append(
-            #     f"[Fold {fold}] group_reg={group_reg}, l1_reg={l1_reg}, {scoring}={mean_score:.4f}"
-            # )
 
             if mean_score > best_score:
                 best_score = mean_score
