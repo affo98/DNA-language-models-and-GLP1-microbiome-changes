@@ -59,7 +59,6 @@ def append_permutation_test(
     )
 
     n_permutations_above_score = int((perm_scores >= score).sum())
-    print(n_permutations_above_score)
     p_value = (n_permutations_above_score + 1) / (n_permutations + 1)
 
     if penalty is None and best_reg is None and k is not None:

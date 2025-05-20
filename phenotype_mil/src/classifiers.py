@@ -191,8 +191,6 @@ def fit_predict_rf(
     X_train: pd.DataFrame,
     X_test: pd.DataFrame,
     y_train: np.ndarray,
-    fold: int,
-    output_path: str,
     log,
     param_grid: dict,
     cv: int,
