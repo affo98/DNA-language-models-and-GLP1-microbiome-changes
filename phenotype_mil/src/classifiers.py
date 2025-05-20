@@ -147,8 +147,6 @@ def choose_regularization_strength(reg_strengths: dict, log):
             best_regs[method] = most_common[0][0]  # Most frequent strength
         else:
             log.append(f"\nNo regularization strengths recorded for method '{method}'.")
-
-    log.append(best_regs)
     return best_regs
 
 
