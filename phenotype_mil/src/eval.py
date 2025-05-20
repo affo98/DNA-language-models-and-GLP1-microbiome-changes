@@ -41,7 +41,7 @@ def append_permutation_test(
         estimator = KNeighborsClassifier(n_neighbors=k, weights="uniform")
 
     # logistic no penalty
-    elif penalty is None and best_reg is None and k is None:
+    elif penalty is None and best_reg is not None and k is None:
         estimator = LogisticRegression(
             penalty=penalty,
             solver="saga",
