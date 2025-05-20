@@ -121,7 +121,7 @@ def main(args, log):
         labels,
         labels,
         k=KNN_K,
-        fold=1
+        fold=1,
         output_path=args.output_path,
     )
     eval_metrics = append_eval_metrics(
@@ -129,7 +129,7 @@ def main(args, log):
         labels,
         predictions,
         predictions_proba,
-        'knn',
+        "knn",
         1,
     )
     print(eval_metrics)
