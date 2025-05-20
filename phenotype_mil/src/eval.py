@@ -45,8 +45,8 @@ def append_permutation_test(
         estimator = LogisticRegression(
             penalty=penalty,
             solver="saga",
-            max_iter=10_000,
-            random_state=0,
+            max_iter=100,
+            random_state=42,
         )
 
     # logistic penalty
@@ -55,8 +55,8 @@ def append_permutation_test(
             penalty=penalty,
             C=best_reg,
             solver="saga",
-            max_iter=10_000,
-            random_state=0,
+            max_iter=100,
+            random_state=42,
             l1_ratio=0.5 if penalty == "elasticnet" else None,
         )
 
