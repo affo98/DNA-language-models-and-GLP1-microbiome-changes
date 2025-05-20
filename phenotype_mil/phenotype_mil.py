@@ -155,7 +155,7 @@ def main(args, log):
                     log=log,
                     k_grid=KNN_K,
                     fold=fold_idx + 1,
-                    output_path=args.output_path,
+                    output_path=None,
                     weights=KNN_WEIGHTS,
                     cv=CV_INNER,
                     scoring=SCORING_CV,
@@ -267,9 +267,13 @@ def main(args, log):
 
     permutation_results = {"perms": {}}
     for mil_method in args.mil_methods:
-        log.append(f"Using MIL method for permutation test: {mil_method}")
-        best_k = best_regs.get("knn", None)
+
         if mil_method == "knn":
+            best_k = best_regs.get("knn", None)
+            mean_score = summary_eval["knn"].get("auc_roc_mean")
+            log.append(
+                f"  → Permutation test for knn using regurilization strength {best_k} '"
+            )
             permutation_results = append_permutation_test(
                 X=cluster_abundance_features,
                 y=labels,
@@ -281,13 +285,14 @@ def main(args, log):
                 scoring=SCORING_CV,
                 cv=skf,
                 n_permutations=N_PERMUTATIONS,
+                score=mean_score,
             )
 
         elif mil_method == "logistic":
             for penalty in [None, "l1", "l2", "elasticnet"]:
-                # best_reg = best_regs['regs'][f"logistic_{penalty}"]
-
-                best_reg = best_regs.get(f"logistic_{penalty}", None)
+                id = f"logistic_{penalty}"
+                best_reg = best_regs.get(id, None)
+                mean_score = summary_eval[id].get("auc_roc_mean", None)
                 log.append(
                     f"  → Permutation test logistic_{penalty} using regurilization strength {best_reg} '"
                 )
@@ -302,6 +307,7 @@ def main(args, log):
                     scoring=SCORING_CV,
                     cv=skf,
                     n_permutations=N_PERMUTATIONS,
+                    score=mean_score,
                 )
 
     log.append(str(permutation_results))

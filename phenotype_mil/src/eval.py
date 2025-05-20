@@ -18,6 +18,7 @@ def append_permutation_test(
     scoring: str,
     cv: int,
     n_permutations: int,
+    score,
 ):
 
     # knn
@@ -46,7 +47,7 @@ def append_permutation_test(
             l1_ratio=0.5 if penalty == "elasticnet" else None,
         )
 
-    score, perm_scores, p_value = permutation_test_score(
+    _, perm_scores, _ = permutation_test_score(
         estimator,
         X,
         y,
@@ -57,17 +58,21 @@ def append_permutation_test(
         n_jobs=-1,
     )
 
+    n_permutations_above_score = int((perm_scores >= score).sum())
+    print(n_permutations_above_score)
+    p_value = (n_permutations_above_score + 1) / (n_permutations + 1)
+
     if penalty is None and best_reg is None and k is not None:
         if mil_method not in permutation_results:
-            permutation_results["perms"][mil_method] = [score, p_value]
+            permutation_results["perms"][mil_method] = float(p_value)
 
     elif penalty is None and best_reg is not None and k is None:
         if mil_method + "_" + "None" not in permutation_results:
-            permutation_results["perms"][f"{mil_method}_None"] = [score, p_value]
+            permutation_results["perms"][f"{mil_method}_None"] = float(p_value)
 
     elif penalty is not None and best_reg is not None and k is None:
         if mil_method + "_" + penalty not in permutation_results:
-            permutation_results["perms"][f"{mil_method}_{penalty}"] = [score, p_value]
+            permutation_results["perms"][f"{mil_method}_{penalty}"] = float(p_value)
 
     return permutation_results
 

@@ -5,6 +5,7 @@ from sklearn.inspection import DecisionBoundaryDisplay
 from sklearn.neighbors import KNeighborsClassifier
 
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
+from sklearn.decomposition import PCA
 
 import numpy as np
 import pandas as pd
@@ -65,20 +66,17 @@ def fit_predict_knn(
 
     reg_strengths = append_bestk(reg_strengths, f"knn", best_knn)
 
-    # PCA for decision boundary visualization
-    # pca = PCA(n_components=2)
-    # X_train_pca = pca.fit_transform(X_train)
-
-    # if X_train_pca.shape[1] == 2 and output_path and fold is not None:
-    #     plot_knn_decision_boundary(
-    #         X=X_train_pca,
-    #         y=y_train,
-    #         k=k,
-    #         weights=weights,
-    #         title=f"KNN Decision Boundary (Fold {fold})",
-    #         save_path=os.path.join(output_path, f"knn_boundary_fold{fold}.png"),
-    #     )
-
+    if output_path is not None:
+        pca = PCA(n_components=2)
+        X_train_pca = pca.fit_transform(X_train)
+        plot_knn_decision_boundary(
+            X=X_train_pca,
+            y=y_train,
+            k=getattr(best_knn, "n_neighbors", None),
+            weights=weights,
+            title=f"KNN Decision Boundary (Fold {fold})",
+            save_path=os.path.join(output_path, f"knn_boundary_fold{fold}.png"),
+        )
     return y_pred, y_predprob
 
 
