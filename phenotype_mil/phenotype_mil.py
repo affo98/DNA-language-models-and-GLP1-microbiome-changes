@@ -120,7 +120,6 @@ def main(args, log):
         cluster_abundance_features,
         cluster_abundance_features,
         labels,
-        labels,
         k=KNN_K,
         fold=1,
         output_path=args.output_path,
