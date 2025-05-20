@@ -2,6 +2,79 @@
 
 import pandas as pd
 from sklearn.metrics import f1_score, roc_auc_score, accuracy_score
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import permutation_test_score
+
+
+def compute_permutation_score(
+    estimator, X, y, scoring="roc_auc", cv=5, n_permutations=100, random_state=42
+):
+    score, perm_scores, p_value = permutation_test_score(
+        estimator,
+        X,
+        y,
+        scoring=scoring,
+        cv=cv,
+        n_permutations=n_permutations,
+        random_state=random_state,
+        n_jobs=-1,
+    )
+    return {"score": score, "p_value": p_value}
+
+
+def append_permutation_test(
+    X,
+    y,
+    mil_method: str,
+    penalty: str,
+    best_reg: float,
+    k: int,
+    permutation_results: dict,
+    scoring: str,
+    cv: int,
+    n_permutations: int,
+):
+
+    # knn
+    if penalty is None and best_reg is None and k is not None:
+        estimator = KNeighborsClassifier(n_neighbors=k, weights="uniform")
+
+    # logistic no penalty
+    elif penalty is None and best_reg is None and k is None:
+        estimator = LogisticRegression(
+            penalty=penalty,
+            solver="saga",
+            max_iter=10_000,
+            random_state=0,
+        )
+
+    # logistic penalty
+    elif penalty is not None and best_reg is not None and k is None:
+        estimator = LogisticRegression(
+            penalty=penalty,
+            C=best_reg,
+            solver="saga",
+            max_iter=10_000,
+            random_state=0,
+            l1_ratio=0.5 if penalty == "elasticnet" else None,
+        )
+
+    score, perm_scores, p_value = permutation_test_score(
+        estimator,
+        X,
+        y,
+        scoring=scoring,
+        cv=cv,
+        n_permutations=n_permutations,
+        random_state=42,
+        n_jobs=-1,
+    )
+
+    if mil_method not in permutation_results:
+        permutation_results["regs"][mil_method] = [score, p_value]
+
+    return permutation_results
 
 
 def append_eval_metrics(

@@ -147,6 +147,8 @@ def choose_regularization_strength(reg_strengths: dict, log):
             best_regs[method] = most_common[0][0]  # Most frequent strength
         else:
             log.append(f"\nNo regularization strengths recorded for method '{method}'.")
+
+    log.append(best_regs)
     return best_regs
 
 
@@ -216,9 +218,12 @@ def fit_predict_sparsegrouplasso(
                         random_state=0,
                     )
                     lr.fit(X_tr_sel, y_tr)
-
-                    score = roc_auc_score(y_val, lr.predict_proba(X_val_sel)[:, 1])
-                    fold_scores.append(score)
+                    if scoring == "auc_roc":
+                        score = roc_auc_score(y_val, lr.predict_proba(X_val_sel)[:, 1])
+                        fold_scores.append(score)
+                    else:
+                        log.append(f"Invalid scoring for Group Sparse Lasso")
+                        break
 
                 except Exception as e:
                     log.append(
@@ -360,7 +365,6 @@ def fit_predict_logistic(
             solver="saga",
             max_iter=10_000,
             random_state=0,
-            l1_ratio=0.5 if penalty == "elasticnet" else None,
         )
 
         best_lr.fit(X_train, y_train)

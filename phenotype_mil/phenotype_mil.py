@@ -25,7 +25,7 @@ from src.classifiers import (
 )
 from src.agglmorative_clustering import get_groups_agglomorative
 
-from src.eval import append_eval_metrics, compute_summary_eval
+from src.eval import append_eval_metrics, compute_summary_eval, append_permutation_test
 
 # DISTANCE_METRIC_BAG = "cosine"
 
@@ -38,7 +38,7 @@ LINKAGE_AGG = "ward"
 TSNE_PERPLEXITY = 17
 
 # cv
-CV_OUTER = 10
+CV_OUTER = 5
 N_REPEATS = 1
 
 # params knn
@@ -57,6 +57,8 @@ SCORING_LOGISTIC = "roc_auc"
 # L1_REGS = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]
 GROUP_REGS = [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]
 L1_REGS = [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]
+
+N_PERMUTATIONS=100
 
 
 def main(args, log):
@@ -257,7 +259,47 @@ def main(args, log):
 
     # permutation test with majority voting regurilization strengths
     best_regs = choose_regularization_strength(reg_strengths, log)
-    print(best_regs)
+
+    permutation_results = {"perms": {}}
+    for mil_method in args.mil_methods:
+        log.append(f"Using MIL method for permutation test: {mil_method}")
+
+        if mil_method == "knn":
+            permutation_results = append_permutation_test(
+                X=cluster_abundance_features, 
+                y=labels,
+                mil_method=mil_method,
+                penalty=None,
+                best_reg=None,
+                k=KNN_K,
+                permutation_results=permutation_results,
+                scoring=SCORING_LOGISTIC,
+                cv=CV_LOGISTIC,
+                n_permutations=N_PERMUTATIONS,
+            )
+
+        elif mil_method == "logistic":
+            for penalty in [None, "l1", "l2", "elasticnet"]:
+                #best_reg = best_regs['regs'][f"logistic_{penalty}"]
+                
+                best_reg = best_regs['regs'].get(f"logistic_{penalty}", None)
+                log.append(
+                    f"  → Permutation test logistic_{penalty} using regurilization strength {best_reg} '"
+                )
+                permutation_results = append_permutation_test(
+                    X=cluster_abundance_features, 
+                    y=labels,
+                    mil_method=mil_method,
+                    penalty=penalty,
+                    best_reg=best_reg,
+                    k=None,
+                    permutation_results=permutation_results,
+                    scoring=SCORING_LOGISTIC,
+                    cv=CV_LOGISTIC
+                    n_permutations=N_PERMUTATIONS,
+                )
+
+    log.append(permutation_results)
 
 
 def add_arguments() -> ArgumentParser:
