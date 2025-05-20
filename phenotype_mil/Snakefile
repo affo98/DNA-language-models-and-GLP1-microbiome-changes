@@ -128,7 +128,8 @@ if config_bin_lookup:
     ]
 
 if config_phenotype_mil:
-    input_files += [os.path.join(OUTDIR_MIL_RESULTS, DATASET, f"{MODEL}_results")]
+    #input_files += [os.path.join(OUTDIR_MIL_RESULTS, DATASET, f"{MODEL}_results")]
+    input_files += [os.path.join(OUTDIR_MIL_RESULTS, DATASET, f"{MODEL}_TEST")]
 
 
 rule all:
