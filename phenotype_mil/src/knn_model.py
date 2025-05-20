@@ -56,7 +56,7 @@ def fit_predict_knn(
     search.fit(X_train, y_train)
 
     log.append(
-        f"Best K: {best_knn.n_neighbors}, best {scoring}: {search.best_score_:.4f}"
+        f"Best K: {search.best_estimator_}, best {scoring}: {search.best_score_:.4f}"
     )
 
     best_knn = search.best_estimator_
