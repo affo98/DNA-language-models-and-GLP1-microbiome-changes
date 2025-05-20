@@ -57,7 +57,7 @@ def append_permutation_test(
         n_jobs=-1,
     )
 
-    if penalty is None:
+    if penalty is None and best_reg is None and k is not None:
         if mil_method not in permutation_results:
             permutation_results["perms"][mil_method] = [score, p_value]
 

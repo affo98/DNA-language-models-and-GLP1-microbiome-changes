@@ -147,6 +147,8 @@ def choose_regularization_strength(reg_strengths: dict, log):
             best_regs[method] = most_common[0][0]  # Most frequent strength
         else:
             log.append(f"\nNo regularization strengths recorded for method '{method}'.")
+
+    log.append(str(best_regs))
     return best_regs
 
 
@@ -342,13 +344,6 @@ def fit_predict_logistic(
         )
         search.fit(X_train, y_train)
 
-        # Log the CV results
-        log.append(f"--- CV results for fold {fold}, penalty={penalty} ---")
-        # res = search.cv_results_
-        # for mean, std, C in zip(
-        #     res["mean_test_score"], res["std_test_score"], res["param_C"]
-        # ):
-        #     log.append(f"C={C:.4g}  {scoring}: {mean:.4f} ± {std:.4f}")
         log.append(
             f"Best C: {search.best_params_['C']:.4g}, best {scoring}: {search.best_score_:.4f}"
         )
