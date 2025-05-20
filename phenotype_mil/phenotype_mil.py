@@ -252,8 +252,6 @@ def main(args, log):
                     X_train=cluster_abundances_train,
                     X_test=cluster_abundances_test,
                     y_train=labels_train,
-                    fold=fold_idx + 1,
-                    output_path_=args.output_path,
                     log=log,
                     param_grid=RF_GRID,
                     cv=CV_INNER,
