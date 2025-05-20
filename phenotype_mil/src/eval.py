@@ -7,26 +7,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import permutation_test_score
 
 
-def compute_permutation_score(
-    estimator, X, y, scoring="roc_auc", cv=5, n_permutations=100, random_state=42
-):
-    score, perm_scores, p_value = permutation_test_score(
-        estimator,
-        X,
-        y,
-        scoring=scoring,
-        cv=cv,
-        n_permutations=n_permutations,
-        random_state=random_state,
-        n_jobs=-1,
-    )
-    return (
-        score,
-        perm_scores,
-        p_value,
-    )
-
-
 def append_permutation_test(
     X,
     y,
