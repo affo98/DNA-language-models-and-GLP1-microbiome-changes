@@ -111,6 +111,7 @@ def main(args, log):
     print(cluster_abundance_features.shape)
     global_features = cluster_abundances.columns.drop("sample").tolist()
     coefficients = {"coefs": {}}
+    reg_strengths = {"regs": {}}
     # skf = StratifiedKFold(n_splits=CV_OUTER, shuffle=True, random_state=42)
     rskf = RepeatedStratifiedKFold(
         n_splits=CV_OUTER, n_repeats=N_REPEATS, random_state=42
@@ -183,6 +184,7 @@ def main(args, log):
                         scoring=SCORING_LOGISTIC,
                         coefficients=coefficients,
                         global_features=global_features,
+                        reg_strengths
                     )
                     eval_metrics = append_eval_metrics(
                         eval_metrics,

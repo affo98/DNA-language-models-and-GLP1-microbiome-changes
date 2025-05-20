@@ -2,7 +2,11 @@ from typing import Optional, Sequence
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import GridSearchCV, StratifiedKFold
+from sklearn.model_selection import (
+    GridSearchCV,
+    StratifiedKFold,
+    permutation_test_score,
+)
 from sklearn.metrics import roc_auc_score
 from group_lasso import LogisticGroupLasso
 from tqdm import tqdm
@@ -114,6 +118,20 @@ def append_coefs(
         coefficients["coefs"][mil_method][feat].append(float(coef))
 
     return coefficients
+
+
+def append_regurilization_strength(reg_strengths: dict, mil_method: str, best_lr):
+
+    if mil_method not in reg_strengths["regs"]:
+        reg_strengths["regs"][mil_method] = []
+
+    reg = best_lr.C if hasattr(best_lr, "C") else None
+
+    # Append the regularization strength if it's available
+    if reg is not None:
+        reg_strengths["regs"][mil_method].append(reg)
+
+    return reg_strengths
 
 
 def fit_predict_sparsegrouplasso(
@@ -273,6 +291,7 @@ def fit_predict_logistic(
     scoring: str,
     coefficients: dict,
     global_features: list,
+    reg_strengths: dict,
 ) -> tuple[np.ndarray, np.ndarray]:
     """
     Fit a LogisticRegression with saga+penalty, grid-searching C if needed,
@@ -306,7 +325,7 @@ def fit_predict_logistic(
 
         # Log the CV results
         log.append(f"--- CV results for fold {fold}, penalty={penalty} ---")
-        res = search.cv_results_
+        # res = search.cv_results_
         # for mean, std, C in zip(
         #     res["mean_test_score"], res["std_test_score"], res["param_C"]
         # ):
@@ -339,6 +358,10 @@ def fit_predict_logistic(
         X_train.columns.tolist(),
         best_lr,
         fold,
+    )
+
+    reg_strengths = append_regurilization_strength(
+        reg_strengths, f"logistic_{penalty}", best_lr
     )
 
     return y_pred, y_predprob, coefficients
