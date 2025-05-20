@@ -233,6 +233,8 @@ def main(args, log):
         coefficients, os.path.join(args.output_path, f"coefs.csv")
     )
 
+    print(reg_strengths)
+
     log.append(f"{eval_metrics}")
     with open(
         os.path.join(
