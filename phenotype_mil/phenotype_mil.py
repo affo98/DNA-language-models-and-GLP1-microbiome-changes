@@ -184,7 +184,7 @@ def main(args, log):
                         scoring=SCORING_LOGISTIC,
                         coefficients=coefficients,
                         global_features=global_features,
-                        reg_strengths
+                        reg_strengths,
                     )
                     eval_metrics = append_eval_metrics(
                         eval_metrics,
