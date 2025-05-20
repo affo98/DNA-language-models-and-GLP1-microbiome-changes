@@ -115,7 +115,28 @@ def main(args, log):
     global_features = cluster_abundances.columns.drop("sample").tolist()
     coefficients = {"coefs": {}}
     reg_strengths = {"regs": {}}
-    # skf = StratifiedKFold(n_splits=CV_OUTER, shuffle=True, random_state=42)
+
+    # -------------------------
+    # from sklearn.utils import _save_split
+    # def _permutation_test_score(
+    # estimator, X, y, cv, scorer, split_params, fit_params, score_params
+    # ):
+    #     """Auxiliary function for permutation_test_score"""
+    #     # Adjust length of sample weights
+    #     fit_params = fit_params if fit_params is not None else {}
+    #     score_params = score_params if score_params is not None else {}
+
+    #     avg_score = []
+    #     for train, test in cv.split(X, y, **split_params):
+    #         X_train, y_train = _safe_split(estimator, X, y, train)
+    #         X_test, y_test = _safe_split(estimator, X, y, test, train)
+    #         fit_params_train = _check_method_params(X, params=fit_params, indices=train)
+    #         score_params_test = _check_method_params(X, params=score_params, indices=test)
+    #         estimator.fit(X_train, y_train, **fit_params_train)
+    #         avg_score.append(scorer(estimator, X_test, y_test, **score_params_test))
+    #     return np.mean(avg_score)
+
+    skf = StratifiedKFold(n_splits=CV_OUTER, shuffle=True, random_state=42)
     rskf = RepeatedStratifiedKFold(
         n_splits=CV_OUTER, n_repeats=N_REPEATS, random_state=42
     )
@@ -236,7 +257,7 @@ def main(args, log):
         coefficients, os.path.join(args.output_path, f"coefs.csv")
     )
 
-    log.append(f"{eval_metrics}")
+    # log.append(f"{eval_metrics}")
     with open(
         os.path.join(
             args.output_path,
@@ -274,7 +295,7 @@ def main(args, log):
                 k=KNN_K,
                 permutation_results=permutation_results,
                 scoring=SCORING_LOGISTIC,
-                cv=CV_OUTER,
+                cv=skf,
                 n_permutations=N_PERMUTATIONS,
             )
 
@@ -295,7 +316,7 @@ def main(args, log):
                     k=None,
                     permutation_results=permutation_results,
                     scoring=SCORING_LOGISTIC,
-                    cv=CV_OUTER,
+                    cv=skf,
                     n_permutations=N_PERMUTATIONS,
                 )
 
