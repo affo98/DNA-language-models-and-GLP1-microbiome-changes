@@ -20,7 +20,11 @@ def compute_permutation_score(
         random_state=random_state,
         n_jobs=-1,
     )
-    return {"score": score, "p_value": p_value}
+    return (
+        score,
+        perm_scores,
+        p_value,
+    )
 
 
 def append_permutation_test(
@@ -71,8 +75,13 @@ def append_permutation_test(
         n_jobs=-1,
     )
 
-    if mil_method not in permutation_results:
-        permutation_results["perms"][mil_method] = [score, p_value]
+    if penalty is None:
+        if mil_method not in permutation_results:
+            permutation_results["perms"][mil_method] = [score, p_value]
+
+    elif best_reg is not None:
+        if mil_method + "_" + penalty not in permutation_results:
+            permutation_results["perms"][f"{mil_method}_{penalty}"]
 
     return permutation_results
 

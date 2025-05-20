@@ -115,6 +115,26 @@ def main(args, log):
     global_features = cluster_abundances.columns.drop("sample").tolist()
     coefficients = {"coefs": {}}
     reg_strengths = {"regs": {}}
+    # -----------------------------------------------------------
+    predictions, predictions_proba = fit_predict_knn(  # euclidian
+        cluster_abundance_features,
+        labels,
+        labels,
+        k=KNN_K,
+        fold=1
+        output_path=args.output_path,
+    )
+    eval_metrics = append_eval_metrics(
+        eval_metrics,
+        labels,
+        predictions,
+        predictions_proba,
+        'knn',
+        1,
+    )
+    print(eval_metrics)
+    break
+    # ----------------------------------------------------
     # skf = StratifiedKFold(n_splits=CV_OUTER, shuffle=True, random_state=42)
     rskf = RepeatedStratifiedKFold(
         n_splits=CV_OUTER, n_repeats=N_REPEATS, random_state=42
