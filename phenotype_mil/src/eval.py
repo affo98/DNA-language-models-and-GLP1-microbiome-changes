@@ -30,6 +30,7 @@ def append_permutation_test(
             penalty=penalty,
             solver="saga",
             max_iter=5_000,
+            tol=3e-3,
             random_state=42,
         )
 
@@ -40,6 +41,7 @@ def append_permutation_test(
             C=best_reg,
             solver="saga",
             max_iter=5_000,
+            tol=3e-3,
             random_state=42,
             l1_ratio=0.5 if penalty == "elasticnet" else None,
         )
