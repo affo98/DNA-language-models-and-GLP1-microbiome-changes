@@ -309,6 +309,7 @@ def main(args, log):
                 penalty=None,
                 best_reg=None,
                 k=best_k,
+                rf_params=None,
                 permutation_results=permutation_results,
                 scoring=SCORING_CV,
                 cv=skf,
@@ -331,12 +332,33 @@ def main(args, log):
                     penalty=penalty,
                     best_reg=best_reg,
                     k=None,
+                    rf_params=None,
                     permutation_results=permutation_results,
                     scoring=SCORING_CV,
                     cv=skf,
                     n_permutations=N_PERMUTATIONS,
                     score=mean_score,
                 )
+        elif mil_method == "rf":
+            best_rf_params = best_regs.get("rf", None)
+            mean_score = summary_eval["rf"].get("auc_roc_mean")
+            log.append(
+                f"  → Permutation test for knn using regurilization strength {best_k} '"
+            )
+            permutation_results = append_permutation_test(
+                X=cluster_abundance_features,
+                y=labels,
+                mil_method=mil_method,
+                penalty=None,
+                best_reg=None,
+                k=None,
+                rf_params=best_rf_params,
+                permutation_results=permutation_results,
+                scoring=SCORING_CV,
+                cv=skf,
+                n_permutations=N_PERMUTATIONS,
+                score=mean_score,
+            )
 
     log.append(str(permutation_results))
     with open(
