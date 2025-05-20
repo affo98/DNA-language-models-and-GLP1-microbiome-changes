@@ -268,7 +268,7 @@ def main(args, log):
     permutation_results = {"perms": {}}
     for mil_method in args.mil_methods:
         log.append(f"Using MIL method for permutation test: {mil_method}")
-
+        best_k = best_regs.get("knn", None)
         if mil_method == "knn":
             permutation_results = append_permutation_test(
                 X=cluster_abundance_features,
@@ -276,7 +276,7 @@ def main(args, log):
                 mil_method=mil_method,
                 penalty=None,
                 best_reg=None,
-                k=KNN_K,
+                k=best_k,
                 permutation_results=permutation_results,
                 scoring=SCORING_CV,
                 cv=skf,

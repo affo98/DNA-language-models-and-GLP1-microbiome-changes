@@ -40,8 +40,8 @@ def fit_predict_knn(
     scoring: str,
     reg_strengths: dict,
 ) -> tuple[np.ndarray, np.ndarray]:
-    strat_kf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=0)
 
+    strat_kf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=0)
     knn_base = KNeighborsClassifier(weights=weights)
 
     search = GridSearchCV(
@@ -50,20 +50,20 @@ def fit_predict_knn(
         cv=strat_kf,
         scoring=scoring,
         n_jobs=-1,
+        refit=True,
     )
 
     search.fit(X_train, y_train)
-    best_knn = search.best_estimator_
 
     log.append(
         f"Best K: {best_knn.n_neighbors}, best {scoring}: {search.best_score_:.4f}"
     )
-    best_knn.fit(X_train, y_train)
 
+    best_knn = search.best_estimator_
     y_pred = best_knn.predict(X_test)
     y_predprob = best_knn.predict_proba(X_test)[:, 1]  # Probability of class 1
 
-    reg_strengths = append_bestk(reg_strengths, f"mil_method", best_knn)
+    reg_strengths = append_bestk(reg_strengths, f"knn", best_knn)
 
     # PCA for decision boundary visualization
     # pca = PCA(n_components=2)
