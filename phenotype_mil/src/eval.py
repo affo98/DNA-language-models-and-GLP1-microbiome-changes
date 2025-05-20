@@ -62,12 +62,11 @@ def append_permutation_test(
             permutation_results["perms"][mil_method] = [score, p_value]
 
     elif penalty is None and best_reg is not None and k is None:
-        if mil_method + "_" + 'None'  not in permutation_results:
-            permutation_results["perms"][f"{mil_method}_None}"] = [score, p_value]
-    
-    
+        if mil_method + "_" + "None" not in permutation_results:
+            permutation_results["perms"][f"{mil_method}_None"] = [score, p_value]
+
     elif penalty is not None and best_reg is not None and k is None:
-         if mil_method + "_" + penalty not in permutation_results:
+        if mil_method + "_" + penalty not in permutation_results:
             permutation_results["perms"][f"{mil_method}_{penalty}"] = [score, p_value]
 
     return permutation_results
