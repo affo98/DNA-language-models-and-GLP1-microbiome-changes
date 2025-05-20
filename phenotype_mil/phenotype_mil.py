@@ -38,7 +38,7 @@ TSNE_PERPLEXITY = 17
 
 # cv
 CV_OUTER = 10
-N_REPEATS = 5
+N_REPEATS = 1
 
 # params knn
 KNN_K = 10
