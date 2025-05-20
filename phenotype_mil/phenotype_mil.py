@@ -118,6 +118,7 @@ def main(args, log):
     # -----------------------------------------------------------
     predictions, predictions_proba = fit_predict_knn(  # euclidian
         cluster_abundance_features,
+        cluster_abundance_features,
         labels,
         labels,
         k=KNN_K,
