@@ -58,7 +58,7 @@ SCORING_LOGISTIC = "roc_auc"
 GROUP_REGS = [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]
 L1_REGS = [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]
 
-N_PERMUTATIONS=100
+N_PERMUTATIONS = 100
 
 
 def main(args, log):
@@ -266,7 +266,7 @@ def main(args, log):
 
         if mil_method == "knn":
             permutation_results = append_permutation_test(
-                X=cluster_abundance_features, 
+                X=cluster_abundance_features,
                 y=labels,
                 mil_method=mil_method,
                 penalty=None,
@@ -280,14 +280,14 @@ def main(args, log):
 
         elif mil_method == "logistic":
             for penalty in [None, "l1", "l2", "elasticnet"]:
-                #best_reg = best_regs['regs'][f"logistic_{penalty}"]
-                
-                best_reg = best_regs['regs'].get(f"logistic_{penalty}", None)
+                # best_reg = best_regs['regs'][f"logistic_{penalty}"]
+
+                best_reg = best_regs["regs"].get(f"logistic_{penalty}", None)
                 log.append(
                     f"  → Permutation test logistic_{penalty} using regurilization strength {best_reg} '"
                 )
                 permutation_results = append_permutation_test(
-                    X=cluster_abundance_features, 
+                    X=cluster_abundance_features,
                     y=labels,
                     mil_method=mil_method,
                     penalty=penalty,
@@ -295,7 +295,7 @@ def main(args, log):
                     k=None,
                     permutation_results=permutation_results,
                     scoring=SCORING_LOGISTIC,
-                    cv=CV_LOGISTIC
+                    cv=CV_LOGISTIC,
                     n_permutations=N_PERMUTATIONS,
                 )
 
