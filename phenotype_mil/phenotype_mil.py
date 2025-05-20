@@ -299,7 +299,7 @@ def main(args, log):
                     n_permutations=N_PERMUTATIONS,
                 )
 
-    log.append(permutation_results)
+    log.append(str(permutation_results))
 
 
 def add_arguments() -> ArgumentParser:
