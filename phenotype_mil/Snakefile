@@ -252,7 +252,7 @@ rule phenotype_mil:
         cluster_dir = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test"),
         sample_labels = SAMPLE_LABELS_FILE,
     output:
-        result_dir "./t"
+        result_dir = "./t",
         #result_dir = directory(os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_results")),
     log:
         os.path.join(LOGS, DATASET, "{MODEL}_mil.log"),
