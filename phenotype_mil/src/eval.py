@@ -72,7 +72,7 @@ def append_permutation_test(
     )
 
     if mil_method not in permutation_results:
-        permutation_results["regs"][mil_method] = [score, p_value]
+        permutation_results["perms"][mil_method] = [score, p_value]
 
     return permutation_results
 
