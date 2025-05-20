@@ -282,7 +282,7 @@ def main(args, log):
             for penalty in [None, "l1", "l2", "elasticnet"]:
                 # best_reg = best_regs['regs'][f"logistic_{penalty}"]
 
-                best_reg = best_regs["regs"].get(f"logistic_{penalty}", None)
+                best_reg = best_regs.get(f"logistic_{penalty}", None)
                 log.append(
                     f"  → Permutation test logistic_{penalty} using regurilization strength {best_reg} '"
                 )
