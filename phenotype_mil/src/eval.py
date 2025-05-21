@@ -48,6 +48,8 @@ def append_permutation_test(
             random_state=42,
             l1_ratio=0.5 if penalty == "elasticnet" else None,
         )
+
+    # rf
     elif penalty is None and best_reg is None and k is None and rf_params is not None:
         estimator = RandomForestClassifier(
             n_estimators=rf_params.get("n_estimators", None),
@@ -71,7 +73,11 @@ def append_permutation_test(
     n_permutations_above_score = int((perm_scores >= score).sum())
     p_value = (n_permutations_above_score + 1) / (n_permutations + 1)
 
-    if penalty is None and best_reg is None and k is not None:
+    if (
+        penalty is None
+        and best_reg is None
+        and (k is not None or rf_params is not None)
+    ):
         if mil_method not in permutation_results:
             permutation_results["perms"][mil_method] = float(p_value)
 

@@ -56,7 +56,7 @@ SCORING_CV = "roc_auc"
 GROUP_REGS = [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]
 L1_REGS = [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]
 
-# random forest (same as deepmicro)
+# random forest (same grid as deepmicro)
 RF_GRID = [
     {
         "n_estimators": [s for s in range(100, 1001, 200)],
@@ -300,7 +300,7 @@ def main(args, log):
             best_k = best_regs.get("knn", None)
             mean_score = summary_eval["knn"].get("auc_roc_mean")
             log.append(
-                f"  → Permutation test for knn using regurilization strength {best_k} '"
+                f"  → Permutation test for KNN using regurilization strength {best_k} '"
             )
             permutation_results = append_permutation_test(
                 X=cluster_abundance_features,
@@ -343,7 +343,7 @@ def main(args, log):
             best_rf_params = best_regs.get("rf", None)
             mean_score = summary_eval["rf"].get("auc_roc_mean")
             log.append(
-                f"  → Permutation test for knn using regurilization strength {best_k} '"
+                f"  → Permutation test for RF using regurilization strength {best_k} '"
             )
             permutation_results = append_permutation_test(
                 X=cluster_abundance_features,
