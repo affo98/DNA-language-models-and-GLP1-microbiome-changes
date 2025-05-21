@@ -84,10 +84,10 @@ class Trainer(nn.Module):
         
         # Load model weights
         if self.args.distributed:
-            self.model.module.dnabert2.from_pretrained(checkpoint_dir)
+            self.model.module.dnabert2.load_state_dict(torch.load(checkpoint_dir+'/pytorch_model.bin'))
             self.model.module.contrast_head.load_state_dict(torch.load(os.path.join(checkpoint_dir, "con_weights.ckpt")))
         else:
-            self.model.dnabert2.from_pretrained(checkpoint_dir)
+            self.model.dnabert2.load_state_dict(torch.load(checkpoint_dir+'/pytorch_model.bin'))
             self.model.contrast_head.load_state_dict(torch.load(os.path.join(checkpoint_dir, "con_weights.ckpt")))
         
         # Load training state if it exists
