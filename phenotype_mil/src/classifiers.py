@@ -308,7 +308,7 @@ def fit_predict_sparsegrouplasso(
                         random_state=0,
                     )
                     lr.fit(X_tr_sel, y_tr)
-                    if scoring == "auc_roc":
+                    if scoring == "roc_auc":
                         score = roc_auc_score(y_val, lr.predict_proba(X_val_sel)[:, 1])
                         fold_scores.append(score)
                     else:
