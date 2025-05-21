@@ -214,40 +214,40 @@ def main(args, log):
                     )
                     del predictions, predictions_proba
 
-            # elif mil_method == "logistic_groupsparselasso":
+            elif mil_method == "logistic_groupsparselasso":
 
-            #     if args.model_name != "vamb":
-            #         (
-            #             predictions,
-            #             predictions_proba,
-            #             coefficients,
-            #         ) = fit_predict_sparsegrouplasso(
-            #             X_train=cluster_abundances_train,
-            #             X_test=cluster_abundances_test,
-            #             y_train=labels_train,
-            #             groups=groups,
-            #             fold=fold_idx + 1,
-            #             output_path=args.output_path,
-            #             log=log,
-            #             group_reg_grid=GROUP_REGS,
-            #             l1_reg_grid=L1_REGS,
-            #             cv=CV_INNER,
-            #             scoring=SCORING_CV,
-            #             coefficients=coefficients,
-            #             global_features=global_features,
-            #         )
-            #         if predictions is None:  # can happen that no features are used.
-            #             continue
+                if args.model_name != "vamb":
+                    (
+                        predictions,
+                        predictions_proba,
+                        coefficients,
+                    ) = fit_predict_sparsegrouplasso(
+                        X_train=cluster_abundances_train,
+                        X_test=cluster_abundances_test,
+                        y_train=labels_train,
+                        groups=groups,
+                        fold=fold_idx + 1,
+                        output_path=args.output_path,
+                        log=log,
+                        group_reg_grid=GROUP_REGS,
+                        l1_reg_grid=L1_REGS,
+                        cv=CV_INNER,
+                        scoring=SCORING_CV,
+                        coefficients=coefficients,
+                        global_features=global_features,
+                    )
+                    if predictions is None:  # can happen that no features are used.
+                        continue
 
-            #         eval_metrics = append_eval_metrics(
-            #             eval_metrics,
-            #             labels_test,
-            #             predictions,
-            #             predictions_proba,
-            #             mil_method,
-            #             fold_idx + 1,
-            #         )
-            #         del predictions, predictions_proba
+                    eval_metrics = append_eval_metrics(
+                        eval_metrics,
+                        labels_test,
+                        predictions,
+                        predictions_proba,
+                        mil_method,
+                        fold_idx + 1,
+                    )
+                    del predictions, predictions_proba
 
             elif mil_method == "rf":
                 log.append(f"  → Training RF")
@@ -331,6 +331,25 @@ def main(args, log):
                 log.append(
                     f"  → Permutation test logistic_{penalty} using regurilization strength: {best_reg} '"
                 )
+
+                if penalty == "l1":  # groupsparselasso, use L1 as baseline
+                    permutation_results = append_permutation_test(
+                        X=cluster_abundance_features,
+                        y=labels,
+                        mil_method="logistic_groupsparselasso",
+                        penalty=penalty,
+                        best_reg=best_reg,
+                        k=None,
+                        rf_params=None,
+                        permutation_results=permutation_results,
+                        scoring=SCORING_CV,
+                        cv=skf,
+                        n_permutations=N_PERMUTATIONS,
+                        score=summary_eval["logistic_groupsparselasso"].get(
+                            "auc_roc_mean", None
+                        ),
+                    )
+
                 permutation_results = append_permutation_test(
                     X=cluster_abundance_features,
                     y=labels,
