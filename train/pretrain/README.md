@@ -38,7 +38,7 @@ sudo apt-get install libnccl2 libnccl-dev
 - `--datapath`: Root directory containing training and validation data
 - `--train_dataname`: Filename for training dataset (TSV format)
 - `--val_dataname`: Filename for validation dataset (TSV format)
-- `--batch_size`: Set it as 9 * number of GPUs (e.g., $18$ when using $2$ GPUs)
+- `--batch_size`: Set it as 9 * number of GPUs (e.g., 18 when using 2 GPUs)
 - `--max_length`: Set it as 0.2 * sequence length
 - `--lr`: Maximum learning rate for training
 - `--warmup_epochs`: Number of epochs for learning rate warmup
@@ -50,7 +50,7 @@ sudo apt-get install libnccl2 libnccl-dev
 
 ## Usage
 
-This training script is configured for $2$ NVIDIA H100. When using a different number of GPUs or different GPU models, you may need to adjust `batch_size` and `max_length` accordingly.
+This training script is configured for 2 NVIDIA H100. When using a different number of GPUs or different GPU models, you may need to adjust `batch_size` and `max_length` accordingly.
 
 ### Basic Training
 
