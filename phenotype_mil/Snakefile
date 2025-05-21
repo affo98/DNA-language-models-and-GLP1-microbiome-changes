@@ -128,8 +128,8 @@ if config_bin_lookup:
     ]
 
 if config_phenotype_mil:
-    #input_files += [os.path.join(OUTDIR_MIL_RESULTS, DATASET, f"{MODEL}_results")]
-    input_files += [os.path.join(OUTDIR_MIL_RESULTS, DATASET, f"{MODEL}_TEST")]
+    input_files += [os.path.join(OUTDIR_MIL_RESULTS, DATASET, f"{MODEL}_results")]
+    #input_files += [os.path.join(OUTDIR_MIL_RESULTS, DATASET, f"{MODEL}_TEST")]
 
 
 rule all:
@@ -235,8 +235,8 @@ rule phenotype_mil:
         cluster_dir = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test"),
         sample_labels = SAMPLE_LABELS_FILE,
     output:
-        result_dir = directory(os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_TEST"))
-        #result_dir = directory(os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_results")),
+        #result_dir = directory(os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_TEST"))
+        result_dir = directory(os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_results")),
     log:
         os.path.join(LOGS, DATASET, "{MODEL}_mil.log"),
     conda:

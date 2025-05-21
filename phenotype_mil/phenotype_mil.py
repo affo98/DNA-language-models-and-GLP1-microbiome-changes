@@ -39,8 +39,8 @@ LINKAGE_AGG = "ward"
 TSNE_PERPLEXITY = 17
 
 # cv
-CV_OUTER = 5
-N_REPEATS = 1
+CV_OUTER = 10
+N_REPEATS = 5
 
 # params knn
 KNN_K = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
@@ -48,13 +48,13 @@ KNN_WEIGHTS = "uniform"
 
 # params logistic
 # C_GRID = np.logspace(-4, 4, 10)
-C_GRID = [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]
+C_GRID = [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000]
 CV_INNER = 5
 SCORING_CV = "roc_auc"
 
 # params sparse group lasso logistic
-GROUP_REGS = [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]
-L1_REGS = [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000]
+GROUP_REGS = [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000]
+L1_REGS = [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000]
 
 # random forest (same grid as deepmicro)
 RF_GRID = [
@@ -67,7 +67,7 @@ RF_GRID = [
 ]
 
 # permutation test
-N_PERMUTATIONS = 100
+N_PERMUTATIONS = 1000
 
 
 def main(args, log):
@@ -215,7 +215,6 @@ def main(args, log):
                     del predictions, predictions_proba
 
             elif mil_method == "logistic_groupsparselasso":
-
                 if args.model_name != "vamb":
                     (
                         predictions,
