@@ -3,6 +3,7 @@
 [Overleaf report](https://www.overleaf.com/project/679796b5a02b660e4f96beff)
 
 #### Meeting Outline
+* [21 May 2025] (#date-21-May-2025)
 * [15 May 2025] (#date-15-May-2025)
 * [08 May 2025](#date-30-january-2025)
 * [01 May 2025](#date-30-january-2025)
@@ -15,6 +16,28 @@
 * [27 February 2025](#date-30-january-2025)
 * [20 February 2025](#date-30-january-2025)
 * [06 February 2025](#date-30-january-2025)
+
+#### Date 21 May 2025
+
+##### Who did you help this week?
+
+
+##### Who helped you this week?
+
+##### What did you achieve?
+- Got more results, made permutation tests, made an additional RF model. 
+- Writing,
+- We got a new version of DNABERT-H which is done training thursday/friday. We are going to get results on metagenomics binning from this also.
+- We got fine results on the "bin-lookup" where we can see which genome/species that a cluster is classified as.
+
+##### What did you struggle with?
+
+
+
+##### Where do you need help from Veronika?
+- Only use AUC-ROC, we are thinking about removing accuracy.
+- How to report variation of classifier performance? SD across all 5 repetitions (50 folds) or mean of each repetition, then SD of those means?
+- Structure of report, in particular how to change the model/experiments sections into a methods section.
 
 
 #### Date 15 May 2025
