@@ -80,6 +80,15 @@ def append_coefs(
     feature_to_global_idx = {feat: i for i, feat in enumerate(global_features)}
     full_coefs = np.zeros(len(global_features), dtype=float)
 
+    # ----------------random forest ----------------
+    if isinstance(model, RandomForestClassifier):
+        importances = model.feature_importances_
+        for imp, feat in zip(importances, local_features):
+            global_idx = feature_to_global_idx.get(feat)
+            if global_idx is None:
+                raise KeyError(f"Local feature {feat} not in global_features list")
+            full_coefs[global_idx] = float(imp)
+
     # --------------sparse group lasso-------------
     if gl_model is not None and groups is not None:
 
@@ -191,10 +200,14 @@ def fit_predict_rf(
     X_train: pd.DataFrame,
     X_test: pd.DataFrame,
     y_train: np.ndarray,
+    fold,
     log,
     param_grid: dict,
     cv: int,
     scoring: str,
+    coefficients: dict,
+    global_features: list,
+    reg_strengths: dict,
 ):
     base_rf = RandomForestClassifier(random_state=42)
 
@@ -216,6 +229,17 @@ def fit_predict_rf(
     best_lr = search.best_estimator_
     y_pred = best_lr.predict(X_test)
     y_predprob = best_lr.predict_proba(X_test)[:, 1]  # probability of class 1
+
+    coefficients = append_coefs(
+        coefficients,
+        "rf",
+        global_features,
+        X_train.columns.tolist(),
+        best_lr,
+        fold,
+    )
+
+    reg_strengths = append_rf_params(reg_strengths, f"rf", best_lr)
 
     return y_pred, y_predprob
 

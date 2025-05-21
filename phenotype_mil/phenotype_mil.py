@@ -252,10 +252,14 @@ def main(args, log):
                     X_train=cluster_abundances_train,
                     X_test=cluster_abundances_test,
                     y_train=labels_train,
+                    fold=fold_idx + 1,
                     log=log,
                     param_grid=RF_GRID,
                     cv=CV_INNER,
                     scoring=SCORING_CV,
+                    coefficients=coefficients,
+                    global_features=global_features,
+                    reg_strengths=reg_strengths,
                 )
                 eval_metrics = append_eval_metrics(
                     eval_metrics,
