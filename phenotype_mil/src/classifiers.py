@@ -242,7 +242,7 @@ def fit_predict_rf(
 
     reg_strengths = append_rf_params(reg_strengths, f"rf", best_lr)
 
-    return y_pred, y_predprob
+    return y_pred, y_predprob, coefficients
 
 
 def fit_predict_sparsegrouplasso(
