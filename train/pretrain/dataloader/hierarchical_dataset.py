@@ -198,7 +198,7 @@ class HierarchicalBatchSampler(Sampler):
             
             # Create hierarchical path with corresponding label dictionaries
             hierarchy_path = [
-                #(superkingdom, self.dataset.labels),
+                (superkingdom, self.dataset.labels),
                 (kingdom, self.dataset.labels[superkingdom]),
                 (phylum, self.dataset.labels[superkingdom][kingdom]),
                 (class_, self.dataset.labels[superkingdom][kingdom][phylum]),
