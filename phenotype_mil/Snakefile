@@ -202,7 +202,6 @@ rule download_gldb_db:
         
         """
 
-
 rule lookup_bins:
     input:
         fasta_bins=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "{MODEL}")
@@ -229,6 +228,7 @@ rule lookupbins_lookup_bins:
         """
         python {SRC_DIR}/... 
         """
+
 
 rule phenotype_mil:
     input:

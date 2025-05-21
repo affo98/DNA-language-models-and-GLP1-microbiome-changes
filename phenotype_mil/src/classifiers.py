@@ -89,39 +89,40 @@ def append_coefs(
                 raise KeyError(f"Local feature {feat} not in global_features list")
             full_coefs[global_idx] = float(imp)
 
-    # --------------sparse group lasso-------------
-    if gl_model is not None and groups is not None:
+    if isinstance(model, LogisticRegression):
+        # --------------sparse group lasso-------------
+        if gl_model is not None and groups is not None:
 
-        mask = gl_model.sparsity_mask_
-        assert len(mask) == len(local_features)
-        sel_coefs = model.coef_.flatten()
-        sel_feature_names = [local_features[i] for i, m in enumerate(mask) if m]
+            mask = gl_model.sparsity_mask_
+            assert len(mask) == len(local_features)
+            sel_coefs = model.coef_.flatten()
+            sel_feature_names = [local_features[i] for i, m in enumerate(mask) if m]
 
-        if len(sel_coefs) != len(sel_feature_names):
-            raise ValueError(
-                f"Mismatch: {len(sel_coefs)} coefficients vs "
-                f"{len(sel_feature_names)} selected features"
-            )
+            if len(sel_coefs) != len(sel_feature_names):
+                raise ValueError(
+                    f"Mismatch: {len(sel_coefs)} coefficients vs "
+                    f"{len(sel_feature_names)} selected features"
+                )
 
-        for coef, feat in zip(sel_coefs, sel_feature_names):
-            global_idx = feature_to_global_idx.get(feat)
-            if global_idx is None:
-                raise KeyError(f"Local feature {feat} not in global_features list")
-            full_coefs[global_idx] = float(coef)
+            for coef, feat in zip(sel_coefs, sel_feature_names):
+                global_idx = feature_to_global_idx.get(feat)
+                if global_idx is None:
+                    raise KeyError(f"Local feature {feat} not in global_features list")
+                full_coefs[global_idx] = float(coef)
 
-    # --------------Normal logistic-------------
-    else:
-        coef_vec = model.coef_.flatten()
-        if len(full_coefs) != len(local_features):
-            raise ValueError(
-                f"Expected {len(local_features)} coefs, got {len(full_coefs)}"
-            )
+        # --------------Normal logistic-------------
+        else:
+            coef_vec = model.coef_.flatten()
+            if len(full_coefs) != len(local_features):
+                raise ValueError(
+                    f"Expected {len(local_features)} coefs, got {len(full_coefs)}"
+                )
 
-        for coef, feat in zip(coef_vec, local_features):
-            global_idx = feature_to_global_idx.get(feat)
-            if global_idx is None:
-                raise KeyError(f"Feature {feat} not found in global_features")
-            full_coefs[global_idx] = float(coef)
+            for coef, feat in zip(coef_vec, local_features):
+                global_idx = feature_to_global_idx.get(feat)
+                if global_idx is None:
+                    raise KeyError(f"Feature {feat} not found in global_features")
+                full_coefs[global_idx] = float(coef)
 
     # append each feature’s coef to its list
     for feat, coef in zip(global_features, full_coefs):
