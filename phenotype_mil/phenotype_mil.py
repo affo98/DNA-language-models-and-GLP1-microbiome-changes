@@ -178,7 +178,7 @@ def main(args, log):
                     mil_method,
                     fold_idx + 1,
                 )
-                del predictions, predictions_proba, coefficients
+                del predictions, predictions_proba
 
             elif mil_method == "logistic":
                 for penalty in [None, "l1", "l2", "elasticnet"]:
@@ -212,7 +212,7 @@ def main(args, log):
                         f"{mil_method}_{penalty}",
                         fold_idx + 1,
                     )
-                    del predictions, predictions_proba, coefficients
+                    del predictions, predictions_proba
 
             # elif mil_method == "logistic_groupsparselasso":
 
@@ -247,6 +247,7 @@ def main(args, log):
             #             mil_method,
             #             fold_idx + 1,
             #         )
+            #         del predictions, predictions_proba
 
             elif mil_method == "rf":
                 log.append(f"  → Training RF")
@@ -271,7 +272,7 @@ def main(args, log):
                     mil_method,
                     fold_idx + 1,
                 )
-                del predictions, predictions_proba, coefficients
+                del predictions, predictions_proba
 
     coefs_df = coefs_dict_to_df(
         coefficients, os.path.join(args.output_path, f"coefs.csv")
