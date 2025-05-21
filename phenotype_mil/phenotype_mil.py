@@ -331,7 +331,9 @@ def main(args, log):
                     f"  → Permutation test logistic_{penalty} using regurilization strength: {best_reg} '"
                 )
 
-                if penalty == "l1":  # groupsparselasso, use L1 as baseline
+                if (
+                    penalty == "l1" and args.model_name != "vamb"
+                ):  # groupsparselasso, use L1 as baseline
                     permutation_results = append_permutation_test(
                         X=cluster_abundance_features,
                         y=labels,
