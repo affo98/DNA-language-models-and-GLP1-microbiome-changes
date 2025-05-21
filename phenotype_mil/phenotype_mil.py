@@ -303,9 +303,7 @@ def main(args, log):
         if mil_method == "knn":
             best_k = best_regs.get("knn", None)
             mean_score = summary_eval["knn"].get("auc_roc_mean")
-            log.append(
-                f"  → Permutation test for KNN using regurilization strength {best_k} '"
-            )
+            log.append(f"  → Permutation test for KNN using K: {best_k} '")
             permutation_results = append_permutation_test(
                 X=cluster_abundance_features,
                 y=labels,
@@ -327,7 +325,7 @@ def main(args, log):
                 best_reg = best_regs.get(id, None)
                 mean_score = summary_eval[id].get("auc_roc_mean", None)
                 log.append(
-                    f"  → Permutation test logistic_{penalty} using regurilization strength {best_reg} '"
+                    f"  → Permutation test logistic_{penalty} using regurilization strength: {best_reg} '"
                 )
                 permutation_results = append_permutation_test(
                     X=cluster_abundance_features,
@@ -346,9 +344,7 @@ def main(args, log):
         elif mil_method == "rf":
             best_rf_params = best_regs.get("rf", None)
             mean_score = summary_eval["rf"].get("auc_roc_mean")
-            log.append(
-                f"  → Permutation test for RF using regurilization strength {best_k} '"
-            )
+            log.append(f"  → Permutation test for RF using params: {best_rf_params} '")
             permutation_results = append_permutation_test(
                 X=cluster_abundance_features,
                 y=labels,
