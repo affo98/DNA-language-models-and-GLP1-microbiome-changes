@@ -250,7 +250,7 @@ def main(args, log):
 
             elif mil_method == "rf":
                 log.append(f"  → Training RF")
-                predictions, predictions_proba, coefficients fit_predict_rf(
+                predictions, predictions_proba, coefficients = fit_predict_rf(
                     X_train=cluster_abundances_train,
                     X_test=cluster_abundances_test,
                     y_train=labels_train,
