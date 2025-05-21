@@ -1,6 +1,6 @@
 # Pretraining
 
-This directory contains the official implementation for DNABERT-H, a DNA language model designed for hierarchical representation learning.
+This directory contains the official implementation for DNABERT-H.
 
 ## Data Requirements
 
@@ -86,8 +86,8 @@ torchrun \
 
 ## Model Checkpointing
 
-- Model checkpoints are saved periodically during training
-- Best model is saved in the `./RESDIR/best/` directory
+- Model checkpoints are saved under `./RESDIR/` directory
+- Best model is saved in `./RESDIR/best/` directory
 - Training state can be resumed from checkpoints
 
 
