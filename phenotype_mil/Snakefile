@@ -230,24 +230,6 @@ rule lookupbins_lookup_bins:
         python {SRC_DIR}/... 
         """
 
-# rule download_gldb_db
-# input:
-#       - the bin folder (just so it triggers)
-# output:
-#  gldb_db files
-
-# rule lookup_bins
-# input:
-#       - the bin folder (just so it triggers)
-# output:
-#      - bin lookups
-# params:
-#      - path/to_gdlb/database
-# shell:
-#     gltdb_tk {input} {output} -db {params}
-
-# then maybe we can add a third with some post processing
-
 rule phenotype_mil:
     input:
         cluster_dir = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test"),
