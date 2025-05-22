@@ -519,16 +519,16 @@ def load_deep_genome_hierarchical(args):
     sequence_datasets = {'train': train_dataset,
                       'val': val_dataset}
     if args.distributed:
-        train_sampler = TrainBatchSampler(batch_size=args.batch_size,
+        train_sampler = TrainBatchSampler(batch_size=args.train_batch_size,
                                            drop_last=True,
                                            dataset=train_dataset)
     else:
-        train_sampler = TrainBatchSampler(batch_size=args.batch_size,
+        train_sampler = TrainBatchSampler(batch_size=args.train_batch_size,
                                            drop_last=True,
                                            dataset=train_dataset,
                                            num_replicas=1,
                                            rank=0)
-    val_sampler = ValidationBatchSampler(batch_size=args.batch_size,
+    val_sampler = ValidationBatchSampler(batch_size=args.val_batch_size,
                                            drop_last=True,
                                            dataset=val_dataset)
     sampler = {'train': train_sampler,

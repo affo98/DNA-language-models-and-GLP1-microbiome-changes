@@ -198,8 +198,8 @@ def set_model(ngpus_per_node, args):
 
     torch.cuda.set_device(args.gpu)
     model.cuda(args.gpu)
-    args.batch_size = int(args.batch_size / ngpus_per_node)
-    print(f"{ngpus_per_node} GPUs, Batch size per GPU {args.batch_size}")
+    args.train_batch_size = int(args.train_batch_size / ngpus_per_node)
+    print(f"{ngpus_per_node} GPUs, Batch size per GPU {args.train_batch_size}")
 
     # Only wrap with DDP if using more than one GPU
     if ngpus_per_node > 1 and args.distributed:
@@ -225,10 +225,11 @@ def get_args(argv):
     parser.add_argument('--val_dataname', type=str, default='val_40k.tsv', help="Name of the data used for validating")
     # Training parameters
     parser.add_argument('--max_length', type=int, default=2000, help="Max length of tokens")
-    parser.add_argument('--batch_size', type=int, default=18, help="Batch size used for training/validating dataset")
-    parser.add_argument('--lr', type=float, default=2e-06, help="Learning rate")
-    parser.add_argument('--lr_scale', type=int, default=100, help="")
+    parser.add_argument('--train_batch_size', type=int, default=18, help="Batch size used for training dataset")
+    parser.add_argument('--val_batch_size', type=int, default=18, help="Batch size used for validating dataset")
+    parser.add_argument('--max_lr', type=float, default=2e-06, help="Maximum learning rate")
     parser.add_argument('--min_lr', type=float, default=0.0, help='Minimum learning rate for cosine scheduler')
+    parser.add_argument('--lr_scale', type=int, default=100, help="Learning rate scale")
     parser.add_argument('--warmup_epochs', type=float, default=0.3, help='Number of warmup epochs for learning rate')
     parser.add_argument('--epochs', type=int, default=3)
     parser.add_argument('--print-freq', '-p', default=100, type=int, metavar='N', help='print frequency (default: 10)')

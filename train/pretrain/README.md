@@ -40,7 +40,7 @@ sudo apt-get install libnccl2 libnccl-dev
 - `--val_dataname`: Filename for validation dataset (TSV format)
 - `--batch_size`: Set it as 9 * number of GPUs (e.g., 18 when using 2 GPUs)
 - `--max_length`: Set it as 0.2 * sequence length (e.g., 2000 for 10000 bp sequences)
-- `--lr`: Maximum learning rate for training
+- `--max_lr`: Maximum learning rate for training
 - `--warmup_epochs`: Number of epochs for learning rate warmup
 
 ### Training Modes
@@ -62,7 +62,7 @@ torchrun \
     --val_dataname val_40k.tsv \
     --batch_size 18 \
     --max_length 2000 \
-    --lr 2e-06 \ 
+    --max_lr 2e-06 \ 
     --warmup_epochs 0.3
 ```
 
@@ -76,7 +76,7 @@ torchrun \
     --val_dataname val_40k.tsv \
     --batch_size 18 \
     --max_length 2000 \
-    --lr 2e-06 \ 
+    --max_lr 2e-06 \ 
     --warmup_epochs 0.3 \
     --resume_from CHECKPOINT_DIR
 ```
@@ -88,9 +88,9 @@ torchrun \
 
 ## Model Checkpointing
 
-- Model checkpoints are saved under `./RESDIR/` directory
+- Model checkpoints are saved under `./RESDIR/CHECKPOINT_DIR/` directory
 - Best model is saved in `./RESDIR/best/` directory
-- Training state can be resumed from checkpoints
+- Training state can be resumed from checkpoints saved at the end of each epoch.
 
 
 

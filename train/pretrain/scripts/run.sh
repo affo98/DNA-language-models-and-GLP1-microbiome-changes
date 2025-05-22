@@ -1,4 +1,4 @@
-export PATH_TO_DATA_DICT=/path/to/data/dict # (e.g., /root/data/DNABERT_h_data)
+export PATH_TO_DATA_DIR=/path/to/data/dict # (e.g., /root/data/DNABERT_h_data)
 
 # Multi-level Hierarchical Contrastive Learning (DNABERT-H)
 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
@@ -13,7 +13,7 @@ torchrun \
   --master_addr=127.0.0.1 \
   --master_port=29500 \
   main.py \
-  --datapath PATH_TO_DATA_DICT \
+  --datapath PATH_TO_DATA_DIR \
   --train_dataname train_2m.tsv \
   --val_dataname val_40k.tsv \
   --batch_size 18
