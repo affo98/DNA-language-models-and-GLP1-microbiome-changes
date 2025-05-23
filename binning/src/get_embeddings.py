@@ -107,6 +107,8 @@ class Embedder:
             "dnaberts",
             "dnaberth_400kv2",
             "dnaberth_2mv3",
+            "dnaberth_2mv4",
+            "dnaberth_2mv5",
             "dnaberth_400k",
             "dnaberth_2mv1",
             "dnaberth_2mv2",

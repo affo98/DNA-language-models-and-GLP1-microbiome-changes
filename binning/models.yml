@@ -21,6 +21,16 @@ dnaberth_2mv3:
   batch_sizes: [32, 8, 1]
   weight_path: "train/dnaberth_weights/dnaberth_2mv3"
 
+dnaberth_2mv4:
+  model_path: "zhihan1996/DNABERT-S"
+  batch_sizes: [32, 8, 1]
+  weight_path: "train/dnaberth_weights/dnaberth_2mv4"
+
+dnaberth_2mv5:
+  model_path: "zhihan1996/DNABERT-S"
+  batch_sizes: [32, 8, 1]
+  weight_path: "train/dnaberth_weights/dnaberth_2mv5"
+
 dnaberth_400k:
   model_path: "zhihan1996/DNABERT-S"
   batch_sizes: [32, 8, 1]

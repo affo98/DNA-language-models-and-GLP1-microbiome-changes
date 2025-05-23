@@ -289,6 +289,7 @@ def parse_bin_postprocess(logdir: str) -> pd.DataFrame:
     results = []
     for dataset in DATASETS:
         for model in OTHER_MODELS + BINNER_MODELS:
+            print(model)
             if model in OTHER_MODELS:
                 log_path = os.path.join(
                     logdir, dataset, f"{model}_test_bin_postprocessing.log"
