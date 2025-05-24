@@ -114,8 +114,8 @@ elif MODEL in ['dnaberts'] and not config_nomodelrun:
     ]
 elif MODEL in ['dnaberth_2mv3'] and not config_nomodelrun:
     input_files += [
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberth_2mv3_output", "test"),
-        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberth_2mv3"),
+        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "dnaberth_2mv3_output", "test"),
+        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "dnaberth_2mv3"),
     ]
 
 elif MODEL in ['dnabert2'] and not config_nomodelrun:
