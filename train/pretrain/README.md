@@ -38,7 +38,7 @@ sudo apt-get install libnccl2 libnccl-dev
 - `--datapath`: Root directory containing training and validation data
 - `--train_dataname`: Filename for training dataset (TSV format)
 - `--val_dataname`: Filename for validation dataset (TSV format)
-- `--batch_size`: Set it as 9 * number of GPUs (e.g., 18 when using 2 GPUs)
+- `--train_batch_size`: Set it as 9 * number of GPUs (e.g., 18 when using 2 GPUs)
 - `--max_length`: Set it as 0.2 * sequence length (e.g., 2000 for 10000 bp sequences)
 - `--max_lr`: Maximum learning rate for training
 - `--warmup_epochs`: Number of epochs for learning rate warmup
@@ -60,7 +60,8 @@ torchrun \
     --datapath PATH_TO_DATA_DIR \
     --train_dataname train_2m.tsv \
     --val_dataname val_40k.tsv \
-    --batch_size 18 \
+    --train_batch_size 18 \
+    --val_batch_size 90 \
     --max_length 2000 \
     --max_lr 2e-06 \ 
     --warmup_epochs 0.3
@@ -74,7 +75,8 @@ torchrun \
     --datapath PATH_TO_DATA_DIR \
     --train_dataname train_2m.tsv \
     --val_dataname val_40k.tsv \
-    --batch_size 18 \
+    --train_batch_size 18 \
+    --val_batch_size 90 \
     --max_length 2000 \
     --max_lr 2e-06 \ 
     --warmup_epochs 0.3 \
