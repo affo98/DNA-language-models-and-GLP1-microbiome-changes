@@ -35,7 +35,7 @@ DNABERT-H is beneficial for application in metagenomics, including metagenomics 
 
 ## 2. Model
 
-The pre-trained model is available at [insert link]. 
+The pre-trained model is available [here](https://figshare.com/articles/dataset/DNABERT-H-2M/29145308) . 
 
 Place the model in the directory `train/dnaberth_weights/`.
 
