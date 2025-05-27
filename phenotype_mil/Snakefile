@@ -38,7 +38,7 @@ BATCH_SIZES=None
 WEIGHT_PATH=None
 if MODEL in models_config.keys():
     MODEL_PATH = models_config[MODEL]["model_path"]
-    BATCH_SIZES = models_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnaberth', 'dnabert2', 'dnabert2random'] else 0
+    BATCH_SIZES = models_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnaberth_2mv4', 'dnabert2', 'dnabert2random'] else 0
     WEIGHT_PATH = models_config[MODEL]["weight_path"] if 'dnaberth' in  MODEL else None
 
 
@@ -98,7 +98,7 @@ input_files = []
 
 if MODEL in ['dnaberts'] and not config_nomodelrun:
     input_files += [
-        #os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "dnaberts_output", "test"),
+        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "dnaberts_output", "test"),
         os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "dnaberts"),
     ]
 
