@@ -1,6 +1,6 @@
 # Pretraining
 
-This directory contains the official implementation for DNABERT-H.
+This directory contains the official implementation for DNABERT-H. The training codebase is developed from these repositories: [DNABERT_S](https://github.com/MAGICS-LAB/DNABERT_S) and [hierarchicalContrastiveLearning](hierarchicalContrastiveLearning).
 
 ## Data Requirements
 
