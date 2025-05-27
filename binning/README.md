@@ -29,6 +29,7 @@ The list of models are specified in the file `models.yml`. They include:
 * **DNABERT-S**: [github](https://github.com/MAGICS-LAB/DNABERT_S)
 * **DNABERT-2**: [github](https://github.com/MAGICS-LAB/DNABERT_2)
 * **DNABERT-2 Random** DNABERT-2 with randomly initialized weights. 
+* **DNABERT-H**: Our DNABERT-H model.
 
 
 ### Output

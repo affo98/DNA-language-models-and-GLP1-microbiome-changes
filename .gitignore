@@ -2,12 +2,15 @@
 #cami2_benchmarks
 /cami2_benchmark/model_results/*
 
+#phenotype mil
+/phenotype_mil/binning_results/*
+/phenotype_mil/mil_results/*
+
 #notebook
 play.ipynb
 
 #Pycache
 *__pycache__
-
 
 #/npz files
 *.npz
