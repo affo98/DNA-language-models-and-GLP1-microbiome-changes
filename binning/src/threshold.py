@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 import torch
 
-from src.utils import get_available_device, Logger
+from src.utils import get_available_device, Logger, get_gpu_mem
 
 
 class Threshold:
@@ -18,9 +18,9 @@ class Threshold:
         n_bins: int,
         block_size: int,
     ):
-        if embeddings.dtype != np.float64:
-            embeddings = embeddings.astype(np.float64)
-            print("Embeddings changed to dtype float64")
+        if embeddings.dtype != np.float32:
+            embeddings = embeddings.astype(np.float32)
+            print("Embeddings changed to dtype float32")
         if block_size < 1:
             raise ValueError("Block size must be at least 1")
         if n_bins < 1:
@@ -38,9 +38,8 @@ class Threshold:
         self.check_params(embeddings, n_bins, block_size)
 
         device, gpu_count = get_available_device()
-        embeddings = torch.from_numpy(embeddings).to(device)
 
-        self.embeddings = embeddings
+        self.embeddings_np = embeddings
         self.n_bins = n_bins
         self.block_size = block_size
         self.save_path = save_path
@@ -51,81 +50,114 @@ class Threshold:
         self.log.append(f"Using {device} for Threshold calculations")
 
     def get_knn_threshold(self, knn_k, knn_p) -> float:
-
         self.knn_k = knn_k
         self.knn_p = knn_p
 
-        n_samples = self.embeddings.shape[0]
+        n_samples, _ = self.embeddings_np.shape
         bin_vector = torch.zeros(self.n_bins, dtype=torch.float32, device=self.device)
+        global_min = torch.tensor(1.0, dtype=torch.float32, device=self.device)
+        global_max = torch.tensor(-1.0, dtype=torch.float32, device=self.device)
 
-        # first, find min/max
-        global_min = torch.tensor([1], dtype=torch.float32, device=self.device)
-        global_max = torch.tensor([-1], dtype=torch.float32, device=self.device)
+        # ---------------- Global min/max pass ----------------
         for i in tqdm(
             range(0, n_samples, self.block_size), desc="Calculating global min/max"
         ):
-            block_start = i
-            block_end = min(i + self.block_size, n_samples)
-            block_embeddings = self.embeddings[block_start:block_end]
+            i_end = min(i + self.block_size, n_samples)
+            emb_i = torch.from_numpy(self.embeddings_np[i:i_end]).to(self.device).half()
+            # compute similarities row-wise in j-chunks
+            for j in range(0, n_samples, self.block_size):
+                j_end = min(j + self.block_size, n_samples)
+                emb_j = (
+                    torch.from_numpy(self.embeddings_np[j:j_end]).to(self.device).half()
+                )
+                sims_block = torch.mm(emb_i, emb_j.T)
 
-            block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
-            top_k_similarities, top_k_indices = torch.topk(
-                block_sim_matrix, self.knn_k, dim=-1
-            )
+                # collect full row sims in memory-chunked fashion
+                # for each row in this block, get top-k indices across all j-chunks
+                # accumulate partial topk per row
+                if j == 0:
+                    partial_vals, partial_idx = torch.topk(
+                        sims_block, self.knn_k, dim=1
+                    )
+                else:
+                    vals, idx = torch.topk(sims_block, self.knn_k, dim=1)
+                    combined_vals = torch.cat([partial_vals, vals], dim=1)
+                    combined_idx = torch.cat([partial_idx, idx + j], dim=1)
+                    partial_vals, sel = torch.topk(combined_vals, self.knn_k, dim=1)
+                    partial_idx = combined_idx.gather(1, sel)
+                del sims_block, emb_j
+                torch.cuda.empty_cache()
 
-            top_k_embeddings = self.embeddings[
-                top_k_indices
-            ]  # shape: (block_size, knn_k, embedding_dim)
-            centroids = top_k_embeddings.mean(
-                dim=1, keepdim=True
-            )  # shape: (block_size, 1, embedding_dim)
-
-            centroids = centroids.transpose(
+            # now partial_idx holds top-k global neighbor indices for each emb_i row
+            topk_embs = torch.from_numpy(
+                self.embeddings_np[partial_idx.cpu().numpy()]
+            ).to(
+                self.device
+            )  # shape (bs_i, knn_k, D)
+            centroids = topk_embs.mean(dim=1, keepdim=True).transpose(
                 1, 2
-            )  # Shape: (block_size, embedding_dim, 1)
+            )  # (bs_i, 1, D)→(bs_i, D, 1)
+            csims = torch.bmm(topk_embs, centroids).squeeze(-1).float().flatten()
+            global_min = torch.min(global_min, csims.min()).float()
+            global_max = torch.max(global_max, csims.max()).float()
 
-            centroid_similarities = torch.bmm(top_k_embeddings, centroids).squeeze(-1)
-            centroid_similarities_flat = centroid_similarities.flatten()
+            del topk_embs, centroids, csims, emb_i
+            torch.cuda.empty_cache()
 
-            global_min = torch.min(global_min, centroid_similarities_flat.min())
-            global_max = torch.max(global_max, centroid_similarities_flat.max())
-
-        # loop through again to get histogram
+        # ---------------- Histogram pass ----------------
         for i in tqdm(range(0, n_samples, self.block_size), desc="Calculating knns"):
-            block_start = i
-            block_end = min(i + self.block_size, n_samples)
-            block_embeddings = self.embeddings[block_start:block_end]
+            i_end = min(i + self.block_size, n_samples)
+            emb_i = torch.from_numpy(self.embeddings_np[i:i_end]).to(self.device).half()
 
-            block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
-            top_k_similarities, top_k_indices = torch.topk(
-                block_sim_matrix, self.knn_k, dim=-1
-            )
+            # compute top-k indices per row same as above
+            for j in range(0, n_samples, self.block_size):
+                j_end = min(j + self.block_size, n_samples)
+                emb_j = (
+                    torch.from_numpy(self.embeddings_np[j:j_end]).to(self.device).half()
+                )
+                sims_block = torch.mm(emb_i, emb_j.T)
+                if j == 0:
+                    partial_vals, partial_idx = torch.topk(
+                        sims_block, self.knn_k, dim=1
+                    )
+                else:
+                    vals, idx = torch.topk(sims_block, self.knn_k, dim=1)
+                    combined_vals = torch.cat([partial_vals, vals], dim=1)
+                    combined_idx = torch.cat([partial_idx, idx + j], dim=1)
+                    partial_vals, sel = torch.topk(combined_vals, self.knn_k, dim=1)
+                    partial_idx = combined_idx.gather(1, sel)
+                del sims_block, emb_j
+                torch.cuda.empty_cache()
 
-            top_k_embeddings = self.embeddings[
-                top_k_indices
-            ]  # shape: (block_size, knn_k, embedding_dim)
-            centroids = top_k_embeddings.mean(
-                dim=1, keepdim=True
-            )  # shape: (block_size, 1, embedding_dim)
-            centroids = centroids.transpose(
+            topk_embs = torch.from_numpy(
+                self.embeddings_np[partial_idx.cpu().numpy()]
+            ).to(
+                self.device
+            )  # shape (bs_i, knn_k, D)
+            centroids = topk_embs.mean(dim=1, keepdim=True).transpose(
                 1, 2
-            )  # Shape: (block_size, embedding_dim, 1)
+            )  # (bs_i, 1, D)→(bs_i, D, 1)
 
-            centroid_similarities = torch.bmm(top_k_embeddings, centroids).squeeze(-1)
-            centroid_similarities_flat = centroid_similarities.flatten()
+            csims = torch.bmm(topk_embs, centroids).squeeze(-1).float().flatten()
 
             bin_vector += torch.histc(
-                centroid_similarities_flat,
+                csims,
                 bins=self.n_bins,
                 min=global_min.item(),
                 max=global_max.item(),
             )
+            del topk_embs, centroids, csims, emb_i
+            torch.cuda.empty_cache()
 
-        bin_vector = bin_vector / bin_vector.sum()
+        # finalize histogram
+        bin_vector /= bin_vector.sum()
         bin_vector = bin_vector.cpu().numpy()
-
         pairsim_vector = (
-            torch.linspace(global_min.item(), global_max.item(), self.n_bins)
+            torch.linspace(
+                global_min.item(),
+                global_max.item(),
+                steps=self.n_bins,
+            )
             .cpu()
             .numpy()
         )
@@ -143,7 +175,8 @@ class Threshold:
         self.save_histogram(knn=True)
         self.save_to_json()
 
-        return knn_threshold
+        torch.cuda.empty_cache()
+        return self.knn_threshold
 
     def save_to_json(self) -> None:
         """Saves the knn_threshold, pairsim_vector, and bin_vector to a JSON file."""
@@ -202,149 +235,3 @@ class Threshold:
         self.log.append(f"Plot saved at: {file_path}")
 
         return
-
-    #         def get_similarity_bin_vector(self) -> float:
-    #     """
-    #     Calculates pairwise similarities of embeddings and returns a histogram of similarities.
-    #     """
-
-    #     n_samples = self.embeddings.shape[0]
-    #     bin_vector = torch.zeros(self.n_bins, dtype=torch.float32, device=self.device)
-
-    #     # loop through to get global min/max pairwise similarity
-    #     global_min = torch.tensor([1], dtype=torch.float32, device=self.device)
-    #     global_max = torch.tensor([-1], dtype=torch.float32, device=self.device)
-    #     for i in tqdm(
-    #         range(0, n_samples, self.block_size), desc="Calculating global min/max"
-    #     ):
-    #         block_start = i
-    #         block_end = min(i + self.block_size, n_samples)
-    #         block_embeddings = self.embeddings[block_start:block_end]
-
-    #         block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
-    #         local_min = block_sim_matrix.flatten().min()
-    #         local_max = block_sim_matrix.flatten().max()
-    #         global_min = torch.min(global_min, local_min)
-    #         global_max = torch.max(global_max, local_max)
-
-    #     # loop through again to get histogram
-    #     for i in tqdm(
-    #         range(0, n_samples, self.block_size), desc="Calculating histogram"
-    #     ):
-    #         block_start = i
-    #         block_end = min(i + self.block_size, n_samples)
-    #         block_embeddings = self.embeddings[block_start:block_end]
-
-    #         block_sim_matrix = torch.mm(block_embeddings, self.embeddings.T)
-
-    #         block_sim_flatten = block_sim_matrix.flatten()
-
-    #         bin_vector += torch.histc(
-    #             block_sim_flatten,
-    #             bins=self.n_bins,
-    #             min=global_min.item(),
-    #             max=global_max.item(),
-    #         )
-
-    #     bin_vector = bin_vector / bin_vector.sum()
-    #     bin_vector = bin_vector.cpu().numpy()
-
-    #     pairsim_vector = (
-    #         torch.linspace(global_min.item(), global_max.item(), self.n_bins)
-    #         .cpu()
-    #         .numpy()
-    #     )
-    #     print(global_min.item(), global_max.item())
-
-    #     return bin_vector, pairsim_vector
-
-    # def get_threshold(self) -> tuple[float, float, float, float, float]:
-
-    #     otsu = filters.threshold_otsu(self.bin_vector[:980])
-    #     otsu_mul = filters.threshold_multiotsu(self.bin_vector, classes=3)
-    #     isodata = filters.threshold_isodata(self.bin_vector)
-    #     minimum = filters.threshold_minimum(self.bin_vector)
-    #     yen = filters.threshold_yen(self.bin_vector)
-
-    #     return (otsu, otsu_mul, isodata, minimum, yen)
-    # plt.axvline(
-    #     x=np.argmin(np.abs(self.pairsim_vector - self.otsu)),
-    #     color="r",
-    #     linestyle="--",
-    #     label=f"Otsu (t={self.otsu:.5f})",
-    # )
-    # plt.axvline(
-    #     x=np.argmin(np.abs(self.pairsim_vector - self.otsu_mul[0])),
-    #     color="indianred",
-    #     linestyle="--",
-    #     label=f"MULTIPLE OTSU (t={self.otsu_mul[0]:.5f})",
-    # )
-    # plt.axvline(
-    #     x=np.argmin(np.abs(self.pairsim_vector - self.isodata)),
-    #     color="b",
-    #     linestyle="--",
-    #     label=f"ISODATA  (t={self.isodata:.5f})",
-    # )
-    # plt.axvline(
-    #     x=np.argmin(np.abs(self.pairsim_vector - self.minimum)),
-    #     color="y",
-    #     linestyle="--",
-    #     label=f"MINIMUM (t={self.minimum:.5f})",
-    # )
-    # plt.axvline(
-    #     x=np.argmin(np.abs(self.pairsim_vector - self.yen)),
-    #     color="slategrey",
-    #     linestyle="--",
-    #     label=f"YEN Threshold (t={self.yen:.5f})",
-    # )
-    # plt.axvline(
-    #     x=350 + self.pairsim_vector[350:700].argmin(),
-    #     color="k",
-    #     linestyle="--",
-    #     label=f"Manual: {self.pairsim_vector[self.pairsim_vector[350:700].argmin()]:.5f}",
-    # )
-
-    # NORMALPDF = 0.005 * torch.tensor(
-    #     [
-    #         2.43432053e-11,
-    #         9.13472041e-10,
-    #         2.66955661e-08,
-    #         6.07588285e-07,
-    #         1.07697600e-05,
-    #         1.48671951e-04,
-    #         1.59837411e-03,
-    #         1.33830226e-02,
-    #         8.72682695e-02,
-    #         4.43184841e-01,
-    #         1.75283005e00,
-    #         5.39909665e00,
-    #         1.29517596e01,
-    #         2.41970725e01,
-    #         3.52065327e01,
-    #         3.98942280e01,
-    #         3.52065327e01,
-    #         2.41970725e01,
-    #         1.29517596e01,
-    #         5.39909665e00,
-    #         1.75283005e00,
-    #         4.43184841e-01,
-    #         8.72682695e-02,
-    #         1.33830226e-02,
-    #         1.59837411e-03,
-    #         1.48671951e-04,
-    #         1.07697600e-05,
-    #         6.07588285e-07,
-    #         2.66955661e-08,
-    #         9.13472041e-10,
-    #         2.43432053e-11,
-    #     ],
-    #     device=self.device,
-    # )
-    # pdf_len = len(NORMALPDF)
-    # densities = torch.zeros(len(bin_vector) + pdf_len - 1, device=self.device)
-    # for i in range(len(densities) - pdf_len + 1):
-    #     densities[i : i + pdf_len] += NORMALPDF * bin_vector[i]
-    # densities = densities[15:-15]
-    # densities = densities.to("cpu").numpy()
-
-    # return densities, global_min.item(), global_max.item()

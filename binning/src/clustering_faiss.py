@@ -3,13 +3,14 @@ import json
 
 import torch
 import numpy as np
+import faiss
 from tqdm import tqdm
 
 
 from src.utils import get_available_device, Logger, get_gpu_mem
 
 
-class KMediod:
+class KMediodFAISS:
 
     def check_params(
         self,
@@ -19,9 +20,9 @@ class KMediod:
         num_steps: int,
         max_iter: int,
     ):
-        if embeddings.dtype != np.float32:
-            embeddings = embeddings.astype(np.float32)
-            print("Embeddings changed to dtype float32")
+        if embeddings.dtype != np.float16:
+            embeddings = embeddings.astype(np.float16)
+            print("Embeddings changed to dtype float16")
         if min_bin_size < 1:
             raise ValueError("Minimum bin size must be at least 1")
         if num_steps < 1:
@@ -34,6 +35,37 @@ class KMediod:
             embeddings
         ), f"Number of embeddings {len(embeddings)} does not match number of contig names {len(contig_names)}"
 
+    def build_faiss(self, IVF_index):
+        d = self.embeddings_np.shape[1]
+        self.log.append(f"N GPUs Faiss: {faiss.get_num_gpus()}")
+
+        co = faiss.GpuMultipleClonerOptions()
+        co.shard = True
+        co.useFloat16 = True
+
+        if IVF_index == False:
+            cpu_index = faiss.IndexFlatIP(d)
+            index = faiss.index_cpu_to_all_gpus(cpu_index, co)
+            index.add(self.embeddings_np)
+            self.log.append(f"FLAT FAISS GPU index built using MiB: {get_gpu_mem()}")
+        else:
+            nlist = 4096  # Number of Voronoi cells/clusters
+            nprobe = 32  # Number of clusters to search
+            quantizer = faiss.IndexFlatIP(d)  # Inner product for cosine similarity
+            cpu_index = faiss.IndexIVFFlat(
+                quantizer, d, nlist, faiss.METRIC_INNER_PRODUCT
+            )
+            index = faiss.index_cpu_to_all_gpus(cpu_index, co)
+            index.train(self.embeddings_np)
+            index.add(self.embeddings_np)
+            index.nprobe = nprobe
+
+            self.log.append(
+                f"IVF--FLAT FAISS GPU index built using MiB: {get_gpu_mem()}; nlist={nlist}, nprobe={nprobe}"
+            )
+
+        return index
+
     def __init__(
         self,
         embeddings: np.ndarray,
@@ -42,14 +74,15 @@ class KMediod:
         log: Logger,
         log_verbose: bool,
         mode: str,
-        min_bin_size: int = 10,
-        num_steps: int = 3,
-        max_iter: int = 1000,
-        block_size: int = 1000,
+        convert_million_emb_gpu_seconds: int,
+        min_bin_size: int,
+        num_steps: int,
+        max_iter: int,
+        block_size: int,
     ):
         self.check_params(embeddings, contig_names, min_bin_size, num_steps, max_iter)
 
-        device, gpu_count = get_available_device()
+        device, _ = get_available_device()
 
         self.embeddings_np = embeddings
         self.contig_names = contig_names
@@ -63,7 +96,7 @@ class KMediod:
         self.device = device
         self.block_size = block_size
 
-        self.log.append(f"Using {device} for K-medoid Clustering")
+        self.gpu_index = self.build_faiss(IVF_index=True)
 
     def fit(self, min_similarity: float, knn_k: int, knn_p: float) -> np.array:
         if not 0 < min_similarity < 1:
@@ -77,56 +110,52 @@ class KMediod:
             f"Using {self.device} and threshold {min_similarity} for k-medoid clustering"
         )
 
+        # Compute density vector using Faiss O(Nx2028) with FAISS
         density_vector = torch.zeros(N, device=self.device)
+        for i in tqdm(range(0, N, self.block_size), desc="Computing density"):
+            i_end = min(i + self.block_size, N)
+            batch = self.embeddings_np[i:i_end]
+
+            # Search batch_size points to compute density
+            similarities, _ = self.gpu_index.search(
+                batch, 2048
+            )  # gpu only supports k=2048
+            sim_matrix = torch.from_numpy(similarities).to(self.device).half()
+            mask = sim_matrix >= min_similarity
+            density_vector[i:i_end] = torch.where(
+                mask, sim_matrix, torch.zeros_like(sim_matrix)
+            ).sum(dim=1)
+
+        predictions = torch.full((N,), -1, dtype=torch.long, device=self.device)
         seeds = []
         seed_labels = []
         cluster_id = 0
 
-        # compute initial density via 2D chunking
-        for i in tqdm(range(0, N, self.block_size), desc="Density i-loop"):
-            i_end = min(i + self.block_size, N)
-            block_i_np = self.embeddings_np[i:i_end]
-            block_i = torch.from_numpy(block_i_np).to(self.device)
-            for j in range(0, N, self.block_size):
-                j_end = min(j + self.block_size, N)
-                block_j_np = self.embeddings_np[j:j_end]
-                block_j = torch.from_numpy(block_j_np).to(self.device)
-
-                sim = torch.mm(block_i, block_j.T)
-                sim = torch.where(sim >= min_similarity, sim, torch.zeros_like(sim))
-                density_vector[i:i_end] += sim.sum(dim=1)
-
-                del sim, block_j
-                torch.cuda.empty_cache()
-            del block_i
-            torch.cuda.empty_cache()
-
-        predictions = torch.full((N,), -1, dtype=torch.long, device=self.device)
         pbar = tqdm(total=self.max_iter, desc="Clusters created K-medoid")
 
         while torch.any(predictions == -1) and cluster_id < self.max_iter:
             cluster_id += 1
 
-            # select medoid
+            # select medoid O(N)
             medoid_idx = torch.argmax(density_vector).item()
             density_vector[medoid_idx] = -100  # rm seed contig
-            seed_np = self.embeddings_np[medoid_idx]
-            seed = torch.from_numpy(seed_np).to(self.device)
+            seed = (
+                torch.from_numpy(self.embeddings_np[medoid_idx]).to(self.device).half()
+            )
             available_mask = predictions == -1
 
             for _ in range(self.num_steps):
-                # full embedding block-by-block for mv
-                sims_full = []
+                sims_full = []  # potential oom
                 for i in range(0, N, self.block_size):
                     i_end = min(i + self.block_size, N)
-                    block_np = self.embeddings_np[i:i_end]
-                    block = torch.from_numpy(block_np).to(self.device)
+                    block = (
+                        torch.from_numpy(self.embeddings_np[i:i_end])
+                        .to(self.device)
+                        .half()
+                    )
                     sims_part = torch.mv(block, seed)
                     sims_full.append(sims_part)
-                    del block, sims_part
-                    torch.cuda.empty_cache()
                 sim_vec = torch.cat(sims_full)
-                del sims_full
 
                 candidate_mask = (sim_vec >= min_similarity) & available_mask
                 candidates = torch.where(candidate_mask)[0]
@@ -134,33 +163,32 @@ class KMediod:
                 if len(candidates) == 0:
                     break
 
-                emb_candicates_np = self.embeddings_np[candidates.cpu().numpy()]
-                emb_candidates = torch.from_numpy(emb_candicates_np).to(self.device)
+                # Update seed as mean of candidates
+                emb_candidates = (
+                    torch.from_numpy(self.embeddings_np[candidates.cpu().numpy()])
+                    .to(self.device)
+                    .half()
+                )
                 seed = torch.mean(emb_candidates, dim=0)
 
             predictions[candidates] = cluster_id
             seeds.append(seed.cpu().numpy())
             seed_labels.append(cluster_id)
 
-            # decrement density via 2D chunking on candidates
+            # Update density vector for affected points O(NxC)
             for i in range(0, N, self.block_size):
                 i_end = min(i + self.block_size, N)
                 block_i_np = self.embeddings_np[i:i_end]
-                block_i = torch.from_numpy(block_i_np).to(self.device)
+                block_i = torch.from_numpy(block_i_np).to(self.device).half()
 
                 for c0 in range(0, len(candidates), self.block_size):
                     c1 = min(len(candidates), c0 + self.block_size)
                     cand_np = self.embeddings_np[candidates[c0:c1].cpu().numpy()]
-                    block_c = torch.from_numpy(cand_np).to(self.device)
+                    block_c = torch.from_numpy(cand_np).to(self.device).half()
 
                     sim = torch.mm(block_i, block_c.T)
                     sim = torch.where(sim >= min_similarity, sim, torch.zeros_like(sim))
                     density_vector[i:i_end] -= sim.sum(dim=1)
-
-                    del sim, block_c
-                    torch.cuda.empty_cache()
-                del block_i
-                torch.cuda.empty_cache()
 
             density_vector[candidates] = -100
             pbar.update(1)
@@ -176,8 +204,8 @@ class KMediod:
             predictions[predictions == label] = -1
 
         # print cluster sizes
-        labels, counts = torch.unique(predictions, return_counts=True)
         if self.log_verbose:
+            labels, counts = torch.unique(predictions, return_counts=True)
             for i, (label, count) in enumerate(zip(labels.cpu(), counts.cpu())):
                 self.log.append(f"Cluster {label}: {count} points")
                 if i == 50:
@@ -186,7 +214,7 @@ class KMediod:
         predictions = predictions.cpu().numpy()
         assert (
             len(predictions) == len(self.embeddings_np) == len(self.contig_names)
-        ), f"Len of predictions {len(predictions)} does not match embeddings {len(self.embeddings_np)} and contig_names {len(self.contig_names)}"
+        ), f"Len mismatch: predictions {len(predictions)}, embeddings {len(self.embeddings_np)}, contig_names {len(self.contig_names)}"
 
         predictions, contig_names = self.remove_unassigned_sequences(predictions)
         self.save_clusters(knn_k, knn_p, predictions, contig_names)

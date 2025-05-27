@@ -33,14 +33,14 @@ sample_str = ' '.join(SAMPLES.get(DATASET, []))
 
 ALL_MODELS  = [d["name"] for d in datasets_model_config["models"]]
 MODEL = config.get("MODEL", None)
-assert MODEL==None or MODEL in ALL_MODELS, f"Error: Selected model '{MODEL}' is not in the available DATASET: {ALL_MODELS}"
+assert MODEL==None or MODEL in ALL_MODELS, f"Error: Selected model '{MODEL}' is not in the available MODELS: {ALL_MODELS}"
 
 MODEL_PATH=None
 BATCH_SIZES=None
 WEIGHT_PATH=None
 if MODEL in other_model_config.keys():
     MODEL_PATH = other_model_config[MODEL]["model_path"]
-    BATCH_SIZES = other_model_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnaberth_400k', 'dnaberth_2m', 'dnabert2', 'dnabert2random'] else 0
+    BATCH_SIZES = other_model_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnaberth_400kv2', 'dnaberth_2mv3', 'dnaberth_2mv4', 'dnaberth_2mv5', 'dnaberth_400k', 'dnaberth_2mv1', 'dnaberth_2mv2', 'dnaberth2mv1_150k', 'dnabert2', 'dnabert2random'] else 0
     WEIGHT_PATH = other_model_config[MODEL]["weight_path"] if 'dnaberth' in  MODEL else None
 
 #processing flow of snakemake 
@@ -61,8 +61,6 @@ MINSIZE_CONTIGS=2000
 KNN_K = [100,200,300,400,500,600,700,800,900,1000]
 KNN_P = [25,50,75]
 VAL_PROPORTION=0.1
-# KNN_K = [200]
-# KNN_P = [25]
 
 print(f"-------------Configuration Flags:--------------")
 print(f"  - DATASET:             {DATASET}")
@@ -175,6 +173,35 @@ elif MODEL in ['dnaberts'] and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output", "test"),
         os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberts"),
+    ]
+
+elif MODEL in ['dnaberth_400kv2'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberth_400kv2_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberth_400kv2"),
+    ]
+
+elif MODEL in ['dnaberth_2mv3'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberth_2mv3_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberth_2mv3"),
+    ]
+
+elif MODEL in ['dnaberth_2mv4'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberth_2mv4_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberth_2mv4"),
+    ]
+elif MODEL in ['dnaberth_2mv5'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberth_2mv5_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberth_2mv5"),
+    ]
+
+elif MODEL in ['dnaberth_400k'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberth_400k_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberth_400k"),
     ]
 
 elif MODEL in ['dnaberth_400k'] and not config_nomodelrun:
@@ -465,6 +492,7 @@ rule other_model_test:
         os.path.join(BINNING_DIR, "envs/binning.yml")
     shell:
         """
+        pip uninstall -y triton
         best_combination_file="{input.best_kp_path}/best_combination.json"
         best_k=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_k"])' $best_combination_file)
         best_p=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_p"])' $best_combination_file)
@@ -718,58 +746,5 @@ rule checkm2:
             checkm2 predict --threads {threads} --input {input.fasta_bins} --output-directory {output.output} \
             --database_path {OUTDIR_MODEL_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
         """
-
-
-
-
-
-
-
-# rule postprocess_cluster_outputs_comebin:
-#     input:
-#         model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output")
-#     output:
-#         cluster_fasta=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"))
-#     log:
-#         os.path.join(LOGS, DATASET, "comebin_bin_postprocessing.log")
-#     params:
-#         minsize_bins = 250000
-#     conda:
-#         "envs/cami2_processing.yml"
-#     shell:
-#         """
-#         python {SRC_DIR}/postprocess_cluster_outputs_comebin.py {output.cluster_fasta} {input.model_outputs}/comebin_res/comebin_res_bins \
-#         {params.minsize_bins} --log {log}
-#         """
-
-
-
-# rule concatenate_process_semibin:
-#     input:
-#         os.path.join(OUTDIR, DATASET, "catalogue.fna.gz")
-#     output:
-#         os.path.join(OUTDIR, DATASET, "semibin/catalogue_semibin.fna")
-#     conda:
-#         "envs/cami2_environment.yml"
-#     shell:
-#         """
-#         zcat {input} | sed -E 's/([0-9]+)([A-Za-z])/\\1:\\2/' > {output} 
-#         """
-
-
-# rule bam_process_semibin:
-#     input:
-#         bam=os.path.join(OUTDIR, DATASET, "{sample}_sorted.bam")
-#     output:
-#         modified_bam=os.path.join(OUTDIR, DATASET, "semibin/{sample}_sorted_semibin.bam")
-#     conda:
-#         "envs/cami2_environment.yml"
-#     shell:
-#         """
-#         samtools view -H {input.bam} | \\
-#         sed -E 's/([0-9]+)([A-Za-z0-9]+)/\\1:\\2/' | \\
-#         samtools reheader - {input.bam} > {output.modified_bam}
-#         """
-
     
 

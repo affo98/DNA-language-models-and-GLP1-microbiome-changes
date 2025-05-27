@@ -3,6 +3,8 @@ from Bio import SeqIO
 import csv
 import json
 import os
+import sys
+import subprocess
 
 import numpy as np
 import torch
@@ -28,6 +30,53 @@ class Logger:
         print(message)
         with open(self.log_path, "a") as log_file:
             log_file.write(message + "\n")
+
+
+def get_gpu_mem() -> int | None:
+    """Return current GPU memory usage in MiB (as int)."""
+    try:
+        out = subprocess.check_output(
+            ["nvidia-smi", "--query-gpu=memory.used", "--format=csv,noheader,nounits"],
+            encoding="utf-8",
+        )
+        # if multiple GPUs, take the first line
+        used = int(out.strip().split("\n")[0])
+        return used
+    except Exception as e:
+        print("Warning: could not query nvidia-smi:", e, file=sys.stderr)
+        return None
+
+
+def read_embeddings(
+    input_path: str, model_name, log: Logger
+) -> tuple[np.memmap | np.ndarray, list[str]]:
+    """Read embeddings from file and return as numpy array and list of contig names."""
+
+    with open(os.path.join(input_path, "n_total_val_test.json")) as f:
+        n_val_test_data = json.load(f)
+    n_test = n_val_test_data["n_test"]
+    log.append(f"Number of test contigs: {n_test}")
+
+    try:
+        embeddings = np.memmap(
+            os.path.join(input_path, "embeddings", "embeddings.npy"),
+            dtype="float32",
+            mode="r",
+            shape=(n_test, 768),
+        )  # embeddings_array = np.array(embeddings)
+        contig_names = np.load(
+            os.path.join(input_path, "embeddings", "contignames.npy"), allow_pickle=True
+        )
+    except:
+        embedding_data = np.load(
+            os.path.join(input_path, "embeddings", f"{model_name}.npz")
+        )
+        embeddings = embedding_data["embeddings"]
+        contig_names = embedding_data["contig_names"]
+
+    log.append(f"Read {embeddings.shape[0]} embeddings from {input_path}")
+
+    return embeddings, contig_names
 
 
 def read_contigs(

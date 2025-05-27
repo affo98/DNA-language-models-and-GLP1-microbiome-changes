@@ -2,7 +2,6 @@ import os
 import yaml
 import glob
 
-#dirs#
 CAMI2_DIR = os.path.join(os.getcwd(), "cami2_benchmark")
 BINNING_DIR = os.path.join(os.getcwd(), "binning")
 NGS_DIR = os.path.join(os.getcwd(), "ngs_pipeline")
@@ -41,7 +40,6 @@ if MODEL in models_config.keys():
     BATCH_SIZES = models_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnaberth_400kv2', 'dnaberth_2mv3', 'dnaberth_2mv4', 'dnaberth_2mv5', 'dnabert2', 'dnabert2random'] else 0
     WEIGHT_PATH = models_config[MODEL]["weight_path"] if 'dnaberth' in  MODEL else None
 
-
 MIL_METHODS = config.get("MIL_METHODS", None)
 if isinstance(MIL_METHODS, str):
     MIL_METHODS = [MIL_METHODS]
@@ -64,7 +62,6 @@ config_bin_lookup = bool(config.get("BIN_LOOKUP", False))
 
 #contig params
 MINSIZE_BINS=200000 #changed from 250000 in cami2, could potentially be smaller, e.g. 150.000
-MINSIZE_CONTIGS=2000 #do we need this?
 
 #knn/binning params
 KNN_K = [100,200,300,400,500,600,700,800,900,1000]
@@ -81,12 +78,12 @@ print(f"  - Model Path:               {MODEL_PATH}")
 print(f"  - Batch Sizes:              {BATCH_SIZES}")
 print(f"  - CheckM2:                  {config_checkm2}")
 print(f"  - MinSize Bins:             {MINSIZE_BINS}")
-print(f"  - MinSize Contigs:          {MINSIZE_CONTIGS}")
 print(f"  - No model run:             {config_nomodelrun}")
 print(f"  - KNN params:               K:{KNN_K}, P:{KNN_P}")
 print(f"  - Phenotype MIL:            {config_phenotype_mil}")
 print(f"  - MIL Method:               {MIL_METHODS}")
 print(f"  - Hausdorff:                {config_hausdorff}")
+
 
 
 
@@ -97,6 +94,7 @@ if MODEL in ['dnaberts'] and not config_nomodelrun:
         os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "dnaberts_output", "test"),
         os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "dnaberts"),
     ]
+
 elif MODEL in ['dnaberth_2mv4'] and not config_nomodelrun:
     input_files += [
         os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "dnaberth_2mv4_output", "test"),
@@ -109,7 +107,6 @@ elif MODEL=='vamb' and not config_nomodelrun:
         os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_postprocess"),
         os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "vamb"),
     ]
-
 
 if config_checkm2:
     input_files += [os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "checkm2", f"{MODEL}_results")]
@@ -126,8 +123,8 @@ if config_bin_lookup:
     input_files += [
         os.path.join(OUTDIR_MIL_RESULTS, "gldb_db"),
         os.path.join(OUTDIR_MIL_RESULTS, DATASET, f"{MODEL}_binlookup"),
-        os.path.join(OUTDIR_MIL_RESULTS, DATASET, f"{MODEL}_binlookup.csv")
     ]
+
 
 if config_phenotype_mil:
     input_files += [os.path.join(OUTDIR_MIL_RESULTS, DATASET, f"{MODEL}_results")]
@@ -136,10 +133,9 @@ if config_phenotype_mil:
 rule all:
     input: input_files
 
+
 if config_phenotype_mil:
     ruleorder: normalize_abundances > get_cluster_abundances > phenotype_mil
-
-
 
 
 
@@ -250,9 +246,6 @@ rule phenotype_mil:
             --mil_methods {MIL_METHODS} \
             --agglomorative_path {params.agglomorative_clustering_path}
         """
-
-
-
 
 
 
@@ -460,4 +453,5 @@ rule checkm2:
             checkm2 predict --threads {threads} --input {input.fasta_bins} --output-directory {output.output} \
             --database_path {OUTDIR_BINNING_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
         """
+
 # End Binning---------------------------------------------------------------------------------------------

@@ -21,6 +21,7 @@ PROCESSED_DATA_DIR = os.path.join("cami2_benchmark", "processed_data")
 OUTPUT_DIR = os.path.join("cami2_benchmark", "model_results", "parsed_results")
 
 COMPLETENESS_BINS = [90, 80, 70, 60, 50]
+CONTAMINATION = 5
 
 BINNER_MODELS = ["vamb", "taxvamb", "comebin"]
 
@@ -42,13 +43,20 @@ OTHER_MODELS = [
     "dnabert2",
     "dnabert2random",
     "dnaberts",
+    "dnaberth_400kv2",
+    "dnaberth_2mv4",
+    "dnaberth_2mv5",
+    "dnaberth_2mv3",
+    "dnaberth_400k",
+    "dnaberth_2mv1",
+    "dnaberth_2mv2",
 ]
 
 
 def parse_quality_report(file_path):
     """Parses a CheckM2 quality report and extracts completeness & contamination."""
     df = pd.read_csv(file_path, sep="\t")
-    df = df[df["Contamination"] < 5]
+    df = df[df["Contamination"] < CONTAMINATION]
     return df["Completeness"].values
 
 
@@ -283,6 +291,7 @@ def parse_bin_postprocess(logdir: str) -> pd.DataFrame:
     results = []
     for dataset in DATASETS:
         for model in OTHER_MODELS + BINNER_MODELS:
+            print(model)
             if model in OTHER_MODELS:
                 log_path = os.path.join(
                     logdir, dataset, f"{model}_test_bin_postprocessing.log"
@@ -385,16 +394,16 @@ def parse_heatmaps(model_results_dir: str) -> pd.DataFrame:
 if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    # cami2_results = process_all_reports(MODEL_RESULTS_DIR)
+    cami2_results = process_all_reports(MODEL_RESULTS_DIR)
 
-    # knn_histograms = parse_knn_histograms(MODEL_RESULTS_DIR)
+    knn_histograms = parse_knn_histograms(MODEL_RESULTS_DIR)
+
+    runtimes = parse_runtimes(BASE_DIR)
+
+    bin_postprocess = parse_bin_postprocess(LOG_DIR)
+
+    n_valtest = parse_nvaltest(MODEL_RESULTS_DIR)
+
+    heatmaps = parse_heatmaps(MODEL_RESULTS_DIR)
 
     contig_summary, contig_lengths = parse_contig_lengths(PROCESSED_DATA_DIR)
-
-    # runtimes = parse_runtimes(BASE_DIR)
-
-    # bin_postprocess = parse_bin_postprocess(LOG_DIR)
-
-    # n_valtest = parse_nvaltest(MODEL_RESULTS_DIR)
-
-    # heatmaps = parse_heatmaps(MODEL_RESULTS_DIR)

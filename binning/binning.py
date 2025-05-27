@@ -3,9 +3,11 @@ from argparse import ArgumentParser
 
 from time import time
 
-from src.clustering import KMediod
 from src.get_embeddings import Embedder
 from src.threshold import Threshold
+from src.threshold_faiss import ThresholdFAISS
+from src.clustering import KMediod
+from src.clustering_faiss import KMediodFAISS
 from src.utils import read_contigs, Logger, split_contigs_valtest
 
 # uncomment to use hubness reducion
@@ -18,12 +20,14 @@ VAL_PROPORTION = 0.1  # 0.1 for cami2, and 0.01 should be enough for phenotype d
 
 # threshold calculation
 N_BINS = 1000
-BLOCK_SIZE = 1000  # might need to chagne in hubness
+BLOCK_SIZE = 10_000
 
 # kmediod
 MIN_BIN_SIZE = 2  # changed from 10 to 2, because bins less than MINSIZE_BINS (250000) will be removed in postprocessing.
 NUM_STEPS = 3
 MAX_ITER = 2000  # increased from 1000
+
+CONVERT_MILLION_EMB_GPU_SECONDS = 6
 
 
 def main(args, log):
@@ -31,8 +35,8 @@ def main(args, log):
     contigs, contig_names = read_contigs(
         args.contigs, filter_len=MAX_CONTIG_LENGTH, log=log
     )
-    # contigs = contigs[0:5000]
-    # contig_names = contig_names[0:5000]
+    # contigs = contigs[0:10000]
+    # contig_names = contig_names[0:100000]
 
     contigs_test, contigs_val, contig_names_test, contig_names_val = (
         split_contigs_valtest(
@@ -59,7 +63,7 @@ def main(args, log):
             args.model_name,
             args.model_path,
             args.weight_path,
-            os.path.join(args.save_path, "embeddings", f"{args.model_name}.npz"),
+            args.save_path,
             normalize_embeddings=True,
             log=log,
         )
@@ -109,19 +113,15 @@ def main(args, log):
             args.model_name,
             args.model_path,
             args.weight_path,
-            os.path.join(args.save_path, "embeddings", f"{args.model_name}.npz"),
+            # "phenotype_mil/binning_results/T2D-EW/dnaberts_output/test/",
+            args.save_path,  # os.path.join("11may", "T2D-EW", "dnaberts_output", "test"),
             normalize_embeddings=True,
             log=log,
         )
         embeddings_test = embedder_test.get_embeddings()
 
         thresholder_test = Threshold(
-            embeddings_test,
-            N_BINS,
-            BLOCK_SIZE,
-            args.save_path,
-            args.model_name,
-            log,
+            embeddings_test, N_BINS, BLOCK_SIZE, args.save_path, args.model_name, log
         )
 
         kmediod_test = KMediod(
@@ -136,7 +136,6 @@ def main(args, log):
             MAX_ITER,
             BLOCK_SIZE,
         )
-
         threshold = thresholder_test.get_knn_threshold(knnk, knnp)
         _, _ = kmediod_test.fit(threshold, knnp, knnk)
 

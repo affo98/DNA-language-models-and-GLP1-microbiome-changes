@@ -1,23 +1,23 @@
 name: binning
 channels:
+  - pytorch
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - python
-  - pip
+  - python=3.10
   - numpy
   - scikit-learn
   - biopython
   - tqdm
+  - matplotlib
+  - seaborn
+  - pandas
+  - faiss-gpu # GPU version of FAISS from conda-forge
+  - pytorch # GPU-compatible PyTorch
+  - torchvision
+  - torchaudio
+  - pip
   - pip:
-      - torch
-      - torchvision
-      - torchaudio
-      - --extra-index-url https://download.pytorch.org/whl/cu118
       - transformers==4.50.3
       - einops
-      - matplotlib
-      - seaborn
-      - pandas
-      - git+https://github.com/VarIr/scikit-hubness.git

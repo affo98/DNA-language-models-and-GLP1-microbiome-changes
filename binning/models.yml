@@ -11,20 +11,45 @@ dnaberts:
   model_path: "zhihan1996/DNABERT-S"
   batch_sizes: [32, 8, 1]
 
-dnaberth_400k:
+dnaberth_400kv2:
   model_path: "zhihan1996/DNABERT-S"
   batch_sizes: [32, 8, 1]
-  weight_path: "train/dnaberth_weights/dnaberth_400k"
+  weight_path: "train/dnaberth_weights/dnaberth_400kv2"
+
+dnaberth_2mv3:
+  model_path: "zhihan1996/DNABERT-S"
+  batch_sizes: [32, 8, 1]
+  weight_path: "train/dnaberth_weights/dnaberth_2mv3"
 
 dnaberth_2mv4:
   model_path: "zhihan1996/DNABERT-S"
   batch_sizes: [32, 8, 1]
   weight_path: "train/dnaberth_weights/dnaberth_2mv4"
 
-dnaberth_2m:
+dnaberth_2mv5:
   model_path: "zhihan1996/DNABERT-S"
   batch_sizes: [32, 8, 1]
-  weight_path: "train/dnaberth_weights/dnaberth_2m"
+  weight_path: "train/dnaberth_weights/dnaberth_2mv5"
+
+dnaberth_400k:
+  model_path: "zhihan1996/DNABERT-S"
+  batch_sizes: [32, 8, 1]
+  weight_path: "train/dnaberth_weights/dnaberth_400k"
+
+dnaberth_2mv1:
+  model_path: "zhihan1996/DNABERT-S"
+  batch_sizes: [32, 8, 1]
+  weight_path: "train/dnaberth_weights/dnaberth_2mv1"
+
+dnaberth_2mv2:
+  model_path: "zhihan1996/DNABERT-S"
+  batch_sizes: [32, 8, 1]
+  weight_path: "train/dnaberth_weights/dnaberth_2mv2"
+
+dnaberth_2mv1_150k:
+  model_path: "zhihan1996/DNABERT-S"
+  batch_sizes: [32, 8, 1]
+  weight_path: "train/dnaberth_weights/dnaberth_2mv1_150k"
 
 dnabert2:
   model_path: "zhihan1996/DNABERT-2-117M"

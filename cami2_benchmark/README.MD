@@ -1,6 +1,6 @@
-## Cami2 Benchmark
+## Cami2 Benchmark 
 
-The code in this folder is used to benchmark models on Cami2 datasets. The datasets in CAMI2 are designed to mimic realistic microbiome environments and include a vast array of both new and known genomes. CAMI2 datasets are often used to benchmark metagenomic binners: https://cami-challenge.org/.
+The code in this folder is used to benchmark models on metagenomics binning on Cami2 datasets. The datasets in CAMI2 are designed to mimic realistic microbiome environments and include a vast array of both new and known genomes. CAMI2 datasets are often used to benchmark metagenomic binners: https://cami-challenge.org/.
 
 We also include the MetaHIT "error free" dataset from [metabat](https://figshare.com/articles/dataset/MetaHIT_error-free_contigs_from_MetaBAT/27933807?file=50894283).
 
@@ -40,7 +40,7 @@ The list of models are specified in the file `config.yml`. They include:
 * **DNABERT-S**: [github](https://github.com/MAGICS-LAB/DNABERT_S)
 * **DNABERT-2**: [github](https://github.com/MAGICS-LAB/DNABERT_2)
 * **DNABERT-2 Random** DNABERT-2 with randomly initialized weights. 
-
+* **DNABERT-H** Our DNABERT-H model.
 
 
 ### Usage

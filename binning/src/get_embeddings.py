@@ -20,6 +20,7 @@ from src.utils import (
     sort_sequences,
     get_available_device,
     Logger,
+    read_embeddings,
 )
 from src.dataset import ContigDataset
 
@@ -76,18 +77,15 @@ class Embedder:
 
         """
 
-        if os.path.exists(self.save_path):
-            self.log.append(f"Load embeddings from file {self.save_path}\n")
-            embeddings = np.load(self.save_path)
+        try:
+            embeddings, _ = read_embeddings(self.save_path, self.model_name, self.log)
+            return embeddings
+        except FileNotFoundError:
+            self.log.append(
+                f"Embeddings not found at {self.save_path}, generating new ones"
+            )
 
-            if embeddings.shape[0] == len(self.dna_sequences):
-                return embeddings
-            else:
-                self.log.append(
-                    f"Mismatch in number of embeddings from {self.save_path} and DNA sequences.\nRecalculating embeddings."
-                )
-        else:
-            os.makedirs(os.path.dirname(self.save_path), exist_ok=True)
+        os.makedirs(os.path.join(self.save_path, "embeddings"), exist_ok=True)
 
         if self.model_name == "tnf":
             embeddings = self.calculate_tnf()
@@ -95,21 +93,32 @@ class Embedder:
             embeddings = self.calculate_tnf(use_kernel=True)
         elif self.model_name == "dna2vec":
             embeddings = self.calculate_dna2vec()
+
+        if self.model_name in ["tnf", "tnfkernel", "dna2vec"]:
+            self.log.append(f"Embeddings shape: {embeddings.shape}")
+            if self.normalize_embeddings:
+                embeddings = normalize(embeddings)
+            save_path = os.path.join(self.save_path, "embeddings", f"embeddings.npy")
+            np.savez(save_path, embeddings=embeddings, contig_names=self.contig_names)
+            torch.cuda.empty_cache()
+            return embeddings
+
         elif self.model_name in [
             "dnaberts",
+            "dnaberth_400kv2",
+            "dnaberth_2mv3",
+            "dnaberth_2mv4",
+            "dnaberth_2mv5",
             "dnaberth_400k",
+            "dnaberth_2mv1",
+            "dnaberth_2mv2",
+            "dnaberth_2mv1_150k",
             "dnabert2",
             "dnabert2random",
         ]:
             embeddings = self.calculate_llm_embedding()
-
-        if self.normalize_embeddings:
-            embeddings = normalize(embeddings)
-
-        self.log.append(f"Embeddings shape: {embeddings.shape}")
-        np.savez(self.save_path, embeddings=embeddings, contig_names=self.contig_names)
-        torch.cuda.empty_cache()
-        return embeddings
+            torch.cuda.empty_cache()
+            return embeddings
 
     def calculate_llm_embedding(self) -> np.array:
         """Get llm embeddings. Process dna sequences based on their length to increase efficiency, i.e. use a large batch size"""
@@ -156,6 +165,18 @@ class Embedder:
         if self.n_gpu > 1:
             self.llm_model = nn.DataParallel(self.llm_model)
 
+        ### Saving on memmap file to avoid OOM errors ###
+        N = len(self.dna_sequences)
+        D = self.llm_inference([self.dna_sequences[0]], batch_size=1).shape[1]
+        self.log.append(f"Embeddings memmap shape: {N} x {D}")
+        emb_path = os.path.join(self.save_path, "embeddings", f"embeddings.npy")
+        mmap = np.memmap(emb_path, dtype="float32", mode="w+", shape=(N, D))
+
+        names_path = os.path.join(
+            self.save_path, "embeddings", f"contignames.npy"
+        )  # save contig names seperately
+        np.save(names_path, np.array(self.contig_names, dtype="<U"))
+
         ### Looping through the sequences ###
         min_sequence_lengths = [
             min([len(seq) for seq in self.dna_sequences]) - 1,
@@ -167,11 +188,6 @@ class Embedder:
             20000,
             max([len(seq) for seq in self.dna_sequences]) + 1,
         ]
-
-        original_ids = (
-            []
-        )  # [index in the original list, so if dna_seq is in position 4512, teh index is 4512]
-        processed_embeddings = []
 
         for sequence_length_min, sequence_length_max, batch_size in zip(
             min_sequence_lengths, max_sequence_lengths, self.batch_sizes
@@ -185,26 +201,42 @@ class Embedder:
                     # and (if len(seq) < LLM_SEQ_MAX_LENGTH) #set max length to avoid OOM errors. Already handles in utils.py.
                 ]
             )
-            self.log.append(
-                f"Running {len(dna_sequences_filtered)} sequences with len between {sequence_length_min} to {sequence_length_max}"
-            )
             if len(dna_sequences_filtered) == 0:
                 continue
+            # self.log.append(
+            #     f"Running {len(dna_sequences_filtered)} sequences with len between {sequence_length_min} to {sequence_length_max}"
+            # )
 
-            dna_sequences_filtered = list(dna_sequences_filtered)
-            embeddings = self.llm_inference(dna_sequences_filtered, batch_size)
-            processed_embeddings.append(embeddings)
+            # Process in 5000 sequences at a time to avoid OOM errors
+            n_dna_sequences_filtered_mini_processing = 5000
+            for start in tqdm(
+                range(
+                    0,
+                    len(dna_sequences_filtered),
+                    n_dna_sequences_filtered_mini_processing,
+                ),
+                desc=f"Outer: Processing {len(dna_sequences_filtered)} contigs in mini-batches of {n_dna_sequences_filtered_mini_processing}, length: {sequence_length_min} to {sequence_length_max}",
+                position=0,
+            ):
+                end = min(
+                    start + n_dna_sequences_filtered_mini_processing,
+                    len(dna_sequences_filtered),
+                )
+                mini_idxs = indices_filtered[start:end]
+                mini_seqs = dna_sequences_filtered[start:end]
 
-            indices_filtered = list(indices_filtered)
-            original_ids.extend(indices_filtered)
+                embeddings = self.llm_inference(list(mini_seqs), batch_size)
+                if self.normalize_embeddings:
+                    embeddings = normalize(embeddings).astype("float32")
 
-        embeddings = np.concatenate(
-            processed_embeddings,
-            axis=0,
+                for j, orig_idx in enumerate(mini_idxs):
+                    mmap[orig_idx, :] = embeddings[j]
+
+        mmap.flush()
+        self.log.append(
+            f"Wrote embeddings memmap to {emb_path} and names to {names_path}"
         )
-        embeddings = embeddings[np.argsort(original_ids)]
-
-        return embeddings
+        return np.memmap(emb_path, dtype="float32", mode="r", shape=(N, D))
 
     def collate_fn(self, batch: list[str]):
         # batch: list of raw DNA sequences
@@ -213,6 +245,7 @@ class Embedder:
             padding="longest",  # pad up to longest in this batch
             truncation=True,  # truncate if too long
             return_tensors="pt",
+            max_length=1000000,
         )
 
         return {
@@ -254,17 +287,13 @@ class Embedder:
         )
         if log_tokenlengths:
             all_token_lengths = []
-        for i, batch in enumerate(tqdm(data_loader)):
 
-            # inputs_tokenized = self.llm_tokenizer.batch_encode_plus(
-            #     batch,
-            #     return_tensors="pt",
-            #     return_attention_mask=True,
-            #     padding=True,
-            #     #max_length=self.llm_tokenizer.model_max_length,  # change to avoid OOM erros
-            # )
-            # input_ids = inputs_tokenized["input_ids"].to(self.device)
-            # attention_mask = inputs_tokenized["attention_mask"].to(self.device)
+        for i, batch in tqdm(
+            enumerate(data_loader),
+            desc="Inner: Running LLM Inference",
+            position=1,
+            leave=False,
+        ):
 
             input_ids, attention_mask = batch["input_ids"].to(self.device), batch[
                 "attention_mask"

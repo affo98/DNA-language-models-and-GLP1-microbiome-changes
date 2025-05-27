@@ -48,6 +48,13 @@ models:
   - name: tnfkernel
   - name: dna2vec
   - name: dnaberts
+  - name: dnaberth_400kv2
+  - name: dnaberth_2mv3
+  - name: dnaberth_2mv4
+  - name: dnaberth_2mv5
   - name: dnaberth_400k
+  - name: dnaberth_2mv1
+  - name: dnaberth_2mv2
+  - name: dnaberth_2mv1_150k
   - name: dnabert2
   - name: dnabert2random
