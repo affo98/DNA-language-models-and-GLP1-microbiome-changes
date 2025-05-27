@@ -189,11 +189,6 @@ class Embedder:
             max([len(seq) for seq in self.dna_sequences]) + 1,
         ]
 
-        # original_ids = (
-        #    []
-        # )  # [index in the original list, so if dna_seq is in position 4512, teh index is 4512]
-        # processed_embeddings = []
-
         for sequence_length_min, sequence_length_max, batch_size in zip(
             min_sequence_lengths, max_sequence_lengths, self.batch_sizes
         ):
@@ -242,19 +237,6 @@ class Embedder:
             f"Wrote embeddings memmap to {emb_path} and names to {names_path}"
         )
         return np.memmap(emb_path, dtype="float32", mode="r", shape=(N, D))
-
-        # processed_embeddings.append(embeddings)
-
-        #     indices_filtered = list(indices_filtered)
-        #     original_ids.extend(indices_filtered)
-
-        # embeddings = np.concatenate(
-        #     processed_embeddings,
-        #     axis=0,
-        # )
-        # embeddings = embeddings[np.argsort(original_ids)]
-
-        # return embeddings
 
     def collate_fn(self, batch: list[str]):
         # batch: list of raw DNA sequences
