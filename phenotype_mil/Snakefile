@@ -38,7 +38,7 @@ BATCH_SIZES=None
 WEIGHT_PATH=None
 if MODEL in models_config.keys():
     MODEL_PATH = models_config[MODEL]["model_path"]
-    BATCH_SIZES = models_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnaberth_2mv4', 'dnabert2', 'dnabert2random'] else 0
+    BATCH_SIZES = models_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnaberth_400kv2', 'dnaberth_2mv3', 'dnaberth_2mv4', 'dnaberth_2mv5', 'dnabert2', 'dnabert2random'] else 0
     WEIGHT_PATH = models_config[MODEL]["weight_path"] if 'dnaberth' in  MODEL else None
 
 
@@ -70,11 +70,7 @@ MINSIZE_CONTIGS=2000 #do we need this?
 KNN_K = [100,200,300,400,500,600,700,800,900,1000]
 KNN_P = [25,50,75]
 
-if DATASET == 'T2D-EW': 
-    VAL_PROPORTION=0.004 # change for all samples, should be around 100k
-    #VAL_PROPORTION=0.05
-else:
-    VAL_PROPORTION=0.02
+VAL_PROPORTION=0.1
 
 
 print(f"-------------Configuration Flags:--------------")
@@ -98,8 +94,13 @@ input_files = []
 
 if MODEL in ['dnaberts'] and not config_nomodelrun:
     input_files += [
-        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "dnaberts_output", "test2"),
+        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "dnaberts_output", "test"),
         os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "dnaberts"),
+    ]
+elif MODEL in ['dnaberth_2mv4'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "dnaberth_2mv4_output", "test"),
+        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "dnaberth_2mv4"),
     ]
 
 elif MODEL=='vamb' and not config_nomodelrun:
@@ -108,6 +109,7 @@ elif MODEL=='vamb' and not config_nomodelrun:
         os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_postprocess"),
         os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "vamb"),
     ]
+
 
 if config_checkm2:
     input_files += [os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "checkm2", f"{MODEL}_results")]
@@ -129,7 +131,6 @@ if config_bin_lookup:
 
 if config_phenotype_mil:
     input_files += [os.path.join(OUTDIR_MIL_RESULTS, DATASET, f"{MODEL}_results")]
-    #input_files += [os.path.join(OUTDIR_MIL_RESULTS, DATASET, f"{MODEL}_TEST")]
 
 
 rule all:
@@ -137,6 +138,7 @@ rule all:
 
 if config_phenotype_mil:
     ruleorder: normalize_abundances > get_cluster_abundances > phenotype_mil
+
 
 
 
@@ -195,11 +197,15 @@ rule download_gldb_db:
         fasta_bins=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "{MODEL}")
     output:
         database = directory(os.path.join(OUTDIR_MIL_RESULTS, "gldb_db"))
-    conda:
-        ...
     shell:
         """
-        
+        if [ ! -d {ouput.database} ]; then
+            echo "Downloading gtdbtk database..."
+            mkdir -p {output.database}
+            wget https://data.gtdb.ecogenomic.org/releases/latest/auxillary_files/gtdbtk_package/full_package/gtdbtk_data.tar.gz 
+            tar -xvzf gtdbtk_data.tar.gz -C {output.database}
+            rm gtdbtk_data.tar.gz
+        fi
         """
 
 rule lookup_bins:
@@ -208,25 +214,14 @@ rule lookup_bins:
     output:
         bin_lookups = directory(os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_binlookup")),
     conda:
-        ...
+        'envs/gtdbtk.yml'
     params:
         database=os.path.join(OUTDIR_MIL_RESULTS, "gldb_db")
     shell:
         """
-        gltdb_tk {input.fasta_bins} {output.bin_lookups} -db {params.database}
-        """
-
-
-rule lookupbins_lookup_bins:
-    input:
-        bin_lookups = os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_binlookup")
-    output:
-        bin_lookup_file = os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_binlookup.csv"),
-    conda:
-        ...
-    shell:
-        """
-        python {SRC_DIR}/... 
+        conda env config vars set GTDBTK_DATA_PATH={params.database}
+        conda deactivate && conda activate gtdbtk
+        gtdbtk classify_wf --genome_dir {input.fasta_bins} --out_dir {output.bin_lookups} --cpus 64 --skip_ani_screen --extension "fna"
         """
 
 
@@ -235,7 +230,6 @@ rule phenotype_mil:
         cluster_dir = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test"),
         sample_labels = SAMPLE_LABELS_FILE,
     output:
-        #result_dir = directory(os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_TEST"))
         result_dir = directory(os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_results")),
     log:
         os.path.join(LOGS, DATASET, "{MODEL}_mil.log"),
@@ -263,11 +257,9 @@ rule phenotype_mil:
 
 
 
-
-
-
-
 #BINNING---------------------------------------------------------------------------------------------
+
+#Other model
 #start val
 rule other_model_val:
     input:
@@ -361,13 +353,13 @@ rule parse_checkm2_val:
         """
 # #-end val
 
-# #-start test
+# #-start test##
 rule other_model_test:
     input:  
         catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
         best_kp_path=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results")
     output:
-        dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test2"))
+        dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test")) 
     log:
         os.path.join(LOGS, DATASET, "{MODEL}_test_binning.log")
     conda:
@@ -401,6 +393,55 @@ rule create_fasta_bins_other_model_test:
         python {SRC_DIR_CAMI2}/create_fasta.py {input.catalogue} {input.cluster_results}/clusters.tsv {params.minsize_bins} {output.dirs} \
         --log {log.log_file} --outtsv {params.clusters_filtered}
         """
+#End Other model
+
+#VAMB
+rule vamb:
+    input:
+        catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
+        bams = os.path.join(PROCESSED_DATA_DIR, "algn")
+    output:
+        dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_output"))
+    conda:
+        os.path.join(CAMI2_DIR, "envs/vamb.yml")
+    shell:
+        """
+        mkdir -p {OUTDIR_BINNING_RESULTS}/{DATASET}
+        vamb bin default --outdir {output.dirs} --fasta {input.catalogue} --bamdir {input.bams}
+        """
+
+rule move_cluster_outputs_vamb:
+    input:
+        model_outputs=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_output")
+    output:
+        cluster_results=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_postprocess"))
+    conda:
+        #envs/snakeenv.yml"
+        os.path.join(CAMI2_DIR, "envs/vamb.yml")
+    shell:
+        """
+        python {SRC_DIR_CAMI2}/move_cluster_outputs_vamb.py {output.cluster_results} {input.model_outputs}
+        """
+
+rule create_fasta_bins_vamb:
+    input:
+        catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
+        cluster_results=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_postprocess")
+    output:
+        dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "vamb"))
+    log:
+        log_file=os.path.join(LOGS, DATASET, "vamb_bin_postprocessing.log")
+    params:
+        minsize_bins = MINSIZE_BINS,
+        clusters_filtered = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_output", "clusters_filtered.tsv"),
+    conda: 
+        os.path.join(CAMI2_DIR, "envs/vamb.yml")
+    shell:
+        """
+        python {SRC_DIR_CAMI2}/create_fasta.py {input.catalogue} {input.cluster_results}/vamb_output_clusters.tsv {params.minsize_bins} {output.dirs} \
+        --log {log.log_file} --outtsv {params.clusters_filtered}
+        """
+#END VAMB
 
 rule checkm2:
     input:
@@ -420,54 +461,3 @@ rule checkm2:
             --database_path {OUTDIR_BINNING_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
         """
 # End Binning---------------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# external_config = {
-#     "DATASET": DATASET,
-#     "DATASET_ID": DATASET_ID,
-#     "MODEL": MODEL,
-#     "MODEL_PATH": MODEL_PATH,
-#     "BATCH_SIZES": BATCH_SIZES,
-#     "config_checkm2": config_checkm2,
-#     "config_nomodelrun": config_nomodelrun,
-#     "MINSIZE_BINS": MINSIZE_BINS,
-#     "MINSIZE_CONTIGS": MINSIZE_CONTIGS,
-#     "KNN_K": KNN_K,
-#     "KNN_P": KNN_P,
-#     # Pass all directory paths you need:
-#     "PROCESSED_DATA_DIR": PROCESSED_DATA_DIR,
-#     "OUTDIR_BINNING_RESULTS": OUTDIR_BINNING_RESULTS,
-#     "LOGS": LOGS,
-#     "BINNING_DIR": BINNING_DIR,
-#     "SRC_DIR": SRC_DIR
-# }
-
-# from snakemake.utils import min_version
-# min_version("6.0")
-
-# module other_workflow:
-#     snakefile: os.path.join(CAMI2_DIR, "Snakefile")
-#     config: external_config
-
-
-# use rule other_model_val, create_fasta_bins_other_model_val, checkm2_val, parse_checkm2_val, other_model_test, create_fasta_bins_other_model_test, checkm2 from other_workflow as *

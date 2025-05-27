@@ -17,12 +17,15 @@ The following processing steps are performed in the Snakefile.
 The full list of possible datasets are specified in the file `ngs_pipeline/config/phenotype_studies.yaml. Due to time-constraints we only used the following datasets:
 
 * [**T2D-EW**](https://pubmed.ncbi.nlm.nih.gov/23719380/): consisting of 96 samples.
+* **WEGOVY**: Novel study on WEGOVY from copenhagen consisting 24 patients with 2 samples per patient, resulting in 48 total samples.  
 
 ### Models
 
 The list of models are specified in `binning/models.yml`. We only use the following models:
 
+* **VAMB** [github](https://github.com/RasmussenLab/vamb).
 * **DNABERT-S**: [github](https://github.com/MAGICS-LAB/DNABERT_S)
+* **DNABERT-H** Our DNABERT-H model.
 
 
 
@@ -58,7 +61,8 @@ Run the following command to get embeddings, binning results, and running knn MI
 
 ```bash
 snakemake --snakefile phenotype_mil/SnakeFile \
- --config DATASET=T2D-EW MODEL=dnaberts CHECKM2=True MIL_METHOD knn \
+ --config DATASET=T2D-EW MODEL=dnaberts CHECKM2=True \
+  HAUSDORFF=True PROCESS_ABUNDANCES=True MIL_METHOD knn \
 --use-conda --cores all 
 ```
 

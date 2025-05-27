@@ -11,10 +11,6 @@ import numpy as np
 import pandas as pd
 
 
-# OTENTIAL USE
-# https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html
-
-
 def append_bestk(reg_strengths: dict, mil_method: str, best_lr):
 
     if mil_method not in reg_strengths["regs"]:

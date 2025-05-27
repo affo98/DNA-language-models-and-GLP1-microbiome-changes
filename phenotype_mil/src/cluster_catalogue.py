@@ -28,9 +28,6 @@ def get_cluster_catalogue(
         seeds_path, clusters.keys(), log
     )
 
-    # embeddings_path
-    # cluster_catalogue_
-
     return cluster_catalogue_centroid
 
 
