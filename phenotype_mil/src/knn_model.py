@@ -88,7 +88,6 @@ def plot_knn_decision_boundary(
     title: str = None,
     save_path: str = None,
 ):
-    # Ensure columns are string type if X is a DataFrame
     if isinstance(X, pd.DataFrame):
         X.columns = X.columns.astype(str)
         xlabel, ylabel = X.columns[0], X.columns[1]
