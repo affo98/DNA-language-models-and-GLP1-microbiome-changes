@@ -1,5 +1,6 @@
 name: phenotype_mil
 channels:
+  - pytorch
   - conda-forge
   - bioconda
   - defaults
@@ -10,13 +11,13 @@ dependencies:
   - scikit-learn
   - biopython
   - tqdm
+  - pytorch # GPU-compatible PyTorch
+  - torchvision
+  - torchaudio
+  - matplotlib
+  - seaborn
+  - pandas
   - pip:
-      - torch
-      - torchvision
-      - torchaudio
-      - --extra-index-url https://download.pytorch.org/whl/cu118
       - transformers==4.50.3
       - einops
-      - matplotlib
-      - seaborn
-      - pandas
+      - group-lasso

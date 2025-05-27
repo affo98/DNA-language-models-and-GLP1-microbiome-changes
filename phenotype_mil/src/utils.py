@@ -1,7 +1,10 @@
 import csv
+import os
+import json
 
 import torch
 import numpy as np
+import pandas as pd
 
 
 CLUSTERS_HEADER = "clustername\tcontigname"
@@ -26,6 +29,57 @@ class Logger:
         print(message)
         with open(self.log_path, "a") as log_file:
             log_file.write(message + "\n")
+
+
+def read_hausdorff(path: str, log: Logger) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Reads a saved Hausdorff distance matrix and cluster names from a .npz file.
+
+
+    Returns:
+    - Tuple of (distance_matrix, cluster_names)
+    """
+    log.append(f"Loading Hausdorff distance matrix from {path}")
+    data = np.load(path, allow_pickle=True)
+
+    distance_matrix = data["distance_matrix"]
+    cluster_names = data["cluster_names"]
+
+    assert distance_matrix.shape[0] == distance_matrix.shape[1] == len(cluster_names)
+
+    log.append(f"Loaded hausdorff distance matrix with shape {distance_matrix.shape}")
+    log.append(f"Loaded {len(cluster_names)} cluster names")
+
+    return distance_matrix, cluster_names
+
+
+def read_cluster_abundances(
+    abundance_path: str, sample_ids: np.array, log: Logger
+) -> pd.DataFrame:
+
+    cluster_abundances = pd.read_csv(
+        os.path.join(abundance_path, "cluster_abundances.tsv"), sep="\t"
+    )
+    cluster_abundances.columns = cluster_abundances.columns.str.replace(".tsv", "")
+
+    # transpose
+    cluster_abundances.set_index("cluster_id", inplace=True)
+    cluster_abundances = cluster_abundances.T
+    cluster_abundances.reset_index(inplace=True)
+    cluster_abundances.rename(columns={"index": "sample"}, inplace=True)
+
+    # sort by sample ids from sample_labels
+    cluster_abundances["sample"] = cluster_abundances["sample"].astype(str)
+    cluster_abundances["sample"] = pd.Categorical(
+        cluster_abundances["sample"], categories=sample_ids.astype(str), ordered=True
+    )
+    cluster_abundances = cluster_abundances.sort_values("sample")
+    cluster_abundances.reset_index(drop=True, inplace=True)
+
+    cluster_abundances.columns = cluster_abundances.columns.astype(str)
+    log.append(f"Abundances shape {cluster_abundances.shape}")
+
+    return cluster_abundances
 
 
 def read_clusters(clusters_path: str, log: Logger) -> dict[str, set[str]]:
@@ -57,7 +111,7 @@ def read_clusters(clusters_path: str, log: Logger) -> dict[str, set[str]]:
 
 def read_sample_labels(
     sample_labels_path: str, log: Logger, split_train_test: bool
-) -> tuple[list[str], list[str]]:
+) -> tuple[np.array, np.array]:
     sample_ids = []
     labels = []
 
@@ -70,14 +124,15 @@ def read_sample_labels(
         ):
             log.append(f"Header Skipped in sample labels file: {first_row}")
         else:
-            sample_ids.append(str(first_row[0]))
-            labels.append(str(first_row[1]))
+            sample_ids.append(str(first_row[0].replace("SAMEA", "")))
+            labels.append(int(first_row[1]))
         for row in reader:
-            sample_ids.append(str(row[0]))
-            labels.append(str(row[1]))
+            sample_ids.append(str(row[0].replace("SAMEA", "")))
+            labels.append(int(row[1]))
 
     if not split_train_test:
         assert len(sample_ids) == len(labels)
+        log.append(f"Sample Ids: {len(sample_ids)} \n Labels: {len(labels)}")
         return np.array(sample_ids), np.array(labels)
 
     sample_ids_train, sample_ids_test, labels_train, labels_test = (
