@@ -3,8 +3,9 @@
 [Overleaf report](https://www.overleaf.com/project/679796b5a02b660e4f96beff)
 
 #### Meeting Outline
-* [21 May 2025] (#date-21-May-2025)
-* [15 May 2025] (#date-15-May-2025)
+* [28 May 2025](#date-28-May-2025)
+* [21 May 2025](#date-21-May-2025)
+* [15 May 2025](#date-15-May-2025)
 * [08 May 2025](#date-30-january-2025)
 * [01 May 2025](#date-30-january-2025)
 * [23 April 2025](#date-30-january-2025)
@@ -16,6 +17,31 @@
 * [27 February 2025](#date-30-january-2025)
 * [20 February 2025](#date-30-january-2025)
 * [06 February 2025](#date-30-january-2025)
+
+#### Date 28 May 2025
+
+##### Who did you help this week?
+
+
+##### Who helped you this week?
+
+- Inna from HPC
+
+##### What did you achieve?
+
+- We are happy about your feedback to the report. And we have moved around some sections. 
+- Got the last results on metagenomics binning and phenotype classification on our model DNABERT-H-2M.
+- Figures and reading through the report. 
+
+
+##### What did you struggle with?
+
+
+##### Where do you need help from Veronika?
+- Front page check.
+- In the guidelines it says that the presentation at the oral exam is 10-15 minutes. We want to confirm this with you. 
+- We will read through your comments this morning. So we can discuss any related questions in the meeting.
+
 
 #### Date 21 May 2025
 
