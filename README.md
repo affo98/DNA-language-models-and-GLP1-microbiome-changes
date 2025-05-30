@@ -33,8 +33,6 @@ DNABERT-H leverages all labels in the taxonomic hiearchy during training, and th
 
 The pre-trained model is available [here](https://figshare.com/articles/dataset/DNABERT-H-2M/29145308) . 
 
-Place the model in the directory `train/dnaberth_weights/dnaberth_2m`.
-
 
 ## 3. Setup environment
 
