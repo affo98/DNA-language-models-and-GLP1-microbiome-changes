@@ -20,13 +20,17 @@ DNABERT-H is a Genomic Language Model (gLM) based on [DNABERT-S](https://github.
 Biological classification of genomes follows a hierarchical taxonomy, ranging from the broadest category - *superkingdom* (e.g. Eukarya) - down to the most specific level, *species* (e.g. Homo sapiens). 
 DNABERT-H leverages all labels in the taxonomic hiearchy during training, and thereby creates embeddings that treflect evolutionary relationships between species. DNABERT-H is trained using bacteria, virus, and fungi genomes, and can be applied to metagenomics tasks such as metagenomics binning and phenotype classification. 
 
-**Pretraining procedure:**
-<img src="figures/readme_figures/pretraining_overview.png" width="500"/>
 
-**Hiearchical taxonomy awareness**
-DNABERT-H preserves phylogenetic structures between species:
-<img src="figures/readme_figures/tsne_hausdorff.png" alt="tsne" width="500"/>
+**Pretraining procedure:**  
+<p align="center">
+  <img src="figures/readme_figures/pretraining_overview.png" alt="Pretraining" width="700"/>
+</p>
 
+**Hierarchical taxonomy awareness**  
+DNABERT-H preserves phylogenetic structures between species:  
+<p align="center">
+  <img src="figures/readme_figures/tsne_hausdorff.png" alt="tsne" width="600"/>
+</p>
 
 
 
