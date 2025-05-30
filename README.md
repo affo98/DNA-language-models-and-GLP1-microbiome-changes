@@ -1,14 +1,11 @@
-# Welcome to Shinkansen's Msc in Data Science Project
+# NEW TITLE
 By Anders Hjulmand, Andreas Flensted, Eisuke Okuda.
 
-*Find the weekly meetings outline in: [Weekly Meetings](weekly_meetings/README.md)*
-
-*Find the overleaf report on: [Overleaf](https://www.overleaf.com/project/679796b5a02b660e4f96beff)* 
+Master Thesis in Data Science @ IT-University of Copenhagen.
 
 
 ## Contents
-
-- [Welcome to Shinkansen's Msc in Data Science Project](#welcome-to-shinkansens-msc-in-data-science-project)
+- [NEW TITLE](#new-title)
   - [Contents](#contents)
   - [1. Introduction](#1-introduction)
   - [2. Model](#2-model)
@@ -19,16 +16,16 @@ By Anders Hjulmand, Andreas Flensted, Eisuke Okuda.
   - [7. Experiment 2: Phenotype Classification](#7-experiment-2-phenotype-classification)
 
 ## 1. Introduction
-DNABERT-H is a DNA language model based on [DNABERT-S](https://github.com/MAGICS-LAB/DNABERT_S) and trained using Hierarchical Multi-label Contrastive Learning from [Use All The Labels](https://arxiv.org/abs/2204.13207).
+DNABERT-H is a Genomic Language Model (gLM) based on [DNABERT-S](https://github.com/MAGICS-LAB/DNABERT_S) and trained using Hierarchical Multi-label Contrastive Learning from [Use All The Labels](https://arxiv.org/abs/2204.13207).
+Biological classification of genomes follows a hierarchical taxonomy, ranging from the broadest category - *superkingdom* (e.g. Eukarya) - down to the most specific level, *species* (e.g. Homo sapiens). 
+DNABERT-H leverages all labels in the taxonomic hiearchy during training, and thereby creates embeddings that treflect evolutionary relationships between species. DNABERT-H is trained using bacteria, virus, and fungi genomes, and can be applied to metagenomics tasks such as metagenomics binning and phenotype classification. 
 
+**Pretraining procedure:**
+<img src="figures/readme_figures/pretraining_overview.png" width="500"/>
 
-Biological classification of genomes follows a hierarchical taxonomy, ranging from the broadest category - *superkingdom* (e.g. Eukarya) - down to the most specific level, *species* (e.g. Homo sapiens). DNABERT-H leverages all labels in the taxonomic hiearchy during training, and thereby creates embeddings that reflect the hiearchical categorization. The model is trained using bacteria, virus, and fungi genomes.
-
-DNABERT-H is beneficial for application in metagenomics, including metagenomics binning and phenotype classification.  
-
-[Insert tn-sne image.]
-
-[insert some results.]
+**Hiearchical taxonomy awareness**
+DNABERT-H preserves phylogenetic structures between species:
+<img src="figures/readme_figures/tsne_hausdorff.png" alt="tsne" width="500"/>
 
 
 
