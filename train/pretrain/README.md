@@ -20,7 +20,7 @@ conda activate DNABERT_H
 
 Install required packages and dependencies:
 ```bash
-pip install -r requirements.txt
+pip install -r train/pretrain/requirements.txt
 pip uninstall triton 
 ```
 
