@@ -19,35 +19,6 @@ print(DATAPATH)
 BENCHMARKS = os.path.join(OUTDIR, "benchmarks")
 LOGS = os.path.join(OUTDIR,"logs")
 
-# samples = glob.glob(f"{DATAPATH}/*/*_1.fastq.gz")
-# print(samples)
-
-# # # Construct Wildcards
-# READS = ["1","2"]
-# SAMPLES_LU = {}
-# SAMPLES = []
-# for sample in samples:
-#     print(sample)
-#     sample_name = sample.split("/")[-2]
-#     SAMPLES_LU[sample_name] = sample
-#     SAMPLES.append(sample_name)
-
-# ### MANUAL 2000 quick fix####
-# # SAMPLES = [
-# #     Path(f).parent.name.split("_")[0]
-# #     for f in glob.glob("T2D-EW_PRJEB1786/knead/*/paired_1.fastq")
-# # ]
-# print(SAMPLES)
-
-# print("\n"*2)
-# print("\t"*1,"#"*100)
-# print("\n")
-# print("\t"*5,f"# Dataset: {STUDY_NAME} ({STUDY_ID})")
-# print("\t"*5,f"# Total Samples Found: {SAMPLES} {len(SAMPLES)}")
-# print("\n")
-# print("\t"*1,"#"*100)
-# print("\n"*2)
-
 def get_samples(wildcards):
     checkpoint_output = checkpoints.download.get().output[0]
     samples = glob.glob(f"{checkpoint_output}/*/1.fastq.gz")
