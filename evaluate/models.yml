@@ -1,7 +1,0 @@
-TNF:
-  model_path: "tnf"
-  save_name: "tnf.npy"
-
-TNF_KERNEL:
-  model_path: "helpers/tnf_kernel.npz"
-  save_name: "tnf_kernel.npy"
