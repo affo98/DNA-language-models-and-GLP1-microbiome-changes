@@ -1,0 +1,14 @@
+name: concatenate
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - meson
+  - compilers
+  - pip:
+      - setuptools
+      - vamb
+  - gzip
