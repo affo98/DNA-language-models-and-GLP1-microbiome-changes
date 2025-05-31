@@ -3,8 +3,40 @@
 [Overleaf report](https://www.overleaf.com/project/679796b5a02b660e4f96beff)
 
 #### Meeting Outline
+* [27 February 2025](#date-30-january-2025)
 * [20 February 2025](#date-30-january-2025)
 * [06 February 2025](#date-30-january-2025)
+
+#### Date: 27 February 2025
+
+##### Who did you help this week?
+
+##### Who helped you this week?
+
+One of Simons collegues, Jakob. He will help us implement the binning algorithm on GPU.
+
+##### What did you achieve?
+
+* Collected 6 phenotype datasets, i.e. reads and sample labels.
+* Collected genome sequences with hiearchical labels, i.e. our pre-training data.
+* Got started on the bioinformatics pipeline, i.e. how to process reads into contigs from multiple patients.
+
+##### What did you struggle with?
+
+
+##### What would you like to work on next week?
+
+* Making a good setup on the Cluster. 
+* Bioinformatics pipeline.
+* Structure pre-training data.
+
+##### Where do you need help from Veronika?
+
+**Phenotype prediction (MIL)**:
+
+- Comparison with other phenotype prediction models (e.g. MetAML, DeepMicro, IDMIL): Can we copy their reported results on the datasets, or should we run the models ourselves? This could be a lot of work, because models use different frameworks to process the reads. 
+- Comparison of different MIL frameworks: KNN baseline, GNN, and other MIL frameworks.
+
 
 
 
@@ -62,8 +94,6 @@ $$ output = l(g, h) $$
 
 Discussion of the MIL setup.
   
-
-
 
 
 
