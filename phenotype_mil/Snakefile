@@ -1,0 +1,457 @@
+import os
+import yaml
+import glob
+
+CAMI2_DIR = os.path.join(os.getcwd(), "cami2_benchmark")
+BINNING_DIR = os.path.join(os.getcwd(), "binning")
+NGS_DIR = os.path.join(os.getcwd(), "ngs_pipeline")
+SRC_DIR = os.path.join(os.getcwd(), "phenotype_mil", "src")
+SRC_DIR_CAMI2 = os.path.join(os.getcwd(), "cami2_benchmark", "src")
+LOGS = os.path.join(os.getcwd(), "phenotype_mil", "logs")
+OUTDIR_BINNING_RESULTS = os.path.join(os.getcwd(), "phenotype_mil", "binning_results")
+OUTDIR_MIL_RESULTS = os.path.join(os.getcwd(), "phenotype_mil", "mil_results")
+
+
+#DATASET, sample and model config
+with open(os.path.join(NGS_DIR, "config/phenotype_studies.yaml"), "r") as f:
+    datasets_model_config = yaml.safe_load(f)
+
+with open(os.path.join(BINNING_DIR, "models.yml"), "r") as f:
+    models_config = yaml.safe_load(f)
+
+ALL_DATASETS_NAMES = [d["name"] for d in datasets_model_config["studies"]]
+ALL_DATASETS_IDS = [d["id"] for d in datasets_model_config["studies"]]
+
+DATASET = config.get("DATASET", None)
+assert DATASET in ALL_DATASETS_NAMES, f"Error: Selected dataset '{DATASET}' is not in the available DATASET: {ALL_DATASETS_NAMES}"
+
+DATASET_ID = [d["id"] for d in datasets_model_config["studies"] if d["name"] == DATASET][0]
+
+ALL_MODELS  = models_config.keys()
+MODEL = config.get("MODEL", None)
+assert MODEL==None or MODEL in list(ALL_MODELS)+['vamb'], f"Error: Selected model '{MODEL}' is not in the available DATASET: {ALL_MODELS}"
+
+
+MODEL_PATH=None
+BATCH_SIZES=None
+WEIGHT_PATH=None
+if MODEL in models_config.keys():
+    MODEL_PATH = models_config[MODEL]["model_path"]
+    BATCH_SIZES = models_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnaberth_400kv2', 'dnaberth_2mv3', 'dnaberth_2mv4', 'dnaberth_2mv5', 'dnabert2', 'dnabert2random'] else 0
+    WEIGHT_PATH = models_config[MODEL]["weight_path"] if 'dnaberth' in  MODEL else None
+
+MIL_METHODS = config.get("MIL_METHODS", None)
+if isinstance(MIL_METHODS, str):
+    MIL_METHODS = [MIL_METHODS]
+elif not MIL_METHODS:
+    MIL_METHODS= ['all']
+assert isinstance(MIL_METHODS, list), "MIL_METHODS must be a list of method names"
+
+
+PROCESSED_DATA_DIR = os.path.join(NGS_DIR, f"{DATASET}_{DATASET_ID}")
+SAMPLE_LABELS_FILE = os.path.join(NGS_DIR, "raw_data", "sample_labels", f"{DATASET}_{DATASET_ID}_sample_labels.txt")
+
+
+#processing flow of snakemake 
+config_checkm2 = bool(config.get("CHECKM2", False))
+config_nomodelrun = bool(config.get("NOMODELRUN", False))
+config_process_abundances = bool(config.get("PROCESS_ABUNDANCES", False))
+config_phenotype_mil = bool(config.get("PHENOTYPE_MIL", False))
+config_hausdorff = bool(config.get("HAUSDORFF", False))
+config_bin_lookup = bool(config.get("BIN_LOOKUP", False))
+
+#contig params
+MINSIZE_BINS=200000 #changed from 250000 in cami2, could potentially be smaller, e.g. 150.000
+
+#knn/binning params
+KNN_K = [100,200,300,400,500,600,700,800,900,1000]
+KNN_P = [25,50,75]
+
+VAL_PROPORTION=0.1
+
+
+print(f"-------------Configuration Flags:--------------")
+print(f"  - DATASET ID:               {DATASET_ID}")
+print(f"  - DATASET Name:             {DATASET}")
+print(f"  - Selected Model:           {MODEL}")
+print(f"  - Model Path:               {MODEL_PATH}")
+print(f"  - Batch Sizes:              {BATCH_SIZES}")
+print(f"  - CheckM2:                  {config_checkm2}")
+print(f"  - MinSize Bins:             {MINSIZE_BINS}")
+print(f"  - No model run:             {config_nomodelrun}")
+print(f"  - KNN params:               K:{KNN_K}, P:{KNN_P}")
+print(f"  - Phenotype MIL:            {config_phenotype_mil}")
+print(f"  - MIL Method:               {MIL_METHODS}")
+print(f"  - Hausdorff:                {config_hausdorff}")
+
+
+
+
+input_files = []
+
+if MODEL in ['dnaberts'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "dnaberts_output", "test"),
+        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "dnaberts"),
+    ]
+
+elif MODEL in ['dnaberth_2mv4'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "dnaberth_2mv4_output", "test"),
+        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "dnaberth_2mv4"),
+    ]
+
+elif MODEL=='vamb' and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_output"),
+        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_postprocess"),
+        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "vamb"),
+    ]
+
+if config_checkm2:
+    input_files += [os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "checkm2", f"{MODEL}_results")]
+
+
+if config_process_abundances:
+    input_files += [os.path.join(PROCESSED_DATA_DIR, "abdn_coverm", "normalized_abundances.tsv"),
+                    os.path.join(OUTDIR_BINNING_RESULTS, DATASET, f"{MODEL}_output", "test", "cluster_abundances.tsv")]    
+
+if config_hausdorff:
+    input_files += [os.path.join(OUTDIR_BINNING_RESULTS, DATASET, f"{MODEL}_output", "test", "hausdorff")]
+
+if config_bin_lookup:
+    input_files += [
+        os.path.join(OUTDIR_MIL_RESULTS, "gldb_db"),
+        os.path.join(OUTDIR_MIL_RESULTS, DATASET, f"{MODEL}_binlookup"),
+    ]
+
+
+if config_phenotype_mil:
+    input_files += [os.path.join(OUTDIR_MIL_RESULTS, DATASET, f"{MODEL}_results")]
+
+
+rule all:
+    input: input_files
+
+
+if config_phenotype_mil:
+    ruleorder: normalize_abundances > get_cluster_abundances > phenotype_mil
+
+
+
+rule normalize_abundances:
+    input:
+        os.path.join(PROCESSED_DATA_DIR, "abdn_coverm", "abundances.tsv"),
+    output:
+        os.path.join(PROCESSED_DATA_DIR, "abdn_coverm", "normalized_abundances.tsv"),
+    log:
+        os.path.join(LOGS, DATASET, "normalise_abundances.log")
+    conda:
+        "envs/phenotype_mil.yml",
+    shell:
+        """
+        python {SRC_DIR}/normalize_abundances.py {input} {output} {log}
+        """
+
+
+rule get_cluster_abundances:
+    input:
+        norm_abun = os.path.join(PROCESSED_DATA_DIR, "abdn_coverm", "normalized_abundances.tsv"),
+        filtered_clusters = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "clusters_filtered.tsv"),
+    output:
+        os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "cluster_abundances.tsv"),
+    conda:
+        "envs/phenotype_mil.yml",
+    shell:
+        """
+        python {SRC_DIR}/get_cluster_abundances.py {input.filtered_clusters} {input.norm_abun} {output}
+        """
+
+
+rule get_hausdorff_distances:
+    input:
+        cluster_dir = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test")
+    output:
+        result_dir = directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "hausdorff"))
+    log:
+        os.path.join(LOGS, DATASET, "{MODEL}_hausdorff.log"),
+    conda:
+        "envs/phenotype_mil.yml",
+    shell:
+        """
+        python {SRC_DIR}/hausdorff_distance.py \
+            --model_name {MODEL} \
+            --dataset_name {DATASET} \
+            --input_path {input.cluster_dir} \
+            --save_path {output.result_dir} \
+            --log {log}
+        """
+
+
+rule download_gldb_db:
+    input:
+        fasta_bins=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "{MODEL}")
+    output:
+        database = directory(os.path.join(OUTDIR_MIL_RESULTS, "gldb_db"))
+    shell:
+        """
+        if [ ! -d {ouput.database} ]; then
+            echo "Downloading gtdbtk database..."
+            mkdir -p {output.database}
+            wget https://data.gtdb.ecogenomic.org/releases/latest/auxillary_files/gtdbtk_package/full_package/gtdbtk_data.tar.gz 
+            tar -xvzf gtdbtk_data.tar.gz -C {output.database}
+            rm gtdbtk_data.tar.gz
+        fi
+        """
+
+rule lookup_bins:
+    input:
+        fasta_bins=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "{MODEL}")
+    output:
+        bin_lookups = directory(os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_binlookup")),
+    conda:
+        'envs/gtdbtk.yml'
+    params:
+        database=os.path.join(OUTDIR_MIL_RESULTS, "gldb_db")
+    shell:
+        """
+        conda env config vars set GTDBTK_DATA_PATH={params.database}
+        conda deactivate && conda activate gtdbtk
+        gtdbtk classify_wf --genome_dir {input.fasta_bins} --out_dir {output.bin_lookups} --cpus 64 --skip_ani_screen --extension "fna"
+        """
+
+
+rule phenotype_mil:
+    input:
+        cluster_dir = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test"),
+        sample_labels = SAMPLE_LABELS_FILE,
+    output:
+        result_dir = directory(os.path.join(OUTDIR_MIL_RESULTS, DATASET, "{MODEL}_results")),
+    log:
+        os.path.join(LOGS, DATASET, "{MODEL}_mil.log"),
+    conda:
+        "envs/phenotype_mil.yml",
+    params:
+        agglomorative_clustering_path = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "agglomorative_clustering")
+    shell:
+        """
+        mkdir -p {output.result_dir}
+        python phenotype_mil/phenotype_mil.py \
+            --model_name {MODEL} \
+            --dataset_name {DATASET} \
+            --input_path {input.cluster_dir} \
+            --sample_labels_path {input.sample_labels} \
+            --output_path {output.result_dir} \
+            --log {log} \
+            --mil_methods {MIL_METHODS} \
+            --agglomorative_path {params.agglomorative_clustering_path}
+        """
+
+
+
+
+#BINNING---------------------------------------------------------------------------------------------
+
+#Other model
+#start val
+rule other_model_val:
+    input:
+        catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz")
+    output:
+        dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "validation"))
+    log:
+        os.path.join(LOGS, DATASET, "{MODEL}_val", "{MODEL}_val_binning.log")
+    conda:
+        os.path.join(BINNING_DIR, "envs/binning.yml")
+    shell:
+        """
+        mkdir -p {OUTDIR_BINNING_RESULTS}/{DATASET}
+        pip uninstall -y triton
+        python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
+        -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {output.dirs} -l {log} -m val -vp {VAL_PROPORTION} -wp {WEIGHT_PATH}
+        """
+
+
+rule create_fasta_bins_other_model_val:
+    input:
+        catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
+        cluster_results = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "validation")                                         
+    output:
+        dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_validation"))
+    log:
+        log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "bin_postprocessing.log")
+    params:
+        cluster_results_dir=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "validation", "cluster_results"),
+        minsize_bins=MINSIZE_BINS
+    conda: 
+        os.path.join(CAMI2_DIR, "envs/vamb.yml")
+    shell:
+        """
+        for cluster_file in {params.cluster_results_dir}/clusters_k*_p*.tsv; do
+            k_p=$(basename "$cluster_file" .tsv | sed 's/clusters_//')
+            output_dir={output.dirs}/$k_p
+            log_file={log.log_file}_$k_p.log
+
+            mkdir -p "$output_dir"
+
+            python {SRC_DIR_CAMI2}/create_fasta.py {input.catalogue} "$cluster_file" {params.minsize_bins} "$output_dir" \
+            --log "$log_file"
+        done
+        """
+
+rule checkm2_val: 
+    input:
+        fasta_bins=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_validation")
+    output:
+        output=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation"))
+    conda:
+        os.path.join(CAMI2_DIR, "envs/checkm2.yml")
+    threads:
+        128
+    shell:
+        """
+        if [ ! -d "{OUTDIR_BINNING_RESULTS}/checkm2_database" ]; then
+            checkm2 database --download --path {OUTDIR_BINNING_RESULTS}/checkm2_database
+        fi
+
+        for bin_dir in {input.fasta_bins}/*; do
+            k_p=$(basename "$bin_dir")
+            output_subdir={output.output}/$k_p
+            
+            mkdir -p "$output_subdir"
+            
+            echo "FOP FLOOP: Processing $k_p with CheckM2..."
+            checkm2 predict --threads {threads} \
+                            --input "$bin_dir" \
+                            --output-directory "$output_subdir" \
+                            --database_path {OUTDIR_BINNING_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
+        done
+        """
+
+rule parse_checkm2_val:
+    input:
+        checkm2_reports=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation"),
+        val_count=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "validation")
+    output:
+        path=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results"))
+    log:
+        log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "checkm2_validation.log")
+    conda:
+        os.path.join(BINNING_DIR, "envs/binning.yml")
+    shell:
+        """
+        mkdir -p {output.path}
+        n_val=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["n_val"])' "{input.val_count}/n_total_val_test.json")
+        python {SRC_DIR_CAMI2}/parse_checkm2_val.py -i {input.checkm2_reports} -o {output.path} -n $n_val -l {log.log_file}
+        """
+# #-end val
+
+# #-start test##
+rule other_model_test:
+    input:  
+        catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
+        best_kp_path=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results")
+    output:
+        dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test")) 
+    log:
+        os.path.join(LOGS, DATASET, "{MODEL}_test_binning.log")
+    conda:
+        os.path.join(BINNING_DIR, "envs/binning.yml")
+    shell:
+        """
+        pip uninstall -y triton
+        best_combination_file="{input.best_kp_path}/best_combination.json"
+        best_k=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_k"])' $best_combination_file)
+        best_p=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_p"])' $best_combination_file)
+
+        python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
+        -b {BATCH_SIZES} -k $best_k -p $best_p -s {output.dirs} -l {log} -m test -vp {VAL_PROPORTION} -wp {WEIGHT_PATH}
+        """
+
+rule create_fasta_bins_other_model_test:
+    input:
+        catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
+        cluster_results=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test")
+    output:
+        dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "{MODEL}")),
+    log:
+        log_file=os.path.join(LOGS, DATASET, "{MODEL}_test_bin_postprocessing.log")
+    params:
+        minsize_bins = MINSIZE_BINS,
+        clusters_filtered = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "{MODEL}_output", "test", "clusters_filtered.tsv")
+    conda: 
+        os.path.join(CAMI2_DIR, "envs/vamb.yml")
+    shell:
+        """
+        python {SRC_DIR_CAMI2}/create_fasta.py {input.catalogue} {input.cluster_results}/clusters.tsv {params.minsize_bins} {output.dirs} \
+        --log {log.log_file} --outtsv {params.clusters_filtered}
+        """
+#End Other model
+
+#VAMB
+rule vamb:
+    input:
+        catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
+        bams = os.path.join(PROCESSED_DATA_DIR, "algn")
+    output:
+        dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_output"))
+    conda:
+        os.path.join(CAMI2_DIR, "envs/vamb.yml")
+    shell:
+        """
+        mkdir -p {OUTDIR_BINNING_RESULTS}/{DATASET}
+        vamb bin default --outdir {output.dirs} --fasta {input.catalogue} --bamdir {input.bams}
+        """
+
+rule move_cluster_outputs_vamb:
+    input:
+        model_outputs=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_output")
+    output:
+        cluster_results=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_postprocess"))
+    conda:
+        #envs/snakeenv.yml"
+        os.path.join(CAMI2_DIR, "envs/vamb.yml")
+    shell:
+        """
+        python {SRC_DIR_CAMI2}/move_cluster_outputs_vamb.py {output.cluster_results} {input.model_outputs}
+        """
+
+rule create_fasta_bins_vamb:
+    input:
+        catalogue=os.path.join(PROCESSED_DATA_DIR, "global_contig_catalogue.fna.gz"),
+        cluster_results=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_postprocess")
+    output:
+        dirs=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "vamb"))
+    log:
+        log_file=os.path.join(LOGS, DATASET, "vamb_bin_postprocessing.log")
+    params:
+        minsize_bins = MINSIZE_BINS,
+        clusters_filtered = os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "vamb_output", "clusters_filtered.tsv"),
+    conda: 
+        os.path.join(CAMI2_DIR, "envs/vamb.yml")
+    shell:
+        """
+        python {SRC_DIR_CAMI2}/create_fasta.py {input.catalogue} {input.cluster_results}/vamb_output_clusters.tsv {params.minsize_bins} {output.dirs} \
+        --log {log.log_file} --outtsv {params.clusters_filtered}
+        """
+#END VAMB
+
+rule checkm2:
+    input:
+        fasta_bins=os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "fasta_bins", "{MODEL}")
+    output:
+        output=directory(os.path.join(OUTDIR_BINNING_RESULTS, DATASET, "checkm2", "{MODEL}_results"))
+    conda:
+        os.path.join(CAMI2_DIR, "envs/checkm2.yml")
+    threads:
+        128
+    shell:
+        """
+        if [ ! -d "{OUTDIR_BINNING_RESULTS}/checkm2_database" ]; then
+            checkm2 database --download --path {OUTDIR_BINNING_RESULTS}/checkm2_database
+        fi
+            checkm2 predict --threads {threads} --input {input.fasta_bins} --output-directory {output.output} \
+            --database_path {OUTDIR_BINNING_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
+        """
+
+# End Binning---------------------------------------------------------------------------------------------

@@ -1,0 +1,23 @@
+name: binning
+channels:
+  - pytorch
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.10
+  - numpy
+  - scikit-learn
+  - biopython
+  - tqdm
+  - matplotlib
+  - seaborn
+  - pandas
+  - faiss-gpu # GPU version of FAISS from conda-forge
+  - pytorch # GPU-compatible PyTorch
+  - torchvision
+  - torchaudio
+  - pip
+  - pip:
+      - transformers==4.50.3
+      - einops

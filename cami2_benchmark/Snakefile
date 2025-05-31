@@ -1,0 +1,750 @@
+""" """
+import os
+import yaml
+import glob
+
+#dirs
+OUTDIR_RAW = os.path.join(os.getcwd(), "cami2_benchmark", "raw_data")
+OUTDIR_PROCESSED = os.path.join(os.getcwd(), "cami2_benchmark", "processed_data")
+OUTDIR_MODEL_RESULTS = os.path.join(os.getcwd(), "cami2_benchmark", "model_results")
+SRC_DIR = os.path.join(os.getcwd(), "cami2_benchmark", "src")
+BASE = os.path.join(os.getcwd(), "cami2_benchmark")
+LOGS = os.path.join(os.getcwd(), "cami2_benchmark", "logs")
+BINNING_DIR = os.path.join(os.getcwd(), "binning")
+NGS_DIR = os.path.join(os.getcwd(), "ngs_pipeline")
+
+#DATASET, sample and model config
+with open(os.path.join(BASE, "config.yml"), "r") as f:
+    datasets_model_config = yaml.safe_load(f)
+
+with open(os.path.join(BINNING_DIR, "models.yml"), "r") as f:
+    other_model_config = yaml.safe_load(f)
+
+with open(os.path.join(NGS_DIR, "config/phenotype_studies.yaml"), "r") as f:
+    ngs_datasets = yaml.safe_load(f)
+
+ALL_DATASETS = [d["name"] for d in datasets_model_config["datasets"]]
+
+DATASET = config.get("DATASET", None)
+assert DATASET in ALL_DATASETS, f"Error: Selected dataset '{DATASET}' is not in the available DATASET: {ALL_DATASETS}"
+
+SAMPLES = {d["name"]: d.get("samples", []) for d in datasets_model_config["datasets"]}
+sample_str = ' '.join(SAMPLES.get(DATASET, []))
+
+ALL_MODELS  = [d["name"] for d in datasets_model_config["models"]]
+MODEL = config.get("MODEL", None)
+assert MODEL==None or MODEL in ALL_MODELS, f"Error: Selected model '{MODEL}' is not in the available MODELS: {ALL_MODELS}"
+
+MODEL_PATH=None
+BATCH_SIZES=None
+WEIGHT_PATH=None
+if MODEL in other_model_config.keys():
+    MODEL_PATH = other_model_config[MODEL]["model_path"]
+    BATCH_SIZES = other_model_config[MODEL]["batch_sizes"] if MODEL in ['dnaberts', 'dnaberth_400kv2', 'dnaberth_2mv3', 'dnaberth_2mv4', 'dnaberth_2mv5', 'dnaberth_400k', 'dnaberth_2mv1', 'dnaberth_2mv2', 'dnaberth2mv1_150k', 'dnabert2', 'dnabert2random'] else 0
+    WEIGHT_PATH = other_model_config[MODEL]["weight_path"] if 'dnaberth' in  MODEL else None
+
+#processing flow of snakemake 
+config_download = bool(config.get("DOWNLOAD", False))
+config_concatenate = bool(config.get("CONCATENATE", False))
+config_concatenate_semibin = bool(config.get("CONCATENATE_SEMIBIN", False))
+config_alignment = bool(config.get("ALIGNMENT", False))
+config_alignment_semibin = bool(config.get("ALIGNMENT_SEMIBIN", False))
+config_checkm2 = bool(config.get("CHECKM2", False))
+config_nomodelrun = bool(config.get("NOMODELRUN", False))
+
+
+#contig params
+MINSIZE_BINS=250000
+MINSIZE_CONTIGS=2000
+
+#knn params
+KNN_K = [100,200,300,400,500,600,700,800,900,1000]
+KNN_P = [25,50,75]
+VAL_PROPORTION=0.1
+
+print(f"-------------Configuration Flags:--------------")
+print(f"  - DATASET:             {DATASET}")
+print(f"  - Selected Model:      {MODEL}")
+print(f"  - Model Path:          {MODEL_PATH}")
+print(f"  - Batch Sizes:         {BATCH_SIZES}")
+print(f"  - Download:            {config_download}")
+print(f"  - Concatenate:         {config_concatenate}")
+print(f"  - Alignment:           {config_alignment}")
+print(f"  - CheckM2:             {config_checkm2}")
+print(f"  - MinSize Bins:        {MINSIZE_BINS}")
+print(f"  - MinSize Contigs:     {MINSIZE_CONTIGS}")
+print(f"  - No model run:        {config_nomodelrun}")
+print(f"  - KNN params:          K:{KNN_K}, P:{KNN_P}")
+
+
+input_files = []
+if config_download:
+    if DATASET != 'metahit':
+        input_files += expand(
+            os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"),
+            sample=SAMPLES.get(DATASET, [])
+        )
+        input_files += expand(
+            os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"),
+            sample=SAMPLES.get(DATASET, [])
+        )
+    elif DATASET == 'metahit':
+        input_files += [
+            os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue_raw.fna.gz"),
+            os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        ]
+
+if config_concatenate:
+    input_files.append(
+        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+    )
+
+if config_concatenate_semibin:
+     input_files.append(
+        os.path.join(OUTDIR_PROCESSED, DATASET, "semibin", "catalogue.fna.gz"),
+    )
+
+if config_alignment:
+    input_files += expand(
+        os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"),
+        sample=SAMPLES.get(DATASET, [])
+    )
+if config_alignment_semibin:
+    input_files += expand(
+        os.path.join(OUTDIR_PROCESSED, DATASET, "semibin", "{sample}_sorted.bam"),
+        sample=SAMPLES.get(DATASET, [])
+    )
+
+if MODEL=='vamb' and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_postprocess"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "vamb"),
+    ]
+
+elif MODEL=='taxvamb' and not config_nomodelrun:
+    input_files += [
+        "metabuli-linux-avx2.tar.gz",
+        os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database"),  
+        os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database_tmp"), 
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results"),
+        "taxconverter",
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_output"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_postprocess"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "taxvamb"),
+    ]
+
+elif MODEL == 'comebin' and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"),
+    ]
+
+
+
+elif MODEL == 'semibin' and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "semibin"),
+    ]
+
+
+#OTHER MODELS
+elif MODEL in ['tnf'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnf_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "tnf"),
+    ]
+
+
+elif MODEL in ['tnfkernel'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "tnfkernel_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "tnfkernel"),
+    ]
+
+elif MODEL in ['dna2vec'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dna2vec_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dna2vec"),
+    ]
+elif MODEL in ['dnaberts'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberts_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberts"),
+    ]
+
+elif MODEL in ['dnaberth_400kv2'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberth_400kv2_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberth_400kv2"),
+    ]
+
+elif MODEL in ['dnaberth_2mv3'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberth_2mv3_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberth_2mv3"),
+    ]
+
+elif MODEL in ['dnaberth_2mv4'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberth_2mv4_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberth_2mv4"),
+    ]
+elif MODEL in ['dnaberth_2mv5'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberth_2mv5_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberth_2mv5"),
+    ]
+
+elif MODEL in ['dnaberth_400k'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberth_400k_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberth_400k"),
+    ]
+
+elif MODEL in ['dnaberth_400k'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberth_400k_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberth_400k"),
+    ]
+
+elif MODEL in ['dnaberth_2m'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnaberth_2m_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnaberth_2m"),
+    ]
+
+elif MODEL in ['dnabert2'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnabert2_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnabert2"),
+    ]
+elif MODEL in ['dnabert2random'] and not config_nomodelrun:
+    input_files += [
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "dnabert2random_output", "test"),
+        os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "dnabert2random"),
+    ]
+
+
+if config_checkm2:
+    input_files += [os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", f"{MODEL}_results")]
+
+
+rule all:
+    input: input_files
+
+
+ruleorder: other_model_val > create_fasta_bins_other_model_val > checkm2_val > parse_checkm2_val > other_model_test > create_fasta_bins_other_model_test > concatenate_semibin >  concatenate > process_metahit
+
+
+
+rule concatenate_semibin:
+    input:
+        expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
+    output:
+        final_output=os.path.join(OUTDIR_PROCESSED, DATASET, "semibin", "catalogue.fna.gz")
+    log:
+        os.path.join(LOGS, DATASET, "concatenate.log")
+    params:
+        min_length=MINSIZE_CONTIGS,
+        tmp_folder=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue"),
+        tmp_output=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue", "concatenated.fa.gz"),
+    conda:
+        "envs/semibin.yml"
+    shell:
+        """
+        SemiBin2 concatenate_fasta --input-fasta {input} --output {params.tmp_folder} -m {params.min_length}
+        mv {params.tmp_output} {output.final_output}
+        rm -rf {params.tmp_folder}
+        """
+        
+rule alignment_semibin:
+    input:
+        read=os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"),
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "semibin", "catalogue.fna.gz")
+    output:
+        os.path.join(OUTDIR_PROCESSED, DATASET, "semibin", "{sample}_sorted.bam")
+    threads:
+        192
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
+        """
+
+rule semibin:
+    input:
+        catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "semibin", "catalogue.fna.gz")),
+        bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "semibin", "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+    output:
+        directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output"))
+    conda:
+        "envs/semibin.yml"
+    params:
+        threads=20
+    shell:
+        """
+        SemiBin2 multi_easy_bin -i {input.catalogue} -b {input.bams} -o {output} \
+        -t {params.threads} --write-pre-reclustering-bins --self-supervised --engine gpu
+        """
+
+# --separator C
+
+rule postprocess_cluster_outputs_semibin:
+    input:
+        model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "semibin_output")
+    output:
+        cluster_fasta=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "semibin"))
+    log:
+        os.path.join(LOGS, DATASET, "semibin_bin_postprocessing.log")
+    params:
+        minsize_bins = MINSIZE_BINS
+
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        python {SRC_DIR}/postprocess_cluster_outputs_comebin_semibin.py {output.cluster_fasta} {input.model_outputs}/bins {params.minsize_bins} --log {log}
+        """
+
+
+rule download_metahit:
+    output:
+        contigs_raw=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue_raw.fna.gz")
+    params:
+        url = "https://figshare.com/ndownloader/files/50894283"
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        wget {params.url} -O {output.contigs_raw}
+        """
+
+rule process_metahit:
+    input:
+        contigs_raw=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue_raw.fna.gz")
+    output:
+        contigs_processed=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+    log:
+        os.path.join(LOGS, DATASET, "process_metahit.log")
+    params:
+        min_length=MINSIZE_CONTIGS
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        python {SRC_DIR}/process_metahit.py -i {input.contigs_raw} -o {output.contigs_processed} --log {log} -m {params.min_length}
+        """
+
+
+rule download_cami2:
+    output:
+        contigs=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, [])),
+        reads=expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"), sample=SAMPLES.get(DATASET, []))
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        python {SRC_DIR}/get_cami2_data.py {DATASET} {sample_str}
+        """
+
+
+rule concatenate:
+    input:
+        expand(os.path.join(OUTDIR_RAW, DATASET, "{sample}_contigs.fasta"), sample=SAMPLES.get(DATASET, []))
+    output:
+        os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+    log:
+        os.path.join(LOGS, DATASET, "concatenate.log")
+    params:
+        min_length=MINSIZE_CONTIGS
+    conda:
+        "envs/vamb.yml"
+    shell:
+        """
+        python {SRC_DIR}/concatenate.py {output} {input} -m {params.min_length} 
+        python {SRC_DIR}/concatenate_log.py {input} {output} -m {params.min_length} --log {log}
+        """
+
+
+rule alignment:
+    input:
+        read=os.path.join(OUTDIR_RAW, DATASET, "{sample}_reads.fq.gz"),
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+    output:
+        os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam")
+    threads:
+        192
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        strobealign -t {threads} {input.catalogue} {input.read} | samtools sort -o {output}
+        """
+
+
+#OTHER MODEL 
+rule other_model_val:
+    input:
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")
+    output:
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation"))
+    log:
+        os.path.join(LOGS, DATASET, "{MODEL}_val", "{MODEL}_val_binning.log")
+    conda:
+        os.path.join(BINNING_DIR, "envs/binning.yml")
+    shell:
+        """
+        mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
+        pip uninstall -y triton
+        python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
+        -b {BATCH_SIZES} -k {KNN_K} -p {KNN_P} -s {output.dirs} -l {log} -m val -vp {VAL_PROPORTION} -wp {WEIGHT_PATH}
+        """
+
+
+rule create_fasta_bins_other_model_val:
+    input:
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        cluster_results = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation")                                         
+    output:
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_validation"))
+    log:
+        log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "bin_postprocessing.log")
+    params:
+        cluster_results_dir=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation", "cluster_results"),
+        minsize_bins=MINSIZE_BINS
+    conda: 
+        "envs/vamb.yml"
+    shell:
+        """
+        for cluster_file in {params.cluster_results_dir}/clusters_k*_p*.tsv; do
+            k_p=$(basename "$cluster_file" .tsv | sed 's/clusters_//')
+            output_dir={output.dirs}/$k_p
+            log_file={log.log_file}_$k_p.log
+
+            mkdir -p "$output_dir"
+
+            python {SRC_DIR}/create_fasta.py {input.catalogue} "$cluster_file" {params.minsize_bins} "$output_dir" \
+            --log "$log_file"
+        done
+        """
+
+rule checkm2_val: 
+    input:
+        fasta_bins=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "fasta_bins_validation")
+    output:
+        output=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation"))
+    conda:
+        "envs/checkm2.yml"
+    threads:
+        128
+    shell:
+        """
+        if [ ! -d "{OUTDIR_MODEL_RESULTS}/checkm2_database" ]; then
+            checkm2 database --download --path {OUTDIR_MODEL_RESULTS}/checkm2_database
+        fi
+
+        for bin_dir in {input.fasta_bins}/*; do
+            k_p=$(basename "$bin_dir")
+            output_subdir={output.output}/$k_p
+            
+            mkdir -p "$output_subdir"
+            
+            echo "FOP FLOOP: Processing $k_p with CheckM2..."
+            checkm2 predict --threads {threads} \
+                            --input "$bin_dir" \
+                            --output-directory "$output_subdir" \
+                            --database_path {OUTDIR_MODEL_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
+        done
+        """
+
+rule parse_checkm2_val:
+    input:
+        checkm2_reports=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation"),
+        val_count=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "validation")
+    output:
+        path=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results"))
+    log:
+        log_file=os.path.join(LOGS, DATASET, "{MODEL}_val", "checkm2_validation.log")
+    conda:
+        os.path.join(BINNING_DIR, "envs/binning.yml")
+    shell:
+        """
+        mkdir -p {output.path}
+        n_val=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["n_val"])' "{input.val_count}/n_total_val_test.json")
+        python {SRC_DIR}/parse_checkm2_val.py -i {input.checkm2_reports} -o {output.path} -n $n_val -l {log.log_file}
+        """
+#-end val
+
+#-start test
+rule other_model_test:
+    input:  
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        best_kp_path=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "checkm2_validation_results")
+    output:
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "test"))
+    log:
+        os.path.join(LOGS, DATASET, "{MODEL}_test_binning.log")
+    conda:
+        os.path.join(BINNING_DIR, "envs/binning.yml")
+    shell:
+        """
+        pip uninstall -y triton
+        best_combination_file="{input.best_kp_path}/best_combination.json"
+        best_k=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_k"])' $best_combination_file)
+        best_p=$(python -c 'import json; import sys; print(json.load(open(sys.argv[1]))["best_p"])' $best_combination_file)
+
+        python {BINNING_DIR}/binning.py -c {input.catalogue} -mn {MODEL} -mp {MODEL_PATH} \
+        -b {BATCH_SIZES} -k $best_k -p $best_p -s {output.dirs} -l {log} -m test -vp {VAL_PROPORTION} -wp {WEIGHT_PATH}
+        """
+
+rule create_fasta_bins_other_model_test:
+    input:
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "test")
+    output:
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{MODEL}")),
+    log:
+        log_file=os.path.join(LOGS, DATASET, "{MODEL}_test_bin_postprocessing.log")
+    params:
+        minsize_bins = MINSIZE_BINS,
+        clusters_filtered = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "{MODEL}_output", "test", "clusters_filtered.tsv")
+    conda: 
+        "envs/vamb.yml"
+    shell:
+        """
+        python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results}/clusters.tsv {params.minsize_bins} {output.dirs} \
+        --log {log.log_file} --outtsv {params.clusters_filtered}
+        """
+#END OTHER MODEL
+
+
+
+
+#VAMB
+rule vamb:
+    input:
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, []))
+    output:
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output"))
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
+        vamb bin default --outdir {output.dirs} --fasta {input.catalogue} --bamfiles {input.bams}
+        """
+
+rule move_cluster_outputs_vamb:
+    input:
+        model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_output")
+    output:
+        cluster_results=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_postprocess"))
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        python {SRC_DIR}/move_cluster_outputs_vamb.py {output.cluster_results} {input.model_outputs}
+        """
+
+rule create_fasta_bins_vamb:
+    input:
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "vamb_postprocess")
+    output:
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "vamb"))
+    log:
+        log_file=os.path.join(LOGS, DATASET, "vamb_bin_postprocessing.log")
+    params:
+        minsize_bins = MINSIZE_BINS
+    conda: 
+        "envs/vamb.yml"
+    shell:
+        """
+        python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results}/vamb_output_clusters.tsv {params.minsize_bins} {output.dirs} --log {log.log_file}
+        """
+#END VAMB
+
+
+#TAXVAMB
+rule metabuli_download:
+    output:
+        metabuli_bin = "metabuli-linux-avx2.tar.gz"
+    shell:
+        """
+        wget https://mmseqs.com/metabuli/metabuli-linux-avx2.tar.gz
+        tar xvzf metabuli-linux-avx2.tar.gz
+        export PATH=$(pwd)/metabuli/bin/:$PATH
+        """
+
+rule metabuli_database:
+    output:
+        database_out = directory(os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database")),  
+        database_tmp = directory(os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database_tmp"))
+    shell:
+        """
+        metabuli databases GTDB {output.database_out} {output.database_tmp}
+        """
+
+
+rule metabuli_classify:
+    input:
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        database = os.path.join(OUTDIR_MODEL_RESULTS, "metabuli", "gtdb_database")
+    output:
+        results = directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results"))   
+    params:
+        seq_mode=1,
+        job_id=100
+
+    shell:
+        """
+        mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}/metabuli
+        metabuli classify --seq-mode {params.seq_mode} {input.catalogue} {input.database}/gtdb {output.results} {params.job_id}
+        """
+
+
+rule taxconverter_download:
+    output:
+        taxconverter_dir=directory("taxconverter")
+    params:
+        lineage_zip="https://github.com/RasmussenLab/taxconverter/raw/7f5ff980612dc59d3290b5ddfe97eb814e96c42f/data/lineage.zip"
+    conda:
+        "envs/taxconverter.yml"
+    shell:
+        """
+        git clone https://github.com/RasmussenLab/taxconverter.git
+        cd taxconverter
+        pip install -e .
+        
+        rm data/lineage.zip
+        curl -L -o data/lineage.zip "{params.lineage_zip}"   
+        unzip -o data/lineage.zip -d data
+        """
+     
+
+rule taxconverter_run:
+    input:
+        input_dir = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "metabuli", "metabuli_results")
+    output:
+        result = os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv")
+    conda:
+        "envs/taxconverter.yml"
+    shell:
+        """
+        taxconverter metabuli -c {input.input_dir}/100_classifications.tsv -r {input.input_dir}/100_report.tsv -o {output.result}
+        """
+
+
+rule taxvamb:
+    input:
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        bams=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "{sample}_sorted.bam"), sample=SAMPLES.get(DATASET, [])),
+        taxonomy=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxconverter", "result.tsv")
+    output:
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_output"))
+    conda:
+        "envs/vamb.yml"
+    shell:
+        """
+        vamb bin taxvamb --outdir {output.dirs} --fasta {input.catalogue} --bamfiles {input.bams} --taxonomy {input.taxonomy}
+        """
+
+
+rule move_cluster_outputs_taxvamb:
+    input:
+        model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_output")
+    output:
+        cluster_results=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_postprocess"))
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        python {SRC_DIR}/move_cluster_outputs_vamb.py {output.cluster_results} {input.model_outputs}
+        """
+
+rule create_fasta_bins_taxvamb:
+    input:
+        catalogue=os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz"),
+        cluster_results=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "taxvamb_postprocess")
+    output:
+        dirs=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "taxvamb"))
+    log:
+        os.path.join(LOGS, DATASET, "taxvamb_bin_postprocessing.log")
+    params:
+        minsize_bins = MINSIZE_BINS
+    conda: 
+        "envs/vamb.yml"
+    shell:
+        """
+        python {SRC_DIR}/create_fasta.py {input.catalogue} {input.cluster_results}/taxvamb_output_clusters.tsv {params.minsize_bins} {output.dirs} --log {log}
+        """
+#END TAXVAMB
+
+
+#COMEBIN
+rule comebin:
+    input:
+        catalogue=expand(os.path.join(OUTDIR_PROCESSED, DATASET, "catalogue.fna.gz")),
+        bams=os.path.join(OUTDIR_PROCESSED, DATASET)
+    output:
+        directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output"))
+    params:
+        views=6,
+        threads=192
+    conda:
+        "envs/comebin.yml"
+    shell:  
+        """
+        mkdir -p {OUTDIR_MODEL_RESULTS}/{DATASET}
+
+        if [ ! -f "{OUTDIR_PROCESSED}/{DATASET}/catalogue.fna" ]; then
+            gzip -dkc {input.catalogue} > {OUTDIR_PROCESSED}/{DATASET}/catalogue.fna
+        fi
+
+        bash run_comebin.sh -a {OUTDIR_PROCESSED}/{DATASET}/catalogue.fna -p {input.bams} -o {output} -n {params.views} -t {params.threads}
+        """
+
+
+rule postprocess_cluster_outputs_comebin:
+    input:
+        model_outputs=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "comebin_output")
+    output:
+        cluster_fasta=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "comebin"))
+    log:
+        os.path.join(LOGS, DATASET, "comebin_bin_postprocessing.log")
+    params:
+        minsize_bins = MINSIZE_BINS
+    conda:
+        "envs/cami2_processing.yml"
+    shell:
+        """
+        BIN_DIR=$(find {input.model_outputs}/comebin_res/cluster_res -type d -name 'weight_seed_kmeans_k_*_result.tsv_bins' | head -n 1)
+        python {SRC_DIR}/postprocess_cluster_outputs_comebin_semibin.py {output.cluster_fasta} $BIN_DIR {params.minsize_bins} --log {log}
+        """
+#END COMEBIN
+
+
+rule checkm2:
+    input:
+        fasta_bins=os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "fasta_bins", "{MODEL}")
+    output:
+        output=directory(os.path.join(OUTDIR_MODEL_RESULTS, DATASET, "checkm2", "{MODEL}_results"))
+    conda:
+        "envs/checkm2.yml"
+    threads:
+        128
+    shell:  
+        """
+        if [ ! -d "{OUTDIR_MODEL_RESULTS}/checkm2_database" ]; then
+            checkm2 database --download --path {OUTDIR_MODEL_RESULTS}/checkm2_database
+        fi
+            checkm2 predict --threads {threads} --input {input.fasta_bins} --output-directory {output.output} \
+            --database_path {OUTDIR_MODEL_RESULTS}/checkm2_database/CheckM2_database/uniref100.KO.1.dmnd
+        """
+    
+

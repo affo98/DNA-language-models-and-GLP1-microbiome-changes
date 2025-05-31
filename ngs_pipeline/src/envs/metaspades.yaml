@@ -1,0 +1,8 @@
+name: fastqc
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - libcxx
+  - spades

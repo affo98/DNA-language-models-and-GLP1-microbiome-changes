@@ -1,0 +1,5 @@
+{BENCHMARKS: T2D-EW_PRJEB1786/benchmarks, CONDA_ENVS: src/envs, DATADIR: data/samples/T2D-EW_PRJEB1786,
+  DB: src/databases/bowtie2-index, FASTQC_PATH: /Users/AFFO/miniconda/envs/snakemake-global/bin,
+  LOGS: T2D-EW_PRJEB1786/logs, OUTDIR: T2D-EW_PRJEB1786, PY_SCRIPTS: src/scripts,
+  dataset: T2D-EW_PRJEB1786, output_dir: pipeline_folder, paths: {INDIR: data/samples/T2D-EW_PRJEB1786,
+    OUTDIR: pipeline_folder/}}

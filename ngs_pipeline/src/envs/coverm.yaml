@@ -1,0 +1,8 @@
+name: coverm
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - samtools
+  - pycoverm

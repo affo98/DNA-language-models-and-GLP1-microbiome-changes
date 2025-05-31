@@ -1,0 +1,13 @@
+name: kneaddata
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - trimmomatic
+  - bowtie2
+  - trf
+  - python=3.10
+  - pip
+  - pip:
+      - kneaddata

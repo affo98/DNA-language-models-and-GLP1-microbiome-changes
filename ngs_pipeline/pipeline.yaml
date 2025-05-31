@@ -1,0 +1,28 @@
+name: snakemake-global
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - snakemake
+  - fastqc
+  - minimap2
+  - graphviz
+  - bowtie2
+  - samtools
+  - python>3.12
+  - pandas
+  - numpy
+  - matplotlib
+  - scipy
+  - biopython
+  - trf
+  - strobealign
+
+  - pip:
+    - kneaddata
+    - multiqc
+    #  at the time of writing - 7. Feb 24 - pysam on bioconda will require
+    #  a lower python version than snakemake, install pysam
+    #  using pip
+    # - pysam ==0.22

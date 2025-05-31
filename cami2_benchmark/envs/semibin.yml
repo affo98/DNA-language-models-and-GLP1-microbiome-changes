@@ -1,0 +1,15 @@
+name: semibin
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python
+  - pip
+  - semibin=2.1.0
+  - pytorch=2.5
+  - torchvision
+  - torchaudio
+  - pip:
+      - torch==2.5.0
+#
