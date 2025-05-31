@@ -3,7 +3,11 @@
 [Overleaf report](https://www.overleaf.com/project/679796b5a02b660e4f96beff)
 
 #### Meeting Outline
-* [01 May 2025] (#date-30-may-2025)
+* [28 May 2025](#date-28-May-2025)
+* [21 May 2025](#date-21-May-2025)
+* [15 May 2025](#date-15-May-2025)
+* [08 May 2025](#date-30-january-2025)
+* [01 May 2025](#date-30-january-2025)
 * [23 April 2025](#date-30-january-2025)
 * [09 April 2025](#date-30-january-2025)
 * [03 April 2025](#date-30-january-2025)
@@ -13,6 +17,104 @@
 * [27 February 2025](#date-30-january-2025)
 * [20 February 2025](#date-30-january-2025)
 * [06 February 2025](#date-30-january-2025)
+
+#### Date 28 May 2025
+
+##### Who did you help this week?
+
+
+##### Who helped you this week?
+
+- Inna from HPC
+
+##### What did you achieve?
+
+- We are happy about your feedback to the report. And we have moved around some sections. 
+- Got the last results on metagenomics binning and phenotype classification on our model DNABERT-H-2M.
+- Figures and reading through the report. 
+
+
+##### What did you struggle with?
+
+
+##### Where do you need help from Veronika?
+- Front page check.
+- In the guidelines it says that the presentation at the oral exam is 10-15 minutes. We want to confirm this with you. 
+- We will read through your comments this morning. So we can discuss any related questions in the meeting.
+
+
+#### Date 21 May 2025
+
+##### Who did you help this week?
+
+
+##### Who helped you this week?
+
+##### What did you achieve?
+- Got more results, made permutation tests, made an additional RF model. 
+- Writing,
+- We got a new version of DNABERT-H which is done training thursday/friday. We are going to get results on metagenomics binning from this also.
+- We got fine results on the "bin-lookup" where we can see which genome/species that a cluster is classified as.
+
+##### What did you struggle with?
+
+
+
+##### Where do you need help from Veronika?
+- Only use AUC-ROC, we are thinking about removing accuracy.
+- How to report variation of classifier performance? SD across all 5 repetitions (50 folds) or mean of each repetition, then SD of those means?
+- Structure of report, in particular how to change the model/experiments sections into a methods section.
+
+
+#### Date 15 May 2025
+
+##### Who did you help this week?
+
+
+##### Who helped you this week?
+- Inna helped us with hpc batch jobs
+
+##### What did you achieve?
+- Finished processing all novo data
+- Got results on T2D dataset and binning for DNABERT-S and VAMB
+   - Best AUC was Ridge regression with $0.64$ (DNABERT-S) and $0.68$ (VAMB) 
+   - Groups Sparse Lasso achieved  AUC $0.59$ (DNABERT-S) and N/A for now (VAMB)
+- Wrote some more to the report.
+- Decreased the number of contigs for each dataset from $\approx 30\text{M}$ million to $\approx 1\text{M}$
+
+##### What did you struggle with?
+- Writing the MIL framework in the report
+
+##### Where do you need help from Veronika?
+- Confirm our idea of discarding two baseline models: TNF kernel and DNABERT-2 random.
+
+#### Date: 08 May 2025
+
+##### Who did you help this week?
+
+
+##### Who helped you this week?
+- Inna helped us with hpc batch jobs
+
+##### What did you achieve?
+
+- Processing Novo Data.
+- Wrote 7 pages on the paper.
+
+
+##### What did you struggle with?
+- Out of memory errors on HPC in the embeddings calculations, we have 30M embeddings. Started new job that should work.
+- We tested 3 versions of our model (DNABERT-H) on CAMI2 and results were terrible. It turns out that there is a small error in our pre-training code which caused the bad results. We have fixed that code and are now training again.
+
+
+![cami2results](images/cami2_8may.png)
+
+
+##### Where do you need help from Veronika?
+
+- In sparse group lasso we need to assign each cluster to a group. We have an idea to get these groups of clusters: 1) compute Hausdorff distances between clusters, 2) then use clustering algorithm (e.g. HDBSCAN) on the Hausdorff Matrix. 
+
+
 
 
 
