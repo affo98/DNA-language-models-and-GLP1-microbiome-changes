@@ -1,11 +1,11 @@
-# NEW TITLE
+# DNABERT-H: Phylogenetic Contrastive Learning for Metagenomics
 By Anders Hjulmand, Andreas Flensted, Eisuke Okuda.
 
 Master Thesis in Data Science @ IT-University of Copenhagen.
 
 
 ## Contents
-- [NEW TITLE](#new-title)
+- [DNABERT-H: Phylogenetic Contrastive Learning for Metagenomics](#new-title)
   - [Contents](#contents)
   - [1. Introduction](#1-introduction)
   - [2. Model](#2-model)
@@ -49,7 +49,6 @@ bash get_conda.sh
 source ~/.bashrc
 ```
 
-Place the model in the directory `train/dnaberth_weights/dnaberth_2m`.
 
 
 ## 4. Quick start
@@ -61,16 +60,15 @@ conda env create -f binning/envs/binning.yml && conda activate binning
 pip uninstall -y triton
 ```
 
-Load the model using the [transformers](https://github.com/huggingface/transformers) and backbone [DNABERT-S](https://github.com/MAGICS-LAB/DNABERT_S).
+Load the model using the [transformers](https://github.com/huggingface/transformers) .
 
 ```
 import torch
 from transformers import AutoTokenizer, BertConfig, AutoModel
 
-tokenizer = AutoTokenizer.from_pretrained("zhihan1996/DNABERT-S", trust_remote_code=True)
-config = BertConfig.from_pretrained("zhihan1996/DNABERT-S")
-model = AutoModel.from_pretrained("zhihan1996/DNABERT-S", config, trust_remote_code=True)
-model.load_state_dict(torch.load(train/dnaberth_weights/dnaberth_2m/pytorch_model.bin))
+tokenizer = AutoTokenizer.from_pretrained("eisuke119/DNABERT-H", trust_remote_code=True)
+config = BertConfig.from_pretrained("eisuke119/DNABERT-H")
+model = AutoModel.from_pretrained("eisuke119/DNABERT-H", config, trust_remote_code=True)
 ```
 
 Run inference with model to get embeddings of a DNA sequence.
