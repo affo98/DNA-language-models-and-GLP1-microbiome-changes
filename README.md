@@ -24,14 +24,14 @@ DNABERT-H leverages all labels in the taxonomic hiearchy during training, and th
 
 **Pretraining procedure:**  
 <p align="center">
-  <img src="figures/readme_figures/pretraining_overview.png" alt="Pretraining" width="600"/>
+  <img src="figures_readme/pretraining_overview.png" alt="Pretraining" width="600"/>
 </p>
 
 
 
 ## 2. Model
 
-The pre-trained model is available [here](https://figshare.com/articles/dataset/DNABERT-H-2M/29145308) . 
+The pre-trained model is available on [huggingface](https://huggingface.co/eisuke119/DNABERT-H).
 
 
 ## 3. Setup environment
@@ -60,7 +60,7 @@ conda env create -f binning/envs/binning.yml && conda activate binning
 pip uninstall -y triton
 ```
 
-Load the model using the [transformers](https://github.com/huggingface/transformers) .
+Load the model using the [transformers](https://github.com/huggingface/transformers) library.
 
 ```
 import torch
@@ -105,7 +105,7 @@ The pre-processing of data for phenotype classification is described in the fold
 
 
 <p align="center">
-  <img src="figures/readme_figures/experiments_overview.png" alt="Pretraining" width="600"/>
+  <img src="figures_readme/experiments_overview.png" alt="Pretraining" width="600"/>
 </p>
 
 
@@ -114,19 +114,19 @@ The pre-processing of data for phenotype classification is described in the fold
 **Metagenomic binning**
 DNABERT-H did not match state-of-the-art binning tools like Comebin and VAMB in metagenomics binning, but performed similar to DNABERT-S.
 <p align="center">
-  <img src="figures/readme_figures/cami2_main.png" alt="Pretraining" width="600"/>
+  <img src="figures_readme/cami2_main.png" alt="Pretraining" width="600"/>
 </p>
 
 **Phenotype classification using Multiple Instance Learning**
 Using our proposed MIL framework, DNABERT-H consistently outperformed DNABERT-S, although still performed worse than state-of-the-art binning tools.
 <p align="center">
-  <img src="figures/readme_figures/mil_performance.png" alt="Pretraining" width="300"/>
+  <img src="figures_readme/mil_performance.png" alt="Pretraining" width="300"/>
 </p>
 
 **Hierarchical taxonomy awareness**  
 DNABERT-H preserves phylogenetic structures between species:  
 <p align="center">
-  <img src="figures/readme_figures/tsne_hausdorff.png" alt="tsne" width="600"/>
+  <img src="figures_readme/tsne_hausdorff.png" alt="tsne" width="600"/>
 </p>
 
 
