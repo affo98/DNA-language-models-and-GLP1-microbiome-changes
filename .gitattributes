@@ -1,1 +1,1 @@
-*.ipynb linguist-vendored
+figure_notebooks/*.ipynb linguist-vendored
