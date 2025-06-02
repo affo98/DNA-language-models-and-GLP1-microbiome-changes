@@ -1,4 +1,4 @@
-# NEW TITLE
+# DNABERT-H: Phylogenetic Contrastive Learning for Metagenomics
 By Anders Hjulmand, Andreas Flensted, Eisuke Okuda.
 
 Master Thesis in Data Science @ IT-University of Copenhagen.
